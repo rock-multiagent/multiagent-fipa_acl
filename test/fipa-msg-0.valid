@@ -1,0 +1,9 @@
+Messageid:    FA
+Version:      01
+MessageType:  01
+MessageParam: 02
+	AgentId: 02
+        AgentName: 11  00
+        EndOfColl: 01
+EndOfMsg: 01
+                 
