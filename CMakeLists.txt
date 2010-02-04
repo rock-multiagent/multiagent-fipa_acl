@@ -59,9 +59,9 @@ add_subdirectory(src)
 ##### Select required libraries and desired versions######################
 set(PROJECT_USES_QT FALSE)
 set(DESIRED_QT_VERSION 4.5)
-set(PROJECT_USES_BOOST FALSE)
+set(PROJECT_USES_BOOST TRUE)
 # Set your boost version here, otherwise the installed version might not be found
-set( Boost_ADDITIONAL_VERSIONS "1.40 1.41")
+set( Boost_ADDITIONAL_VERSIONS "1.42")
 ##### End Select required libaries #######################################
 
 ##### Add Qt support #####################################################
@@ -105,7 +105,7 @@ if(PROJECT_USES_BOOST)
 	find_package(Boost COMPONENTS filesystem program_options)
 	
 	if(Boost_FOUND)
-		message("Prerequisite ok: Boost installation found")
+		message("Prerequisite ok: Boost installation found " ${Boost_VERSION} )
 	else(Boost_FOUND)
 		message("Boost required to build this project, but installation cannot be found!")
 	endif(Boost_FOUND)	
