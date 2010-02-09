@@ -64,13 +64,29 @@ BOOST_FUSION_ADAPT_STRUCT(
 namespace fipa
 {
 
-	struct print_action
+	struct storeVersion
 	{
 		void operator()(char const& c, qi::unused_type, qi::unused_type) const
 		{
-			printf("Hex: %x", c);
+			printf("Version: %x \n", c);
 		}
 	};
+
+	struct storeMessageId
+	{	
+		void operator()(char const& c, qi::unused_type, qi::unused_type) const
+		{
+
+			printf("MessageId: %x \n", c);
+		}
+
+	};
+
+	void setMessageId(int i)
+	{
+		printf("Set MessageId to: %i\n", i);
+
+	}
 
 template <typename Iterator>
 struct bitefficient_grammar : qi::grammar<Iterator, ACLMessage, ascii::space_type>
@@ -95,11 +111,15 @@ struct bitefficient_grammar : qi::grammar<Iterator, ACLMessage, ascii::space_typ
 		//lexeme[x] disables skip parsing for x	
 		aclCommunicativeAct = message;
 		message = header >> messageType >> *messageParameter >> endOfMessage;
-		header %= (messageId >> version); 			// [ std::cout << "Header" << label::_1 << std::endl] ;
-		messageId %= ( byte_(0xFA) | byte_(0xFB) | byte_(0xFC) ) [ std::cout << "MessageId: " << label::_1 << std::endl ];
-		version %= byte_ 					 [ std::cout << "version: " << label::_1 << std::endl ];
+		header %= (messageId  >> version ); //	 [ std::cout << "Header" << label::_1 << std::endl];
+		messageId = (
+                            byte_(0xFA)  [ boost::bind(&fipa::setMessageId,1) ] 
+			  | byte_(0xFB)  [ boost::bind(&fipa::setMessageId,2) ]
+                          | byte_(0xFC)  [ boost::bind(&fipa::setMessageId,3) ]
+			 ); // there is only the used_type for byte_() as attribute, so we cannot use this here 
+		version %= byte_ 					 [ storeVersion()]; // std::cout << "version: " << std::ios::hex << label::_1 << std::endl ];
 		endOfMessage %= endOfCollection;
-		endOfCollection %= byte_(0x01)   			 [ std::cout << "endOfCollection: " <<  label::_1 << std::endl ];
+		endOfCollection %= byte_(0x01)   			 [ std::cout << "endOfCollection: " <<  std::ios::hex << label::_1 << std::endl ];
 		messageType %= predefinedMessageType | userDefinedMessageType;
 		userDefinedMessageType %= byte_(0x00) >> messageTypeName;
 		messageTypeName %= binWord;
@@ -130,7 +150,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, ACLMessage, ascii::space_typ
 					| byte_(0x13)   // request       
 					| byte_(0x14)   // request-when 
 					| byte_(0x15)   // request-whenever
-					| byte_(0x16);  // subscribe      
+					| byte_(0x16)   // subscribe  
+									[ std::cout << "predefinedMessageType: " << std::ios::hex << label::_1 << std::endl ];    
 
 		predefinedMessageParameter %= byte_(0x02) >> agentIdentifier  // sender
 					| byte_(0x03) >>  recipientExpr      // receiver 
@@ -236,19 +257,34 @@ struct bitefficient_grammar : qi::grammar<Iterator, ACLMessage, ascii::space_typ
 		second %= byte_;
 		millisecond %= byte_ >> byte_;
 
-		word %= *char_;  //TODO: character exceptions
+		word %= (char_ - wordExceptionsStart ) >> *(char_ - wordExceptionsGeneral);  //TODO: TESTING
+		wordExceptionsStart %= wordExceptionsGeneral
+                                | char_('#') 
+				| char_('0','9')
+				| char_('-')
+				| char_('@')
+				;
+		wordExceptionsGeneral %= char_('\x00','\x20') 
+				| char_('(')
+                                | char_(')')
+				;
+				
 		fipaString %= stringLiteral | byteLengthEncodedString;
-		stringLiteral %= char_('"');// >> TODO: ([ ~ "\"" ] | "\\\"")*  char_('"');
-		byteLengthEncodedString %= char_('#');// >> +digit >> char_("\"") >> *byte_;
+		stringLiteral %= char_('\\') >> *( ( char_ - char_('\\') ) | (char_('\\') >> char_('\"') ) ) >> char_('\"'); // TODO: REQUIRES VERYFICATION
+		byteLengthEncodedString %= char_('#') >> +digit >> char_('\"') >> byteSeq; // REQUIRES TESTING
 
-		codedNumber %= byte_; // two number in one byte - use padding 00 if coding only one number
+		codedNumber %= byte_; // two numbers in one byte - padding 00 if coding only one number
 		typeDesignator %= alpha;
 	}
-
+	
+	// Define rules as follows
+	// qi::rule<Iterator, synthesized_attribute(inherited_attribute>)> r;
+	// synthesized = type of output value
+	// inherited = actual type the parser gives you
 	qi::rule<Iterator, ACLMessage, ascii::space_type> aclCommunicativeAct;
 	qi::rule<Iterator> message;
 	qi::rule<Iterator> header;
-	qi::rule<Iterator> messageId;
+	qi::rule<Iterator, boost::uint_least8_t()> messageId;
 	qi::rule<Iterator> version;
 	qi::rule<Iterator> endOfMessage;
 	qi::rule<Iterator> endOfCollection;
@@ -311,6 +347,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, ACLMessage, ascii::space_typ
 	qi::rule<Iterator> millisecond;
 
 	qi::rule<Iterator> word;
+	qi::rule<Iterator> wordExceptionsStart;
+	qi::rule<Iterator> wordExceptionsGeneral;
 	qi::rule<Iterator> fipaString;
 	qi::rule<Iterator> stringLiteral;
 	qi::rule<Iterator> byteLengthEncodedString;

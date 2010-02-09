@@ -6,7 +6,7 @@
   <license></license>
   <url>http://www.fipa.org</url>
   <logo>http://</logo>
-  <depend package="" />
+<!--  <depend package="" /> -->
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="" />
