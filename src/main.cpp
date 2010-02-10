@@ -58,8 +58,8 @@ int main(int argc, char** argv)
 		std::cout << "------------------------------------\n";
 		std::cout << " Parsing succeeded\n";
 		std::cout << "------------------------------------\n";
-//		fipa::MessagePrinter printer;
-//		printer.print(parseTree);
+		fipa::acl::MessagePrinter printer;
+		printer.print(parseTree);
 
 	        return 0;	
 	} else {

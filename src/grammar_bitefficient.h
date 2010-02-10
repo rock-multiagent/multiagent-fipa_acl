@@ -55,10 +55,11 @@ class MessagePrinter
 	}
 
 	void print(const fipa::acl::Message& msg)
-	{
-		printf("Id: %x", msg.header.id);// version %x",msg.id,msg.version);
+	{	
+		printf("Message read:");
+		printf("id:          %x", msg.header.id);
+		printf("version:     %x", msg.header.version); 
 	}
-
 };
 
 } // end namespace acl
@@ -140,8 +141,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// set the first element (position 0) of the element synthesized attribute,i.e._val, to the parsed value, i.e. _1
 		// the synthesized attribute might be a fipa::acl::message, and the element ordering depends on the structure as
 		// defined with the BOOST_FUSION_ADAPT_STRUCT definition
-		aclCommunicativeAct = header [at_c<0>(label::_val) = label::_1 ]; //>> messageType >> *messageParameter >> endOfMessage;
-		header = (messageId [ at_c<0>(label::_val) = label::_1 ]  >> version [ at_c<1>(label::_val) = label::_1] ); //	 [ std::cout << "Header" << label::_1 << std::endl];
+		aclCommunicativeAct = header [at_c<0>(label::_val) = label::_1 ] >> messageType >> *messageParameter >> endOfMessage;
+		header = (messageId [ at_c<0>(label::_val) = label::_1 ]  >> version [ at_c<1>(label::_val) = label::_1] ); 
 		
 		// byte_() does only return an unused_type, so if we want to save the value, we either have to assign it directly or we have to use byte_ instead
 		messageId = byte_; /*(
@@ -150,7 +151,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
                           | byte_(0xFC)  [ boost::bind(&fipa::setMessageId,3) ]
 			 ); // there is only the used_type for byte_() as attribute, so we cannot use this here 
 			 */
-		version = byte_ 					 [ storeVersion()]; // std::cout << "version: " << std::ios::hex << label::_1 << std::endl ];
+		version = byte_; 					 
 		endOfMessage %= endOfCollection;
 		endOfCollection %= byte_(0x01)   			 [ std::cout << "endOfCollection: " <<  std::ios::hex << label::_1 << std::endl ];
 		messageType %= predefinedMessageType | userDefinedMessageType;
@@ -223,7 +224,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	
 
 		binWord %= ( ( byte_(0x10) >> word >> byte_(0x00) ) | byte_(0x11) >> index);
-		binNumber %= ( byte_(0x12) >> digits )       // Decimal numbers
+		binNumber %= ( byte_(0x12) >> digits )          // Decimal numbers
 			  | ( byte_(0x13) >> digits );  	// Hexadecimal numbers
 
 		digits %= +codedNumber;
