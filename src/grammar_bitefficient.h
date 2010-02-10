@@ -44,6 +44,7 @@ typedef struct
 struct Message
 {
 	Header header;
+	std::string type;
 };
 
 
@@ -57,8 +58,9 @@ class MessagePrinter
 	void print(const fipa::acl::Message& msg)
 	{	
 		printf("Message read:");
-		printf("id:          %x", msg.header.id);
-		printf("version:     %x", msg.header.version); 
+		printf("id:          %x\n", msg.header.id);
+		printf("version:     %x\n", msg.header.version); 
+		printf("type:        %s\n", msg.type.c_str());
 	}
 };
 
@@ -82,6 +84,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::Message,
 	(fipa::acl::Header, header)
+	(std::string, type)
 )
 
 namespace fipa
@@ -141,8 +144,15 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// set the first element (position 0) of the element synthesized attribute,i.e._val, to the parsed value, i.e. _1
 		// the synthesized attribute might be a fipa::acl::message, and the element ordering depends on the structure as
 		// defined with the BOOST_FUSION_ADAPT_STRUCT definition
-		aclCommunicativeAct = header [at_c<0>(label::_val) = label::_1 ] >> messageType >> *messageParameter >> endOfMessage;
-		header = (messageId [ at_c<0>(label::_val) = label::_1 ]  >> version [ at_c<1>(label::_val) = label::_1] ); 
+		aclCommunicativeAct = header          		[ at_c<0>(label::_val) = label::_1 ]
+					>> messageType		[ at_c<1>(label::_val) = label::_1 ]
+					>> *messageParameter
+					>> endOfMessage
+				     ;
+
+		header = messageId  [ at_c<0>(label::_val) = label::_1 ] 
+			 >> version [ at_c<1>(label::_val) = label::_1]
+			;
 		
 		// byte_() does only return an unused_type, so if we want to save the value, we either have to assign it directly or we have to use byte_ instead
 		messageId = byte_; /*(
@@ -153,9 +163,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			 */
 		version = byte_; 					 
 		endOfMessage %= endOfCollection;
-		endOfCollection %= byte_(0x01)   			 [ std::cout << "endOfCollection: " <<  std::ios::hex << label::_1 << std::endl ];
-		messageType %= predefinedMessageType | userDefinedMessageType;
-		userDefinedMessageType %= byte_(0x00) >> messageTypeName;
+		endOfCollection %= byte_(0x01); 
+		messageType = predefinedMessageType  [ label::_val = label::_1 ] 
+			    | userDefinedMessageType [ label::_val = label::_1 ]
+ 			   ;
+		userDefinedMessageType = byte_(0x00) >> messageTypeName [ label::_val = "messagTypeName" ];
 		messageTypeName %= binWord;
 	
 		messageParameter %= predefinedMessageParameter | userDefinedMessageParameter;
@@ -163,29 +175,30 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		parameterName %= binWord;
 
 		parameterValue %= binExpression;
-		predefinedMessageType %= byte_(0x01) 	// accept-proposal 	
-					| byte_(0x02)   // agree 		
-					| byte_(0x03)   // cancel 	
-					| byte_(0x04)   // cfp    
-					| byte_(0x05)   // confirm
-					| byte_(0x06)   // disconfirm 	
-					| byte_(0x07)   // failure
-					| byte_(0x08)   // inform
-					| byte_(0x09)   // inform-if
-					| byte_(0x0a)   // inform-ref
-					| byte_(0x0b)   // not-understood
-					| byte_(0x0c)   // propagate 	
-					| byte_(0x0d)   // propose 
-					| byte_(0x0e)   // proxy 
-					| byte_(0x0f)   // query-if
-					| byte_(0x10)   // query-ref
-					| byte_(0x11)   // refuse   
-					| byte_(0x12)   // reject-proposal
-					| byte_(0x13)   // request       
-					| byte_(0x14)   // request-when 
-					| byte_(0x15)   // request-whenever
-					| byte_(0x16)   // subscribe  
-									[ std::cout << "predefinedMessageType: " << std::ios::hex << label::_1 << std::endl ];    
+		predefinedMessageType = byte_(0x01)    [ label::_val = "accept-proposal" ]
+					| byte_(0x02)  [ label::_val = "agree" ]  
+					| byte_(0x03)  [ label::_val = "cancel" ] 	
+					| byte_(0x04)  [ label::_val = "cfp" ]    
+					| byte_(0x05)  [ label::_val = "confirm" ]
+					| byte_(0x06)  [ label::_val = "disconfirm" ]
+					| byte_(0x07)  [ label::_val = "failure" ]
+					| byte_(0x08)  [ label::_val = "inform" ]
+					| byte_(0x09)  [ label::_val = "inform-if" ]
+					| byte_(0x0a)  [ label::_val = "inform-ref" ]
+					| byte_(0x0b)  [ label::_val = "not-understood" ]
+					| byte_(0x0c)  [ label::_val = "propagate" ]
+   					| byte_(0x0d)  [ label::_val = "propose" ]
+					| byte_(0x0e)  [ label::_val = "proxy" ] 
+					| byte_(0x0f)  [ label::_val = "query-if" ]
+					| byte_(0x10)  [ label::_val = "query-ref" ]
+					| byte_(0x11)  [ label::_val = "refuse" ]   
+					| byte_(0x12)  [ label::_val = "reject-proposal" ]
+					| byte_(0x13)  [ label::_val = "request" ]
+					| byte_(0x14)  [ label::_val = "request-when" ] 
+					| byte_(0x15)  [ label::_val = "request-whenever" ]
+					| byte_(0x16)  [ label::_val = "subscribe" ]  
+					; 
+								
 
 		predefinedMessageParameter %= byte_(0x02) >> agentIdentifier  // sender
 					| byte_(0x03) >>  recipientExpr      // receiver 
@@ -323,8 +336,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator> endOfMessage;
 	qi::rule<Iterator> endOfCollection;
 
-	qi::rule<Iterator> messageType;
-	qi::rule<Iterator> userDefinedMessageType;
+	qi::rule<Iterator, std::string() > messageType;
+	qi::rule<Iterator, std::string() > userDefinedMessageType;
 	qi::rule<Iterator> messageTypeName;
 	qi::rule<Iterator> messageParameter;
 	qi::rule<Iterator> userDefinedMessageParameter;
@@ -332,7 +345,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator> parameterName;
 	qi::rule<Iterator> parameterValue;
 
-	qi::rule<Iterator> predefinedMessageType;
+	qi::rule<Iterator, std::string() > predefinedMessageType;
 	qi::rule<Iterator> predefinedMessageParameter;
 	
 	qi::rule<Iterator> agentIdentifier;
