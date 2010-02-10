@@ -61,7 +61,7 @@ set(PROJECT_USES_QT FALSE)
 set(DESIRED_QT_VERSION 4.5)
 set(PROJECT_USES_BOOST FALSE)
 # Set your boost version here, otherwise the installed version might not be found
-set( Boost_ADDITIONAL_VERSIONS "1.40 1.41")
+set( Boost_ADDITIONAL_VERSIONS "1.42")
 ##### End Select required libaries #######################################
 
 ##### Add Qt support #####################################################
