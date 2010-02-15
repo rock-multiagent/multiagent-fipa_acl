@@ -1,7 +1,7 @@
 <package>
   <description brief="Library for parsing FIPA Messages">
   FIPA (Foundation for Intelligent Physical Agents) provides a specification for an agent communication language. This is a C++ implementation of a message parser.
-  <description>
+  </description>
   <author>Thomas Roehr/thomas.roehr@dfki.de</author>
   <license></license>
   <url>http://www.fipa.org</url>
