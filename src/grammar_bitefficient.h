@@ -265,7 +265,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		binWord = ( ( byte_(0x10) >> word 		[ label::_val = "test" ]
 				>> byte_(0x00) )
-		        | byte_(0x11) >> index                  [ label::_val = extractFromCodetable(label::_1)) ]
+		        | byte_(0x11) >> index                  [ label::_val = boost::bind(&fipa::extractFromCodetable,val(label::_1)) ]
 			);
 		binNumber %= ( byte_(0x12) >> digits )          // Decimal numbers
 			  | ( byte_(0x13) >> digits );  	// Hexadecimal numbers
