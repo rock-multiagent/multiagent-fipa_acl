@@ -183,12 +183,12 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// defined with the BOOST_FUSION_ADAPT_STRUCT definition
 		aclCommunicativeAct = header          		[ phoenix::at_c<0>(label::_val) = label::_1 ]
 				      >> messageType		[ phoenix::at_c<1>(label::_val) = label::_1 ]
-				      >> *messageParameter      [ phoenix::push_back(at_c<2>(label::_val),label::_1) ]
+				      >> *messageParameter      //[ phoenix::push_back(phoenix::at_c<2>(label::_val), label::_1) ]
 				      >> endOfMessage           // No action here
 				     ;
 
 		header = messageId  [ phoenix::at_c<0>(label::_val) = label::_1 ] 
-			 >> version [ phoenix::at_c<1>(label::_val) = label::_1]
+			 >> version [ phoenix::at_c<1>(label::_val) = label::_1 ]
 			;
 		
 		// byte_() does only return an unused_type, so if we want to save the value, we either have to assign it directly or we have to use byte_ instead
@@ -210,12 +210,18 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		userDefinedMessageType = byte_(0x00) >> messageTypeName [ label::_val = label::_1 ];
 		messageTypeName = binWord                               [ label::_val = label::_1 ];
-	
-		messageParameter = predefinedMessageParameter | userDefinedMessageParameter;
-		userDefinedMessageParameter %= byte_(0x00) >> parameterName >> parameterValue;
-		parameterName %= binWord;
 
-		parameterValue %= binExpression;
+		// Note: never do a direct assignment like
+		// messageParameter = predefinedMessageParameter or you will be getting runtime errors	
+		// use messageParameter = predefinedMessageParameter.copy() instead
+		messageParameter = predefinedMessageParameter | userDefinedMessageParameter;
+
+		userDefinedMessageParameter = byte_(0x00) 
+						>> parameterName	[ phoenix::at_c<0>(label::_val) = label::_1 ] 
+						>> parameterValue	[ phoenix::at_c<1>(label::_val) = "TODO:binExpression" ]
+					       ;
+		parameterName = binWord.copy();
+		parameterValue = binExpression.copy();
 
 		// Converting message type into predefined strings
 		predefinedMessageType = byte_(0x01)    [ label::_val = "accept-proposal" ]
@@ -243,24 +249,27 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					; 
 								
 
-		predefinedMessageParameter = byte_(0x02) [ phoenix.at_c<0>(label::_val) = "sender" ]       >> agentIdentifier    // sender
-					| byte_(0x03) [ phoenix.at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
-					| byte_(0x04) [ phoenix.at_c<0>(label::_val) = "content" ]         >> msgContent         // content 
-					| byte_(0x05) [ phoenix.at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam     // reply-with
-					| byte_(0x06) [ phoenix.at_c<0>(label::_val) = "reply-by" ]        >> replyByParam       // reply-by 
-					| byte_(0x07) [ phoenix.at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam     // in-reply-to 
-					| byte_(0x08) [ phoenix.at_c<0>(label::_val) = "reply-to" ]        >> replyToParam       // reply-to   
-					| byte_(0x09) [ phoenix.at_c<0>(label::_val) = "language" ]        >> language           // language  
-					| byte_(0x0a) [ phoenix.at_c<0>(label::_val) = "encoding" ]        >> encoding           // encoding 
-					| byte_(0x0b) [ phoenix.at_c<0>(label::_val) = "ontology" ]        >> ontology           // ontology
-					| byte_(0x0c) [ phoenix.at_c<0>(label::_val) = "protocol" ]        >> protocol           // protocol
-					| byte_(0x0d) [ phoenix.at_c<0>(label::_val) = "conversation-id" ] >> conversationId;    // conversation-id
-					 
+		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) ="aid" ]   // sender
+		/*
+					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
+					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent         // content 
+					| byte_(0x05) [ phoenix::at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam     // reply-with
+					| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam       // reply-by 
+					| byte_(0x07) [ phoenix::at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam     // in-reply-to 
+					| byte_(0x08) [ phoenix::at_c<0>(label::_val) = "reply-to" ]        >> replyToParam       // reply-to   
+					| byte_(0x09) [ phoenix::at_c<0>(label::_val) = "language" ]        >> language           // language  
+					| byte_(0x0a) [ phoenix::at_c<0>(label::_val) = "encoding" ]        >> encoding           // encoding 
+					| byte_(0x0b) [ phoenix::at_c<0>(label::_val) = "ontology" ]        >> ontology           // ontology
+					| byte_(0x0c) [ phoenix::at_c<0>(label::_val) = "protocol" ]        >> protocol           // protocol
+					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId    // conversation-id
+	*/				; 
 		agentIdentifier %= byte_(0x02) >> agentName >> -addresses >> -resolvers >> *(userDefinedParameter) >> endOfCollection;				
 		agentName %= binWord;
 		addresses %= byte_(0x02) >> urlCollection;
 		resolvers %= byte_(0x03) >> agentIdentifierCollection;
-		userDefinedParameter %= byte_(0x04) >> binWord >> binExpression;
+		userDefinedParameter = byte_(0x04) >> binWord [ phoenix::at_c<0>(label::_val) = label::_1 ]
+					 >> binExpression     [ phoenix::at_c<1>(label::_val) = "TODO:binExpression" ]  
+					;
 		
 		urlCollection %= *url >> endOfCollection;
 		url %= binWord;
@@ -279,7 +288,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		conversationId %= binExpression;
 	
 
-		binWord = ( ( byte_(0x10) >> word 		[ label::_val = "test" ]
+		binWord = ( ( byte_(0x10) >> word 		[ label::_val = label::_1 ]
 				>> byte_(0x00) )
 		        | byte_(0x11) >> index   		[ label::_val = extractFromCodetable(label::_1) ]
 			);
@@ -350,9 +359,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		second %= byte_;
 		millisecond %= byte_ >> byte_;
 
-		word %= (char_ - wordExceptionsStart )// 		[ label::_val += label::_1 ]
-			 >> *(char_ - wordExceptionsGeneral) //    [ label::_val += label::_1 ]
+		word = (char_ - wordExceptionsStart )  		[ label::_val += label::_1 ]
+			 >> *(char_ - wordExceptionsGeneral)    [ label::_val += label::_1 ]
 			;  //TODO: TESTING
+
 		wordExceptionsStart %= wordExceptionsGeneral
                                 | char_('#') 
 				| char_('0','9')
@@ -387,20 +397,21 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > messageType;
 	qi::rule<Iterator, std::string() > userDefinedMessageType;
 	qi::rule<Iterator, std::string() > messageTypeName;
-	qi::rule<Iterator, std::vector<fipa::acl::MessageParameter>()> messageParameter;
-	qi::rule<Iterator> userDefinedMessageParameter;
+
+	qi::rule<Iterator, fipa::acl::MessageParameter() > messageParameter;
+	qi::rule<Iterator, fipa::acl::MessageParameter() > userDefinedMessageParameter;
+	qi::rule<Iterator, fipa::acl::MessageParameter() > predefinedMessageParameter;
 	
-	qi::rule<Iterator> parameterName;
-	qi::rule<Iterator> parameterValue;
+	qi::rule<Iterator, std::string() > parameterName;
+	qi::rule<Iterator, std::string() > parameterValue;
 
 	qi::rule<Iterator, std::string() > predefinedMessageType;
-	qi::rule<Iterator> predefinedMessageParameter;
 	
 	qi::rule<Iterator> agentIdentifier;
 	qi::rule<Iterator> agentName;
 	qi::rule<Iterator> addresses;
 	qi::rule<Iterator> resolvers;
- 	qi::rule<Iterator> userDefinedParameter;
+ 	qi::rule<Iterator, fipa::acl::MessageParameter() > userDefinedParameter;
 	
 	qi::rule<Iterator> urlCollection;
 	qi::rule<Iterator> url;
@@ -441,7 +452,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator> second;
 	qi::rule<Iterator> millisecond;
 
-	qi::rule<Iterator> word;
+	qi::rule<Iterator, std::string() > word;
 	qi::rule<Iterator> wordExceptionsStart;
 	qi::rule<Iterator> wordExceptionsGeneral;
 	qi::rule<Iterator> fipaString;

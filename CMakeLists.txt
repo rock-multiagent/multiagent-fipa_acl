@@ -102,7 +102,8 @@ endif(PROJECT_USES_QT)
 ##### Add boost support ####################################################
 if(PROJECT_USES_BOOST)
 	# Select boost components from (there might be more): filesystem iostreams signals serialization thread system program_options
-	find_package(Boost COMPONENTS filesystem program_options)
+	set(BOOST_INCLUDEDIR /usr/local/include/boost)
+	find_package(Boost 1.42.0 COMPONENTS filesystem program_options)
 	
 	if(Boost_FOUND)
 		message("Prerequisite ok: Boost installation found " ${Boost_VERSION} )

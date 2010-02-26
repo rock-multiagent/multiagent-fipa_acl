@@ -25,11 +25,18 @@ namespace fipa
 namespace acl
 {
 
+typedef struct
+{
+	std::string name;
+	std::string data;
+} MessageParameter;
+
 
 // Define the final message structure here
 struct Message
 {
 	std::string word;
+	fipa::acl::MessageParameter parameter;
 };
 
 class MessagePrinter 
@@ -51,10 +58,16 @@ class MessagePrinter
 
 } // end namespace fipa
 
+BOOST_FUSION_ADAPT_STRUCT(
+	fipa::acl::MessageParameter,
+	(std::string, name)
+	(std::string, data)
+)
 // The final message structure
 BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::Message,
 	(std::string, word)
+	(fipa::acl::MessageParameter, parameter)
 )
 
 namespace fipa
@@ -115,15 +128,21 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		using phoenix::at_c;
 		
 	
-		aclCommunicativeAct = binWord  [ at_c<0>(label::_val) = label::_1 ]; 
-		binWord = index 	       [ label::_val = extractFromCodetable(label::_1) ];
-		index = byte_ | short_;
+		aclCommunicativeAct = messageParameter [ at_c<1>(label::_val) = label::_1 ];
+		messageParameter =  pName [ at_c<0>(label::_val) = label::_1 ]
+				 >> pData [ at_c<1>(label::_val) = label::_1 ]
 
+				;
+		pName = *char_;
+		pData = *char_;
+	
 	}
+	
 
 	qi::rule<Iterator, fipa::acl::Message(),ascii::space_type> aclCommunicativeAct;
-	qi::rule<Iterator, std::string()> binWord;
-	qi::rule<Iterator, unsigned short()> index;
+	qi::rule<Iterator, fipa::acl::MessageParameter()> messageParameter;
+	qi::rule<Iterator, std::string() > pName;
+	qi::rule<Iterator, std::string() > pData;
 
 
 };
