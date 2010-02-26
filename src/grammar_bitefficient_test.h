@@ -59,7 +59,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 namespace fipa
 {
-	
+
+	// In order to use functions as semantic actions
+	// lazy evaluation is required	
 	struct extractFromCodetableImpl
 	{
 		template <typename T>
