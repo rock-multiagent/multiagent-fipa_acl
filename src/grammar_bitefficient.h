@@ -43,12 +43,6 @@ typedef struct
 	char version;
 } Header;
 
-typedef struct
-{
-	std::string name;
-	std::string data;
-} MessageParameter;
-
 struct AgentID;
 
 typedef boost::recursive_wrapper<AgentID> Resolver;
@@ -59,6 +53,14 @@ struct AgentID
 	std::vector<std::string> addresses;	
 	std::vector<fipa::acl::Resolver> resolvers;
 };
+
+typedef boost::variant<std::string,fipa::acl::AgentID> ParameterValue;
+typedef struct
+{
+	std::string name;
+	fipa::acl::ParameterValue data;
+} MessageParameter;
+
 
 // Define the final message structure here
 struct Message
@@ -105,7 +107,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::MessageParameter,
 	(std::string, name)
-	(std::string, data)
+	(fipa::acl::ParameterValue, data)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -257,7 +259,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					; 
 								
 
-		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) ="aid" ]   // sender
+		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) = label::_1 ]   // sender
 		/*
 					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
 					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent         // content 
