@@ -49,6 +49,17 @@ typedef struct
 	std::string data;
 } MessageParameter;
 
+struct AgentID;
+
+typedef boost::recursive_wrapper<AgentID> Resolver;
+
+struct AgentID
+{
+	std::string name;
+	std::vector<std::string> addresses;	
+	std::vector<fipa::acl::Resolver> resolvers;
+};
+
 // Define the final message structure here
 struct Message
 {
@@ -95,6 +106,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::MessageParameter,
 	(std::string, name)
 	(std::string, data)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+	fipa::acl::AgentID,
+	(std::string, name)
+	(std::vector<std::string>, addresses)
+	(std::vector<fipa::acl::Resolver>, resolvers)
 )
 
 // The final message structure
@@ -203,25 +221,15 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		endOfMessage %= endOfCollection;
 		endOfCollection %= byte_(0x01); 
 		
+		// we do not support dynamic code tables or user defined values
 		// message type is a string
-		messageType = predefinedMessageType  [ label::_val = label::_1 ] 
-			    | userDefinedMessageType [ label::_val = label::_1 ]
- 			   ;
-
-		userDefinedMessageType = byte_(0x00) >> messageTypeName [ label::_val = label::_1 ];
-		messageTypeName = binWord                               [ label::_val = label::_1 ];
+		messageType = predefinedMessageType.copy();
+		messageTypeName = binWord.copy();
 
 		// Note: never do a direct assignment like
 		// messageParameter = predefinedMessageParameter or you will be getting runtime errors	
 		// use messageParameter = predefinedMessageParameter.copy() instead
-		messageParameter = predefinedMessageParameter | userDefinedMessageParameter;
-
-		userDefinedMessageParameter = byte_(0x00) 
-						>> parameterName	[ phoenix::at_c<0>(label::_val) = label::_1 ] 
-						>> parameterValue	[ phoenix::at_c<1>(label::_val) = "TODO:binExpression" ]
-					       ;
-		parameterName = binWord.copy();
-		parameterValue = binExpression.copy();
+		messageParameter = predefinedMessageParameter.copy();
 
 		// Converting message type into predefined strings
 		predefinedMessageType = byte_(0x01)    [ label::_val = "accept-proposal" ]
@@ -263,29 +271,37 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					| byte_(0x0c) [ phoenix::at_c<0>(label::_val) = "protocol" ]        >> protocol           // protocol
 					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId    // conversation-id
 	*/				; 
-		agentIdentifier %= byte_(0x02) >> agentName >> -addresses >> -resolvers >> *(userDefinedParameter) >> endOfCollection;				
-		agentName %= binWord;
-		addresses %= byte_(0x02) >> urlCollection;
-		resolvers %= byte_(0x03) >> agentIdentifierCollection;
-		userDefinedParameter = byte_(0x04) >> binWord [ phoenix::at_c<0>(label::_val) = label::_1 ]
-					 >> binExpression     [ phoenix::at_c<1>(label::_val) = "TODO:binExpression" ]  
+		
+		agentIdentifier = byte_(0x02) >> agentName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
+				 >> -addresses  	   		[ phoenix::at_c<1>(label::_val) = label::_1 ]
+				 >> -resolvers 	           		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+				 //>> *(userDefinedParameter) 
+				>> endOfCollection;				
+		agentName = binWord.copy();
+		addresses = byte_(0x02) >> urlCollection 		[ label::_val = label::_1 ];
+		resolvers = byte_(0x03) >> *agentIdentifier 		[ phoenix::push_back(label::_val, label::_1) ]
+					   >> endOfCollection;
+
+		userDefinedParameter = byte_(0x04) >> binWord 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
+					 >> binExpression     		[ phoenix::at_c<1>(label::_val) = "TODO:binExpression" ]  
 					;
 		
-		urlCollection %= *url >> endOfCollection;
-		url %= binWord;
-		agentIdentifierCollection %= *(agentIdentifier) >> endOfCollection;
-	 	recipientExpr %= agentIdentifierCollection;
-		msgContent %= binString;	
+		urlCollection = *url 					[ phoenix::push_back(label::_val, label::_1) ]
+				 >> endOfCollection;
+		url = binWord.copy();
 
-		replyWithParam %= binExpression;
-		replyByParam %= binDateTimeToken;
-		inReplyToParam %= binExpression;
-		replyToParam %= recipientExpr;
-		language %= binExpression;
-		encoding %= binExpression;
-		ontology %= binExpression;
-		protocol %= binWord;
-		conversationId %= binExpression;
+		recipientExpr = *agentIdentifier >> endOfCollection;
+		msgContent = binString.copy();	
+
+		replyWithParam = binExpression.copy();
+		replyByParam = binDateTimeToken.copy();
+		inReplyToParam = binExpression.copy();
+		replyToParam = recipientExpr.copy();
+		language = binExpression.copy();
+		encoding = binExpression.copy();
+		ontology = binExpression.copy();
+		protocol = binWord.copy();
+		conversationId = binExpression.copy();
 	
 
 		binWord = ( ( byte_(0x10) >> word 		[ label::_val = label::_1 ]
@@ -343,7 +359,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			| ( byte_(0x57) >> len16 >> fipaString )
 			| ( byte_(0x58) >> len32 >> fipaString )
 			| ( byte_(0x59) >> index );
-
+		
+		// Index is a pointer to code table entry and its size (in bits) depends on the code table size. 
+		// If the code table size is 256 entries, the size of the index is one byte;
+		//  otherwise its size is two bytes (represented in network byte order).
 		index = byte_ | short_;
 		byteSeq %= *byte_;
 		
@@ -407,15 +426,15 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 	qi::rule<Iterator, std::string() > predefinedMessageType;
 	
-	qi::rule<Iterator> agentIdentifier;
-	qi::rule<Iterator> agentName;
-	qi::rule<Iterator> addresses;
-	qi::rule<Iterator> resolvers;
+	qi::rule<Iterator, fipa::acl::AgentID()> agentIdentifier;
+	qi::rule<Iterator, std::string() > agentName;
+	qi::rule<Iterator, std::vector<std::string>() > addresses;
+	qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > resolvers;
  	qi::rule<Iterator, fipa::acl::MessageParameter() > userDefinedParameter;
 	
-	qi::rule<Iterator> urlCollection;
-	qi::rule<Iterator> url;
-	qi::rule<Iterator> agentIdentifierCollection;
+	qi::rule<Iterator, std::vector<std::string>() > urlCollection;
+	qi::rule<Iterator, std::string() > url;
+	qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > agentIdentifierCollection;
 	qi::rule<Iterator> recipientExpr;
 	qi::rule<Iterator> msgContent;
 	qi::rule<Iterator> replyWithParam;
