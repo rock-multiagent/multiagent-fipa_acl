@@ -100,6 +100,18 @@ class MessagePrinter
 		{
 			MessageParameter mp = msg.parameters[i];
 			printf("\tparameter #%d:  %s\n",i, mp.name.c_str()); 
+		
+			if(mp.name == "sender")
+			{
+				fipa::acl::AgentID& aid = boost::get<fipa::acl::AgentID>(mp.data);
+				printf("\t\tname: %s\n", aid.name.c_str());
+				for(int a=0; a < aid.addresses.size(); a++)
+				{	
+					printf("\t\taddresses: %s\n", aid.addresses[a].c_str());
+				}
+
+			}
+			
 		}
 	
 	}
@@ -276,11 +288,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					| byte_(0x16)  [ label::_val = "subscribe" ]  
 					; 
 								
-
+		// since predefinedMessageParamter uses a boost::variant, the variant need to be accesses using different indexes, i.e. correspoing phoenix::at_c< positionInSequence >
 		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) = label::_1 ]   // sender
-		/*
-					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
-					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent         // content 
+/*					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
+					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent      [ phoenix::at_c<0>(label::_val) = label::_1 ]   // content 
 					| byte_(0x05) [ phoenix::at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam     // reply-with
 					| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam       // reply-by 
 					| byte_(0x07) [ phoenix::at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam     // in-reply-to 
@@ -290,7 +301,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					| byte_(0x0b) [ phoenix::at_c<0>(label::_val) = "ontology" ]        >> ontology           // ontology
 					| byte_(0x0c) [ phoenix::at_c<0>(label::_val) = "protocol" ]        >> protocol           // protocol
 					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId    // conversation-id
-	*/				; 
+*/					; 
 		
 		agentIdentifier = byte_(0x02) >> agentName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
 				 >> -addresses  	   		[ phoenix::at_c<1>(label::_val) = label::_1 ]
