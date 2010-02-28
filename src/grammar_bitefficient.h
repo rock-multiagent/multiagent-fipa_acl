@@ -65,6 +65,8 @@ typedef struct
 // Define the final message structure here
 struct Message
 {
+	Message() : type(""), parameters() {}
+
 	Header header;
 	std::string type;
 	std::vector<fipa::acl::MessageParameter> parameters;
@@ -82,8 +84,24 @@ class MessagePrinter
 	{	
 		printf("Message read:");
 		printf("id:          %x\n", msg.header.id);
+		switch(msg.header.id)
+		{
+			case 0xfa: printf("id is FA\n"); break;
+			case 0xfb: printf("id is FB\n"); break;
+			case 0xfc: printf("id is FC\n"); break;
+			default: printf("id is unknown\n");
+		}
+
 		printf("version:     %x\n", msg.header.version); 
 		printf("type:        %s\n", msg.type.c_str());
+		
+		printf("msg-parameters count: %d\n", msg.parameters.size());
+		for(int i=0; i < msg.parameters.size(); i++)
+		{
+			MessageParameter mp = msg.parameters[i];
+			printf("parameter #%d:	%s\n",i, mp.name.c_str()); 
+		}
+	
 	}
 };
 
@@ -202,8 +220,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// the synthesized attribute might be a fipa::acl::message, and the element ordering depends on the structure as
 		// defined with the BOOST_FUSION_ADAPT_STRUCT definition
 		aclCommunicativeAct = header          		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-				      >> messageType		[ phoenix::at_c<1>(label::_val) = label::_1 ]
-				      >> *messageParameter      //[ phoenix::push_back(phoenix::at_c<2>(label::_val), label::_1) ]
+				      >> /*predefinedMessageType*/ messageType		[ phoenix::at_c<1>(label::_val) = label::_1 ]
+			//	      >> *messageParameter      //[ phoenix::push_back(phoenix::at_c<2>(label::_val), label::_1) ]
 				      >> endOfMessage           // No action here
 				     ;
 
@@ -225,8 +243,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		
 		// we do not support dynamic code tables or user defined values
 		// message type is a string
-		messageType = predefinedMessageType.copy();
-		messageTypeName = binWord.copy();
+		messageType = predefinedMessageType.alias();
+		messageTypeName = binWord.alias();
 
 		// Note: never do a direct assignment like
 		// messageParameter = predefinedMessageParameter or you will be getting runtime errors	

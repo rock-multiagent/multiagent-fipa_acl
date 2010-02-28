@@ -58,6 +58,7 @@ int main(int argc, char** argv)
 		std::cout << "------------------------------------\n";
 		std::cout << " Parsing succeeded\n";
 		std::cout << "------------------------------------\n";
+
 		fipa::acl::MessagePrinter printer;
 		printer.print(parseTree);
 
