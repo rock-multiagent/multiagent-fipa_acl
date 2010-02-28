@@ -82,24 +82,24 @@ class MessagePrinter
 
 	void print(const fipa::acl::Message& msg)
 	{	
-		printf("Message read:");
+		printf("FIPA Message read:\n");
 		printf("id:          %x\n", msg.header.id);
 		switch(msg.header.id)
 		{
-			case 0xfa: printf("id is FA\n"); break;
-			case 0xfb: printf("id is FB\n"); break;
-			case 0xfc: printf("id is FC\n"); break;
-			default: printf("id is unknown\n");
+			case 0xfa: printf("\tid is FA\n"); break;
+			case 0xfb: printf("\tid is FB\n"); break;
+			case 0xfc: printf("\tid is FC\n"); break;
+			default: printf("\tWARNING: id is unknown\n");
 		}
 
-		printf("version:     %x\n", msg.header.version); 
-		printf("type:        %s\n", msg.type.c_str());
+		printf("version:                  %x\n", msg.header.version); 
+		printf("performative(type):       %s\n", msg.type.c_str());
 		
-		printf("msg-parameters count: %d\n", msg.parameters.size());
+		printf("msg-parameters count:     %d\n", msg.parameters.size());
 		for(int i=0; i < msg.parameters.size(); i++)
 		{
 			MessageParameter mp = msg.parameters[i];
-			printf("parameter #%d:	%s\n",i, mp.name.c_str()); 
+			printf("\tparameter #%d:  %s\n",i, mp.name.c_str()); 
 		}
 	
 	}
@@ -220,8 +220,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// the synthesized attribute might be a fipa::acl::message, and the element ordering depends on the structure as
 		// defined with the BOOST_FUSION_ADAPT_STRUCT definition
 		aclCommunicativeAct = header          		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-				      >> /*predefinedMessageType*/ messageType		[ phoenix::at_c<1>(label::_val) = label::_1 ]
-			//	      >> *messageParameter      //[ phoenix::push_back(phoenix::at_c<2>(label::_val), label::_1) ]
+				      >> messageType		[ phoenix::at_c<1>(label::_val) = label::_1 ]
+				      >> *messageParameter       [ phoenix::push_back(phoenix::at_c<2>(label::_val), label::_1) ]
 				      >> endOfMessage           // No action here
 				     ;
 
@@ -248,8 +248,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		// Note: never do a direct assignment like
 		// messageParameter = predefinedMessageParameter or you will be getting runtime errors	
-		// use messageParameter = predefinedMessageParameter.copy() instead
-		messageParameter = predefinedMessageParameter.copy();
+		// use messageParameter = predefinedMessageParameter.alias() instead
+		messageParameter = predefinedMessageParameter.alias();
 
 		// Converting message type into predefined strings
 		predefinedMessageType = byte_(0x01)    [ label::_val = "accept-proposal" ]
@@ -297,7 +297,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 				 >> -resolvers 	           		[ phoenix::at_c<2>(label::_val) = label::_1 ]
 				 //>> *(userDefinedParameter) 
 				>> endOfCollection;				
-		agentName = binWord.copy();
+		agentName = binWord.alias();
 		addresses = byte_(0x02) >> urlCollection 		[ label::_val = label::_1 ];
 		resolvers = byte_(0x03) >> *agentIdentifier 		[ phoenix::push_back(label::_val, label::_1) ]
 					   >> endOfCollection;
@@ -308,20 +308,20 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		
 		urlCollection = *url 					[ phoenix::push_back(label::_val, label::_1) ]
 				 >> endOfCollection;
-		url = binWord.copy();
+		url = binWord.alias();
 
 		recipientExpr = *agentIdentifier >> endOfCollection;
-		msgContent = binString.copy();	
+		msgContent = binString.alias();	
 
-		replyWithParam = binExpression.copy();
-		replyByParam = binDateTimeToken.copy();
-		inReplyToParam = binExpression.copy();
-		replyToParam = recipientExpr.copy();
-		language = binExpression.copy();
-		encoding = binExpression.copy();
-		ontology = binExpression.copy();
-		protocol = binWord.copy();
-		conversationId = binExpression.copy();
+		replyWithParam = binExpression.alias();
+		replyByParam = binDateTimeToken.alias();
+		inReplyToParam = binExpression.alias();
+		replyToParam = recipientExpr.alias();
+		language = binExpression.alias();
+		encoding = binExpression.alias();
+		ontology = binExpression.alias();
+		protocol = binWord.alias();
+		conversationId = binExpression.alias();
 	
 
 		binWord = ( ( byte_(0x10) >> word 		[ label::_val = label::_1 ]
