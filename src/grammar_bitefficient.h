@@ -72,6 +72,28 @@ struct Message
 	std::vector<fipa::acl::MessageParameter> parameters;
 };
 
+class AgentIDPrinter
+{
+	public:
+	AgentIDPrinter() {}
+	
+	void print(const fipa::acl::AgentID& aid)
+	{
+				printf("\t\tname: %s\n", aid.name.c_str());
+				for(int a=0; a < aid.addresses.size(); a++)
+				{	
+					printf("\t\taddresses: %s\n", aid.addresses[a].c_str());
+				}
+				printf("\t\tresolvers:\n");
+				for(int r=0; r < aid.resolvers.size(); r++)
+				{
+					fipa::acl::AgentID resolver = aid.resolvers[r].get();
+					print(resolver);
+				}
+
+	}
+
+};
 
 class MessagePrinter 
 {
@@ -84,13 +106,12 @@ class MessagePrinter
 	{	
 		printf("FIPA Message read:\n");
 		printf("id:          %x\n", msg.header.id);
-		switch(msg.header.id)
-		{
-			case 0xfa: printf("\tid is FA\n"); break;
-			case 0xfb: printf("\tid is FB\n"); break;
-			case 0xfc: printf("\tid is FC\n"); break;
-			default: printf("\tWARNING: id is unknown\n");
-		}
+
+			if( (msg.header.id & ! 0xfa) == 0) printf("\tid is FA\n");
+			else if( (msg.header.id & ! 0xfb) == 0 ) printf("\tid is FB\n");
+			else if( (msg.header.id & ! 0xfc) == 0 ) printf("\tid is FC\n"); 
+			else printf("\tWARNING: id is unknown\n");
+	
 
 		printf("version:                  %x\n", msg.header.version); 
 		printf("performative(type):       %s\n", msg.type.c_str());
@@ -103,13 +124,9 @@ class MessagePrinter
 		
 			if(mp.name == "sender")
 			{
+				AgentIDPrinter aidPrinter;
 				fipa::acl::AgentID& aid = boost::get<fipa::acl::AgentID>(mp.data);
-				printf("\t\tname: %s\n", aid.name.c_str());
-				for(int a=0; a < aid.addresses.size(); a++)
-				{	
-					printf("\t\taddresses: %s\n", aid.addresses[a].c_str());
-				}
-
+				aidPrinter.print(aid);
 			}
 			
 		}
