@@ -243,18 +243,18 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					; 
 								
 
-		predefinedMessageParameter = byte_(0x02) [ phoenix.at_c<0>(label::_val) = "sender" ]       >> agentIdentifier    // sender
-					| byte_(0x03) [ phoenix.at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
-					| byte_(0x04) [ phoenix.at_c<0>(label::_val) = "content" ]         >> msgContent         // content 
-					| byte_(0x05) [ phoenix.at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam     // reply-with
-					| byte_(0x06) [ phoenix.at_c<0>(label::_val) = "reply-by" ]        >> replyByParam       // reply-by 
-					| byte_(0x07) [ phoenix.at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam     // in-reply-to 
-					| byte_(0x08) [ phoenix.at_c<0>(label::_val) = "reply-to" ]        >> replyToParam       // reply-to   
-					| byte_(0x09) [ phoenix.at_c<0>(label::_val) = "language" ]        >> language           // language  
-					| byte_(0x0a) [ phoenix.at_c<0>(label::_val) = "encoding" ]        >> encoding           // encoding 
-					| byte_(0x0b) [ phoenix.at_c<0>(label::_val) = "ontology" ]        >> ontology           // ontology
-					| byte_(0x0c) [ phoenix.at_c<0>(label::_val) = "protocol" ]        >> protocol           // protocol
-					| byte_(0x0d) [ phoenix.at_c<0>(label::_val) = "conversation-id" ] >> conversationId;    // conversation-id
+		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier    // sender
+					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
+					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent         // content 
+					| byte_(0x05) [ phoenix::at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam     // reply-with
+					| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam       // reply-by 
+					| byte_(0x07) [ phoenix::at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam     // in-reply-to 
+					| byte_(0x08) [ phoenix::at_c<0>(label::_val) = "reply-to" ]        >> replyToParam       // reply-to   
+					| byte_(0x09) [ phoenix::at_c<0>(label::_val) = "language" ]        >> language           // language  
+					| byte_(0x0a) [ phoenix::at_c<0>(label::_val) = "encoding" ]        >> encoding           // encoding 
+					| byte_(0x0b) [ phoenix::at_c<0>(label::_val) = "ontology" ]        >> ontology           // ontology
+					| byte_(0x0c) [ phoenix::at_c<0>(label::_val) = "protocol" ]        >> protocol           // protocol
+					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId;    // conversation-id
 					 
 		agentIdentifier %= byte_(0x02) >> agentName >> -addresses >> -resolvers >> *(userDefinedParameter) >> endOfCollection;				
 		agentName %= binWord;
