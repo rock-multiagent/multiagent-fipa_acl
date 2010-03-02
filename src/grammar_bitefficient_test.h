@@ -25,19 +25,24 @@ namespace fipa
 namespace acl
 {
 
-typedef struct
+struct AgentID;
+typedef boost::recursive_wrapper<AgentID> Resolver;
+
+struct AgentID
 {
 	std::string name;
-	std::string data;
-} MessageParameter;
+	std::vector<fipa::acl::Resolver> resolvers;
+};
 
+typedef boost::variant< std::string, std::vector<fipa::acl::AgentID> > ParameterValue;
 
 // Define the final message structure here
 struct Message
 {
-	std::string word;
-	fipa::acl::MessageParameter parameter;
+	std::string name;
+	fipa::acl::ParameterValue parameter;
 };
+
 
 class MessagePrinter 
 {
@@ -48,8 +53,7 @@ class MessagePrinter
 
 	void print(const fipa::acl::Message& msg)
 	{	
-		printf("Message read:");
-		printf("word:          %s\n", msg.word.c_str());
+		printf("Message read.");
 	}
 };
 
@@ -58,59 +62,15 @@ class MessagePrinter
 
 } // end namespace fipa
 
-BOOST_FUSION_ADAPT_STRUCT(
-	fipa::acl::MessageParameter,
-	(std::string, name)
-	(std::string, data)
-)
 // The final message structure
 BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::Message,
-	(std::string, word)
-	(fipa::acl::MessageParameter, parameter)
+	(std::string, name)
+	(fipa::acl::ParameterValue, data)
 )
 
 namespace fipa
 {
-
-	// In order to use functions as semantic actions
-	// lazy evaluation is required	
-	struct extractFromCodetableImpl
-	{
-		template <typename T>
-		struct result
-		{
-			typedef std::string type;
-		};
-
-		template <typename T>
-		std::string operator()(T arg) const
-		{
-			unsigned short index;
-			if(typeid(T) == typeid(unsigned short))
-			{
-				std::cout << "Unsigned short" << std::endl;
-				index = arg;
-			}
-
-
-			switch(index)
-			{
-				case 1:
-					return std::string("ONE");
-					break;
-				case 2:
-					return std::string("TWO");
-					break;
-			}
-
-			return std::string("UNKNOWN");
-		}
-	
-	};
-
-	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
-
 
 namespace acl
 {
@@ -128,21 +88,19 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		using phoenix::at_c;
 		
 	
-		aclCommunicativeAct = messageParameter [ at_c<1>(label::_val) = label::_1 ];
-		messageParameter =  pName [ at_c<0>(label::_val) = label::_1 ]
-				 >> pData [ at_c<1>(label::_val) = label::_1 ]
-
+		aclCommunicativeAct = pName [ at_c<0>(label::_val) = label::_1 ]
+				    >> messageParameter [ at_c<1>(label::_val) = label::_1 ];
+		messageParameter = *char_ 
+				 | pData [ at_c<1>(label::_val) = label::_1 ]
 				;
-		pName = *char_;
-		pData = *char_;
-	
+		pData = messageParameter.alias();
 	}
 	
 
 	qi::rule<Iterator, fipa::acl::Message(),ascii::space_type> aclCommunicativeAct;
 	qi::rule<Iterator, fipa::acl::MessageParameter()> messageParameter;
 	qi::rule<Iterator, std::string() > pName;
-	qi::rule<Iterator, std::string() > pData;
+	qi::rule<Iterator> pData;
 
 
 };

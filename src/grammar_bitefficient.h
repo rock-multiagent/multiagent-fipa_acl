@@ -54,7 +54,8 @@ struct AgentID
 	std::vector<fipa::acl::Resolver> resolvers;
 };
 
-typedef boost::variant<std::string,fipa::acl::AgentID> ParameterValue;
+typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID> > ParameterValue;
+
 typedef struct
 {
 	std::string name;
@@ -305,20 +306,20 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					| byte_(0x16)  [ label::_val = "subscribe" ]  
 					; 
 								
-		// since predefinedMessageParamter uses a boost::variant, the variant need to be accesses using different indexes, i.e. correspoing phoenix::at_c< positionInSequence >
-		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) = label::_1 ]   // sender
-/*					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr      // receiver 
-					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent      [ phoenix::at_c<0>(label::_val) = label::_1 ]   // content 
-					| byte_(0x05) [ phoenix::at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam     // reply-with
-					| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam       // reply-by 
-					| byte_(0x07) [ phoenix::at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam     // in-reply-to 
-					| byte_(0x08) [ phoenix::at_c<0>(label::_val) = "reply-to" ]        >> replyToParam       // reply-to   
-					| byte_(0x09) [ phoenix::at_c<0>(label::_val) = "language" ]        >> language           // language  
-					| byte_(0x0a) [ phoenix::at_c<0>(label::_val) = "encoding" ]        >> encoding           // encoding 
-					| byte_(0x0b) [ phoenix::at_c<0>(label::_val) = "ontology" ]        >> ontology           // ontology
-					| byte_(0x0c) [ phoenix::at_c<0>(label::_val) = "protocol" ]        >> protocol           // protocol
-					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId    // conversation-id
-*/					; 
+		// predefinedMessageParamter uses a boost::variant
+		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) = label::_1 ]    // sender
+					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr   [ phoenix::at_c<1>(label::_val) = label::_1 ]   // receiver 
+					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent      [ phoenix::at_c<1>(label::_val) = "msgContent" ]   // content 
+					| byte_(0x05) [ phoenix::at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam  [ phoenix::at_c<1>(label::_val) = "todo:binExpression" ]   // reply-with
+			//		| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam    [ phoenix::at_c<1>(label::_val) = "todo:binExpression" ]  // reply-by 
+					| byte_(0x07) [ phoenix::at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam  [ phoenix::at_c<1>(label::_val) = "todo:binExpression" ]  // in-reply-to 
+					| byte_(0x08) [ phoenix::at_c<0>(label::_val) = "reply-to" ]        >> replyToParam    [ phoenix::at_c<1>(label::_val) = "todo:binExpression" ] // reply-to   
+					| byte_(0x09) [ phoenix::at_c<0>(label::_val) = "language" ]        >> language        [ phoenix::at_c<1>(label::_val) = "todo::binExpression" ] // language  
+					| byte_(0x0a) [ phoenix::at_c<0>(label::_val) = "encoding" ]        >> encoding        [ phoenix::at_c<1>(label::_val) = "todo::binExpression" ] // encoding 
+					| byte_(0x0b) [ phoenix::at_c<0>(label::_val) = "ontology" ]        >> ontology        [ phoenix::at_c<1>(label::_val) = "todo::binExpression" ] // ontology
+					| byte_(0x0c) [ phoenix::at_c<0>(label::_val) = "protocol" ]        >> protocol        [ phoenix::at_c<1>(label::_val) = "todo::binWord" ] // protocol
+					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId  [ phoenix::at_c<1>(label::_val) = "todo::binExpression" ] // conversation-id
+					; 
 		
 		agentIdentifier = byte_(0x02) >> agentName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
 				 >> -addresses  	   		[ phoenix::at_c<1>(label::_val) = label::_1 ]
@@ -331,14 +332,16 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					   >> endOfCollection;
 
 		userDefinedParameter = byte_(0x04) >> binWord 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-					 >> binExpression     		[ phoenix::at_c<1>(label::_val) = "TODO:binExpression" ]  
+					 >> binExpression     		[ phoenix::at_c<1>(label::_val) = "todo:binExpression" ]  
 					;
 		
 		urlCollection = *url 					[ phoenix::push_back(label::_val, label::_1) ]
 				 >> endOfCollection;
 		url = binWord.alias();
 
-		recipientExpr = *agentIdentifier >> endOfCollection;
+		recipientExpr = *agentIdentifier 			[ phoenix::push_back(label::_val, label::_1) ]
+				>> endOfCollection;
+
 		msgContent = binString.alias();	
 
 		replyWithParam = binExpression.alias();
@@ -482,9 +485,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	
 	qi::rule<Iterator, std::vector<std::string>() > urlCollection;
 	qi::rule<Iterator, std::string() > url;
-	qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > agentIdentifierCollection;
-	qi::rule<Iterator> recipientExpr;
-	qi::rule<Iterator> msgContent;
+	qi::rule<Iterator, std::vector<fipa::acl::AgentID>() > recipientExpr;
+	qi::rule<Iterator, std::string() > msgContent;
 	qi::rule<Iterator> replyWithParam;
 	qi::rule<Iterator> replyByParam;
 	qi::rule<Iterator> inReplyToParam;
