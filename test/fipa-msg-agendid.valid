@@ -1,0 +1,39 @@
+Messageid:    FA
+Version:      01
+MessageType:  01
+MessageParam: 02
+	AgentId: 02
+        AgentName: 11  00 // using index
+	Adresses: 
+	     Prefix: 02
+	     urlCollection: // binword (10 word 00
+		    prefix: 10
+			     6d 65 72 69 61 64 6f 63  2e 6c 6f 63 61 6c 0a //meriadoc.local
+		    postfix:00
+		    prefix: 10
+		             70 65 72 65 67 72 69 6e  2e 6c 6f 63 61 6c 0a //peregrin.local
+		    postfix:00
+	            endOfCollection: 01
+	Resolvers:
+	      Prefix: 03
+	      agentIdentifier:
+		     prefix: 02
+	             AgentName:       11 01 // using index
+	             Adresses:
+		           Prefix 02
+		           urlCollection: 
+					  10 //binword start
+			            	  72 65 6c 61 79 2e 6c 6f  63 61 6c 0a // relay.local
+				          00 // binword end
+		                          endOfCollection: 01
+	            endOfCollection 01
+	      endOfCollection: 01
+	    
+        EndOfColl: 01
+MessageParam: 04
+	Prefix: 14 // fipaString follows
+	Start: 23 0a // #
+	Content:  4d 53 47 2d 43 4f 4e 54  45 4e 54 0a // MSG-CONTENT
+	Postfix: 00
+EndOfMsg: 01
+                 

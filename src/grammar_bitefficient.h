@@ -2,6 +2,12 @@
  *
  * \file grammar_bitefficient.h
  * \author Thomas Roehr, thomas.roehr@dfki.de
+ * \brief This grammar represents the bitefficient message specification
+ * of the Foundation for Intelligent Physical Agents (FIPA at http://www.fipa.org)
+ * 
+ * \version 0.1
+ *  - parses valid messages
+ *  - extract some field information from messages
  */
 
 #include <boost/config/warning_disable.hpp>
@@ -249,8 +255,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// set the first element (position 0) of the element synthesized attribute,i.e._val, to the parsed value, i.e. _1
 		// the synthesized attribute might be a fipa::acl::message, and the element ordering depends on the structure as
 		// defined with the BOOST_FUSION_ADAPT_STRUCT definition
-		aclCommunicativeAct = header          		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-				      >> messageType		[ phoenix::at_c<1>(label::_val) = label::_1 ]
+		aclCommunicativeAct = header          		 [ phoenix::at_c<0>(label::_val) = label::_1 ]
+				      >> messageType		 [ phoenix::at_c<1>(label::_val) = label::_1 ]
 				      >> *messageParameter       [ phoenix::push_back(phoenix::at_c<2>(label::_val), label::_1) ]
 				      >> endOfMessage           // No action here
 				     ;
