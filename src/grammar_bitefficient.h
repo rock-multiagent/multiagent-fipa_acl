@@ -402,7 +402,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			;
 
 		exprStart = ( byte_(0x60) ) [ label::_val = "" ]
-	/*		  | ( byte_(0x70) >> word       [ label::_val = label::_1 ] >> byte_(0x00) )
+			  | ( byte_(0x70) >> word       [ label::_val = label::_1 ] >> byte_(0x00) )
 			  | ( byte_(0x71) >> index      [ label::_val = extractFromCodetable(label::_1)] )
 			  | ( byte_(0x72) >> digits     [ label::_val = "todo:digits" ] )
 			  | ( byte_(0x73) >> digits     [ label::_val = "todo:digits" ] ) 
@@ -411,11 +411,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			  | ( byte_(0x76) >> len8 >> fipaString   [ label::_val = "todo:len8-fipaString" ])
 			  | ( byte_(0x77) >> len16 >> fipaString  [ label::_val = "todo:len16-fipaString" ])
 			  | ( byte_(0x78) >> len32 >> fipaString  [ label::_val = "todo:len32-fipaString" ])
-			  | ( byte_(0x79) >> index [ label::_val = extractFromCodetable(label::_1)])
-	*/		 ;
+			  | ( byte_(0x79) >> index 		  [ label::_val = extractFromCodetable(label::_1)])
+			 ;
 
 		exprEnd = ( byte_(0x40) ) [ label::_val = "" ]
-	/*		| ( byte_(0x50) >> word >> byte_(0x00) )
+			| ( byte_(0x50) >> word >> byte_(0x00) )
 			| ( byte_(0x51) >> index )
 			| ( byte_(0x52) >> digits )
 			| ( byte_(0x53) >> digits )
@@ -425,7 +425,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			| ( byte_(0x57) >> len16 >> fipaString )
 			| ( byte_(0x58) >> len32 >> fipaString )
 			| ( byte_(0x59) >> index )
-	*/		;
+			;
 		
 		// Index is a pointer to code table entry and its size (in bits) depends on the code table size. 
 		// If the code table size is 256 entries, the size of the index is one byte;
@@ -460,8 +460,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
                                 | char_(')')
 				;
 				
-		fipaString %= stringLiteral | byteLengthEncodedString;
-		stringLiteral %= char_('\\') >> *( ( char_ - char_('\\') ) | (char_('\\') >> char_('\"') ) ) >> char_('\"'); // TODO: REQUIRES VERYFICATION
+		fipaString = stringLiteral.alias(); // | byteLengthEncodedString;
+		stringLiteral = char_('\\') 
+			      >> *( ( char_ - char_('\\') ) | (char_('\\') >> char_('\"') ) ) 	[ label::_val = "todo:stringLitera" ]
+			      >> char_('\"'); // TODO: REQUIRES VERYFICATION
+		// Actually 
 		byteLengthEncodedString %= char_('#') >> +digit >> char_('\"') >> byteSeq; // REQUIRES TESTING
 
 		codedNumber %= byte_; // two numbers in one byte - padding 00 if coding only one number
@@ -515,7 +518,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	
 	qi::rule<Iterator, std::string()> binWord;
 	qi::rule<Iterator> binNumber;
-	qi::rule<Iterator> digits; 
+	qi::rule<Iterator, std::string() > digits; 
 	qi::rule<Iterator, std::string() > binString;
 	qi::rule<Iterator> binDateTimeToken;
 	qi::rule<Iterator> binDate;
@@ -540,8 +543,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > word;
 	qi::rule<Iterator> wordExceptionsStart;
 	qi::rule<Iterator> wordExceptionsGeneral;
-	qi::rule<Iterator> fipaString;
-	qi::rule<Iterator> stringLiteral;
+	qi::rule<Iterator, std::string() > fipaString;
+	qi::rule<Iterator, std::string() > stringLiteral;
 	qi::rule<Iterator> byteLengthEncodedString;
 	qi::rule<Iterator> codedNumber;
 	qi::rule<Iterator> typeDesignator;
