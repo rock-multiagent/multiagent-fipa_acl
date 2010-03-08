@@ -61,7 +61,7 @@ set(PROJECT_USES_QT FALSE)
 set(DESIRED_QT_VERSION 4.5)
 set(PROJECT_USES_BOOST TRUE)
 # Set your boost version here, otherwise the installed version might not be found
-set( Boost_ADDITIONAL_VERSIONS "1.42")
+set( Boost_ADDITIONAL_VERSIONS "1.42.0")
 ##### End Select required libaries #######################################
 
 ##### Add Qt support #####################################################
@@ -102,11 +102,13 @@ endif(PROJECT_USES_QT)
 ##### Add boost support ####################################################
 if(PROJECT_USES_BOOST)
 	# Select boost components from (there might be more): filesystem iostreams signals serialization thread system program_options
-	set(BOOST_INCLUDEDIR /usr/local/include/boost)
-	find_package(Boost 1.42.0 COMPONENTS filesystem program_options)
-	
+	# Select boost components from (there might be more): filesystem iostreams signals serialization thread system program_options
+	set( BOOST_ROOT /opt/boost_1_42_0 )
+	set( BOOST_INCLUDEDIR /usr/local/include/boost )
+	set( BOOST_LIBRARYDIR /usr/local/lib ) 
+	find_package( Boost 1.42.0 EXACT )
 	if(Boost_FOUND)
-		message("Prerequisite ok: Boost installation found " ${Boost_VERSION} )
+		message("Prerequisite ok: Boost installation found " ${Boost_VERSION} ${Boost_INCLUDE_DIRS} )
 	else(Boost_FOUND)
 		message("Boost required to build this project, but installation cannot be found!")
 	endif(Boost_FOUND)	
