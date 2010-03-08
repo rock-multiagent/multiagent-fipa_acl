@@ -49,6 +49,15 @@ typedef struct
 	char version;
 } Header;
 
+typedef boost::variant<boost::uint_least8_t,boost::uint_least16_t, boost::uint_least32_t> LengthValue;
+
+typedef struct
+{
+	std::string encoding;
+	fipa::acl::LengthValue length;
+	std::string bytes;
+} ByteSequence;
+
 struct AgentID;
 
 typedef boost::recursive_wrapper<AgentID> Resolver;
@@ -159,6 +168,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
+	fipa::acl::ByteSequence,
+	(std::string, encoding)
+	(fipa::acl::LengthValue, length)
+	(std::string, bytes)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::MessageParameter,
 	(std::string, name)
 	(fipa::acl::ParameterValue, data)
@@ -223,6 +239,28 @@ namespace fipa
 
 	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
+	/*
+	typedef boost::variant<std::vector<boost::uint8_t>,
+					       std::vector<boost::uint16_t>,
+					       std::vector<boost::uint32_t>,
+					       std::vector<boost::uint64_t> encodedBytes;
+	struct createByteSequenceImpl
+	{
+		template <typename T>
+		struct result
+ 		{
+			typedef encodedBytes type;
+		};	
+
+		template <typename T>
+		encodedBytes operator()(T arg) const
+		{
+			
+		}
+	};
+	
+	phoenix::function<createByteSequenceImpl> createByteSequence;
+*/
 
 namespace acl
 {
@@ -373,12 +411,16 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		digits %= +codedNumber;
 
-		binString = ( byte_(0x14) >> fipaString 		[ label::_val = "todo:fipaString" ] >> byte_(0x00) ) // new string literal 
-			  | ( byte_(0x15) >> index 			[ label::_val = extractFromCodetable(label::_1) ])                     // string literal from code table
-			  | ( byte_(0x16) >> len8 >> byteSeq		[ label::_val = "todo:len8-byteSeq" ] )           // new byteLengthEncoded string 
-			  | ( byte_(0x17) >> len16 >> byteSeq		[ label::_val = "todo:len16-byteSeq" ] )          // new byteLengthEncoded string
-			  | ( byte_(0x18) >> index                      [ label::_val = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
-			  | ( byte_(0x19) >> len32 >> byteSeq		[ label::_val = "todo:len32-byteSeq" ] )
+		binString = ( byte_(0x14) >> fipaString 		[ label::_val = label::_val ] 
+					  >> byte_(0x00) ) // new string literal 
+			  | ( byte_(0x15) >> index 			[ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])                     // string literal from code table
+			  | ( byte_(0x16) >> len8                       [ phoenix::at_c<1>(label::_val) = label::_1 ]
+					  >> byteSeq			[ phoenix::at_c<2>(label::_val) = label::_1 ] )           // new byteLengthEncoded string 
+			  | ( byte_(0x17) >> len16 			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+				          >> byteSeq			[ phoenix::at_c<2>(label::_val) = label::_1 ] )          // new byteLengthEncoded string
+			  | ( byte_(0x18) >> index                      [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
+			  | ( byte_(0x19) >> len32 			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+                                          >> byteSeq			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
 			  ;         // new byteLengthEncoded string   
 
 		binDateTimeToken %= ( byte_(0x20) >> binDate )		            // Absolute time  
@@ -390,12 +432,12 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		binDate %= year >> month >> day >> hour >> minute >> second >> millisecond;
 		
-		binExpression = binExpr				[ label::_val = "" ] //label::_1 ] 
-			      | byte_(0xFF) >> binString        [ label::_val = "" ] //label::_1 ]
+		binExpression = binExpr				[ label::_val = "todo:binExpr" ] //label::_1 ] 
+			      | byte_(0xFF) >> binString        [ label::_val = "todo::binString-integration" ] //label::_1 ]
 			      ;
 
-		binExpr = binWord				[ label::_val = "" ] //label::_1 ]
-			| binString				[ label::_val = "" ] //label::_1 ]
+		binExpr = binWord				[ label::_val = "todo:binWord" ] //label::_1 ]
+			| binString				[ label::_val = "todo:binWord" ] //label::_1 ]
 			| binNumber				[ label::_val = "todo:binNumber" ]
 			| (exprStart >> *binExpr 		[ label::_val = "todo:binExpr-in-binExpr" ]
 			   >> exprEnd)
@@ -406,7 +448,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			  | ( byte_(0x71) >> index      [ label::_val = extractFromCodetable(label::_1)] )
 			  | ( byte_(0x72) >> digits     [ label::_val = "todo:digits" ] )
 			  | ( byte_(0x73) >> digits     [ label::_val = "todo:digits" ] ) 
-			  | ( byte_(0x74) >> fipaString [ label::_val = label::_1 ] >> byte_(0x00) )
+			  | ( byte_(0x74) >> fipaString [ label::_val = "todo:fipaString" ] >> byte_(0x00) )
 			  | ( byte_(0x75) >> index      [ label::_val = extractFromCodetable(label::_1)])
 			  | ( byte_(0x76) >> len8 >> fipaString   [ label::_val = "todo:len8-fipaString" ])
 			  | ( byte_(0x77) >> len16 >> fipaString  [ label::_val = "todo:len16-fipaString" ])
@@ -431,11 +473,12 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// If the code table size is 256 entries, the size of the index is one byte;
 		//  otherwise its size is two bytes (represented in network byte order).
 		index = byte_ | short_;
-		byteSeq %= *byte_;
+		byteSeq = *byte_	[ label::_val += label::_1 ]
+			;
 		
-		len8 %= byte_;
-		len16 %= short_;
-		len32 %= long_;
+		len8 = byte_;
+		len16 = short_;
+		len32 = long_;
 	
 		year %= byte_ >> byte_;
 		month %= byte_;
@@ -462,10 +505,16 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 				
 		fipaString = stringLiteral.alias(); // | byteLengthEncodedString;
 		stringLiteral = char_('\\') 
-			      >> *( ( char_ - char_('\\') ) | (char_('\\') >> char_('\"') ) ) 	[ label::_val = "todo:stringLitera" ]
+			      >> *( ( char_ - char_('\\') ) 	[ phoenix::at_c<2>(label::_val) += label::_1 ]
+				| (char_('\\') >> char_('\"') ) [ phoenix::at_c<2>(label::_val) += label::_1 ]
+				  )
 			      >> char_('\"'); // TODO: REQUIRES VERYFICATION
 		// Actually 
-		byteLengthEncodedString %= char_('#') >> +digit >> char_('\"') >> byteSeq; // REQUIRES TESTING
+		byteLengthEncodedString = char_('#') 
+				       >> +digit 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
+			               >> char_('\"') 
+					>> byteSeq 		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+					; // REQUIRES TESTING
 
 		codedNumber %= byte_; // two numbers in one byte - padding 00 if coding only one number
 		typeDesignator %= alpha;
@@ -505,7 +554,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::vector<std::string>() > urlCollection;
 	qi::rule<Iterator, std::string() > url;
 	qi::rule<Iterator, std::vector<fipa::acl::AgentID>() > recipientExpr;
-	qi::rule<Iterator, std::string() > msgContent;
+	qi::rule<Iterator, fipa::acl::ByteSequence() > msgContent;
 	qi::rule<Iterator, std::string() > replyWithParam;
 	qi::rule<Iterator> replyByParam;
 	qi::rule<Iterator, std::string() > inReplyToParam;
@@ -519,7 +568,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string()> binWord;
 	qi::rule<Iterator> binNumber;
 	qi::rule<Iterator, std::string() > digits; 
-	qi::rule<Iterator, std::string() > binString;
+	qi::rule<Iterator, fipa::acl::ByteSequence() > binString;
 	qi::rule<Iterator> binDateTimeToken;
 	qi::rule<Iterator> binDate;
 	qi::rule<Iterator, std::string() > binExpression;
@@ -527,11 +576,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > exprStart;
 	qi::rule<Iterator> exprEnd;
 
-	qi::rule<Iterator> byteSeq;
+	qi::rule<Iterator, std::string() > byteSeq;
 	qi::rule<Iterator, unsigned short() > index;
-	qi::rule<Iterator> len8;
-	qi::rule<Iterator> len16;
-	qi::rule<Iterator> len32;
+	qi::rule<Iterator, boost::uint_least8_t() > len8;
+	qi::rule<Iterator, boost::uint_least16_t() > len16;
+	qi::rule<Iterator, boost::uint_least32_t() > len32;
 	qi::rule<Iterator> year;
 	qi::rule<Iterator> month;
 	qi::rule<Iterator> day;
@@ -543,9 +592,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > word;
 	qi::rule<Iterator> wordExceptionsStart;
 	qi::rule<Iterator> wordExceptionsGeneral;
-	qi::rule<Iterator, std::string() > fipaString;
-	qi::rule<Iterator, std::string() > stringLiteral;
-	qi::rule<Iterator> byteLengthEncodedString;
+	qi::rule<Iterator, fipa::acl::ByteSequence() > fipaString;
+	qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteral;
+	qi::rule<Iterator, fipa::acl::ByteSequence() > byteLengthEncodedString;
 	qi::rule<Iterator> codedNumber;
 	qi::rule<Iterator> typeDesignator;
 
