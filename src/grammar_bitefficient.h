@@ -51,6 +51,9 @@ typedef struct
 
 typedef boost::variant<boost::uint_least8_t,boost::uint_least16_t, boost::uint_least32_t> LengthValue;
 
+
+// Bytesequence - whereas the encoding is defined by a natural number, i.e. 
+// postprocessing has to be performed 
 typedef struct
 {
 	std::string encoding;
@@ -69,7 +72,7 @@ struct AgentID
 	std::vector<fipa::acl::Resolver> resolvers;
 };
 
-typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID> > ParameterValue;
+typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence > ParameterValue;
 
 typedef struct
 {
@@ -144,6 +147,7 @@ class MessagePrinter
 				fipa::acl::AgentID& aid = boost::get<fipa::acl::AgentID>(mp.data);
 				aidPrinter.print(aid);
 			}
+			std::cout << "\t\tvalue: " << mp.data << std::endl;
 			
 		}
 	
@@ -354,7 +358,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// predefinedMessageParamter uses a boost::variant
 		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) = label::_1 ]    // sender
 					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr   [ phoenix::at_c<1>(label::_val) = label::_1 ]   // receiver 
-					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent      [ phoenix::at_c<1>(label::_val) = "todo:msgContent" ]   // content 
+					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent      [ phoenix::at_c<1>(label::_val) = label::_1 ]   // content 
 					| byte_(0x05) [ phoenix::at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam  [ phoenix::at_c<1>(label::_val) = label::_1 ]   // reply-with
 					| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam    [ phoenix::at_c<1>(label::_val) = "todo:binDateTimeToken" ]  // reply-by 
 					| byte_(0x07) [ phoenix::at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam  [ phoenix::at_c<1>(label::_val) = label::_1 ]  // in-reply-to 
