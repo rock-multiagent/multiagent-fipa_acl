@@ -147,7 +147,13 @@ class MessagePrinter
 				fipa::acl::AgentID& aid = boost::get<fipa::acl::AgentID>(mp.data);
 				aidPrinter.print(aid);
 			}
-			std::cout << "\t\tvalue: " << mp.data << std::endl;
+
+			if(mp.name == "content")
+			{	
+				fipa::acl::ByteSequence bs = boost::get<fipa::acl::ByteSequence>(mp.data);
+				printf("encoding: %s\n", bs.encoding.c_str());
+				printf("content: %s\n", bs.bytes.c_str());
+			}
 			
 		}
 	
@@ -415,7 +421,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		digits %= +codedNumber;
 
-		binString = ( byte_(0x14) >> fipaString 		[ label::_val = label::_val ] 
+		binString = ( byte_(0x14) >> fipaString 		[ label::_val = label::_1 ] 
 					  >> byte_(0x00) ) // new string literal 
 			  | ( byte_(0x15) >> index 			[ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])                     // string literal from code table
 			  | ( byte_(0x16) >> len8                       [ phoenix::at_c<1>(label::_val) = label::_1 ]
@@ -508,15 +514,15 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 				;
 				
 		fipaString = stringLiteral.alias(); // | byteLengthEncodedString;
-		stringLiteral = char_('\\') 
-			      >> *( ( char_ - char_('\\') ) 	[ phoenix::at_c<2>(label::_val) += label::_1 ]
-				| (char_('\\') >> char_('\"') ) [ phoenix::at_c<2>(label::_val) += label::_1 ]
-				  )
-			      >> char_('\"'); // TODO: REQUIRES VERYFICATION
+		stringLiteral = char_('"') 
+			       >> * (( char_("\\") >> char_('"') ) 	[ phoenix::at_c<2>(label::_val) += "\"" ]
+				  | (char_ - char_('"') ) 		[ phoenix::at_c<2>(label::_val) += label::_1 ]
+				)
+			      >> char_('"'); 
 		// Actually 
 		byteLengthEncodedString = char_('#') 
 				       >> +digit 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
-			               >> char_('\"') 
+			               >> char_('"') 
 					>> byteSeq 		[ phoenix::at_c<2>(label::_val) = label::_1 ]
 					; // REQUIRES TESTING
 
