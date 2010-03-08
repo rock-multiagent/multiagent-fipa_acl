@@ -101,15 +101,13 @@ endif(PROJECT_USES_QT)
 
 ##### Add boost support ####################################################
 if(PROJECT_USES_BOOST)
-	
-	set( Boost_DEBUG TRUE)	
 	# Select boost components from (there might be more): filesystem iostreams signals serialization thread system program_options
 	set( BOOST_ROOT /opt/boost_1_42_0 )
 	set( BOOST_INCLUDEDIR /usr/local/include/boost )
 	set( BOOST_LIBRARYDIR /usr/local/lib ) 
 	find_package( Boost 1.42.0 EXACT )
 	if(Boost_FOUND)
-		message("Prerequisite ok: Boost installation found " ${Boost_VERSION} ${Boost_INCLUDE_DIRS} )
+		message("Prerequisite ok: Boost installation found " ${Boost_VERSION} " include-path: " ${Boost_INCLUDE_DIRS} )
 	else(Boost_FOUND)
 		message("Boost required to build this project, but installation cannot be found!")
 	endif(Boost_FOUND)	
