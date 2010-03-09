@@ -9,8 +9,8 @@
 #include <string>
 #include <vector>
 
-#include "grammar_bitefficient_test.h"
-//#include "grammar_bitefficient.h"
+//#include "grammar_bitefficient_test.h"
+#include "grammar_bitefficient.h"
 
 
 ////////////////////////////////////////////////////////////////////////////

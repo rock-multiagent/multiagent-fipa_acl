@@ -12,6 +12,7 @@
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_repeat.hpp>
 
 #include <boost/spirit/home/support/context.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -249,6 +250,29 @@ namespace fipa
 
 	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
+	struct convertToStringImpl
+	{
+		template <typename T>
+		struct result
+		{
+			typedef std::string type;
+		};
+
+		template <typename T>
+		std::string operator()(T arg) const
+		{
+			return std::string("Unsupported conversion");
+		}
+
+		template <>
+		std::string operator()(std::vector<char> input)
+		{
+			return std::string(input.begin(), input.end());
+		}
+
+	};
+
+	phoenix::function<convertToStringImpl> convertToString;
 	/*
 	typedef boost::variant<std::vector<boost::uint8_t>,
 					       std::vector<boost::uint16_t>,
@@ -302,7 +326,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// To avoid namespace clashes with boost::bind
 		namespace label = qi::labels;
 
-		int currentLength;
+		boost::uint64_t sequenceLength;
 		
 		
 		// Explanation:
@@ -427,8 +451,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		digits %= +codedNumber;
 
-		binString = ( byte_(0x14) >> fipaString 		[ label::_val = label::_1 ] 
-					  >> byte_(0x00) ) // new string literal 
+		binString = ( byte_(0x14) >> ( stringLiteral | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
+					  //>> byte_(0x00) ) // new string literal 
 			  | ( byte_(0x15) >> index 			[ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])                     // string literal from code table
 			  | ( byte_(0x16) >> len8                       [ phoenix::at_c<1>(label::_val) = label::_1 ]
 					  >> byteSeq			[ phoenix::at_c<2>(label::_val) = label::_1 ] )           // new byteLengthEncoded string 
@@ -519,8 +543,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
                                 | char_(')')
 				;
 				
-		fipaString = /*stringLiteral |*/ byteLengthEncodedString.alias();
-
+		fipaString = stringLiteral | byteLengthEncodedString;
+		
 		// Order of statement is relevant here, since the character \ needs to be matched
 		// first -- matching is greedy with char_ otherwise
 		stringLiteral = char_('"') 
@@ -528,13 +552,21 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 				  | (char_ - char_('"') ) 		[ phoenix::at_c<2>(label::_val) += label::_1 ]
 				)
 			      >> char_('"'); 
-		
+	
+		byteLengthEncodedStringHeader = char_('#')
+					      >> + digit 	[ label::_val += label::_1 ]
+					      >> char_('"')
+					      ;
+
 		// Digits tell the byte endcoding
-		byteLengthEncodedString = char_('#') 
-				       //>> +digit 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
-			               >> char_('"') 
-					>> byteSeq 		[ phoenix::at_c<2>(label::_val) = "test" ] //label::_1 ]
+		byteLengthEncodedString = byteLengthEncodedStringHeader 		        [ phoenix::at_c<0>(label::_val) += label::_1 ]
+					>> qi::repeat(phoenix::ref(sequenceLength))[byte_]      [ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ]
 					; // REQUIRES TESTING
+
+		byteLengthEncodedStringTerminated = byteLengthEncodedStringHeader 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
+						>> * (byte_ - byte_(0x00))			[ phoenix::at_c<2>(label::_val) += label::_1 ]
+						>> byte_(0x00)
+						;
 
 		codedNumber %= byte_; // two numbers in one byte - padding 00 if coding only one number
 		typeDesignator %= alpha;
@@ -629,7 +661,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator> wordExceptionsGeneral;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > fipaString;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteral;
+	qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > byteLengthEncodedString;
+	qi::rule<Iterator, fipa::acl::ByteSequence() > byteLengthEncodedStringTerminated;
 	qi::rule<Iterator> codedNumber;
 	qi::rule<Iterator> typeDesignator;
 
