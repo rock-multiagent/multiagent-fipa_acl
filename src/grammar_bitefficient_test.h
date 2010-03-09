@@ -66,7 +66,7 @@ class MessagePrinter
 BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::Message,
 	(std::string, name)
-	(fipa::acl::ParameterValue, data)
+	(fipa::acl::ParameterValue, parameter)
 )
 
 namespace fipa
@@ -88,20 +88,23 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		using phoenix::at_c;
 		
 	
-		aclCommunicativeAct = pName [ at_c<0>(label::_val) = label::_1 ]
-				    >> messageParameter [ at_c<1>(label::_val) = label::_1 ];
-		messageParameter = *char_ 
-				 | pData [ at_c<1>(label::_val) = label::_1 ]
-				;
-		pData = messageParameter.alias();
+		aclCommunicativeAct = len8 >> bytelengthEncodedString;
+
+		bytelengthEncodedString = char_('#')
+		//		     >> +digit
+				     >> char_('"')
+				     >> byteSeq [ phoenix::at_c<0>(label::_val) = "testname" ]
+				     >> byte_(0x00)
+					;
+		len8 = byte_;
+		byteSeq %= *byte_;
 	}
 	
 
 	qi::rule<Iterator, fipa::acl::Message(),ascii::space_type> aclCommunicativeAct;
-	qi::rule<Iterator, fipa::acl::MessageParameter()> messageParameter;
-	qi::rule<Iterator, std::string() > pName;
-	qi::rule<Iterator> pData;
-
+	qi::rule<Iterator> bytelengthEncodedString;
+	qi::rule<Iterator, boost::uint_least8_t() > len8;
+	qi::rule<Iterator> byteSeq;
 
 };
 

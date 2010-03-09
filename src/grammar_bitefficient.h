@@ -281,6 +281,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 {
 	bitefficient_grammar() : bitefficient_grammar::base_type(aclCommunicativeAct, "bitefficient-grammar")
 	{
+		using qi::on_error;
+		using qi::fail;
+		using phoenix::construct;
+		using phoenix::val;
+
 		using qi::lit;
 		using qi::lexeme; // prevents character skipping
 		
@@ -296,6 +301,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		
 		// To avoid namespace clashes with boost::bind
 		namespace label = qi::labels;
+
+		int currentLength;
 		
 		
 		// Explanation:
@@ -313,13 +320,12 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			 >> version [ phoenix::at_c<1>(label::_val) = label::_1 ]
 			;
 		
-		// byte_() does only return an unused_type, so if we want to save the value, we either have to assign it directly or we have to use byte_ instead
-		messageId = byte_; /*(
-                            byte_(0xFA)  [ boost::bind(&fipa::setMessageId,1) ] 
-			  | byte_(0xFB)  [ boost::bind(&fipa::setMessageId,2) ]
-                          | byte_(0xFC)  [ boost::bind(&fipa::setMessageId,3) ]
-			 ); // there is only the used_type for byte_() as attribute, so we cannot use this here 
-			 */
+		// byte_() does only return an unused_type, so if we want to save the value, we either have to assign it directly
+		messageId = byte_(0xFA)  [ label::_val = 0xfa ] 
+			  | byte_(0xFB)  [ label::_val = 0xfb ]
+                          | byte_(0xFC)  [ label::_val = 0xfc ]
+			 ; 
+			 
 
 		version = byte_; 					 
 		endOfMessage %= endOfCollection;
@@ -513,21 +519,40 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
                                 | char_(')')
 				;
 				
-		fipaString = stringLiteral.alias(); // | byteLengthEncodedString;
+		fipaString = /*stringLiteral |*/ byteLengthEncodedString.alias();
+
+		// Order of statement is relevant here, since the character \ needs to be matched
+		// first -- matching is greedy with char_ otherwise
 		stringLiteral = char_('"') 
 			       >> * (( char_("\\") >> char_('"') ) 	[ phoenix::at_c<2>(label::_val) += "\"" ]
 				  | (char_ - char_('"') ) 		[ phoenix::at_c<2>(label::_val) += label::_1 ]
 				)
 			      >> char_('"'); 
-		// Actually 
+		
+		// Digits tell the byte endcoding
 		byteLengthEncodedString = char_('#') 
-				       >> +digit 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
+				       //>> +digit 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
 			               >> char_('"') 
-					>> byteSeq 		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+					>> byteSeq 		[ phoenix::at_c<2>(label::_val) = "test" ] //label::_1 ]
 					; // REQUIRES TESTING
 
 		codedNumber %= byte_; // two numbers in one byte - padding 00 if coding only one number
 		typeDesignator %= alpha;
+
+
+		on_error<fail>
+		(
+		    //aclCommunicativeAct,
+		    byteLengthEncodedString,
+		    std::cout
+			<< val("Error: expecting ")
+			<< label::_4 			   // what failed?
+			<< val(" here: \"")
+			<< construct<std::string>(label::_3,label::_2)
+			<< val("\"")
+			<< std::endl
+                );
+		
 	}
 	
 	// Define rules as follows
