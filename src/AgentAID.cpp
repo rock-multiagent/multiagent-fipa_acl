@@ -1,4 +1,5 @@
 #include "AgentAID.h"
+#include <iostream>
 
 AgentAID::AgentAID()
 {
@@ -21,7 +22,7 @@ AgentAID::AgentAID(std::string nam)
                      // name = std::string("\0");
 	                   adresses = new std::set<std::string>();
 	                   if (!(*adresses).empty()) (*adresses).clear();
-	                   resolvers = new std::set<AgentAID*>();
+			   resolvers = new std::set<AgentAID*>();
 	                   if (!(*resolvers).empty()) (*resolvers).clear();
 	                   adresses = new std::set<std::string>();
 	                   if (!(*adresses).empty()) (*adresses).clear();

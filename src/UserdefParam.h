@@ -12,9 +12,9 @@ class UserdefParam {
                
        public:
               std::string getValue();
-              void setValue(std::string& val);
+              void setValue(std::string val);
               std::string getName();
-              void setName (std::string& nam);
+              void setName (std::string nam);
 };
 
 #endif

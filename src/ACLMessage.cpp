@@ -1,34 +1,13 @@
-#include<set>
-#include<string>
+#include <iostream>
+#include <set>
+#include <string>
 #include "ACLMessage.h"
 
-std::string ACLMessage::perfs[22];
+const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","cfp","confirm","disconfirm","failure","inform","inform-if","inform-ref","not-understood","propagate","propose","proxy","query-if","query-ref","refuse","reject-proposal","request","request-when","request-whenever","subscribe"};
 
-ACLMessage::ACLMessage() 
+  
+void ACLMessage::initializeObject()
 {
-       perfs[ACCEPT_PROPOSAL] = "accept-proposal";
-       perfs[AGREE] = "agree";
-       perfs[CANCEL] = "cancel";
-       perfs[CALL_FOR_PROPOSAL] = "cfp";
-       perfs[CONFIRM] = "confirm";
-       perfs[DISCONFIRM] = "disconfirm";
-       perfs[FAILURE] = "failure";
-       perfs[INFORM] = "inform";
-       perfs[INFORM_IF] = "inform-if";
-       perfs[INFORM_REF] = "inform-ref";
-       perfs[NOT_UNDERSTOOD] = "not-understood";
-       perfs[PROPAGATE] = "propagate";
-       perfs[PROPOSE] = "propose";
-       perfs[PROXY] = "proxy";
-       perfs[QUERY_IF] = "query-if";
-       perfs[QUERY_REF] = "query-ref";
-       perfs[REFUSE] = "refuse";
-       perfs[REJECT_PROPOSAL] = "reject-proposal";
-       perfs[REQUEST] = "request";
-       perfs[REQUEST_WHEN] = "request-when";
-       perfs[REQUEST_WHENEVER] = "request-whenever";
-       perfs[SUBSCRIBE] =  "subscribe";
-	
 	AgentAID* sender = NULL;
         receivers = new std::set<AgentAID*>();
 	if (!(*receivers).empty()) (*receivers).clear();
@@ -44,12 +23,44 @@ ACLMessage::ACLMessage()
          reply_by = -1;
          reply_by1 = std::string("\0");
         params = new std::set<UserdefParam*>();
+		
 	if (!(*params).empty()) (*params).clear();
+		
         
          content = std::string("\0");
 }
+ACLMessage::ACLMessage() 
+{/*
+	AgentAID* sender = NULL;
+        receivers = new std::set<AgentAID*>();
+	if (!(*receivers).empty()) (*receivers).clear();
+        reply_to = new std::set<AgentAID*>();
+	if (!(*reply_to).empty()) (*reply_to).clear();
+         language = std::string("\0");
+         encoding = std::string("\0");
+         ontology = std::string("\0");
+         protocol = std::string("\0");
+         conversation_id = std::string("\0");
+         reply_with = std::string("\0");
+         in_reply_to = std::string("\0");
+         reply_by = -1;
+         reply_by1 = std::string("\0");
+        params = new std::set<UserdefParam*>();
+		
+	if (!(*params).empty()) (*params).clear();
+		
+        
+         content = std::string("\0");
+*/
+initializeObject();
+}
 
-ACLMessage::ACLMessage(int perf) {performative = perfs[perf]; }
+ACLMessage::ACLMessage(int perf)
+
+{
+initializeObject();
+performative = ACLMessage::perfs[perf];
+}
 
 ACLMessage::ACLMessage(std::string perf) {performative = perf; }
 

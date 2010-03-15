@@ -18,8 +18,10 @@ class ACLMessageOutputParser {
        public:
               ACLMessageOutputParser();
               char* getBitMessage();
+		void setMessage(ACLMessage* a);
        
-       private:
+       //private:
+	public:
                char getBitEndOfColl();
                std::string  getBitHeader();
                char  getBitMessageID();
@@ -44,6 +46,8 @@ class ACLMessageOutputParser {
                std::string  getBitBinDateTimeToken(std::string date1);
                std::string  getBitBinDate(std::string date1);
                std::string  getBitCodedNumber(std::string cn);
+		
+		
 
 };
 

@@ -33,35 +33,35 @@ private:
                 
 
        // all predefined FIPA performatives:
-       public: static const int ACCEPT_PROPOSAL = 0;
-       public: static const int AGREE = 1;
-       public: static const int CANCEL = 2;
-       public: static const int CALL_FOR_PROPOSAL = 3;
-       public: static const int CONFIRM = 4;
-       public: static const int DISCONFIRM = 5;
-       public: static const int FAILURE = 6;
-       public: static const int INFORM = 7;
-       public: static const int INFORM_IF = 8;
-       public: static const int INFORM_REF = 9;
-       public: static const int NOT_UNDERSTOOD = 10;
-       public: static const int PROPAGATE = 11;
-       public: static const int PROPOSE = 12;
-       public: static const int PROXY = 13;
-       public: static const int QUERY_IF = 14;
-       public: static const int QUERY_REF = 15;
-       public: static const int REFUSE = 16;
-       public: static const int REJECT_PROPOSAL = 17;
-       public: static const int REQUEST = 18;
-       public: static const int REQUEST_WHEN = 19;
-       public: static const int REQUEST_WHENEVER = 20;
-       public: static const int SUBSCRIBE = 21;
+       public:  static const int ACCEPT_PROPOSAL = 0;
+       		static const int AGREE = 1;
+       		static const int CANCEL = 2;
+       		static const int CALL_FOR_PROPOSAL = 3;
+       		static const int CONFIRM = 4;
+       		static const int DISCONFIRM = 5;
+       		static const int FAILURE = 6;
+       		static const int INFORM = 7;
+       		static const int INFORM_IF = 8;
+       		static const int INFORM_REF = 9;
+       		static const int NOT_UNDERSTOOD = 10;
+       		static const int PROPAGATE = 11;
+       		static const int PROPOSE = 12;
+       		static const int PROXY = 13;
+       		static const int QUERY_IF = 14;
+       		static const int QUERY_REF = 15;
+       		static const int REFUSE = 16;
+       		static const int REJECT_PROPOSAL = 17;
+       		static const int REQUEST = 18;
+       		static const int REQUEST_WHEN = 19;
+       		static const int REQUEST_WHENEVER = 20;
+       		static const int SUBSCRIBE = 21;
        
-       public: static std::string perfs[22];
+       		static const std::string perfs[];
      /* 
      static {
        perfs [ACCEPT_PROPOSAL] = "accept-proposal";
        perfs [AGREE] = "agree";
-       perfs [CANCEL] "cancel";
+       perfs [CANCEL] = "cancel";
        perfs [CALL_FOR_PROPOSAL] = "cfp";
        perfs [CONFIRM] = "confirm";
        perfs [DISCONFIRM] = "disconfirm";
@@ -84,6 +84,7 @@ private:
        };   
 */
 public:
+	void initializeObject();
        ACLMessage();
        ACLMessage(int perf);
        ACLMessage(std::string perf);
