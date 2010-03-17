@@ -258,18 +258,19 @@ namespace fipa
 			typedef std::string type;
 		};
 
+		// TODO for std::vector<char> HACKED
 		template <typename T>
 		std::string operator()(T arg) const
 		{
-			return std::string("Unsupported conversion");
+			return std::string(arg.begin(), arg.end());
 		}
-
+/*
 		template <>
 		std::string operator()(std::vector<char> input)
 		{
 			return std::string(input.begin(), input.end());
 		}
-
+*/
 	};
 
 	phoenix::function<convertToStringImpl> convertToString;
