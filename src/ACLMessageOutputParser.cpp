@@ -25,15 +25,13 @@ ACLMessageOutputParser::ACLMessageOutputParser()
 char* ACLMessageOutputParser::getBitMessage()
 {
 	
-	std::string mes = std::string();
+      std::string mes = std::string();
 
-	mes = getBitHeader() + getBitMessageType() + getBitMessageParameters() + getBitEndOfColl();
- 
-	std::cout << mes << std::endl << mes.length()<< std::endl;     
-      
-	char* output = new char(mes.length()+1);
-	strcpy(output,mes.c_str());
-	std::cout<<output<<std::endl<<strlen(output)<<std::endl<<std::endl;
+      mes = getBitHeader() + getBitMessageType() + getBitMessageParameters() + getBitEndOfColl();
+ std::cout<<mes<<std::endl<<mes.length()<<std::endl;;     
+      char* output = new char(mes.length()+1);
+      strcpy(output,mes.c_str());
+std::cout<<output<<std::endl<<strlen(output)<<std::endl<<std::endl;
       return output;
 }
 
