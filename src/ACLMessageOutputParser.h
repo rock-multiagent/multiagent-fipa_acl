@@ -16,8 +16,9 @@ class ACLMessageOutputParser {
                int res_depth;
                
        public:
-              ACLMessageOutputParser();
-              char* getBitMessage();
+		ACLMessageOutputParser();
+		void printParsedMessage(std::string);		
+		std::string getBitMessage();
 		void setMessage(ACLMessage* a);
        
        //private:

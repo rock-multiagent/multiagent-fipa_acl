@@ -1,8 +1,9 @@
-#include<iostream>
-#include<sstream>
-#include<string>
-#include<cstring>
-#include<iterator>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <cstring>
+#include <iterator>
 #include "ACLMessageOutputParser.h"
 #include "ACLMessage.h"
 #include "UserdefParam.h"
@@ -22,17 +23,32 @@ ACLMessageOutputParser::ACLMessageOutputParser()
 			                   
 }
 
-char* ACLMessageOutputParser::getBitMessage()
+void ACLMessageOutputParser::printParsedMessage(std::string stream)
+{
+     std::ofstream out(stream.c_str(), std::ios_base::binary);
+	std::string output = getBitMessage();
+
+	for (int i = 0; i < output.length(); i++)
+		out.put(output[i]);
+
+	out.close();
+     
+     
+}
+
+std::string ACLMessageOutputParser::getBitMessage()
 {
 	
       std::string mes = std::string();
 
       mes = getBitHeader() + getBitMessageType() + getBitMessageParameters() + getBitEndOfColl();
- std::cout<<mes<<std::endl<<mes.length()<<std::endl;;     
-      char* output = new char(mes.length()+1);
-      strcpy(output,mes.c_str());
-std::cout<<output<<std::endl<<strlen(output)<<std::endl<<std::endl;
-      return output;
+	
+	return mes;
+// std::cout<<mes<<std::endl<<mes.length()<<std::endl;;     
+//      char* output = new char(mes.length()+1);
+      //strcpy(output,mes.c_str());
+//std::cout<<output<<std::endl<<strlen(output)<<std::endl<<std::endl;
+      //return output;
 }
 
 char ACLMessageOutputParser::getBitEndOfColl()

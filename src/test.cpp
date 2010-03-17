@@ -48,37 +48,29 @@ UserdefParam *p1 = new UserdefParam();
     //getch();
 	ACLMessageOutputParser a = ACLMessageOutputParser();
 	a.setMessage(m);
-	std::cout<<a.getBitMessage()<<std::endl;
+	std::cout<<a.getBitMessage()<<std::endl<<a.getBitMessage().length()<<std::endl;
 	//std::cout<<a.getBitHeader()<<std::endl;
 	//std::cout<<a.getBitMessageType()<<std::endl;
 	//std::cout<<int('\0')<<0<<std::endl;
 	//	std::cout<<char(21)<<"\t"<<int(a.getBitMessage()[3])<<std::endl;
 	
+	a.printParsedMessage(std::string("TestMessage.txt"));
     
     return 0;
 }
-/*
-void writeMessageType(std::fstream& o)
-{
-     for (int i = 0; i<22; i++)
-             if (!ACLMessage::perfs[i].compare((*message).performative) )
-             {
-                
-                o.write(ACLMessage::perfs[i].c_str(), ACLMessage::perfs[i].length()+1)
-             }
-                
+ /*               
 }
 
 void parseBitEfficient(std::string stream)
 {
-     std::fstream o(stream, std::ios::out | std::ios::binary);
+     std::fstream out(stream, std::ios::out | std::ios::binary);
+	std::string output = getBitMessage();
+	for (int i = 0; i < output.length(); i++)
+		out.put(output[i]);
+
+	out.close();
      
-     o.write(0xfa,1);
-     o.write(0x10,1);
      
-     
-     
-     o.write(0x01,1);
 }
 */
 
