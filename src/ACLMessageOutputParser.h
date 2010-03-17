@@ -6,6 +6,10 @@
 #include"UserdefParam.h"
 #include"ACLMessage.h"
 
+namespace fipa {
+
+namespace acl {
+
 class ACLMessageOutputParser {
 
        private:
@@ -17,7 +21,7 @@ class ACLMessageOutputParser {
                
        public:
 		ACLMessageOutputParser();
-		void printParsedMessage(std::string);		
+		int printParsedMessage(std::string);		
 		std::string getBitMessage();
 		void setMessage(ACLMessage* a);
        
@@ -52,4 +56,8 @@ class ACLMessageOutputParser {
 
 };
 
+
+}//end of acl namespace
+
+}// end of fipa namespace
 #endif

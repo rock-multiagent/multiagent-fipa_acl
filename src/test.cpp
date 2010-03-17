@@ -8,6 +8,10 @@
 #include "ACLMessageOutputParser.h"
 #include "UserdefParam.h"
 
+using namespace fipa::acl;
+
+
+
 void printm(ACLMessage m){
      std::cout<<m.getPerformative()<<std::endl<<m.getReplyBy()<<std::endl<<m.getConversationID()<<std::endl;    
 /*	
@@ -54,7 +58,8 @@ UserdefParam *p1 = new UserdefParam();
 	//std::cout<<int('\0')<<0<<std::endl;
 	//	std::cout<<char(21)<<"\t"<<int(a.getBitMessage()[3])<<std::endl;
 	
-	a.printParsedMessage(std::string("TestMessage.txt"));
+	if (!a.printParsedMessage(std::string("TestMessage.txt")))
+		return 1;
     
     return 0;
 }

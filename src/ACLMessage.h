@@ -6,6 +6,10 @@
 #include"AgentAID.h"
 #include"UserdefParam.h"
 
+namespace fipa {
+
+namespace acl {
+
 class ACLMessage {
 
 private:
@@ -128,4 +132,7 @@ public:
        
 };
 
+}//end of acl namespace
+
+}// end of fipa namespace
 #endif

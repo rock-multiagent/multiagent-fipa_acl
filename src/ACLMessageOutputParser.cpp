@@ -9,6 +9,10 @@
 #include "UserdefParam.h"
 #include "AgentAID.h"
 
+namespace fipa {
+
+namespace acl {
+
 void ACLMessageOutputParser::setMessage(ACLMessage* a)
 {
 	msg = a;
@@ -23,15 +27,19 @@ ACLMessageOutputParser::ACLMessageOutputParser()
 			                   
 }
 
-void ACLMessageOutputParser::printParsedMessage(std::string stream)
+int ACLMessageOutputParser::printParsedMessage(std::string stream)
 {
      std::ofstream out(stream.c_str(), std::ios_base::binary);
+	if (!out)
+		return 0;
+	
 	std::string output = getBitMessage();
 
 	for (int i = 0; i < output.length(); i++)
 		out.put(output[i]);
 
 	out.close();
+	return 1;
      
      
 }
@@ -279,3 +287,7 @@ std::string ACLMessageOutputParser::getBitCodedNumber(std::string cn)
             return retstr;
             
 }
+
+}//end of acl namespace
+
+}// end of fipa namespace

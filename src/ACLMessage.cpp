@@ -3,6 +3,10 @@
 #include <string>
 #include "ACLMessage.h"
 
+namespace fipa {
+
+namespace acl {
+
 const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","cfp","confirm","disconfirm","failure","inform","inform-if","inform-ref","not-understood","propagate","propose","proxy","query-if","query-ref","refuse","reject-proposal","request","request-when","request-whenever","subscribe"};
 
   
@@ -52,7 +56,7 @@ ACLMessage::ACLMessage()
         
          content = std::string("\0");
 */
-initializeObject();
+	initializeObject();
 }
 
 ACLMessage::ACLMessage(int perf)
@@ -134,3 +138,7 @@ void ACLMessage::setUserdefParams(std::set<UserdefParam*>* p) {params = p;}
 
 std::string ACLMessage::getReplyBy1(){return reply_by1;}
 void ACLMessage::setReplyBy1(std::string date1){reply_by1 = date1;}
+
+}//end of acl namespace
+
+}// end of fipa namespace

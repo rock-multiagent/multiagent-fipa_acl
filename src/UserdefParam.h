@@ -12,9 +12,13 @@
 #ifndef UserdefMessageParam_H_
 #define UserdefMessageParam_H_
 
-#include<string>
+#include <string>
 
-//template<typename T>
+namespace fipa {
+
+namespace acl {
+
+
 class UserdefParam {
        
        private:
@@ -28,4 +32,8 @@ class UserdefParam {
               void setName (std::string nam);
 };
 
+
+}//end of acl namespace
+
+}// end of fipa namespace
 #endif

@@ -5,6 +5,10 @@
 #include<string>
 #include<set>
 
+namespace fipa {
+
+namespace acl {
+
 class AgentAID {
 
        private:
@@ -24,6 +28,13 @@ class AgentAID {
                std::set<AgentAID*>* getResolvers();
                void addUserdefParam(UserdefParam* p);
                std::set<UserdefParam*>* getUserdefParams();
+	
+	private:
+		void initializeFields();
 };
 
+
+}//end of acl namespace
+
+}// end of fipa namespace
 #endif
