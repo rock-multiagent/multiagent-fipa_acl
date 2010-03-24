@@ -274,6 +274,30 @@ namespace fipa
 	};
 
 	phoenix::function<convertToStringImpl> convertToString;
+
+	struct setSequenceLengthImpl
+	{
+		template <typename T>
+		struct result
+		{
+			typedef void type;
+		};
+
+		template <typename T>
+		void operator() (boost::uint32_t* lengthVar, T arg) const
+		{
+			lengthVar = 0;
+
+			if( boost::is_convertible<T,const boost::uint32_t>::value )
+			{
+				*lengthVar = arg;
+			}
+			
+			return;
+		}
+	};
+	
+	phoenix::function<setSequenceLengthImpl> setSequenceLength;
 	/*
 	typedef boost::variant<std::vector<boost::uint8_t>,
 					       std::vector<boost::uint16_t>,
@@ -327,7 +351,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// To avoid namespace clashes with boost::bind
 		namespace label = qi::labels;
 
-		boost::uint64_t sequenceLength;
+		boost::uint32_t sequenceLength;
 		
 		
 		// Explanation:
@@ -455,14 +479,15 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		binString = ( byte_(0x14) >> ( stringLiteral | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
 					  //>> byte_(0x00) ) // new string literal 
 			  | ( byte_(0x15) >> index 			[ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])                     // string literal from code table
-			  | ( byte_(0x16) >> len8                       [ phoenix::at_c<1>(label::_val) = label::_1 ]
-					  >> byteSeq			[ phoenix::at_c<2>(label::_val) = label::_1 ] )           // new byteLengthEncoded string 
-			  | ( byte_(0x17) >> len16 			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+			  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
+					  >> qi::repeat(label::_a)[byte_]	[ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ] )           // new byteLengthEncoded string 
+/*	
+			  | ( byte_(0x17) >> len16 			[ phoenix::at_c<1>(label::_val) = setSequenceLength(label::_1) ]
 				          >> byteSeq			[ phoenix::at_c<2>(label::_val) = label::_1 ] )          // new byteLengthEncoded string
 			  | ( byte_(0x18) >> index                      [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
-			  | ( byte_(0x19) >> len32 			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+			  | ( byte_(0x19) >> len32 			[ phoenix::at_c<1>(label::_val) = setSequenceLength(label::_1) ]
                                           >> byteSeq			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
-			  ;         // new byteLengthEncoded string   
+		*/	  ;         // new byteLengthEncoded string   
 
 		binDateTimeToken %= ( byte_(0x20) >> binDate )		            // Absolute time  
 				| ( byte_(0x21) >> binDate )		            // Relative time (+)
@@ -514,7 +539,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// If the code table size is 256 entries, the size of the index is one byte;
 		//  otherwise its size is two bytes (represented in network byte order).
 		index = byte_ | short_;
-		byteSeq = *byte_	[ label::_val += label::_1 ]
+
+		// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
+		// TODO: check value and reset
+		byteSeq = qi::repeat(phoenix::ref(sequenceLength))[byte_]	[ label::_val = convertToString(label::_1) ]
 			;
 		
 		len8 = byte_;
@@ -636,7 +664,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string()> binWord;
 	qi::rule<Iterator> binNumber;
 	qi::rule<Iterator, std::string() > digits; 
-	qi::rule<Iterator, fipa::acl::ByteSequence() > binString;
+	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least8_t> > binString;
 	qi::rule<Iterator> binDateTimeToken;
 	qi::rule<Iterator> binDate;
 	qi::rule<Iterator, std::string() > binExpression;
