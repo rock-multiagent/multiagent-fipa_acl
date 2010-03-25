@@ -172,7 +172,7 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
             if ((*msg).getLanguage().compare("\0")) retstr = retstr + char(0x09) + getBitBinExpression((*msg).getLanguage(),'s'); 
             if ((*msg).getEncoding().compare("\0")) retstr = retstr + char(0x0a) + getBitBinExpression((*msg).getEncoding(),'s');
             if ((*msg).getOntology().compare("\0")) retstr = retstr + char(0x0b) + getBitBinExpression((*msg).getOntology(),'s'); 
-            if ((*msg).getProtocol().compare("\0")) retstr = retstr + char(0x0c) + getBitBinExpression((*msg).getProtocol(),'w');
+            if ((*msg).getProtocol().compare("\0")) retstr = retstr + char(0x0c) + getBitBinWord((*msg).getProtocol());
             if ((*msg).getConversationID().compare("\0")) retstr = retstr + char(0x0d) + getBitBinExpression((*msg).getConversationID(),'s');
             
             return retstr;
@@ -416,6 +416,15 @@ std::string ACLMessageOutputParser::getBitCodedNumberByte(std::string cn)
             return retstr;
             
 }
+
+void ACLMessageOutputParser::setUseCodeTables(int x){useCodeTables = x; }
+int ACLMessageOutputParser::getUseCodeTables() {return useCodeTables; }
+void ACLMessageOutputParser::setUpdateCodeTables(int x) {updateCodeTables = x;}
+int ACLMessageOutputParser::getUpdateCodeTables() {return updateCodeTables;}
+void ACLMessageOutputParser::setResolverDepth(int res){res_depth = res;}
+int ACLMessageOutputParser::getResolverDepth() {return res_depth;}
+void ACLMessageOutputParser::setVersion(std::string v){version = v; }
+std::string ACLMessageOutputParser::getVersion() {return version; }
 
 }//end of acl namespace
 

@@ -48,6 +48,15 @@ class ACLMessageOutputParser {
                
        public:
 		ACLMessageOutputParser();
+		void setUseCodeTables(int x);
+		int getUseCodeTables();
+		void setUpdateCodeTables(int x);
+		int getUpdateCodeTables();
+		void setResolverDepth(int res);
+		int getResolverDepth();
+		void setVersion(std::string);
+		std::string getVersion(); 		
+		
 		
 		int printParsedMessage(std::string);		
 		std::string getBitMessage();

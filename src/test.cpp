@@ -89,19 +89,22 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	(*a1).addUserdefParam(p1); 
 */
    
+ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
+(*m4).setProtocol(std::string("myprotocol"));   
   //printm(*m);
     //getch();
 	ACLMessageOutputParser a = ACLMessageOutputParser();
-	a.setMessage(m3);
+	a.setMessage(m4);
 	std::cout<<a.getBitMessage()<<std::endl<<a.getBitMessage().length()<<std::endl;
 	//std::cout<<a.getBitHeader()<<std::endl;
 	//std::cout<<a.getBitMessageType()<<std::endl;
 	//std::cout<<int('\0')<<0<<std::endl;
 	//	std::cout<<char(21)<<"\t"<<int(a.getBitMessage()[3])<<std::endl;
 	
-	if (!a.printParsedMessage(std::string("TestMessage14.txt")))
+	if (!a.printParsedMessage(std::string("TestMessage15.txt")))
 		return 1;
-    
+delete m3;
+delete m4;    
     return 0;
 }
  /*               
