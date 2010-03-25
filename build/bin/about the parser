@@ -11,3 +11,4 @@ when we follow a binaryExpression production that ends up in a string literal:
 		 
 binary word:
 	- apparently this doesn't work either but I also cannot find any bugs in the grammar specification so I don't know why(TestMessage15.txt is an 		  ilustrative example)
+	- I do not understand why testing succeeds for messages with refferences to AgentAID class(test messages 7-13), because when generating the 		  encoding, the same getBitBinWord function is being called(for the name of the agent) which in other circumstances(other types of parameters) does not work.
