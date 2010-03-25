@@ -1,3 +1,13 @@
+/**
+ *
+ * \file AgentAID.h
+ * \author Mircea Cretu Stancu
+ * \brief Implements the general AgentAID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org).
+ * 
+ * \version 1.0
+ *  - has very basic features, only what was needed for the ACLMessage class
+ *  - may need to be expanded/derived from depending on future needs
+ */
 #ifndef AgentAID_H_
 #define AgentAID_H_
 
@@ -11,6 +21,9 @@ namespace acl {
 
 class AgentAID {
 
+/*
+	the fields are not based on the Architecture specification and utilities, but rather on the bit-Efficient encoding specification, so they have the name, values and functionality needed to implement this specification 
+*/
        private:
                std::string name;
                std::set<std::string>* adresses;
@@ -18,6 +31,9 @@ class AgentAID {
                std::set<UserdefParam*>* params;
                
        public:
+/*
+	setter and getter methods are all the functionality needed so far
+*/
                AgentAID();
 	       AgentAID(std::string nam);
                std::string getName();
@@ -30,6 +46,9 @@ class AgentAID {
                std::set<UserdefParam*>* getUserdefParams();
 	
 	private:
+/*
+	method to be called by all existing and possibly future implemented constructors, that initializes the fields of the object
+*/
 		void initializeFields();
 };
 

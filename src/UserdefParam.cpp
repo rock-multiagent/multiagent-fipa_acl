@@ -1,3 +1,13 @@
+/**
+ *
+ * \file UserdefParam.cpp
+ * \author Mircea Cretu Stancu
+ * \brief Implements the general User-defined parameters, which are present throughout the fipa specifications(FIPA at http://www.fipa.org).
+ * 
+ * \version 1.0
+ *  
+ */
+
 #include "UserdefParam.h"
 
 namespace fipa {

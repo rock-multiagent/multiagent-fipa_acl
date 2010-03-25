@@ -1,3 +1,11 @@
+/**
+ *
+ * \file AgentAID.cpp
+ * \author Mircea Cretu Stancu
+ * \brief Implements the general AgentAID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org).
+ * 
+ * \version 1.0
+ */
 #include "AgentAID.h"
 #include <iostream>
 

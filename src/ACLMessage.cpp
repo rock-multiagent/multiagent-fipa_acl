@@ -12,7 +12,8 @@ const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","c
   
 void ACLMessage::initializeObject()
 {
-	AgentAID* sender = NULL;
+	AgentAID* sender = new AgentAID();
+	sender = NULL;
         receivers = new std::set<AgentAID*>();
 	if (!(*receivers).empty()) (*receivers).clear();
         reply_to = new std::set<AgentAID*>();
@@ -66,7 +67,7 @@ initializeObject();
 performative = ACLMessage::perfs[perf];
 }
 
-ACLMessage::ACLMessage(std::string perf) {performative = perf; }
+ACLMessage::ACLMessage(std::string perf) {performative = perf; initializeObject();}
 
 void ACLMessage::setPerformative(std::string str) {performative = str; }
 
