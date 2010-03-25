@@ -64,6 +64,15 @@ msg-parameters count:     2
 		name: r4
 		resolvers:
 	parameter #1:  receiver
+	
+---TestMessage15.txt---
+FIPA Message read:
+id:          fffffffa
+id is FA
+version:                  10
+performative(type):       request-whenever
+msg-parameters count:     1
+	parameter #0:  protocol: myprotocol
 
-
+// testing failed; should have passed
 
