@@ -383,13 +383,24 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// we do not support dynamic code tables or user defined values
 		// message type is a string
 		// the types in the rule definition have to match to apply alias()
-		messageType = predefinedMessageType.alias();
+		messageType = predefinedMessageType | userDefinedMessageType;
+
+		userDefinedMessageType = byte_(0x00)
+				       >> messageTypeName 	[ label::_val = label::_1 ]
+				       ;
+
+		
 		messageTypeName = binWord.alias();
 
 		// Note: never do a direct assignment like
 		// messageParameter = predefinedMessageParameter or you will be getting runtime errors	
 		// use messageParameter = predefinedMessageParameter.alias() instead
-		messageParameter = predefinedMessageParameter.alias();
+		messageParameter = predefinedMessageParameter | userDefinedMessageParameter;
+
+		userDefinedMessageParameter = byte_(0x00)
+					    >> parameterName		[ phoenix::at_c<0>(label::_val) = label::_1 ]
+					    >> parameterValue           [ phoenix::at_c<1>(label::_val) = label::_1 ]
+					    ;
 
 		// Converting message type into predefined strings
 		predefinedMessageType = byte_(0x01)    [ label::_val = "accept-proposal" ]
@@ -476,7 +487,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		digits %= +codedNumber;
 
-		binString = ( byte_(0x14) >> ( stringLiteral | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
+		binString = ( byte_(0x14) >> ( stringLiteralTerminated | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
 					  //>> byte_(0x00) ) // new string literal 
 			  | ( byte_(0x15) >> index 			[ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])                     // string literal from code table
 			  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
@@ -581,6 +592,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 				  | (char_ - char_('"') ) 		[ phoenix::at_c<2>(label::_val) += label::_1 ]
 				)
 			      >> char_('"'); 
+
+		stringLiteralTerminated = stringLiteral 		[ label::_val = label::_1 ]
+					>> byte_(0x00)
+					;
 	
 		byteLengthEncodedStringHeader = char_('#')
 					      >> + digit 	[ label::_val += label::_1 ]
@@ -690,6 +705,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator> wordExceptionsGeneral;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > fipaString;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteral;
+	qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteralTerminated;
 	qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > byteLengthEncodedString;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > byteLengthEncodedStringTerminated;
