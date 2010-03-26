@@ -39,10 +39,21 @@ int main(int argc, char** argv)
 
 	std::string storage; 
 //	in.unsetf(std::ios::skipws); // No white space skipping
+/*
 	std::copy(
 		std::istream_iterator<char>(in),
 		std::istream_iterator<char>(),
 		std::back_inserter(storage));
+*/
+	char buffer;
+	while(true)
+	{
+		in.get(buffer);
+		if( !in.eof() )
+			storage += buffer;
+		else
+			break;
+	}
 
 	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
 	bitefficient_grammar grammar;
