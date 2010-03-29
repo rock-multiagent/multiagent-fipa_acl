@@ -398,8 +398,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		messageParameter = predefinedMessageParameter | userDefinedMessageParameter;
 
 		userDefinedMessageParameter = byte_(0x00)
-					    >> parameterName		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-					    >> parameterValue           [ phoenix::at_c<1>(label::_val) = label::_1 ]
+					    >> binWord		[ phoenix::at_c<0>(label::_val) = label::_1 ]
+					    >> binExpression           [ phoenix::at_c<1>(label::_val) = label::_1 ]
 					    ;
 
 		// Converting message type into predefined strings
