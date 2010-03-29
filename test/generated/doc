@@ -2,6 +2,8 @@ run "run_tests" to run all tests
 
 the parser apparently parses the reply-to parameter correctly but it doesn't print it
 
+the uerdefined parameter(from the agentAID expansion) must be uncommented and finished
+
 all the test messages left that fail the parsing involve userdefined parmeters for agentAID so once that is fixed they should all parse
 
 -----------------------------------------------------------------------------------------------------------
