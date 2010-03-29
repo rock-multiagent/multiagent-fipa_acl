@@ -16,3 +16,7 @@ fa - message id
 22 6d 61 72 65 22 - ascii for the parameter value plus the surounding quotation marks("mare")
 
 01 - endOfMessage
+
+-------> did not work initially; if in the grammar .h file I change the production of the userdefined message parameter to binWord binString instead of ParameterName and parameterValue it works fine(the parameterName and parameterValue are "useless" prductions)
+
+

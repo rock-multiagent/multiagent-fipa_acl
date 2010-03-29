@@ -150,7 +150,7 @@ class MessagePrinter
 				fipa::acl::AgentID& aid = boost::get<fipa::acl::AgentID>(mp.data);
 				aidPrinter.print(aid);
 			}
-
+			
 			if(mp.name == "content")
 			{	
 				fipa::acl::ByteSequence bs = boost::get<fipa::acl::ByteSequence>(mp.data);
