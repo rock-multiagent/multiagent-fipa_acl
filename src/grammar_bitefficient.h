@@ -63,6 +63,7 @@ typedef struct
 } ByteSequence;
 
 struct AgentID;
+//struct MessageParameter;
 
 typedef boost::recursive_wrapper<AgentID> Resolver;
 
@@ -71,6 +72,7 @@ struct AgentID
 	std::string name;
 	std::vector<std::string> addresses;	
 	std::vector<fipa::acl::Resolver> resolvers;
+//	std::vector<fipa::acl::MessageParameter> parameters;
 };
 
 typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence > ParameterValue;
@@ -196,6 +198,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 	(std::string, name)
 	(std::vector<std::string>, addresses)
 	(std::vector<fipa::acl::Resolver>, resolvers)
+//	(std::vector<fipa::acl::MessageParameter>, parameters)
 )
 
 // The final message structure
@@ -398,9 +401,12 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		messageParameter = predefinedMessageParameter | userDefinedMessageParameter;
 
 		userDefinedMessageParameter = byte_(0x00)
-					    >> binWord		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-					    >> binExpression           [ phoenix::at_c<1>(label::_val) = label::_1 ]
+					    >> parameterName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
+					    >> parameterValue           [ phoenix::at_c<1>(label::_val) = label::_1 ]
 					    ;
+
+		parameterName = binWord.alias();
+		parameterValue = binExpression.alias();
 
 		// Converting message type into predefined strings
 		predefinedMessageType = byte_(0x01)    [ label::_val = "accept-proposal" ]
@@ -445,7 +451,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		agentIdentifier = byte_(0x02) >> agentName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
 				 >> -addresses  	   		[ phoenix::at_c<1>(label::_val) = label::_1 ]
 				 >> -resolvers 	           		[ phoenix::at_c<2>(label::_val) = label::_1 ]
-				 //>> *(userDefinedParameter) 
+				 //>> *userDefinedParameter		[ phoenix::push_back(label::_val, label::_1) ] 
 				>> endOfCollection;				
 		agentName = binWord.alias();
 		addresses = byte_(0x02) >> urlCollection 		[ label::_val = label::_1 ];
