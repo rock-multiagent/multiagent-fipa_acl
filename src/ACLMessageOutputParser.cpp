@@ -33,7 +33,7 @@ void ACLMessageOutputParser::setMessage(ACLMessage* a)
   		  useCodeTables = 0;
                   updateCodeTables = 1;
                   version = "1.0";
-                  res_depth = 0; 
+                  res_depth = 2; 
 }
 
 
@@ -164,7 +164,7 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
 
             if ((*msg).getSender() != NULL) retstr = retstr + char(0x02) + getBitAID((*msg).getSender(), res_depth); 
             if (!(*msg).getAllReceivers()->empty()) retstr =retstr + char(0x03) + getBitAIDColl((*msg).getAllReceivers(),res_depth); 
-            if ((*msg).getContent().compare("\0")) retstr = retstr + char(0x04) + getBitBinString((*msg).getContent()); 
+            if ((*msg).getContent().compare("\0")) retstr = retstr + char(0x04) + getBitBinString((*msg).getContent(),0); 
             if ((*msg).getReplyWith().compare("\0")) retstr = retstr + char(0x05) + getBitBinExpression((*msg).getReplyWith(),'s'); 
             if ((*msg).getReplyBy1().compare("\0")) retstr = retstr + char(0x06) + getBitBinDateTimeToken((*msg).getReplyBy1()); 
             if ((*msg).getInReplyTo().compare("\0")) retstr = retstr + char(0x07) + getBitBinExpression((*msg).getInReplyTo(),'s'); 
@@ -310,7 +310,7 @@ std::string ACLMessageOutputParser::getBitBinNumber(double n,char base)
 */
 std::string ACLMessageOutputParser::getBitBinString(std::string sword)
 {
-            if (!useCodeTables) return char(0x14) + sword + char(0x00);
+            if (!useCodeTables) return char(0x14) + ('\"' + sword + '\"') + char(0x00);
             // char(0x15) + return getCTIndex(sword);
 }
 
@@ -321,7 +321,7 @@ std::string ACLMessageOutputParser::getBitBinString(std::string sword)
 */
 std::string ACLMessageOutputParser::getBitBinString(std::string sword,int codeTables)
 {
-            if (!codeTables) return char(0x14) + sword + char(0x00);
+            if (!codeTables) return char(0x14) + ( '\"' + sword + '\"') + char(0x00);
             // char(0x15) + return getCTIndex(sword);
 }
 

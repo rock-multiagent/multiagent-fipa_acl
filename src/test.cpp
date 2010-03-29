@@ -48,22 +48,22 @@ int main(int argc, char** argv)
 ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
 
 	
-    //(*m).setConversationID("plm");
-    //(*m3).setReplyBy1("20091201010101111");
-/*
+    (*m3).setConversationID("plm");
+    (*m3).setReplyBy1("20091201010101111");
+
 	UserdefParam *p = new UserdefParam();
 //std::cout<<"1\n";
 	(*p).setName(std::string("cretzu")); 
 	(*p).setValue(std::string("mare"));
-	(*m3).addUserdefParam(p); 
+//	(*m3).addUserdefParam(p); 
 	
 	UserdefParam *p1 = new UserdefParam();
-
+/*
 	(*p1).setName(std::string("cretzu")); 
 	(*p1).setValue(std::string("marf")); ;
 	(*m3).addUserdefParam(p1); 
 
-
+*/
 	AgentAID *a1 = new AgentAID(std::string("r1"));
 	(*a1).addAdress(std::string("adr1"));
 	(*a1).addAdress(std::string("adr2"));	
@@ -82,26 +82,35 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	
 	AgentAID *a3 = new AgentAID(std::string("r3"));
 	(*m3).addReceiver(a3); 
-	
-	UserdefParam *p1 = new UserdefParam();
-	(*p1).setName(std::string("cretzu")); 
-	(*p1).setValue(std::string("marf")); ;
-	(*a1).addUserdefParam(p1); 
-*/
-   
+/*	
+	UserdefParam *p2 = new UserdefParam();
+	(*p2).setName(std::string("cretzu")); 
+	(*p2).setValue(std::string("marf")); ;
+	(*a1).addUserdefParam(p2); 
+	(*a3).addUserdefParam(p2);
+
+*/   
 ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
-(*m4).setProtocol(std::string("myprotocol"));   
+(*m3).setProtocol(std::string("myprotocol")); 
+(*m3).setLanguage(std::string("mylang")); 
+(*m3).setReplyWith(std::string("replywith"));
+(*m3).setInReplyTo(std::string("inreplyto"));
+(*m3).setEncoding(std::string("encoding"));
+(*m3).setOntology(std::string("myontology"));
+(*m3).setContent(std::string("my_content"));
+
+
   //printm(*m);
     //getch();
 	ACLMessageOutputParser a = ACLMessageOutputParser();
-	a.setMessage(m4);
+	a.setMessage(m3);
 	std::cout<<a.getBitMessage()<<std::endl<<a.getBitMessage().length()<<std::endl;
 	//std::cout<<a.getBitHeader()<<std::endl;
 	//std::cout<<a.getBitMessageType()<<std::endl;
 	//std::cout<<int('\0')<<0<<std::endl;
 	//	std::cout<<char(21)<<"\t"<<int(a.getBitMessage()[3])<<std::endl;
 	
-	if (!a.printParsedMessage(std::string("TestMessage15.txt")))
+	if (!a.printParsedMessage(std::string("TestMessage17.txt")))
 		return 1;
 delete m3;
 delete m4;    
