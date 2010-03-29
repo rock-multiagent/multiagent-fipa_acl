@@ -42,7 +42,7 @@ ACLMessageOutputParser::ACLMessageOutputParser()
                   useCodeTables = 0;
                   updateCodeTables = 1;
                   version = "1.0";
-                  res_depth = 0; 
+                  res_depth = 3; 
 			                   
 }
 
@@ -163,7 +163,7 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
 	    retstr.clear();
 
             if ((*msg).getSender() != NULL) retstr = retstr + char(0x02) + getBitAID((*msg).getSender(), res_depth); 
-            if (!(*msg).getAllReceivers()->empty()) retstr =retstr + char(0x03) + getBitAIDColl((*msg).getAllReceivers(),res_depth); 
+            if (!((*msg).getAllReceivers()->empty())) retstr =retstr + char(0x03) + getBitAIDColl((*msg).getAllReceivers(),res_depth); 
             if ((*msg).getContent().compare("\0")) retstr = retstr + char(0x04) + getBitBinString((*msg).getContent(),0); 
             if ((*msg).getReplyWith().compare("\0")) retstr = retstr + char(0x05) + getBitBinExpression((*msg).getReplyWith(),'s'); 
             if ((*msg).getReplyBy1().compare("\0")) retstr = retstr + char(0x06) + getBitBinDateTimeToken((*msg).getReplyBy1()); 

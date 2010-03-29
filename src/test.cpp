@@ -55,41 +55,72 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 //std::cout<<"1\n";
 	(*p).setName(std::string("cretzu")); 
 	(*p).setValue(std::string("mare"));
-//	(*m3).addUserdefParam(p); 
+	(*m3).addUserdefParam(p); 
 	
 	UserdefParam *p1 = new UserdefParam();
-/*
+
 	(*p1).setName(std::string("cretzu")); 
 	(*p1).setValue(std::string("marf")); ;
 	(*m3).addUserdefParam(p1); 
 
-*/
+
 	AgentAID *a1 = new AgentAID(std::string("r1"));
 	(*a1).addAdress(std::string("adr1"));
 	(*a1).addAdress(std::string("adr2"));	
 	(*m3).setSender(a1);
-
+	
 	AgentAID *a2 = new AgentAID(std::string("r2"));
+	AgentAID *a3 = new AgentAID(std::string("r3"));
+	AgentAID *a4 = new AgentAID(std::string("r4"));
+	AgentAID *a5 = new AgentAID(std::string("r5"));
+	AgentAID *a6 = new AgentAID(std::string("r6"));
+	AgentAID *a7 = new AgentAID(std::string("r7"));
+	UserdefParam *p4 = new UserdefParam();
+	
+	
+	(*a6).addAdress(std::string("adr1"));
+	(*a6).addAdress(std::string("adr2"));	
+	(*m3).addReplyTo(a6);
+	(*a6).addResolver(a7);
+	(*a6).addResolver(a2);
+	
+	
+	(*a7).addAdress(std::string("adr1"));
+	(*a7).addAdress(std::string("adr2"));	
+	(*m3).addReplyTo(a7);
+	(*a7).addResolver(a6);
+
+	
 	(*a1).addResolver(a2);	
 	(*m3).addReceiver(a2); 
-	AgentAID *a4 = new AgentAID(std::string("r4"));
+	
 	(*a1).addResolver(a4);	
 	(*m3).addReceiver(a4); 
 	
-	AgentAID *a5 = new AgentAID(std::string("r5"));
+	
 	(*a2).addResolver(a5);	
 
 	
-	AgentAID *a3 = new AgentAID(std::string("r3"));
+	
 	(*m3).addReceiver(a3); 
-/*	
+	
 	UserdefParam *p2 = new UserdefParam();
 	(*p2).setName(std::string("cretzu")); 
 	(*p2).setValue(std::string("marf")); ;
 	(*a1).addUserdefParam(p2); 
-	(*a3).addUserdefParam(p2);
+	(*m3).addUserdefParam(p2);
+	
+	(*m3).addUserdefParam(p2);
+	UserdefParam *p3 = new UserdefParam();
+	(*p3).setName(std::string("stancu")); 
+	(*p3).setValue(std::string("marf"));
+	(*m3).addUserdefParam(p3); 
+	
+	(*p4).setName(std::string("cretzu")); 
+	(*p4).setValue(std::string("marf"));
+	(*a1).addUserdefParam(p4);
 
-*/   
+   
 ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
 (*m3).setProtocol(std::string("myprotocol")); 
 (*m3).setLanguage(std::string("mylang")); 
@@ -110,10 +141,21 @@ ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	//std::cout<<int('\0')<<0<<std::endl;
 	//	std::cout<<char(21)<<"\t"<<int(a.getBitMessage()[3])<<std::endl;
 	
-	if (!a.printParsedMessage(std::string("TestMessage17.txt")))
+	if (!a.printParsedMessage(std::string("TestMessage23.txt")))
 		return 1;
 delete m3;
-delete m4;    
+delete m4;  
+delete a1;
+delete a2;
+delete a3;
+delete a4;
+delete a5;
+delete a6;
+delete a7;
+delete p3;  
+delete p;
+delete p1;
+delete p2;
     return 0;
 }
  /*               
