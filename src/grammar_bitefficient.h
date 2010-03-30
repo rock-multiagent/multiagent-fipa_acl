@@ -67,12 +67,22 @@ struct AgentID;
 
 typedef boost::recursive_wrapper<AgentID> Resolver;
 
+// To avoid dealing with circular dependecies we use a 'similar' definition to ParameterValue 
+typedef boost::variant<std::string, fipa::acl::Resolver, std::vector<fipa::acl::Resolver>, fipa::acl::ByteSequence > UserDefinedParameterValue;
+
+typedef struct
+{
+	std::string name;
+	fipa::acl::UserDefinedParameterValue data;
+} UserDefinedParameter;
+
+
 struct AgentID
 {
 	std::string name;
 	std::vector<std::string> addresses;	
 	std::vector<fipa::acl::Resolver> resolvers;
-//	std::vector<fipa::acl::MessageParameter> parameters;
+	std::vector<fipa::acl::UserDefinedParameter> parameters;
 };
 
 typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence > ParameterValue;
@@ -194,11 +204,17 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
+	fipa::acl::UserDefinedParameter,
+	(std::string, name)
+	(fipa::acl::UserDefinedParameterValue, data)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::AgentID,
 	(std::string, name)
 	(std::vector<std::string>, addresses)
 	(std::vector<fipa::acl::Resolver>, resolvers)
-//	(std::vector<fipa::acl::MessageParameter>, parameters)
+	(std::vector<fipa::acl::UserDefinedParameter>, parameters)
 )
 
 // The final message structure
@@ -451,8 +467,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		agentIdentifier = byte_(0x02) >> agentName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
 				 >> -addresses  	   		[ phoenix::at_c<1>(label::_val) = label::_1 ]
 				 >> -resolvers 	           		[ phoenix::at_c<2>(label::_val) = label::_1 ]
-				 //>> *userDefinedParameter		[ phoenix::push_back(label::_val, label::_1) ] 
-				>> endOfCollection;				
+				 >> *userDefinedParameter		[ phoenix::push_back(phoenix::at_c<3>(label::_val), label::_1) ] 
+				 >> endOfCollection;				
+
 		agentName = binWord.alias();
 		addresses = byte_(0x02) >> urlCollection 		[ label::_val = label::_1 ];
 		resolvers = byte_(0x03) >> *agentIdentifier 		[ phoenix::push_back(label::_val, label::_1) ]
@@ -666,7 +683,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > agentName;
 	qi::rule<Iterator, std::vector<std::string>() > addresses;
 	qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > resolvers;
- 	qi::rule<Iterator, fipa::acl::MessageParameter() > userDefinedParameter;
+ 	qi::rule<Iterator, fipa::acl::UserDefinedParameter() > userDefinedParameter;
 	
 	qi::rule<Iterator, std::vector<std::string>() > urlCollection;
 	qi::rule<Iterator, std::string() > url;
