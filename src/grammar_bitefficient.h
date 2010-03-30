@@ -625,10 +625,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					      >> char_('"')
 					      ;
 
-		// Digits tell the byte endcoding
+		// Digits tell the byte encoding
 		byteLengthEncodedString = byteLengthEncodedStringHeader 		        [ phoenix::at_c<0>(label::_val) += label::_1 ]
 					>> qi::repeat(phoenix::ref(sequenceLength))[byte_]      [ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ]
-					; // REQUIRES TESTING
+					;
 
 		byteLengthEncodedStringTerminated = byteLengthEncodedStringHeader 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
 						>> * (byte_ - byte_(0x00))			[ phoenix::at_c<2>(label::_val) += label::_1 ]
