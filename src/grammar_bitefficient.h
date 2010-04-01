@@ -103,6 +103,14 @@ struct DateTime
 
    DateTime() : relative(0), timezone(0) {}
 
+   std::string toString()
+   {
+	char buffer[512];
+	strftime(buffer,512, "%Y-%m-%dT%H:%M:%S%Z", &dateTime);
+	
+	return std::string(buffer);
+   }
+
 }; 
 
 typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence, fipa::acl::DateTime > ParameterValue;
@@ -179,15 +187,37 @@ class MessagePrinter
 				AgentIDPrinter aidPrinter;
 				fipa::acl::AgentID& aid = boost::get<fipa::acl::AgentID>(mp.data);
 				aidPrinter.print(aid);
-			}
-			
-			if(mp.name == "content")
+			} else if(mp.name == "receiver")
+			{
+			} else if(mp.name == "content")
 			{	
 				fipa::acl::ByteSequence bs = boost::get<fipa::acl::ByteSequence>(mp.data);
 				printf("encoding: %s\n", bs.encoding.c_str());
 				printf("content: %s\n", bs.bytes.c_str());
+			} else if(mp.name == "reply-with")
+			{
+			} else if(mp.name == "reply-by")
+			{
+				fipa::acl::DateTime dt = boost::get<fipa::acl::DateTime>(mp.data);
+				std::string dtString = dt.toString();
+				printf("DateTime: %s\n", dtString.c_str());
+
+			} else if(mp.name == "in-reply-to")
+			{
+			} else if(mp.name == "reply-to")
+			{
+			} else if(mp.name == "language")
+			{
+			} else if(mp.name == "encoding")
+			{
+			} else if(mp.name == "ontology")
+			{
+			} else if(mp.name == "protocol")
+			{
+			} else if(mp.name == "conversation-id")
+			{
 			}
-			
+
 		}
 	
 	}
@@ -302,6 +332,43 @@ namespace fipa
 
 	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
+	struct appendStringImpl
+	{
+		template <typename T, typename U>
+		struct result
+		{
+			typedef std::string type;
+		};
+
+		template <typename T, typename U>
+		std::string operator()(T arg0, U arg1) const
+		{
+			arg0 += arg1;	
+			return arg0;
+		}
+
+
+	};
+	phoenix::function<appendStringImpl> appendString;
+
+	struct printImpl
+	{
+		template <typename T, typename U>
+		struct result
+		{
+			typedef void type;
+		};
+
+		template <typename T, typename U>
+		void operator()(T arg0, U arg1) const
+		{
+			printf("%s %s\n", arg0, arg1.c_str());
+		}
+
+	};
+
+	phoenix::function<printImpl> print;
+
 	struct convertToTimeImpl
 	{
 		template <typename T, typename U>
@@ -318,9 +385,10 @@ namespace fipa
 		fipa::acl::Time operator()(std::string arg, std::string msecs) const
 		{
 			fipa::acl::Time	convertedTime;
+			printf("Convert to time: %s", arg.c_str());
 			// TODO: windows portage
-			strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
-			convertedTime.tm_msec = atoi(msecs.c_str());
+		//	strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
+			//convertedTime.tm_msec = atoi(msecs.c_str());
 			
 			return fipa::acl::Time(convertedTime);
 		}
@@ -339,15 +407,22 @@ namespace fipa
 		template <typename T> 
 		std::string operator()(T arg) const
 		{
-
-			return "";
-		}
-
-		std::string operator()(const char& arg) const
-		{
 			char highbytes = arg;
 			char lowerbytes = arg;
-			highbytes >> 4;
+			highbytes >>= 4;
+
+			std::string tmp = convert(highbytes);
+			tmp += convert(lowerbytes);
+
+			return std::string(tmp);
+		}
+		
+		std::string operator()(char arg) const
+		{
+			printf("Correct template");	
+			char highbytes = arg;
+			char lowerbytes = arg;
+			highbytes >>= 4;
 
 			std::string tmp = convert(highbytes);
 			tmp += convert(lowerbytes);
@@ -357,7 +432,8 @@ namespace fipa
 
 		std::string convert(char lowerbyte) const
 		{
-			lowerbyte &= 0x0F;		
+			// make sure high order bytes are set to 0	
+			lowerbyte &= 0x0F;	
 			
 			// There will be more efficient ways to do that, but for clarity
 			switch(lowerbyte)
@@ -668,14 +744,14 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// Construct/Fill Time()
 		// First read the standard input for struct tm
 		// then fill the extended millisecond field
-		binDate = ( year	 	[ label::_a += label::_1, label::_a +="-"] 
-				>> month	[ label::_a += label::_1, label::_a +="-"] 
-				>> day		[ label::_a += label::_1, label::_a +="T"] 
-				>> hour	        [ label::_a += label::_1, label::_a += ":" ]		
-				>> minute	[ label::_a += label::_1, label::_a += ":" ]
-				>> second	[ label::_a += label::_1, label::_a += ":" ]
-			   ) 		
-			>> millisecond  [ label::_val = convertToTime(label::_a, label::_1)]
+		binDate = (        ( year	[ label::_a = label::_1, label::_a +="-", print("yearinBinDate:", label::_1) ] )
+				>> ( month	[ label::_a = appendString(label::_a, label::_1), label::_a +="-", print("monthinBinDate:", label::_1)]  )
+				>> ( day	[ label::_a += label::_1, label::_a +="T", print("dayinBinDate:", label::_1)] )
+				>> ( hour       [ label::_a += label::_1, label::_a += ":" ] )
+				>> ( minute	[ label::_a += label::_1, label::_a += ":" ] )
+				>> ( second	[ label::_a += label::_1, label::_a += ":" ] )
+			   ) [ print("local var: ", label::_a) ]		
+			>> ( millisecond  [ label::_val = convertToTime(label::_a, label::_1)])
 			 ;
 		
 		binExpression = binExpr				[ label::_val = label::_1 ] 
@@ -742,9 +818,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		len16 = short_;
 		len32 = long_;
 	
-		year = codedNumber  	[ label::_val += label::_1 ]
-		       >> codedNumber 	[ label::_val += label::_1 ]
+		year = ( codedNumber  	[ label::_val = label::_1] )
+		       >> ( codedNumber [ label::_val += label::_1 ])
 		       ;
+
 		month = codedNumber.alias();
 		day = codedNumber.alias();
 		hour = codedNumber.alias();
