@@ -25,6 +25,8 @@
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
 
+#include <ctime>
+
 namespace fusion = boost::fusion;
 namespace phoenix = boost::phoenix;
 namespace spirit = boost::spirit;
@@ -85,7 +87,25 @@ struct AgentID
 	std::vector<fipa::acl::UserDefinedParameter> parameters;
 };
 
-typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence > ParameterValue;
+struct Time : public std::tm
+{
+	// inheriting from struct tm
+
+	// Extending milliseconds
+	int tm_msec;
+}; 
+
+struct DateTime
+{
+   char relative;
+   Time dateTime; 
+   char timezone;
+
+   DateTime() : relative(0), timezone(0) {}
+
+}; 
+
+typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence, fipa::acl::DateTime > ParameterValue;
 
 typedef struct
 {
@@ -197,6 +217,19 @@ BOOST_FUSION_ADAPT_STRUCT(
 	(std::string, bytes)
 )
 
+// We only need additional access to the millisecond element
+BOOST_FUSION_ADAPT_STRUCT(
+	fipa::acl::Time,
+	(int, tm_msec)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+	fipa::acl::DateTime,
+	(char, relative)
+	(fipa::acl::Time, dateTime)
+	(char, timezone)
+)
+
 BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::MessageParameter,
 	(std::string, name)
@@ -269,6 +302,118 @@ namespace fipa
 
 	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
+	struct convertToTimeImpl
+	{
+		template <typename T, typename U>
+		struct result
+		{
+			typedef fipa::acl::Time type;
+		};
+
+		template <typename T, typename U>
+		fipa::acl::Time operator()(T arg0, U arg1) const
+		{
+		}
+
+		fipa::acl::Time operator()(std::string arg, std::string msecs) const
+		{
+			fipa::acl::Time	convertedTime;
+			// TODO: windows portage
+			strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
+			convertedTime.tm_msec = atoi(msecs.c_str());
+			
+			return fipa::acl::Time(convertedTime);
+		}
+	};
+	
+	phoenix::function<convertToTimeImpl> convertToTime;
+
+	struct convertToNumberTokenImpl
+	{
+		template <typename T>
+		struct result
+		{
+			typedef std::string type;
+		};
+		
+		template <typename T> 
+		std::string operator()(T arg) const
+		{
+
+			return "";
+		}
+
+		std::string operator()(const char& arg) const
+		{
+			char highbytes = arg;
+			char lowerbytes = arg;
+			highbytes >> 4;
+
+			std::string tmp = convert(highbytes);
+			tmp += convert(lowerbytes);
+			
+			return std::string(tmp);
+		}
+
+		std::string convert(char lowerbyte) const
+		{
+			lowerbyte &= 0x0F;		
+			
+			// There will be more efficient ways to do that, but for clarity
+			switch(lowerbyte)
+			{
+				case 0x00: return "";
+				case 0x01: return "0";
+				case 0x02: return "1";
+				case 0x03: return "2";
+				case 0x04: return "3";
+				case 0x05: return "4";
+				case 0x06: return "5";
+				case 0x07: return "6";
+				case 0x08: return "7";
+				case 0x09: return "8";
+				case 0x0a: return "9";
+				case 0x0c: return "+";
+				case 0x0d: return "E";
+				case 0x0e: return "-";
+				case 0x0f: return ".";
+				default: return "";
+			}
+		}
+	};
+
+	phoenix::function<convertToNumberTokenImpl> convertToNumberToken;
+	
+	/**
+	* Convert a string that represents an integer to a string that represent an hexadecimal number
+	*/
+	struct convertDigitsToHexImpl
+	{
+		template <typename T>
+		struct result
+		{
+			typedef std::string type;
+		};
+
+		template <typename T> 
+		std::string operator()(T arg) const
+		{
+			return "";
+		}
+
+		std::string operator()(std::string arg)
+		{
+			unsigned int hexNumber = atoi(arg.c_str());
+			
+			char buffer[512];
+			sprintf(buffer,"%x",hexNumber);
+
+			return std::string(buffer);
+		}
+	};
+
+	phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;
+
 	struct convertToStringImpl
 	{
 		template <typename T>
@@ -298,57 +443,18 @@ namespace fipa
 
 	phoenix::function<convertToStringImpl> convertToString;
 
-	struct setSequenceLengthImpl
-	{
-		template <typename T>
-		struct result
-		{
-			typedef void type;
-		};
-
-		template <typename T>
-		void operator() (boost::uint32_t* lengthVar, T arg) const
-		{
-			lengthVar = 0;
-
-			if( boost::is_convertible<T,const boost::uint32_t>::value )
-			{
-				*lengthVar = arg;
-			}
-			
-			return;
-		}
-	};
-	
-	phoenix::function<setSequenceLengthImpl> setSequenceLength;
 	/*
 	typedef boost::variant<std::vector<boost::uint8_t>,
 					       std::vector<boost::uint16_t>,
 					       std::vector<boost::uint32_t>,
 					       std::vector<boost::uint64_t> encodedBytes;
-	struct createByteSequenceImpl
-	{
-		template <typename T>
-		struct result
- 		{
-			typedef encodedBytes type;
-		};	
-
-		template <typename T>
-		encodedBytes operator()(T arg) const
-		{
-			
-		}
-	};
-	
-	phoenix::function<createByteSequenceImpl> createByteSequence;
-*/
+	*/
 
 namespace acl
 {
 
 template <typename Iterator>
-// IMPORTANT: ACLMessage with following () otherwise, heaps of compiler errors
+// IMPORTANT: ACLMessage with following () otherwise, compiler error
 struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii::space_type>
 {
 	bitefficient_grammar() : bitefficient_grammar::base_type(aclCommunicativeAct, "bitefficient-grammar")
@@ -455,7 +561,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr   [ phoenix::at_c<1>(label::_val) = label::_1 ]   // receiver 
 					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent      [ phoenix::at_c<1>(label::_val) = label::_1 ]   // content 
 					| byte_(0x05) [ phoenix::at_c<0>(label::_val) = "reply-with" ]      >> replyWithParam  [ phoenix::at_c<1>(label::_val) = label::_1 ]   // reply-with
-					| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam    [ phoenix::at_c<1>(label::_val) = "todo:binDateTimeToken" ]  // reply-by 
+					| byte_(0x06) [ phoenix::at_c<0>(label::_val) = "reply-by" ]        >> replyByParam    [ phoenix::at_c<1>(label::_val) = label::_1 ]  // reply-by 
 					| byte_(0x07) [ phoenix::at_c<0>(label::_val) = "in-reply-to" ]     >> inReplyToParam  [ phoenix::at_c<1>(label::_val) = label::_1 ]  // in-reply-to 
 					| byte_(0x08) [ phoenix::at_c<0>(label::_val) = "reply-to" ]        >> replyToParam    [ phoenix::at_c<1>(label::_val) = label::_1 ] // reply-to   
 					| byte_(0x09) [ phoenix::at_c<0>(label::_val) = "language" ]        >> language        [ phoenix::at_c<1>(label::_val) = label::_1 ] // language  
@@ -506,10 +612,14 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		        | byte_(0x11) >> index   		[ label::_val = extractFromCodetable(label::_1) ]
 			);
 
-		binNumber %= ( byte_(0x12) >> digits )          // Decimal numbers
-			  | ( byte_(0x13) >> digits );  	// Hexadecimal numbers
+		// Decimal number 0x12
+		// Hex number 0x13
+		// Hexadecimal number are converted to int and then back
+		binNumber = ( byte_(0x12) >> digits 	[ label::_val = label::_1 ] )         
+			  | ( byte_(0x13) >> digits 	[ label::_val = convertDigitsToHex(label::_1) ]
+			  ); 
 
-		digits %= +codedNumber;
+		digits = +codedNumber [ label::_val += label::_1];
 
 		binString = ( byte_(0x14) >> ( stringLiteralTerminated 
 					   | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
@@ -524,15 +634,49 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			  | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
                                           >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
 			  ;         
-
-		binDateTimeToken %= ( byte_(0x20) >> binDate )		            // Absolute time  
-				| ( byte_(0x21) >> binDate )		            // Relative time (+)
-				| ( byte_(0x22) >> binDate )		            // Relative time (-)
-				| ( byte_(0x24) >> binDate >> typeDesignator )      // Absolute time   
-				| ( byte_(0x25) >> binDate >> typeDesignator )      // Relative time (+)
-				| ( byte_(0x26) >> binDate >> typeDesignator );     // Relative time (-)
-
-		binDate %= year >> month >> day >> hour >> minute >> second >> millisecond;
+		
+		// Absolute time, relative +/-
+		// identifier indicate if typeDesignator follows or not
+		binDateTimeToken = ( byte_(0x20) 			[ phoenix::at_c<0>(label::_val) = ' ' ]
+				    >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
+				   )
+				// Relative time (-)
+				| ( byte_(0x21) 			[ phoenix::at_c<0>(label::_val) = '+' ]
+				   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
+                                  )
+				// Relative time (+)
+				| ( byte_(0x22)				[ phoenix::at_c<0>(label::_val) = '-' ]
+				   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
+                                  )
+				// Absolute time   
+				| ( byte_(0x24)				[ phoenix::at_c<0>(label::_val) = ' ' ] 
+					>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+					>> typeDesignator 		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+					) 
+				// Relative time (-)
+				| ( byte_(0x25) 			[ phoenix::at_c<0>(label::_val) = '+' ]
+					>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+					>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+					) 
+				// Relative time (+)
+				| ( byte_(0x26)				[ phoenix::at_c<0>(label::_val) = '-' ] 
+					>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+					>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+					)
+	;    
+		
+		// Construct/Fill Time()
+		// First read the standard input for struct tm
+		// then fill the extended millisecond field
+		binDate = ( year	 	[ label::_a += label::_1, label::_a +="-"] 
+				>> month	[ label::_a += label::_1, label::_a +="-"] 
+				>> day		[ label::_a += label::_1, label::_a +="T"] 
+				>> hour	        [ label::_a += label::_1, label::_a += ":" ]		
+				>> minute	[ label::_a += label::_1, label::_a += ":" ]
+				>> second	[ label::_a += label::_1, label::_a += ":" ]
+			   ) 		
+			>> millisecond  [ label::_val = convertToTime(label::_a, label::_1)]
+			 ;
 		
 		binExpression = binExpr				[ label::_val = label::_1 ] 
 			      | byte_(0xFF) >> binString        [ label::_val = convertToString(label::_1) ] 
@@ -540,7 +684,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		binExpr = binWord				[ label::_val = label::_1 ]
 			| binString				[ label::_val = convertToString(label::_1) ] 
-			| binNumber				[ label::_val = "todo:binNumber" ]
+			| binNumber				[ label::_val = label::_1 ]
 			// Every expression can look like the following of "(+ (-1 2) 3)"
 			| (exprStart 				[ label::_val = "(" , label::_val += label::_1 ]
 			  >> *binExpr				[ label::_val += label::_1 ]
@@ -552,8 +696,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			  | ( byte_(0x70) >> word       			 [ label::_val = label::_1 ]
 					  >> byte_(0x00) )
 			  | ( byte_(0x71) >> index      			 [ label::_val = extractFromCodetable(label::_1)] )
-			  | ( byte_(0x72) >> digits     			 [ label::_val = "todo:digits" ] )
-			  | ( byte_(0x73) >> digits     			 [ label::_val = "todo:digits" ] ) 
+			  | ( byte_(0x72) >> digits     			 [ label::_val = label::_1 ] )
+			  | ( byte_(0x73) >> digits     			 [ label::_val = label::_1 ] ) 
 			  | ( byte_(0x74) >> ( stringLiteralTerminated 
 					   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ] )
 			  | ( byte_(0x75) >> index      			 [ label::_val = extractFromCodetable(label::_1)])
@@ -570,8 +714,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			| ( byte_(0x50) >> word 	 			 [ label::_val = label::_1 ]
 					>> byte_(0x00) )
 			| ( byte_(0x51) >> index      				 [ label::_val = extractFromCodetable(label::_1)])
-			| ( byte_(0x52) >> digits 				 [ label::_val = "todo:digits" ] )
-			| ( byte_(0x53) >> digits 				 [ label::_val = "todo:digits" ] )
+			| ( byte_(0x52) >> digits 				 [ label::_val = label::_1 ] )
+			| ( byte_(0x53) >> digits 				 [ label::_val = label::_1 ] )
 			| ( byte_(0x54) >> ( stringLiteralTerminated 
 					   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ])
 			| ( byte_(0x55) >> index      				 [ label::_val = extractFromCodetable(label::_1)]) 
@@ -598,13 +742,16 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		len16 = short_;
 		len32 = long_;
 	
-		year %= byte_ >> byte_;
-		month %= byte_;
-		day %= byte_;
-		hour %= byte_;
-		minute %= byte_;
-		second %= byte_;
-		millisecond %= byte_ >> byte_;
+		year = codedNumber  	[ label::_val += label::_1 ]
+		       >> codedNumber 	[ label::_val += label::_1 ]
+		       ;
+		month = codedNumber.alias();
+		day = codedNumber.alias();
+		hour = codedNumber.alias();
+		minute = codedNumber.alias();
+		second = codedNumber.alias();
+		// same format as year
+		millisecond = year.alias();
 
 		word = (char_ - wordExceptionsStart )  		[ label::_val += label::_1 ]
 			 >> *(char_ - wordExceptionsGeneral)    [ label::_val += label::_1 ]
@@ -652,9 +799,12 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 						>> * (byte_ - byte_(0x00))			[ phoenix::at_c<2>(label::_val) += label::_1 ]
 						>> byte_(0x00)
 						;
+		// two numbers in one byte - padding 00 if coding only one number
+		codedNumber = byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
+	
 
-		codedNumber %= byte_; // two numbers in one byte - padding 00 if coding only one number
-		typeDesignator %= alpha;
+		// Timezone for UTC is Z
+		typeDesignator = alpha 		[ label::_val = label::_1 ]; 	
 
 
 		on_error<fail>
@@ -708,7 +858,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::vector<fipa::acl::AgentID>() > recipientExpr;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > msgContent;
 	qi::rule<Iterator, std::string() > replyWithParam;
-	qi::rule<Iterator> replyByParam;
+	qi::rule<Iterator, fipa::acl::DateTime() > replyByParam;
 	qi::rule<Iterator, std::string() > inReplyToParam;
 	qi::rule<Iterator, std::vector<fipa::acl::AgentID>() > replyToParam;
 	qi::rule<Iterator, std::string() > language;
@@ -718,11 +868,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > conversationId;
 	
 	qi::rule<Iterator, std::string()> binWord;
-	qi::rule<Iterator> binNumber;
+	qi::rule<Iterator, std::string()> binNumber;
 	qi::rule<Iterator, std::string() > digits; 
 	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > binString;
-	qi::rule<Iterator> binDateTimeToken;
-	qi::rule<Iterator> binDate;
+	qi::rule<Iterator, fipa::acl::DateTime() > binDateTimeToken;
+	qi::rule<Iterator, fipa::acl::Time(), qi::locals<std::string> > binDate;
 	qi::rule<Iterator, std::string() > binExpression;
 	qi::rule<Iterator, std::string() > binExpr;
 	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
@@ -735,13 +885,13 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, boost::uint_least8_t() > len8;
 	qi::rule<Iterator, boost::uint_least16_t() > len16;
 	qi::rule<Iterator, boost::uint_least32_t() > len32;
-	qi::rule<Iterator> year;
-	qi::rule<Iterator> month;
-	qi::rule<Iterator> day;
-	qi::rule<Iterator> hour;
-	qi::rule<Iterator> minute;
-	qi::rule<Iterator> second;
-	qi::rule<Iterator> millisecond;
+	qi::rule<Iterator, std::string() > year;
+	qi::rule<Iterator, std::string() > month;
+	qi::rule<Iterator, std::string() > day;
+	qi::rule<Iterator, std::string() > hour;
+	qi::rule<Iterator, std::string() > minute;
+	qi::rule<Iterator, std::string() > second;
+	qi::rule<Iterator, std::string() > millisecond;
 
 	qi::rule<Iterator, std::string() > word;
 	qi::rule<Iterator> wordExceptionsStart;
@@ -752,8 +902,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
 	qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > byteLengthEncodedStringTerminated;
-	qi::rule<Iterator> codedNumber;
-	qi::rule<Iterator> typeDesignator;
+	qi::rule<Iterator, std::string()> codedNumber;
+	qi::rule<Iterator, char() > typeDesignator;
 
 };
 
