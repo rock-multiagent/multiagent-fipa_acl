@@ -269,33 +269,6 @@ namespace fipa
 
 	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
-	struct convertStringVectorToStringImpl
-	{
-		template <typename T>
-		struct result
-		{
-			typedef std::string type;
-		};
-
-		template <typename T>
-		std::string operator()(T arg) const
-		{
-			int length = arg.size();
-			std::string tmpString;
-
-			for(int i = 0; i < length; i++)
-			{
-				tmpString += arg[0];
-			} 
-
-			return std::string(tmpString);
-
-		}
-	};
-
-	phoenix::function<convertStringVectorToStringImpl> convertStringVectorToString;
-
-	
 	struct convertToStringImpl
 	{
 		template <typename T>
@@ -304,7 +277,7 @@ namespace fipa
 			typedef std::string type;
 		};
 
-		// TODO for std::vector<char> HACKED
+		// for std::vector<char>
 		template <typename T>
 		std::string operator()(T arg) const
 		{
@@ -313,8 +286,11 @@ namespace fipa
 
 		std::string operator()(fipa::acl::ByteSequence arg) const
 		{
+			// perform some encoding stuff here
+			// using arg.encoding
 			return arg.bytes;
 		}
+
 
 	};
 
@@ -535,17 +511,18 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		digits %= +codedNumber;
 
-		binString = ( byte_(0x14) >> ( stringLiteralTerminated | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
-					  //>> byte_(0x00) ) // new string literal 
-			  | ( byte_(0x15) >> index 			        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])                     // string literal from code table
+		binString = ( byte_(0x14) >> ( stringLiteralTerminated 
+					   | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
+			  // string literal from code table
+			  | ( byte_(0x15) >> index 			        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])            
 			  // The byte length will be stored in the rule local variable (label::_a) and then forwarded to the qi::repeat instruction
-			  //| ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
-			//		  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )  // new byteLengthEncoded string 
+			  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
+					  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )  // new byteLengthEncoded string 
 			  | ( byte_(0x17) >> len16 			        [ label::_a = label::_1 ]
-				          >> qi::repeat(label::_a)[byte_]	[ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ] )
+				          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
 			  | ( byte_(0x18) >> index                              [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
 			  | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
-                                          >> qi::repeat(label::_a)[byte_]	[ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ] )
+                                          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
 			  ;         
 
 		binDateTimeToken %= ( byte_(0x20) >> binDate )		            // Absolute time  
@@ -558,11 +535,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		binDate %= year >> month >> day >> hour >> minute >> second >> millisecond;
 		
 		binExpression = binExpr				[ label::_val = label::_1 ] 
-			      | byte_(0xFF) >> binString        [ label::_val = "todo::binString-integration" ] //label::_1 ]
+			      | byte_(0xFF) >> binString        [ label::_val = convertToString(label::_1) ] 
 			      ;
 
 		binExpr = binWord				[ label::_val = label::_1 ]
-			| binString				[ label::_val = "todo:binWord" ] //label::_1 ] // needs conversion to string is a bytesequence
+			| binString				[ label::_val = convertToString(label::_1) ] 
 			| binNumber				[ label::_val = "todo:binNumber" ]
 			// Every expression can look like the following of "(+ (-1 2) 3)"
 			| (exprStart 				[ label::_val = "(" , label::_val += label::_1 ]
@@ -578,33 +555,34 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 			  | ( byte_(0x72) >> digits     			 [ label::_val = "todo:digits" ] )
 			  | ( byte_(0x73) >> digits     			 [ label::_val = "todo:digits" ] ) 
 			  | ( byte_(0x74) >> ( stringLiteralTerminated 
-					   | byteLengthEncodedStringTerminated ) [ label::_val = "todo:CovertFromByteSequence" ] )
+					   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ] )
 			  | ( byte_(0x75) >> index      			 [ label::_val = extractFromCodetable(label::_1)])
 			  | ( byte_(0x76) >> len8 				 [ label::_a = label::_1 ]
-					  >> fipaString(label::_a)		 [ label::_val = "todo:ConvertFromByteSequence" ]) 
+					  >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ]) 
 			  | ( byte_(0x77) >> len16 				 [ label::_a = label::_1 ] 
-					  >> fipaString(label::_a)		 [ label::_val = "todo" ])
+					  >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ])
 			  | ( byte_(0x78) >> len32 				 [ label::_a = label::_1 ]
-				          >> fipaString(label::_a)		 [ label::_val = "todo" ])
+				          >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ])
 			  | ( byte_(0x79) >> index 				 [ label::_val = extractFromCodetable(label::_1)])
 			 ;
 
-		exprEnd = ( byte_(0x40) ) [ label::_val = "" ]
-			| ( byte_(0x50) >> word 		[ label::_val = label::_1 ]
+		exprEnd = ( byte_(0x40) ) 					 [ label::_val = "" ]
+			| ( byte_(0x50) >> word 	 			 [ label::_val = label::_1 ]
 					>> byte_(0x00) )
-			| ( byte_(0x51) >> index      		[ label::_val = extractFromCodetable(label::_1)])
-			| ( byte_(0x52) >> digits 		[ label::_val = "todo:digits" ] )
-			| ( byte_(0x53) >> digits 		[ label::_val = "todo:digits" ] )
-			| ( byte_(0x54) >> ( stringLiteralTerminated | byteLengthEncodedStringTerminated )	[ label::_val = "todo" ]) //label::_1 ])
-			| ( byte_(0x55) >> index      		[ label::_val = extractFromCodetable(label::_1)]) 
-	/*		| ( byte_(0x56) >> len8       		[ setSequenceLength(sequenceLength, label::_1) ] 
-					>> fipaString		[ label::_val = convertToString(label::_1)] )
-			| ( byte_(0x57) >> len16      		[ setSequenceLength(sequenceLength, label::_1) ]
-					>> fipaString 		[ label::_val = convertToString(label::_1)])
-			| ( byte_(0x58) >> len32      		[ setSequenceLength(sequenceLength, label::_1) ]
-					>> fipaString 		[ label::_val = convertToString(label::_1)])
-			| ( byte_(0x59) >> index      		[ label::_val = extractFromCodetable(label::_1)])
-			*/;
+			| ( byte_(0x51) >> index      				 [ label::_val = extractFromCodetable(label::_1)])
+			| ( byte_(0x52) >> digits 				 [ label::_val = "todo:digits" ] )
+			| ( byte_(0x53) >> digits 				 [ label::_val = "todo:digits" ] )
+			| ( byte_(0x54) >> ( stringLiteralTerminated 
+					   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ])
+			| ( byte_(0x55) >> index      				 [ label::_val = extractFromCodetable(label::_1)]) 
+			| ( byte_(0x56) >> len8       				 [ label::_a = label::_1 ]
+					>> fipaString(label::_a)		 [ label::_val = convertToString(label::_1)] )
+			| ( byte_(0x57) >> len16      				 [ label::_a = label::_1 ]
+					>> fipaString(label::_a)    		 [ label::_val = convertToString(label::_1)])
+			| ( byte_(0x58) >> len32      				 [ label::_a = label::_1 ]
+					>> fipaString(label::_a)		 [ label::_val = convertToString(label::_1)])
+			| ( byte_(0x59) >> index      		                 [ label::_val = extractFromCodetable(label::_1)])
+			;
 		
 		// Index is a pointer to code table entry and its size (in bits) depends on the code table size. 
 		// If the code table size is 256 entries, the size of the index is one byte;
@@ -748,7 +726,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, std::string() > binExpression;
 	qi::rule<Iterator, std::string() > binExpr;
 	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
-	qi::rule<Iterator, std::string() > exprEnd;
+	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprEnd;
 
 	//qi::symbols<char, qi::rule<Iterator> > exprKeyword;
 
