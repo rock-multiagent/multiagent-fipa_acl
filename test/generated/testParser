@@ -1,0 +1,13 @@
+#!/bin/sh
+
+for file in `ls *.txt`
+do 
+  ERROR=
+  ERROR=`../../build/bin/message-parser $file | grep -i failed`
+
+  if [ "$ERROR" != "" ]; then 
+	echo "$file \t\t [ERROR]"
+  else 
+	echo "$file \t\t [OK]"
+  fi
+done
