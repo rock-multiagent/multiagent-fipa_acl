@@ -106,7 +106,8 @@ struct DateTime
    std::string toString()
    {
 	char buffer[512];
-	strftime(buffer,512, "%Y-%m-%dT%H:%M:%S%Z", &dateTime);
+	// %Z missing so far
+	strftime(buffer,512, "%Y-%m-%dT%H:%M:%S", &dateTime);
 	
 	return std::string(buffer);
    }
@@ -332,24 +333,25 @@ namespace fipa
 
 	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
-	struct appendStringImpl
+	struct buildStringImpl
 	{
-		template <typename T, typename U>
+		template <typename T, typename U, typename V>
 		struct result
 		{
 			typedef std::string type;
 		};
 
-		template <typename T, typename U>
-		std::string operator()(T arg0, U arg1) const
+		template <typename T, typename U, typename V>
+		std::string operator()(T arg0, U arg1, V arg2) const
 		{
-			arg0 += arg1;	
+			arg0 += arg1;
+			arg0 += arg2;
 			return arg0;
 		}
 
 
 	};
-	phoenix::function<appendStringImpl> appendString;
+	phoenix::function<buildStringImpl> buildString;
 
 	struct printImpl
 	{
@@ -385,10 +387,10 @@ namespace fipa
 		fipa::acl::Time operator()(std::string arg, std::string msecs) const
 		{
 			fipa::acl::Time	convertedTime;
-			printf("Convert to time: %s", arg.c_str());
+			printf("convertToTimeImpl: %s:%s\n", arg.c_str(), msecs.c_str());
 			// TODO: windows portage
-		//	strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
-			//convertedTime.tm_msec = atoi(msecs.c_str());
+			strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
+			convertedTime.tm_msec = atoi(msecs.c_str());
 			
 			return fipa::acl::Time(convertedTime);
 		}
@@ -744,14 +746,18 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		// Construct/Fill Time()
 		// First read the standard input for struct tm
 		// then fill the extended millisecond field
-		binDate = (        ( year	[ label::_a = label::_1, label::_a +="-", print("yearinBinDate:", label::_1) ] )
-				>> ( month	[ label::_a = appendString(label::_a, label::_1), label::_a +="-", print("monthinBinDate:", label::_1)]  )
-				>> ( day	[ label::_a += label::_1, label::_a +="T", print("dayinBinDate:", label::_1)] )
-				>> ( hour       [ label::_a += label::_1, label::_a += ":" ] )
-				>> ( minute	[ label::_a += label::_1, label::_a += ":" ] )
-				>> ( second	[ label::_a += label::_1, label::_a += ":" ] )
-			   ) [ print("local var: ", label::_a) ]		
+		
+		// Fixme: label::_a = string, label::_a += "-" will return only label::_a as "-"
+		// Currently using a workaround with 'buildString'
+		binDate = ((        ( year	[ label::_a = buildString(label::_1,"-","") ]) //, label::_a = label::_a + "-" ])//, print("yearinBinDate:", label::_1) ]*/ )
+				>> ( month	[ label::_a = buildString(label::_a, label::_1,"-") ]) 
+				>> ( day	[ label::_a = buildString(label::_a, label::_1,"T") ])
+				>> ( hour       [ label::_a = buildString(label::_a, label::_1,":") ])
+				>> ( minute	[ label::_a = buildString(label::_a, label::_1,":") ])
+				>> ( second	[ label::_a = buildString(label::_a, label::_1,"") ]) 
+			   ) 		
 			>> ( millisecond  [ label::_val = convertToTime(label::_a, label::_1)])
+			)
 			 ;
 		
 		binExpression = binExpr				[ label::_val = label::_1 ] 
