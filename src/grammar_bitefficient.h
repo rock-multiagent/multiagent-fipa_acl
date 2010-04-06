@@ -108,8 +108,13 @@ struct DateTime
 	char buffer[512];
 	// %Z missing so far
 	strftime(buffer,512, "%Y-%m-%dT%H:%M:%S", &dateTime);
-	
-	return std::string(buffer);
+
+	std::string formattedOutput;
+	formattedOutput += relative;
+	formattedOutput += std::string(buffer);
+	formattedOutput += timezone;
+
+	return formattedOutput;
    }
 
 }; 
@@ -311,7 +316,7 @@ namespace fipa
 			unsigned short index;
 			if(typeid(T) == typeid(unsigned short))
 			{
-				std::cout << "Unsigned short" << std::endl;
+				std::cout << "extractFromCodetableImpl: Unsigned short" << std::endl;
 				index = arg;
 			}
 
