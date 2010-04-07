@@ -414,26 +414,19 @@ namespace fipa
 		template <typename T> 
 		std::string operator()(T arg) const
 		{
+
+			// Each bytes contains two numbers: 
+			// one in the highbytes and one in the lowerbytes
 			char highbytes = arg;
 			char lowerbytes = arg;
+
+			// Shift to lowerbytes so that we can use the convert 
+			// function here as well
 			highbytes >>= 4;
 
 			std::string tmp = convert(highbytes);
 			tmp += convert(lowerbytes);
 
-			return std::string(tmp);
-		}
-		
-		std::string operator()(char arg) const
-		{
-			printf("Correct template");	
-			char highbytes = arg;
-			char lowerbytes = arg;
-			highbytes >>= 4;
-
-			std::string tmp = convert(highbytes);
-			tmp += convert(lowerbytes);
-			
 			return std::string(tmp);
 		}
 
@@ -483,8 +476,8 @@ namespace fipa
 		{
 			return "";
 		}
-
-		std::string operator()(std::string arg)
+		
+		std::string operator()(std::string arg) const
 		{
 			unsigned int hexNumber = atoi(arg.c_str());
 			
@@ -514,7 +507,7 @@ namespace fipa
 
 		std::string operator()(fipa::acl::ByteSequence arg) const
 		{
-			// perform some encoding stuff here
+			// TODO: (optional) perform some encoding stuff here
 			// using arg.encoding
 			return arg.bytes;
 		}
@@ -522,16 +515,7 @@ namespace fipa
 
 	};
 
-	
-
 	phoenix::function<convertToStringImpl> convertToString;
-
-	/*
-	typedef boost::variant<std::vector<boost::uint8_t>,
-					       std::vector<boost::uint16_t>,
-					       std::vector<boost::uint32_t>,
-					       std::vector<boost::uint64_t> encodedBytes;
-	*/
 
 namespace acl
 {
@@ -690,7 +674,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		conversationId = binExpression.alias();
 	
 
-		binWord = ( ( byte_(0x10) >> word 		[ label::_val = label::_1 ]
+		binWord = ( ( byte_(0x10) 
+				>> word 			[ label::_val = label::_1 ]
 				>> byte_(0x00) )
 		        | byte_(0x11) >> index   		[ label::_val = extractFromCodetable(label::_1) ]
 			);
@@ -754,14 +739,14 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		
 		// Fixme: label::_a = string, label::_a += "-" will return only label::_a as "-"
 		// Currently using a workaround with 'buildString'
-		binDate = ((        ( year	[ label::_a = buildString(label::_1,"-","") ]) //, label::_a = label::_a + "-" ])//, print("yearinBinDate:", label::_1) ]*/ )
+		binDate = ((        ( year	[ label::_a = buildString(label::_1,"-","") ]) //, label::_a = label::_1, label::_a += "-" ])//, print("yearinBinDate:", label::_1) ]*/ )
 				>> ( month	[ label::_a = buildString(label::_a, label::_1,"-") ]) 
 				>> ( day	[ label::_a = buildString(label::_a, label::_1,"T") ])
 				>> ( hour       [ label::_a = buildString(label::_a, label::_1,":") ])
 				>> ( minute	[ label::_a = buildString(label::_a, label::_1,":") ])
-				>> ( second	[ label::_a = buildString(label::_a, label::_1,"") ]) 
+				>> ( second	[ label::_a = buildString(label::_a, label::_1,"")  ]) 
 			   ) 		
-			>> ( millisecond  [ label::_val = convertToTime(label::_a, label::_1)])
+			>> ( millisecond  	[ label::_val = convertToTime(label::_a, label::_1) ])
 			)
 			 ;
 		
