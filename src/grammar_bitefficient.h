@@ -57,6 +57,10 @@ typedef boost::variant<boost::uint_least8_t,boost::uint_least16_t, boost::uint_l
 
 typedef boost::variant<std::string, std::vector<unsigned char> > ByteString;
 
+/**
+* \class ByteStringPrinter
+* \brief Printer using the visitor pattern for the ByteString type
+*/
 class ByteStringPrinter : public boost::static_visitor<std::string>
 {
 
@@ -64,12 +68,22 @@ class ByteStringPrinter : public boost::static_visitor<std::string>
 public: 
 
 	ByteStringPrinter(std::string enc) : encoding(enc) {}
-
+	
+	/**
+	* Build a string for the given type
+	* \param vector One of the types for the variant that this printer is implemented for
+	*/
 	std::string operator()(std::string s) const
 	{
 		return s;
 	}
-
+	
+	/**
+	* Build a string from a raw byte sequence, i.e. the following output format will be used, 
+        * embedding encoding information
+        *  HEX(dword)[0a af 02 10 ... 01]
+	* \param vector One of the types for the variant that this printer is implemented for
+	*/
 	std::string operator()(std::vector<unsigned char> vector) const
 	{
 		int length = vector.size();
@@ -103,6 +117,7 @@ struct ByteSequence
 	std::string toString()
 	{
 		std::string tmp;
+		// Since bytes is a variant we apply the visitor pattern here
 		tmp += boost::apply_visitor( ByteStringPrinter(encoding), bytes);
 		return tmp;
 	}
@@ -240,6 +255,17 @@ class MessagePrinter
 				aidPrinter.print(aid);
 			} else if(mp.name == "receiver")
 			{
+				AgentIDPrinter aidPrinter;
+				std::vector<fipa::acl::AgentID> aids = boost::get<std::vector<fipa::acl::AgentID> >(mp.data);
+				int length = aids.size();
+
+				printf("Receiver: \n");
+				for(int i = 0; i < length; i++)
+				{
+					aidPrinter.print(aids[i]);
+				}
+
+
 			} else if(mp.name == "content")
 			{	
 				fipa::acl::ByteSequence bs = boost::get<fipa::acl::ByteSequence>(mp.data);
@@ -249,6 +275,8 @@ class MessagePrinter
 				printf("content: %s\n", printBytes.c_str());
 			} else if(mp.name == "reply-with")
 			{
+				std::string replyWith = boost::get<std::string>(mp.data);
+				printf("ReplyWith: %s\n", replyWith.c_str());
 			} else if(mp.name == "reply-by")
 			{
 				fipa::acl::DateTime dt = boost::get<fipa::acl::DateTime>(mp.data);
@@ -257,18 +285,53 @@ class MessagePrinter
 
 			} else if(mp.name == "in-reply-to")
 			{
+				std::string inReplyTo = boost::get<std::string>(mp.data);	
+				printf("InReplyTo: %s\n", inReplyTo.c_str());
+
 			} else if(mp.name == "reply-to")
 			{
+				AgentIDPrinter aidPrinter;
+				std::vector<fipa::acl::AgentID> aids = boost::get<std::vector<fipa::acl::AgentID> >(mp.data);
+				int length = aids.size();
+
+				printf("ReplyTo: \n");
+				for(int i = 0; i < length; i++)
+				{
+					aidPrinter.print(aids[i]);
+				}
+
+				
 			} else if(mp.name == "language")
 			{
+				std::string language = boost::get<std::string>(mp.data);	
+				printf("Language: %s\n", language.c_str());
+
+
 			} else if(mp.name == "encoding")
-			{
+			{	
+				std::string encoding = boost::get<std::string>(mp.data);	
+				printf("Encoding: %s\n", encoding.c_str());
+
+
 			} else if(mp.name == "ontology")
 			{
+
+				std::string ontology = boost::get<std::string>(mp.data);	
+				printf("Ontology: %s\n", ontology.c_str());
+
+
 			} else if(mp.name == "protocol")
 			{
+				std::string protocol = boost::get<std::string>(mp.data);	
+				printf("Protocol: %s\n", protocol.c_str());
+
+
 			} else if(mp.name == "conversation-id")
 			{
+				std::string conversationId = boost::get<std::string>(mp.data);	
+				printf("Conversation-id: %s\n", conversationId.c_str());
+
+
 			}
 
 		}
