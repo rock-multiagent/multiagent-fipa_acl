@@ -55,14 +55,59 @@ typedef struct
 typedef boost::variant<boost::uint_least8_t,boost::uint_least16_t, boost::uint_least32_t> LengthValue;
 
 
+typedef boost::variant<std::string, std::vector<unsigned char> > ByteString;
+
+class ByteStringPrinter : public boost::static_visitor<std::string>
+{
+
+	std::string encoding;
+public: 
+
+	ByteStringPrinter(std::string enc) : encoding(enc) {}
+
+	std::string operator()(std::string s) const
+	{
+		return s;
+	}
+
+	std::string operator()(std::vector<unsigned char> vector) const
+	{
+		int length = vector.size();
+		std::string tmp("HEX(");
+		tmp += encoding;
+		tmp +=")[";
+
+		for(int i = 0; i < length; i++)
+		{
+			char currentChar; 
+			sprintf(&currentChar, "%x", vector[i]);
+			tmp += tmp;
+			if( i%2 == 0 )
+				tmp += " ";
+		}
+
+		tmp += "]";
+
+		return std::string(tmp);
+	}
+};
+
 // Bytesequence - whereas the encoding is defined by a natural number, i.e. 
 // postprocessing has to be performed 
-typedef struct
+struct ByteSequence
 {
 	std::string encoding;
 	fipa::acl::LengthValue length;
-	std::string bytes;
-} ByteSequence;
+	fipa::acl::ByteString bytes;
+
+	std::string toString()
+	{
+		std::string tmp;
+		tmp += boost::apply_visitor( ByteStringPrinter(encoding), bytes);
+		return tmp;
+	}
+
+};
 
 struct AgentID;
 //struct MessageParameter;
@@ -70,7 +115,7 @@ struct AgentID;
 typedef boost::recursive_wrapper<AgentID> Resolver;
 
 // To avoid dealing with circular dependecies we use a 'similar' definition to ParameterValue 
-typedef boost::variant<std::string, fipa::acl::Resolver, std::vector<fipa::acl::Resolver>, fipa::acl::ByteSequence > UserDefinedParameterValue;
+typedef boost::variant<std::string, fipa::acl::Resolver, std::vector<fipa::acl::Resolver>, fipa::acl::ByteSequence, fipa::acl::ByteString > UserDefinedParameterValue;
 
 typedef struct
 {
@@ -119,7 +164,7 @@ struct DateTime
 
 }; 
 
-typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence, fipa::acl::DateTime > ParameterValue;
+typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence, fipa::acl::DateTime, fipa::acl::ByteString > ParameterValue;
 
 typedef struct
 {
@@ -199,7 +244,9 @@ class MessagePrinter
 			{	
 				fipa::acl::ByteSequence bs = boost::get<fipa::acl::ByteSequence>(mp.data);
 				printf("encoding: %s\n", bs.encoding.c_str());
-				printf("content: %s\n", bs.bytes.c_str());
+
+				std::string printBytes = bs.toString();
+				printf("content: %s\n", printBytes.c_str());
 			} else if(mp.name == "reply-with")
 			{
 			} else if(mp.name == "reply-by")
@@ -250,7 +297,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::ByteSequence,
 	(std::string, encoding)
 	(fipa::acl::LengthValue, length)
-	(std::string, bytes)
+	(fipa::acl::ByteString, bytes)
 )
 
 // We only need additional access to the millisecond element
@@ -509,13 +556,39 @@ namespace fipa
 		{
 			// TODO: (optional) perform some encoding stuff here
 			// using arg.encoding
-			return arg.bytes;
+			return arg.toString();
 		}
 
 
 	};
 
 	phoenix::function<convertToStringImpl> convertToString;
+
+	struct convertToCharVectorImpl
+	{
+		template <typename T>
+		struct result
+		{
+			typedef std::vector<unsigned char> type;
+		};
+
+		template<typename T>
+		std::vector<unsigned char> operator()(T arg) const
+		{
+			int length = arg.size();
+			std::vector<unsigned char> tmp;
+
+			for(int i = 0; i < length; i++)
+			{
+				tmp.push_back((unsigned char) arg[i]);	
+	
+			}
+			return tmp; 
+		}
+
+	};
+	
+	phoenix::function<convertToCharVectorImpl> convertToCharVector;
 
 namespace acl
 {
@@ -807,7 +880,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 		// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
 		// TODO: check value and reset
-		byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToString(label::_1) ]
+		byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToCharVector(label::_1) ]
 			;
 		
 		len8 = byte_;
@@ -847,11 +920,13 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		
 		// Order of statement is relevant here, since the character \ needs to be matched
 		// first -- matching is greedy with char_ otherwise
-		stringLiteral = char_('"') 
-			       >> * (( char_("\\") >> char_('"') ) 	[ phoenix::at_c<2>(label::_val) += "\"" ]
-				  | (char_ - char_('"') ) 		[ phoenix::at_c<2>(label::_val) += label::_1 ]
-				)
-			      >> char_('"'); 
+		stringLiteral = ( char_('"') 
+			       >> * (( char_("\\") >> char_('"') ) 	[  label::_a += "\"" ]
+				  | (char_ - char_('"') ) 		[  label::_a += label::_1 ]
+			          )
+			       >> char_('"')
+				)					[ phoenix::at_c<2>(label::_val) = label::_a ]
+				; 
 
 		stringLiteralTerminated = stringLiteral 		[ label::_val = label::_1 ]
 					>> byte_(0x00)
@@ -868,9 +943,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 					>> qi::repeat(label::_r1)[byte_]     			[ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ]
 					;
 
-		byteLengthEncodedStringTerminated = byteLengthEncodedStringHeader 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
-						>> * (byte_ - byte_(0x00))			[ phoenix::at_c<2>(label::_val) += label::_1 ]
-						>> byte_(0x00)
+		byteLengthEncodedStringTerminated = ( byteLengthEncodedStringHeader 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
+						>> * (byte_ - byte_(0x00))			[ label::_a += label::_1 ]
+						>> byte_(0x00) 
+						) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
 						;
 		// two numbers in one byte - padding 00 if coding only one number
 		codedNumber = byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
@@ -946,14 +1022,14 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > binString;
 	qi::rule<Iterator, fipa::acl::DateTime() > binDateTimeToken;
 	qi::rule<Iterator, fipa::acl::Time(), qi::locals<std::string> > binDate;
-	qi::rule<Iterator, std::string() > binExpression;
+	qi::rule<Iterator, std::string()> binExpression;
 	qi::rule<Iterator, std::string() > binExpr;
 	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
 	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprEnd;
 
 	//qi::symbols<char, qi::rule<Iterator> > exprKeyword;
 
-	qi::rule<Iterator, std::string(boost::uint32_t) > byteSeq;
+	qi::rule<Iterator, std::vector<unsigned char>(boost::uint32_t) > byteSeq;
 	qi::rule<Iterator, unsigned short() > index;
 	qi::rule<Iterator, boost::uint_least8_t() > len8;
 	qi::rule<Iterator, boost::uint_least16_t() > len16;
@@ -970,11 +1046,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	qi::rule<Iterator> wordExceptionsStart;
 	qi::rule<Iterator> wordExceptionsGeneral;
 	qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > fipaString;
-	qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteral;
+	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > stringLiteral;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteralTerminated;
 	qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
 	qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
-	qi::rule<Iterator, fipa::acl::ByteSequence() > byteLengthEncodedStringTerminated;
+	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byteLengthEncodedStringTerminated;
 	qi::rule<Iterator, std::string()> codedNumber;
 	qi::rule<Iterator, char() > typeDesignator;
 
