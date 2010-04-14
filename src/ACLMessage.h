@@ -14,11 +14,7 @@ class ACLMessage {
 
 private:
         std::string performative;
-        /*
-          The sender, receiver and reply_to fields should be redefined by a an implemented agend id(AID) type.
-          AID generation an allocation ought to be attributes of the AMS system of the agent platform.
-          For testing and preliminary use std::string will be used(or int)
-        */
+       
         AgentAID* sender;
         std::set<AgentAID*>* receivers;
         std::set<AgentAID*>* reply_to;

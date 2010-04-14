@@ -35,36 +35,15 @@ void ACLMessage::initializeObject()
          content = std::string("\0");
 }
 ACLMessage::ACLMessage() 
-{/*
-	AgentAID* sender = NULL;
-        receivers = new std::set<AgentAID*>();
-	if (!(*receivers).empty()) (*receivers).clear();
-        reply_to = new std::set<AgentAID*>();
-	if (!(*reply_to).empty()) (*reply_to).clear();
-         language = std::string("\0");
-         encoding = std::string("\0");
-         ontology = std::string("\0");
-         protocol = std::string("\0");
-         conversation_id = std::string("\0");
-         reply_with = std::string("\0");
-         in_reply_to = std::string("\0");
-         reply_by = -1;
-         reply_by1 = std::string("\0");
-        params = new std::set<UserdefParam*>();
-		
-	if (!(*params).empty()) (*params).clear();
-		
-        
-         content = std::string("\0");
-*/
+{
 	initializeObject();
 }
 
 ACLMessage::ACLMessage(int perf)
 
 {
-initializeObject();
-performative = ACLMessage::perfs[perf];
+	initializeObject();
+	performative = ACLMessage::perfs[perf];
 }
 
 ACLMessage::ACLMessage(std::string perf) {performative = perf; initializeObject();}
@@ -138,6 +117,7 @@ void ACLMessage::setUserdefParams(std::set<UserdefParam*>* p) {params = p;}
 
 
 std::string ACLMessage::getReplyBy1(){return reply_by1;}
+
 void ACLMessage::setReplyBy1(std::string date1){reply_by1 = date1;}
 
 }//end of acl namespace

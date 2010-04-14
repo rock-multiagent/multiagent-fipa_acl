@@ -48,27 +48,28 @@ int main(int argc, char** argv)
 ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
 
 	
-    (*m3).setConversationID("plm");
-    (*m3).setReplyBy1("20091201010101111");
+    //(*m3).setConversationID("plm");
+    //(*m3).setReplyBy1("20091201010101111");
 
 	UserdefParam *p = new UserdefParam();
 //std::cout<<"1\n";
 	(*p).setName(std::string("cretzu")); 
 	(*p).setValue(std::string("mare"));
-	(*m3).addUserdefParam(p); 
+	//(*m3).addUserdefParam(p); 
 	
 	UserdefParam *p1 = new UserdefParam();
 
 	(*p1).setName(std::string("cretzu")); 
 	(*p1).setValue(std::string("marf")); ;
-	(*m3).addUserdefParam(p1); 
+	//(*m3).addUserdefParam(p1); 
 
 
 	AgentAID *a1 = new AgentAID(std::string("r1"));
-	(*a1).addAdress(std::string("adr1"));
-	(*a1).addAdress(std::string("adr2"));	
+	//(*a1).addAdress(std::string("adr1"));
+	//(*a1).addAdress(std::string("adr2"));	
 	(*m3).setSender(a1);
-	
+	(*a1).addUserdefParam(p1);
+/*	
 	AgentAID *a2 = new AgentAID(std::string("r2"));
 	AgentAID *a3 = new AgentAID(std::string("r3"));
 	AgentAID *a4 = new AgentAID(std::string("r4"));
@@ -107,7 +108,7 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	UserdefParam *p2 = new UserdefParam();
 	(*p2).setName(std::string("cretzu")); 
 	(*p2).setValue(std::string("marf")); ;
-	(*a1).addUserdefParam(p2); 
+	//(*a1).addUserdefParam(p2); 
 	(*m3).addUserdefParam(p2);
 	
 	(*m3).addUserdefParam(p2);
@@ -129,7 +130,7 @@ ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 (*m3).setEncoding(std::string("encoding"));
 (*m3).setOntology(std::string("myontology"));
 (*m3).setContent(std::string("my_content"));
-
+*/
 
   //printm(*m);
     //getch();
@@ -141,10 +142,11 @@ ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	//std::cout<<int('\0')<<0<<std::endl;
 	//	std::cout<<char(21)<<"\t"<<int(a.getBitMessage()[3])<<std::endl;
 	
-	if (!a.printParsedMessage(std::string("TestMessage23.txt")))
+	if (!a.printParsedMessage(std::string("TestMessage26.txt")))
 		return 1;
+
 delete m3;
-delete m4;  
+/*delete m4;  
 delete a1;
 delete a2;
 delete a3;
@@ -156,6 +158,7 @@ delete p3;
 delete p;
 delete p1;
 delete p2;
+  */
     return 0;
 }
  /*               
