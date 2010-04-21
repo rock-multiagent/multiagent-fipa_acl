@@ -1,9 +1,9 @@
-SET(main_cpp main.cpp)
+#SET(main_cpp main.cpp)
 # Set 
 SET(module_name ${PROJECT_NAME})
 SET(sources 
 	# Insert your sources here
-   #     dummy.cpp
+	message_parser.cpp
 )
 
 find_file(executable ${main_cpp} PATHS ${CMAKE_CURRENT_SOURCE_DIR} NO_DEFAULT_PATH)
@@ -14,8 +14,9 @@ else()
 endif(executable)
 
 find_file(projectbinary ${PROJECT_NAME})
+
 if(projectbinary)
-	target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${USER_DEFINED_LIBS})
+	target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${USER_DEFINED_LIBS} ${MessageParser_LIBRARY})
 	install(TARGETS ${PROJECT_NAME} 
 			RUNTIME DESTINATION bin
 			LIBRARY DESTINATION lib

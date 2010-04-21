@@ -49,6 +49,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 ##### End specification of build directory ##############################
 
+include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
+pkg_check_modules(MessageGenerator "message-generator")
+
+include_directories(${MessageGenerator_INCLUDE_DIRS})
+link_directories(${MessageGenerator_LIBRARY_DIRS})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)

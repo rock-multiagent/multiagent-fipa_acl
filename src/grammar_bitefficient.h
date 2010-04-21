@@ -1,3 +1,5 @@
+#ifndef RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#define RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
 /**
  *
  * \file grammar_bitefficient.h
@@ -1122,4 +1124,4 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 } // end namespace acl
 } // end namespace fipa
 
-
+#endif // RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
