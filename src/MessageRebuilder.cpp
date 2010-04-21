@@ -35,21 +35,27 @@ ACLMessage* MessageRebuilder::buildMessage(Message parsedMsg)
 void MessageRebuilder::buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage* msg)
 {
     std::vector<MessageParameter>::iterator it = parsedParams.begin();
+    UserdefParam *_param;
     
     for (it; it != parsedParams.end(); it++)
     {
-        if (!buildPredefMessageParameters(*it,msg)); //buildUserdefParam(*it,msg);
+        if (!buildPredefMessageParameters(*it,msg)) 
+        {
+	  _param = buildUserdefParameter(*it);
+	  msg->addUserdefParam(_param);
+	  
+        }
     }
 }
 
 int MessageRebuilder::buildPredefMessageParameters(MessageParameter param,ACLMessage* msg)
 {
-    /*
+    
     if (!param.name.compare(std::string("sender"))) 	{buildSender(param, msg); return 1;}
     if (!param.name.compare(std::string("receiver")))	{buildReceiver(param, msg); return 1;}
-    */
+    
     if (!param.name.compare(std::string("content")))	{buildContent(param, msg); return 1;}
-    /*
+    
     if (!param.name.compare(std::string("reply-with")))	{buildReplyWith(param, msg); return 1;}
     if (!param.name.compare(std::string("reply-by")))	{buildReplyBy(param, msg); return 1;}
     if (!param.name.compare(std::string("in-reply-to")))	{buildInReplyTo(param, msg); return 1;}
@@ -59,32 +65,32 @@ int MessageRebuilder::buildPredefMessageParameters(MessageParameter param,ACLMes
     if (!param.name.compare(std::string("ontology")))	{buildOntology(param, msg); return 1;}
     if (!param.name.compare(std::string("protocol")))	{buildProtocol(param, msg); return 1;}
     if (!param.name.compare(std::string("conversation-id"))){buildConversationID(param, msg); return 1;}
-    */
+    
     return 0;
 }
 
 void MessageRebuilder::buildSender(MessageParameter param,ACLMessage* msg)
 {
-   /* 
+    
     fipa::acl::ParameterValue *mydata = new fipa::acl::ParameterValue;
     *mydata = param.data;
     
-    AgentID temp = boost::get(mydata);
+    AgentID temp = boost::get<AgentID>(mydata);
     AgentAID *_sender = buildAgentAID(temp);
     
     msg->setSender(_sender);
-    */
+    
 }
-/*
+
 AgentAID* MessageRebuilder::buildAgentAID(AgentID agent)
 {
     AgentAID* retAg = new AgentAID(agent.name);
     
     // setting the adresses
-    if (!agent.adresses.empty()) 
+    if (!agent.addresses.empty()) 
     {
-        std::vector<std::string>::iterator it = agent.adresses.begin();
-        for(it; it != agent.adresses.end(); it++)
+        std::vector<std::string>::iterator it = agent.addresses.begin();
+        for(it; it != agent.addresses.end(); it++)
 	  retAg->addAdress(*it);
     }
     // building resolvers
@@ -116,7 +122,7 @@ void MessageRebuilder::buildResolvers(AgentAID *workAg, AgentID agent)
     }
 }
 
-void MessageRebuilder::buildParameters(AgentAID* workAg, AgentID agent)
+void MessageRebuilder::buildAgentParameters(AgentAID* workAg, AgentID agent)
 {
     
     std::vector<UserDefinedParameter>::iterator it = agent.parameters.begin();
@@ -134,7 +140,7 @@ UserdefParam* MessageRebuilder::buildUserdefParameter(UserDefinedParameter param
     UserDefinedParameterValue *_data = new UserdDefinedParameterValue();
     *_data = param.data;
     
-    std::string _value = boost::get(_data); // boost::get() -> to return a specific type value from a boost::variant
+    std::string _value = boost::get<std::string>(_data); // boost::get() -> to return a specific type value from a boost::variant
     retParam->setName(param.name);
     retParam->setValue(_value);
     
@@ -150,7 +156,7 @@ void MessageRebuilder::buildReceiver(MessageParameter param, ACLMessage *msg)
     *_data = param.data;
     
     
-    std::vector<AgentID> unbuiltReceivers = boost::get(_data); // boost::get() -> to return a specific type value from a boost::variant
+    std::vector<AgentID> unbuiltReceivers = boost::get<Receiver>(_data); // boost::get() -> to return a specific type value from a boost::variant
     std::vector<AgentID>::iterator it = unbuiltReceivers.begin();
     for (it; it!= unbuiltReceivers.end(); it++)
     {
@@ -159,7 +165,132 @@ void MessageRebuilder::buildReceiver(MessageParameter param, ACLMessage *msg)
     }
     delete _data;
 }
-*/
+
+void MessageRebuilder::buildReplyWith(MessageParameter param, ACLMessage *msg)
+{
+    ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setReplyWith(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+void MessageRebuilder::buildReplyBy(MessageParameter param, ACLMessage *msg)
+{
+    ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setReplyBy1(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+void MessageRebuilder::buildInReplyTo(MessageParameter param, ACLMessage *msg)
+{
+    ParameterValue *mydata = new ParameterValue;
+    AgentAID *result;
+     *mydata = param.data;
+          
+     std::vector<AgentID> _value;
+     _value = boost::get<std::vector<AgentID> >(mydata);
+     
+     std::vector<AgentID>::iterator it = _value.begin();
+     for (it; it != _value.end(); it++)
+     {
+         result = buildAgentAID(*it);
+         msg->addReplyTo(result);
+     }
+     
+     delete mydata;
+     
+}
+
+void MessageRebuilder::buildReplyTo(MessageParameter param, ACLMessage *msg)
+{
+     ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setReplyTo(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+void MessageRebuilder::builLanguage(MessageParameter param, ACLMessage *msg)
+{
+     ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setLanguage(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+void MessageRebuilder::buildEncoding(MessageParameter param, ACLMesssage *msg)
+{
+     ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setEncoding(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+void MessageRebuilder::builOntology(MessageParameter param, ACLMessage *msg)
+{
+     ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setOntology(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+void MessageParameter::buildProtocol(MessageParameter param, ACLMessage *msg)
+{
+     ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setProtocol(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+void MessageRebuilder::builConversationID(MessageParameter param, ACLMessage *msg)
+{
+     ParameterValue *mydata = new ParameterValue;
+     *mydata = param.data;
+          
+     std::string *_value = new std::string();
+     _value = boost::get<std::string>(mydata);
+     msg->setConversationID(*_value);
+     
+     delete mydata;
+     delete _value;
+}
+
+   
 void MessageRebuilder::buildContent(MessageParameter param,ACLMessage* msg)
 {
      ParameterValue *mydata = new ParameterValue;
@@ -168,7 +299,7 @@ void MessageRebuilder::buildContent(MessageParameter param,ACLMessage* msg)
      //mydata = param.data;
      
      
-     std::string *_content = new std::string();
+     std::string *_content =  std::string();
      _content = boost::get<std::string>(mydata);
      msg->setContent(*_content);
      
