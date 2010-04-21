@@ -33,7 +33,7 @@ void ACLMessageOutputParser::setMessage(ACLMessage* a)
   		  useCodeTables = 0;
                   updateCodeTables = 1;
                   version = "1.0";
-                  res_depth = 2; 
+                  res_depth = 1; 
 }
 
 
@@ -42,7 +42,7 @@ ACLMessageOutputParser::ACLMessageOutputParser()
                   useCodeTables = 0;
                   updateCodeTables = 1;
                   version = "1.0";
-                  res_depth = 3; 
+                  res_depth = 1; 
 			                   
 }
 

@@ -8,6 +8,7 @@ SET(sources
 	AgentAID.cpp
 	UserdefParam.cpp
 	ACLMessageOutputParser.cpp
+	MessageRebuilder.cpp
         ) 
 #SET(USER_DEFINED_LIBS
 #	ACLMessage.h

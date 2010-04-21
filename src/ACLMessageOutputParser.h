@@ -24,7 +24,7 @@ namespace acl {
 class ACLMessageOutputParser {
 
        private:
-/*
+/**
 	@msg message to be parsed
 
 	@useCodeTables flag to determine whether we use code tables or not
@@ -62,8 +62,7 @@ class ACLMessageOutputParser {
 		std::string getBitMessage();
 		void setMessage(ACLMessage* a);
        
-       //private:
-	public: // temporary, for testing purposes
+       private: // temporary, for testing purposes
                char getBitEndOfColl();
                std::string  getBitHeader();
                char  getBitMessageID();

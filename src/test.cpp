@@ -13,9 +13,11 @@
 #include <string>
 #include <cstring>
 //#include <conio.h>
-#include "ACLMessage.h"
-#include "ACLMessageOutputParser.h"
-#include "UserdefParam.h"
+//#include "ACLMessage.h"
+//#include "ACLMessageOutputParser.h"
+//#include "UserdefParam.h"
+//#include "../../message-parser/src/grammar_bitefficient.h"
+#include "MessageRebuilder.h"
 
 using namespace fipa::acl;
 
@@ -51,24 +53,24 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
     //(*m3).setConversationID("plm");
     //(*m3).setReplyBy1("20091201010101111");
 
-	UserdefParam *p = new UserdefParam();
+	//UserdefParam *p = new UserdefParam();
 //std::cout<<"1\n";
-	(*p).setName(std::string("cretzu")); 
-	(*p).setValue(std::string("mare"));
+	//(*p).setName(std::string("cretzu")); 
+	//(*p).setValue(std::string("mare"));
 	//(*m3).addUserdefParam(p); 
 	
-	UserdefParam *p1 = new UserdefParam();
+	//UserdefParam *p1 = new UserdefParam();
 
-	(*p1).setName(std::string("cretzu")); 
-	(*p1).setValue(std::string("marf")); ;
+	//(*p1).setName(std::string("cretzu")); 
+	//(*p1).setValue(std::string("marf")); ;
 	//(*m3).addUserdefParam(p1); 
 
 
-	AgentAID *a1 = new AgentAID(std::string("r1"));
+	//AgentAID *a1 = new AgentAID(std::string("r1"));
 	//(*a1).addAdress(std::string("adr1"));
 	//(*a1).addAdress(std::string("adr2"));	
-	(*m3).setSender(a1);
-	(*a1).addUserdefParam(p1);
+	//(*m3).setSender(a1);
+	//(*a1).addUserdefParam(p1);
 /*	
 	AgentAID *a2 = new AgentAID(std::string("r2"));
 	AgentAID *a3 = new AgentAID(std::string("r3"));
@@ -134,6 +136,7 @@ ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 
   //printm(*m);
     //getch();
+    (*m3).setContent("mycontent");
 	ACLMessageOutputParser a = ACLMessageOutputParser();
 	a.setMessage(m3);
 	std::cout<<a.getBitMessage()<<std::endl<<a.getBitMessage().length()<<std::endl;
@@ -159,6 +162,29 @@ delete p;
 delete p1;
 delete p2;
   */
+  
+  	std::string storage = a.getBitMessage();
+  
+   
+  	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
+	bitefficient_grammar grammar;
+	fipa::acl::Message parseTree;
+
+	using boost::spirit::ascii::space;
+	std::string::const_iterator iter = storage.begin();
+	std::string::const_iterator end = storage.end();
+	bool r = phrase_parse(iter, end, grammar, space, parseTree);
+
+	if(r && iter == end)
+	{
+	ACLMessage *rebuilt;
+	MessageRebuilder rebuilder = MessageRebuilder(); 
+	rebuilt = rebuilder.buildMessage(parseTree);
+  	}
+  
+  
+  
+  
     return 0;
 }
  /*               
