@@ -1,18 +1,18 @@
 #include "message_parser.h"
-#include "bitefficient_grammar.h"
+#include "grammar_bitefficient.h"
 
-namespace fipa { acl {
+namespace fipa { namespace acl {
 
 
 MessageParser::MessageParser()
 {
 }
 
-MessageParser::~MessagerParser()
+MessageParser::~MessageParser()
 {
 }
 
-fipa::acl::ACLMessage parseData(const std::vector<uint_8_t>& data)
+fipa::acl::ACLMessage parseData(const std::vector<uint8_t>& data)
 {
  
   fipa::acl::ACLMessage message;
