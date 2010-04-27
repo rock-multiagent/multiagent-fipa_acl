@@ -17,7 +17,7 @@
 //#include "ACLMessageOutputParser.h"
 //#include "UserdefParam.h"
 //#include "../../message-parser/src/grammar_bitefficient.h"
-#include "MessageRebuilder.h"
+//#include "MessageRebuilder.h"
 
 using namespace fipa::acl;
 
@@ -178,8 +178,8 @@ delete p2;
 	if(r && iter == end)
 	{
 	ACLMessage *rebuilt;
-	MessageRebuilder rebuilder = MessageRebuilder(); 
-	rebuilt = rebuilder.buildMessage(parseTree);
+	//MessageRebuilder rebuilder = MessageRebuilder(); 
+	//rebuilt = rebuilder.buildMessage(parseTree);
   	}
   
   

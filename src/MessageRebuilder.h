@@ -32,7 +32,7 @@ class MessageRebuilder {
         void buildReplyTo(MessageParameter param, ACLMessage *msg);
         void builLanguage(MessageParameter param, ACLMessage *msg);
         void buildEncoding(MessageParameter param, ACLMessage *msg);
-        void builOntology(MessageParameter param, ACLMessage *msg);
+        void buildOntology(MessageParameter param, ACLMessage *msg);
         void buildProtocol(MessageParameter param, ACLMessage *msg);
         void builConversationID(MessageParameter param, ACLMessage *msg);
         void buildContent(MessageParameter param,ACLMessage* msg);

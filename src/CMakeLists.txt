@@ -1,4 +1,5 @@
-SET(main_cpp test.cpp)
+#SET(main_cpp test.cpp)
+SET(main_cpp )
 # Set 
 SET(module_name ${PROJECT_NAME})
 SET(sources 
@@ -8,7 +9,7 @@ SET(sources
 	AgentAID.cpp
 	UserdefParam.cpp
 	ACLMessageOutputParser.cpp
-	MessageRebuilder.cpp
+#	MessageRebuilder.cpp
         ) 
 #SET(USER_DEFINED_LIBS
 #	ACLMessage.h
@@ -22,6 +23,7 @@ find_file(executable ${main_cpp} PATHS ${CMAKE_CURRENT_SOURCE_DIR} NO_DEFAULT_PA
 if(executable)
     add_executable(${PROJECT_NAME} ${sources} ${main_cpp} ${sources_MOC_HDRS} ${sources_ui})   
 else()
+    message("Add lib")
     add_library(${PROJECT_NAME} ${sources} ${sources_MOC_HDRS})
 endif(executable)
 

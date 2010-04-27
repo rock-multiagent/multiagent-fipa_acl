@@ -32,7 +32,7 @@ ACLMessage* MessageRebuilder::buildMessage(Message parsedMsg)
 	
 }
 
-void MessageRebuilder::buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage* msg)
+void MessageRebuilder::buildParameters(std::vector<fipa::acl::MessageParameter> parsedParams,ACLMessage* msg)
 {
     std::vector<MessageParameter>::iterator it = parsedParams.begin();
     UserdefParam *_param;
@@ -48,7 +48,7 @@ void MessageRebuilder::buildParameters(std::vector<MessageParameter> parsedParam
     }
 }
 
-int MessageRebuilder::buildPredefMessageParameters(MessageParameter param,ACLMessage* msg)
+int MessageRebuilder::buildPredefMessageParameters(fipa::acl::MessageParameter param,ACLMessage* msg)
 {
     
     if (!param.name.compare(std::string("sender"))) 	{buildSender(param, msg); return 1;}
