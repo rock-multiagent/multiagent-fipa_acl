@@ -19,8 +19,6 @@
 //#include "../../message-parser/src/grammar_bitefficient.h"
 //#include "MessageRebuilder.h"
 
-using namespace fipa::acl;
-
 
 
 void printm(ACLMessage m){
