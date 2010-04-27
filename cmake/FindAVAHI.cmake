@@ -1,0 +1,46 @@
+FIND_PATH(AVAHICOMMON_INCLUDE_DIR avahi-common/defs.h
+  /usr/local/include
+  /usr/include
+)
+
+FIND_PATH(AVAHICLIENT_INCLUDE_DIR avahi-client/client.h
+  /usr/local/include
+  /usr/include
+)
+
+
+
+FIND_LIBRARY(AVAHICOMMON_LIBRARY
+  NAMES avahi-common
+  PATHS /usr/lib /usr/local/lib 
+)
+
+FIND_LIBRARY(AVAHICLIENT_LIBRARY
+  NAMES avahi-client
+  PATHS /usr/lib /usr/local/lib 
+)
+
+
+IF (AVAHICOMMON_INCLUDE_DIR AND AVAHICLIENT_INCLUDE_DIR AND AVAHICOMMON_LIBRARY AND AVAHICLIENT_LIBRARY)
+    SET( AVAHI_FOUND "YES" )
+ENDIF()
+    
+    
+IF (AVAHI_FOUND)
+
+    set(AVAHI_INCLUDES ${AVAHICOMMON_INCLUDE_DIR} ${AVAHICLIENT_INCLUDE_DIR})
+    set(AVAHI_LIBRARIES ${AVAHICOMMON_LIBRARY} ${AVAHICLIENT_LIBRARY})    
+
+   IF (NOT AVAHI_FIND_QUIETLY)
+      MESSAGE(STATUS:\n
+         "FOUND AVAHI: 
+             LIBRARIES: ${AVAHICOMMON_LIBRARY}, ${AVAHICLIENT_LIBRARY}
+             INCLUDES: ${AVAHICOMMON_INCLUDE_DIR}, ${AVAHICLIENT_INCLUDE_DIR}")
+   ENDIF ()
+
+
+ELSE ()
+   IF (AVAHI_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Couldn't find avahi-common and avahi-client development files")
+   ENDIF ()
+ENDIF ()
