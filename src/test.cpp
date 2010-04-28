@@ -16,13 +16,11 @@
 #include "ACLMessage.h"
 #include "ACLMessageOutputParser.h"
 #include "UserdefParam.h"
-//#include "../../message-parser/src/grammar_bitefficient.h"
+
 #include "../../message-parser/src/message_parser.h"
 
 
 using namespace fipa::acl;
-
-
 
 void printm(ACLMessage m){
      std::cout<<m.getPerformative()<<std::endl<<m.getReplyBy()<<std::endl<<m.getConversationID()<<std::endl;    
@@ -191,8 +189,8 @@ delete p2;
 	if(r && iter == end)
 	{
 	ACLMessage *rebuilt;
-	MessageRebuilder rebuilder = MessageRebuilder(); 
-	rebuilt = rebuilder.buildMessage(parseTree);
+	//MessageRebuilder rebuilder = MessageRebuilder(); 
+	//rebuilt = rebuilder.buildMessage(parseTree);
   	}
   */
   
