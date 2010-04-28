@@ -8,7 +8,9 @@ SET(sources
 	AgentAID.cpp
 	UserdefParam.cpp
 	ACLMessageOutputParser.cpp
-	MessageRebuilder.cpp
+	../../message-parser/src/message_parser.cpp
+	# message_parser.cpp
+	# MessageRebuilder.cpp
         ) 
 #SET(USER_DEFINED_LIBS
 #	ACLMessage.h
@@ -27,7 +29,7 @@ endif(executable)
 
 find_file(projectbinary ${PROJECT_NAME})
 if(projectbinary)
-	target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${USER_DEFINED_LIBS})
+	target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS} ${USER_DEFINED_LIBS} )
 	install(TARGETS ${PROJECT_NAME} 
 			RUNTIME DESTINATION bin
 			LIBRARY DESTINATION lib

@@ -13,11 +13,12 @@
 #include <string>
 #include <cstring>
 //#include <conio.h>
-//#include "ACLMessage.h"
-//#include "ACLMessageOutputParser.h"
-//#include "UserdefParam.h"
+#include "ACLMessage.h"
+#include "ACLMessageOutputParser.h"
+#include "UserdefParam.h"
 //#include "../../message-parser/src/grammar_bitefficient.h"
-#include "MessageRebuilder.h"
+#include "../../message-parser/src/message_parser.h"
+
 
 using namespace fipa::acl;
 
@@ -125,21 +126,24 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 
    
 ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
-(*m3).setProtocol(std::string("myprotocol")); 
-(*m3).setLanguage(std::string("mylang")); 
-(*m3).setReplyWith(std::string("replywith"));
-(*m3).setInReplyTo(std::string("inreplyto"));
-(*m3).setEncoding(std::string("encoding"));
+*/
+//(*m3).setProtocol(std::string("myprotocol")); 
+//(*m3).setLanguage(std::string("mylang")); 
+(*m3).setReplyWith(std::string("myreplywith"));
+//(*m3).setInReplyTo(std::string("inreplyto"));
+//(*m3).setEncoding(std::string("encoding"));
 (*m3).setOntology(std::string("myontology"));
 (*m3).setContent(std::string("my_content"));
-*/
+//(*m3).setConversationID(std::string("convID"));
+
 
   //printm(*m);
     //getch();
-    (*m3).setContent("mycontent");
+    
 	ACLMessageOutputParser a = ACLMessageOutputParser();
 	a.setMessage(m3);
-	std::cout<<a.getBitMessage()<<std::endl<<a.getBitMessage().length()<<std::endl;
+	std::string storage = a.getBitMessage();
+	//std::cout<<storage<<std::endl<<a.getBitMessage().length()<<std::endl;
 	//std::cout<<a.getBitHeader()<<std::endl;
 	//std::cout<<a.getBitMessageType()<<std::endl;
 	//std::cout<<int('\0')<<0<<std::endl;
@@ -162,9 +166,18 @@ delete p;
 delete p1;
 delete p2;
   */
+
+        std::cout<<"written\n";
   
-  	std::string storage = a.getBitMessage();
-  
+  	//std::string storage = a.getBitMessage();
+	std::cout<<"storage_set\n";
+	MessageParser rebuilder = MessageParser();
+	std::cout<<"rebuilder created\n";
+	ACLMessage* rebuilt = rebuilder.parseData(storage);
+	
+	if (!rebuilt) std::cout <<"null message returned\n";
+	std::cout<<"rebuilt the message\n";
+ /* 
    
   	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
 	bitefficient_grammar grammar;
@@ -181,8 +194,10 @@ delete p2;
 	MessageRebuilder rebuilder = MessageRebuilder(); 
 	rebuilt = rebuilder.buildMessage(parseTree);
   	}
+  */
   
-  
+    //std::cout<<(*rebuilt).getContent().length()<<std::endl;
+    std::cout<<(*rebuilt).getReplyWith()<<std::endl;
   
   
     return 0;
