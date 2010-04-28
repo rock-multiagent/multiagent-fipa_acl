@@ -1,3 +1,5 @@
+#ifndef RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#define RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
 /**
  *
  * \file grammar_bitefficient.h
@@ -412,7 +414,16 @@ namespace fipa
 //#####################################################
 	// In order to use functions as semantic actions
 	// lazy evaluation is required	
-	struct extractFromCodetableImpl
+	
+namespace acl
+{
+
+template <typename Iterator>
+// IMPORTANT: ACLMessage with following () otherwise, compiler error
+struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii::space_type>
+{
+        
+        struct extractFromCodetableImpl
 	{
 		template <typename T>
 		struct result
@@ -653,13 +664,6 @@ namespace fipa
 	
 	phoenix::function<convertToCharVectorImpl> convertToCharVector;
 
-namespace acl
-{
-
-template <typename Iterator>
-// IMPORTANT: ACLMessage with following () otherwise, compiler error
-struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii::space_type>
-{
 	bitefficient_grammar() : bitefficient_grammar::base_type(aclCommunicativeAct, "bitefficient-grammar")
 	{
 		using qi::on_error;
@@ -1122,4 +1126,4 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 } // end namespace acl
 } // end namespace fipa
 
-
+#endif // RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
