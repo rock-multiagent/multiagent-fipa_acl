@@ -73,7 +73,8 @@ public:
 	
 	/**
 	* Build a string for the given type
-	* \param vector One of the types for the variant that this printer is implemented for
+	* \param s One of the types for the variant that this printer is implemented for
+	* \return string 
 	*/
 	std::string operator()(std::string s) const
 	{

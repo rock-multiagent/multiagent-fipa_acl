@@ -1,3 +1,11 @@
+/**
+ *
+ * \file message_parser.cpp
+ * \author Mircea Cretu Stancu
+ * \brief rebuilds an ACLMessage from a parsed bit-efficient encoded received message
+ * 
+ * \version 1.0
+ */
 #include "message_parser.h"
 
 
@@ -47,8 +55,6 @@ ACLMessage*  MessageParser::parseData(const std::string storage)
 	message = buildMessage(parseTree);
   	}
 	
-	std::cout<< message->getReplyWith()<<"\n";
-	
 	return message;
   // use the stuff as shown in the main.cpp an use the tools given in bitefficient_grammar
   // to populate the ACLMessage
@@ -60,12 +66,10 @@ ACLMessage* MessageParser::buildMessage(Message parsedMsg)
 	ACLMessage *msg = new ACLMessage();
 	msg->setPerformative(parsedMsg.type);
 	
-	std::cout<<"type set "<< msg->getPerformative()<<std::endl;
+	
 	if (parsedMsg.parameters.empty()) std::cout<<"empty param list\n";
 	
 	buildParameters(parsedMsg.parameters,msg);
-	
-	std::cout<< msg->getReplyWith()<<"\n";
 	
 	return msg;
 	
@@ -75,16 +79,15 @@ void MessageParser::buildParameters(std::vector<MessageParameter> parsedParams,A
 {
     std::vector<MessageParameter>::iterator it = parsedParams.begin();
     UserdefParam *_param;
-    std::cout<<"build Parameters call\n";
+ 
     for (it; it != parsedParams.end(); it++)
     {	
-        std::cout<<"param iteration\n";
+    
         if (!buildPredefMessageParameters(*it,msg)) 
         {
-	  std::cout<<"not predef\n";
-	  _param = buildUserdefParameter(*it);
-	  std::cout<<"userdef param returned\n";
-	  msg->addUserdefParam(_param);
+	
+	 _param = buildUserdefParameter(*it);
+	 msg->addUserdefParam(_param);
 	  
         }
     }
@@ -93,20 +96,20 @@ void MessageParser::buildParameters(std::vector<MessageParameter> parsedParams,A
 int MessageParser::buildPredefMessageParameters(MessageParameter param,ACLMessage* msg)
 {
     
-    if (!param.name.compare(std::string("sender"))) 	{buildSender(param, msg); std::cout<<"1\n"; return 1;}
-    if (!param.name.compare(std::string("receiver")))	{buildReceiver(param, msg); std::cout<<"2\n"; return 1;}
+    if (!param.name.compare(std::string("sender"))) 	{buildSender(param, msg); return 1;}
+    if (!param.name.compare(std::string("receiver")))	{buildReceiver(param, msg); return 1;}
     
-    if (!param.name.compare(std::string("content")))	{std::cout<<"content\n"; buildContent(param, msg);  return 1;}
+    if (!param.name.compare(std::string("content")))	{buildContent(param, msg);  return 1;}
     
-    if (!param.name.compare(std::string("reply-with")))	{buildReplyWith(param, msg); std::cout<<"3\n"; return 1;}
-    if (!param.name.compare(std::string("reply-by")))	{buildReplyBy(param, msg); std::cout<<"4\n"; return 1;}
-    if (!param.name.compare(std::string("in-reply-to")))	{buildInReplyTo(param, msg); std::cout<<"5\n"; return 1;}
-    if (!param.name.compare(std::string("reply-to")))	{buildReplyTo(param, msg); std::cout<<"6\n"; return 1;}
-    if (!param.name.compare(std::string("language")))	{buildLanguage(param, msg); std::cout<<"7\n"; return 1;}
-    if (!param.name.compare(std::string("encoding")))	{buildEncoding(param, msg); std::cout<<"8\n"; return 1;}
-    if (!param.name.compare(std::string("ontology")))	{buildOntology(param, msg); std::cout<<"9\n"; return 1;}
-    if (!param.name.compare(std::string("protocol")))	{buildProtocol(param, msg); std::cout<<"10\n"; return 1;}
-    if (!param.name.compare(std::string("conversation-id"))){buildConversationID(param, msg); std::cout<<"11\n"; return 1;}
+    if (!param.name.compare(std::string("reply-with")))	{buildReplyWith(param, msg); return 1;}
+    if (!param.name.compare(std::string("reply-by")))	{buildReplyBy1(param, msg); return 1;}
+    if (!param.name.compare(std::string("in-reply-to")))	{buildInReplyTo(param, msg); return 1;}
+    if (!param.name.compare(std::string("reply-to")))	{buildReplyTo(param, msg); return 1;}
+    if (!param.name.compare(std::string("language")))	{buildLanguage(param, msg); return 1;}
+    if (!param.name.compare(std::string("encoding")))	{buildEncoding(param, msg); return 1;}
+    if (!param.name.compare(std::string("ontology")))	{buildOntology(param, msg); return 1;}
+    if (!param.name.compare(std::string("protocol")))	{buildProtocol(param, msg); return 1;}
+    if (!param.name.compare(std::string("conversation-id"))){buildConversationID(param, msg); return 1;}
     
     std::cout<<"no-predef\n";
     return 0;
@@ -180,49 +183,40 @@ UserdefParam* MessageParser::buildUserdefParameter(UserDefinedParameter param)
 {
     UserdefParam *retParam = new UserdefParam();
     // I create a pointer with the value of the data so that I can call the boost::get() function that I want (*variant<...>*)
-    UserDefinedParameterValue *_data = new UserDefinedParameterValue();
-    *_data = param.data;
+
     
-    std::string *_value = boost::get<std::string>(_data); // boost::get() -> to return a specific type value from a boost::variant
+    std::string _value = boost::get<std::string>(param.data); // boost::get() -> to return a specific type value from a boost::variant
     retParam->setName(param.name);
-    retParam->setValue(*_value);
+    retParam->setValue(_value);
     
-    delete _data;
     return retParam;
 }
 
 UserdefParam* MessageParser::buildUserdefParameter(MessageParameter param)
 {
-    std::cout<<"userdef call\n";
+    //std::cout<<"userdef call\n";
     UserdefParam *retParam = new UserdefParam();
-    // I create a pointer with the value of the data so that I can call the boost::get() function that I want (*variant<...>*)
-    ParameterValue *_data = new ParameterValue();
-    *_data = param.data;
     
-    std::string *_value = boost::get<std::string>(_data); // boost::get() -> to return a specific type value from a boost::variant
+    std::string _value = boost::get<std::string>(param.data); // boost::get() -> to return a specific type value from a boost::variant
     retParam->setName(param.name);
-    retParam->setValue(*_value);
+    retParam->setValue(_value);
     
-    delete _data;
     return retParam;
+
 }
 
 void MessageParser::buildReceiver(MessageParameter param, ACLMessage *msg)
 {
-    AgentAID* _receiver;
-    // I create a pointer with the value of the data so that I can call the boost::get() function that I want (*variant<...>*)
-    ParameterValue *_data = new ParameterValue();
-    *_data = param.data;
+    AgentAID* _receiver;    
     
-    
-    std::vector<AgentID>* unbuiltReceivers = boost::get<std::vector<AgentID> >(_data); // boost::get() -> to return a specific type value from a boost::variant
-    std::vector<AgentID>::iterator it = unbuiltReceivers->begin();
-    for (it; it!= unbuiltReceivers->end(); it++)
+    std::vector<AgentID> unbuiltReceivers = boost::get<std::vector<AgentID> >(param.data); // boost::get() -> to return a specific type value from a boost::variant
+    std::vector<AgentID>::iterator it = unbuiltReceivers.begin();
+    for (it; it!= unbuiltReceivers.end(); it++)
     {
         _receiver = buildAgentAID(*it);
         msg->addReceiver(_receiver);
     }
-    delete _data;
+   
 }
 
 void MessageParser::buildReplyWith(MessageParameter param, ACLMessage *msg)
@@ -233,116 +227,69 @@ void MessageParser::buildReplyWith(MessageParameter param, ACLMessage *msg)
      msg->setReplyWith(_value);
 }
 
-void MessageParser::buildReplyBy(MessageParameter param, ACLMessage *msg)
+void MessageParser::buildReplyBy1(MessageParameter param, ACLMessage *msg)
 {
-    ParameterValue *mydata = new ParameterValue;
-     *mydata = param.data;
-          
-     std::string *_value = new std::string();
-     _value = boost::get<std::string>(mydata);
-     msg->setReplyBy1(*_value);
+     DateTime _value;
+     _value = boost::get<DateTime>(param.data);
      
-     delete mydata;
-     delete _value;
+     msg->setReplyBy1(_value.toString());
 }
 
 void MessageParser::buildReplyTo(MessageParameter param, ACLMessage *msg)
 {
-    ParameterValue *mydata = new ParameterValue;
     AgentAID *result;
-     *mydata = param.data;
           
-     std::vector<AgentID>* _value;
-     _value = boost::get<std::vector<AgentID> >(mydata);
+     std::vector<AgentID> _value;
+     _value = boost::get<std::vector<AgentID> >(param.data);
      
-     std::vector<AgentID>::iterator it = _value->begin();
-     for (it; it != _value->end(); it++)
+     std::vector<AgentID>::iterator it = _value.begin();
+     for (it; it != _value.end(); it++)
      {
          result = buildAgentAID(*it);
          msg->addReplyTo(result);
      }
-     
-     delete mydata;
-     delete _value;
-     
 }
 
 void MessageParser::buildInReplyTo(MessageParameter param, ACLMessage *msg)
 {
-     ParameterValue *mydata = new ParameterValue;
-     *mydata = param.data;
-          
-     std::string *_value = new std::string();
-     _value = boost::get<std::string>(mydata);
-     msg->setInReplyTo(*_value);
-     
-     delete mydata;
-     delete _value;
+     std::string _value = std::string();
+     _value = boost::get<std::string>(param.data);
+     msg->setInReplyTo(_value);
 }
 
 void MessageParser::buildLanguage(MessageParameter param, ACLMessage *msg)
 {
-     ParameterValue *mydata = new ParameterValue;
-     *mydata = param.data;
-          
-     std::string *_value = new std::string();
-     _value = boost::get<std::string>(mydata);
-     msg->setLanguage(*_value);
-     
-     delete mydata;
-     delete _value;
+     std::string _value = std::string();
+     _value = boost::get<std::string>(param.data);
+     msg->setLanguage(_value);
 }
 
 void MessageParser::buildEncoding(MessageParameter param, ACLMessage *msg)
 {
-     ParameterValue *mydata = new ParameterValue;
-     *mydata = param.data;
-          
-     std::string *_value = new std::string();
-     _value = boost::get<std::string>(mydata);
-     msg->setEncoding(*_value);
-     
-     delete mydata;
-     delete _value;
+     std::string _value = std::string();
+     _value = boost::get<std::string>(param.data);
+     msg->setEncoding(_value);
 }
 
 void MessageParser::buildOntology(MessageParameter param, ACLMessage *msg)
 {
-     ParameterValue *mydata = new ParameterValue;
-     *mydata = param.data;
-          
-     std::string *_value = new std::string();
-     _value = boost::get<std::string>(mydata);
-     msg->setOntology(*_value);
-     
-     delete mydata;
-     delete _value;
+     std::string _value = std::string();
+     _value = boost::get<std::string>(param.data);
+     msg->setOntology(_value);
 }
 
 void MessageParser::buildProtocol(MessageParameter param, ACLMessage *msg)
 {
-     ParameterValue *mydata = new ParameterValue;
-     *mydata = param.data;
-          
-     std::string *_value = new std::string();
-     _value = boost::get<std::string>(mydata);
-     msg->setProtocol(*_value);
-     
-     delete mydata;
-     delete _value;
+     std::string _value = std::string();
+     _value = boost::get<std::string>(param.data);
+     msg->setProtocol(_value);
 }
 
 void MessageParser::buildConversationID(MessageParameter param, ACLMessage *msg)
 {
-     ParameterValue *mydata = new ParameterValue;
-     *mydata = param.data;
-          
-     std::string *_value = new std::string();
-     _value = boost::get<std::string>(mydata);
-     msg->setConversationID(*_value);
-     
-     delete mydata;
-     delete _value;
+     std::string _value = std::string();
+     _value = boost::get<std::string>(param.data);
+     msg->setConversationID(_value);
 }
 
    
@@ -355,7 +302,6 @@ void MessageParser::buildContent(MessageParameter param,ACLMessage* msg)
      _content = temp.toString();
      
      msg->setContent(_content);
-     std::cout<<"content set\n";
 }
 
 
