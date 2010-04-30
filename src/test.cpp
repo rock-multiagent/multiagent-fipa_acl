@@ -21,18 +21,64 @@
 
 
 using namespace fipa::acl;
+using namespace std;
 
-void printm(ACLMessage m){
-     std::cout<<m.getPerformative()<<std::endl<<m.getReplyBy()<<std::endl<<m.getConversationID()<<std::endl;    
-/*	
-	std::set<UserdefParam*>* s = new std::set<UserdefParam*>();
-	//s = m.getUserdefParams();
-std::cout<<"check first\n";
-	std::set<UserdefParam*>::iterator it = (*s).begin();
-std::cout<<"check\n";
-	for (it; it!=(*s).end();it++)
-		std::cout<<(*(*it)).getName()<<"\t"<<(*(*it)).getValue()<<std::endl;
-*/
+void printAgentAID(AgentAID *agent);
+void printAgentAIDset(set<AgentAID*>* myset);
+void printUserdefParamset(set<UserdefParam*>* params);
+
+void printMessage(ACLMessage *msg)
+{
+    cout<<"=================================Printing Message=================================\n";
+    cout<<"performative:\t"<< msg->getPerformative()<<endl;
+    
+    if (!(*msg).getContent().empty()) cout<<"content:\t"<< msg->getContent()<<endl;
+    if (!(*msg).getReplyWith().empty()) cout<<"reply with:\t"<< msg->getReplyWith()<<endl;
+    if (!(*msg).getReplyBy1().empty()) cout<<"reply by1:\t"<< msg->getReplyBy1()<<endl;
+    if (!(*msg).getInReplyTo().empty()) cout<<"in reply to:\t"<< msg->getInReplyTo()<<endl;
+    if (!(*msg).getLanguage().empty()) cout<<"language:\t"<< msg->getLanguage()<<endl;
+    if (!(*msg).getEncoding().empty()) cout<<"encoding:\t"<< msg->getEncoding()<<endl;
+    if (!(*msg).getOntology().empty()) cout<<"ontology:\t"<< msg->getOntology()<<endl;
+    if (!(*msg).getProtocol().empty()) cout<<"protocol:\t"<< msg->getProtocol()<<endl;
+    if (!(*msg).getConversationID().empty()) cout<<"conversation id:\t"<< msg->getConversationID()<<endl;
+    if ((*msg).getSender() != NULL) {cout<<"sender:\n"; printAgentAID(msg->getSender());}
+    if (!((*msg).getAllReceivers()->empty())) { cout<<"receivers:\n"; printAgentAIDset(msg->getAllReceivers());}
+    if (!(*msg).getAllReplyTo()->empty()) {cout<<"reply to:\n"; printAgentAIDset(msg->getAllReplyTo());}
+    if (!(*msg).getUserdefParams()->empty()) printUserdefParamset(msg->getUserdefParams());
+
+}
+
+void printAgentAIDset(set<AgentAID*>* myset)
+{
+    cout<<"\t==================Agent AID set==================\n";
+    set<AgentAID*>::iterator it = myset->begin();
+    for(it; it != myset->end(); it++)
+        printAgentAID(*it);
+}
+void printAgentAID(AgentAID *agent)
+{
+    cout<<"\t==================Agent AID==================\n";
+    if (!agent->getName().empty()) cout<<"\t\tname:\t"<< agent->getName()<<endl;
+    if (!agent->getAdresses()->empty())
+    {
+        cout<<"\t\tadresses:\t\n";
+        set<string>::iterator it = agent->getAdresses()->begin();
+        for(it; it != agent->getAdresses()->end(); it++)
+	  cout<<"\t\t\t"<<*it<<endl;
+    }
+    if (!agent->getResolvers()->empty()) {cout<<"\t\tresolvers:\t\n"; printAgentAIDset(agent->getResolvers());}
+    if (!agent->getUserdefParams()->empty()) {cout<<"\t\tUser Defined Parameters:\t\n";printUserdefParamset(agent->getUserdefParams());}
+}
+
+void printUserdefParamset(set<UserdefParam*>* params)
+{
+    cout<<"\t\t==================User Defined Parameters==================\n";
+    set<UserdefParam*>::iterator it = params->begin();
+    for(it; it != params->end(); it++)
+    {
+        cout<<"\t\tparam name:\t"<< (*(*it)).getName()<<endl;
+        cout<<"\t\tparam value:\t"<< (*(*it)).getValue()<<"\n\n";
+    }
 }
 
 
@@ -50,7 +96,7 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 
 	
     //(*m3).setConversationID("plm");
-    //(*m3).setReplyBy1("20091201010101111");
+    (*m3).setReplyBy1("20091201010101111");
 
 	//UserdefParam *p = new UserdefParam();
 //std::cout<<"1\n";
@@ -58,19 +104,19 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	//(*p).setValue(std::string("mare"));
 	//(*m3).addUserdefParam(p); 
 	
-	//UserdefParam *p1 = new UserdefParam();
+	UserdefParam *p1 = new UserdefParam();
 
-	//(*p1).setName(std::string("cretzu")); 
-	//(*p1).setValue(std::string("marf")); ;
-	//(*m3).addUserdefParam(p1); 
-
-
-	//AgentAID *a1 = new AgentAID(std::string("r1"));
-	//(*a1).addAdress(std::string("adr1"));
-	//(*a1).addAdress(std::string("adr2"));	
-	//(*m3).setSender(a1);
-	//(*a1).addUserdefParam(p1);
-/*	
+	(*p1).setName(std::string("cretzu")); 
+	(*p1).setValue(std::string("marfa")); ;
+	(*m3).addUserdefParam(p1); 
+	
+	
+	AgentAID *a1 = new AgentAID(std::string("r1"));
+	(*a1).addAdress(std::string("adr1"));
+	(*a1).addAdress(std::string("adr2"));	
+	(*m3).setSender(a1);
+	(*a1).addUserdefParam(p1);
+	
 	AgentAID *a2 = new AgentAID(std::string("r2"));
 	AgentAID *a3 = new AgentAID(std::string("r3"));
 	AgentAID *a4 = new AgentAID(std::string("r4"));
@@ -86,6 +132,7 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	(*a6).addResolver(a7);
 	(*a6).addResolver(a2);
 	
+	(*m3).addReceiver(a3); 
 	
 	(*a7).addAdress(std::string("adr1"));
 	(*a7).addAdress(std::string("adr2"));	
@@ -104,12 +151,12 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 
 	
 	
-	(*m3).addReceiver(a3); 
+	
 	
 	UserdefParam *p2 = new UserdefParam();
 	(*p2).setName(std::string("cretzu")); 
 	(*p2).setValue(std::string("marf")); ;
-	//(*a1).addUserdefParam(p2); 
+	(*a1).addUserdefParam(p2); 
 	(*m3).addUserdefParam(p2);
 	
 	(*m3).addUserdefParam(p2);
@@ -123,16 +170,16 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	(*a1).addUserdefParam(p4);
 
    
-ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
-*/
-//(*m3).setProtocol(std::string("myprotocol")); 
-//(*m3).setLanguage(std::string("mylang")); 
+//ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
+
+(*m3).setProtocol(std::string("myprotocol")); 
+(*m3).setLanguage(std::string("mylang")); 
 (*m3).setReplyWith(std::string("myreplywith"));
-//(*m3).setInReplyTo(std::string("inreplyto"));
-//(*m3).setEncoding(std::string("encoding"));
+(*m3).setInReplyTo(std::string("inreplyto"));
+(*m3).setEncoding(std::string("encoding"));
 (*m3).setOntology(std::string("myontology"));
 (*m3).setContent(std::string("my_content"));
-//(*m3).setConversationID(std::string("convID"));
+(*m3).setConversationID(std::string("convID"));
 
 
   //printm(*m);
@@ -147,11 +194,11 @@ ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	//std::cout<<int('\0')<<0<<std::endl;
 	//	std::cout<<char(21)<<"\t"<<int(a.getBitMessage()[3])<<std::endl;
 	
-	if (!a.printParsedMessage(std::string("TestMessage26.txt")))
-		return 1;
+	//if (!a.printParsedMessage(std::string("TestMessage26.txt")))
+	//	return 1;
 
 delete m3;
-/*delete m4;  
+delete p1;
 delete a1;
 delete a2;
 delete a3;
@@ -159,22 +206,22 @@ delete a4;
 delete a5;
 delete a6;
 delete a7;
-delete p3;  
-delete p;
-delete p1;
-delete p2;
-  */
+//delete p3;  
+//delete p;
 
-        std::cout<<"written\n";
+//delete p2;
+  
+
+        //std::cout<<"written\n";
   
   	//std::string storage = a.getBitMessage();
-	std::cout<<"storage_set\n";
+	//std::cout<<"storage_set\n";
 	MessageParser rebuilder = MessageParser();
-	std::cout<<"rebuilder created\n";
+	//std::cout<<"rebuilder created\n";
 	ACLMessage* rebuilt = rebuilder.parseData(storage);
 	
-	if (!rebuilt) std::cout <<"null message returned\n";
-	std::cout<<"rebuilt the message\n";
+	if (!rebuilt); //std::cout <<"null message returned\n";
+	printMessage(rebuilt);
  /* 
    
   	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
@@ -195,7 +242,7 @@ delete p2;
   */
   
     //std::cout<<(*rebuilt).getContent().length()<<std::endl;
-    std::cout<<(*rebuilt).getReplyWith()<<std::endl;
+    //std::cout<<(*rebuilt).getReplyWith()<<std::endl;
   
   
     return 0;

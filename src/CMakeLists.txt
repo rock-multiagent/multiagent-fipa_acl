@@ -9,8 +9,9 @@ SET(sources
 	AgentAID.cpp
 	UserdefParam.cpp
 	ACLMessageOutputParser.cpp
-
-	../../message-parser/src/message_parser.cpp
+	test.cpp
+	#../../message-parser/src/message_parser.cpp
+	
 	# message_parser.cpp
         ) 
 #SET(USER_DEFINED_LIBS

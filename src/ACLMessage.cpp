@@ -12,27 +12,38 @@ const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","c
   
 void ACLMessage::initializeObject()
 {
-	AgentAID* sender = new AgentAID();
+	
 	sender = NULL;
         receivers = new std::set<AgentAID*>();
 	if (!(*receivers).empty()) (*receivers).clear();
         reply_to = new std::set<AgentAID*>();
 	if (!(*reply_to).empty()) (*reply_to).clear();
-         language = std::string("\0");
-         encoding = std::string("\0");
-         ontology = std::string("\0");
-         protocol = std::string("\0");
-         conversation_id = std::string("\0");
-         reply_with = std::string("\0");
-         in_reply_to = std::string("\0");
+	
+         language = std::string();
+         language.clear();
+         encoding = std::string();
+         encoding.clear();
+         ontology = std::string();
+         ontology.clear();
+         protocol = std::string();
+         protocol.clear();
+         conversation_id = std::string();
+         conversation_id.clear();
+         reply_with = std::string();
+         reply_with.clear();
+         in_reply_to = std::string();
+         in_reply_to.clear();
          reply_by = -1;
-         reply_by1 = std::string("\0");
+         reply_by1 = std::string();
+         reply_by1.clear();
+         
         params = new std::set<UserdefParam*>();
 		
 	if (!(*params).empty()) (*params).clear();
 		
         
-         content = std::string("\0");
+         content = std::string();
+         content.clear();
 }
 ACLMessage::ACLMessage() 
 {

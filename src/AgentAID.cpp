@@ -15,7 +15,8 @@ namespace acl {
 
 AgentAID::AgentAID()
 {
-	name = std::string("\0");
+	name = std::string();
+	name.clear();
 	initializeFields();
 }
 
