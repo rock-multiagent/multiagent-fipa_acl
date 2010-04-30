@@ -29,13 +29,13 @@ class MessageParser
 		~MessageParser();
 	
 		/**
-		* \param data Array of bytes that represent the bitefficient FIPA message
+		* \param storage Array of bytes that represent the bitefficient FIPA message
 		* \return A message object for internal use
 		*/	
 		ACLMessage* parseData(const std::string storage);
 		
 		ACLMessage* buildMessage(Message parsedMsg);
-		void buildParameters(std::vector<fipa::acl::MessageParameter> parsedParams,ACLMessage* msg);
+		void buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage* msg);
 		int buildPredefMessageParameters(MessageParameter param,ACLMessage* msg);
 		void buildSender(MessageParameter param,ACLMessage* msg);
 		AgentAID* buildAgentAID(AgentID agent);

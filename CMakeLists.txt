@@ -30,29 +30,6 @@ add_subdirectory(src)
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
-### Uncomment if you want to use Qt
-# set(QT_SEARCH_PATH /opt)
-# find_package(QT4 4.5 REQUIRED QtTest QtThread QtXml QtNetwork QtGui)
-# include(${QT_USE_FILES})
-
-### Uncomment if you want to use Boost. Use the first find_package stanza to
-### search for headers only, and the second one if you need binary libraries
-#set(Boost_ADDITIONAL_VERSION 1.40 1.41)
-#find_package(Boost REQUIRED)
-#find_package(Boost REQUIRED COMPONENTS graph filesystem)
-#include_directories(${Boost_INCLUDE_DIRS})
-
-include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
-pkg_check_modules(MessageGenerator "message-generator")
-
-include_directories(${MessageGenerator_INCLUDE_DIRS})
-link_directories(${MessageGenerator_LIBRARY_DIRS})
-
-
-### Update external libraries that are available
 set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
-
-# Process CMakeLists.txt in the following subdirectory
-add_subdirectory(src)
 
 
