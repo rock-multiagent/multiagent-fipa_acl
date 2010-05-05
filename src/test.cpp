@@ -17,7 +17,7 @@
 #include "ACLMessageOutputParser.h"
 #include "UserdefParam.h"
 
-#include "../../message-parser/src/message_parser.h"
+//#include "../../message-parser/src/message_parser.h"
 
 
 using namespace fipa::acl;
@@ -216,12 +216,12 @@ delete a7;
   
   	//std::string storage = a.getBitMessage();
 	//std::cout<<"storage_set\n";
-	MessageParser rebuilder = MessageParser();
+	//MessageParser rebuilder = MessageParser();
 	//std::cout<<"rebuilder created\n";
-	ACLMessage* rebuilt = rebuilder.parseData(storage);
+	//ACLMessage* rebuilt = rebuilder.parseData(storage);
 	
-	if (!rebuilt); //std::cout <<"null message returned\n";
-	printMessage(rebuilt);
+	//if (!rebuilt); //std::cout <<"null message returned\n";
+	//printMessage(rebuilt);
  /* 
    
   	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
