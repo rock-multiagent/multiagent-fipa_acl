@@ -6,7 +6,7 @@
   <license></license>
   <url>http://www.fipa.org</url>
   <logo>http://</logo>
-  <depend package="fipa/acl/message-parser" />
+  <depend package="fipa/acl/message-generator" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="" />

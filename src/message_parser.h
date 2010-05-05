@@ -9,10 +9,11 @@
 #ifndef RIMRES_FIPAACL_MESSAGE_PARSER_H_
 #define RIMRES_FIPAACL_MESSAGE_PARSER_H_
 
-//#include "fipa/acl/message-generator/ACLMessage.h"
-#include "../../message-generator/src/ACLMessage.h"
-#include "../../message-generator/src/UserdefParam.h"
-#include "../../message-generator/src/AgentAID.h"
+#include "message-generator/ACLMessage.h"
+#include "message-generator/UserdefParam.h"
+#include "message-generator/AgentAID.h"
+#include "grammar_bitefficient.h"
+
 
 #include <vector>
 #include <string>
