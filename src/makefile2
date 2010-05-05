@@ -1,0 +1,7 @@
+	
+../bin/message_parser.o : message_parser.cpp grammar_bitefficient.h message_parser.h ../bin/grammar_bitefficient.o
+	g++ -c message_parser.cpp -o ../bin/message_parser.o
+	
+../bin/grammar_bitefficient.o : grammar_bitefficient.cpp grammar_bitefficient.h
+	g++ -c grammar_bitefficient.cpp -o ../bin/grammar_bitefficient.o
+
