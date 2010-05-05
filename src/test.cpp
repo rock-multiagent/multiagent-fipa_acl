@@ -17,9 +17,11 @@
 #include "ACLMessageOutputParser.h"
 #include "UserdefParam.h"
 
+
 #include "../../message-parser/src/grammar_bitefficient.h"
 
 #include "../../message-parser/src/message_parser.h"
+
 
 
 using namespace fipa::acl;
@@ -196,11 +198,12 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
   
   	//std::string storage = a.getBitMessage();
 	//std::cout<<"storage_set\n";
-	MessageParser rebuilder = MessageParser();
+	//MessageParser rebuilder = MessageParser();
 	//std::cout<<"rebuilder created\n";
-	ACLMessage* rebuilt = rebuilder.parseData(storage);
+	//ACLMessage* rebuilt = rebuilder.parseData(storage);
 	
-	if (!rebuilt); //std::cout <<"null message returned\n";
+
+	//if (!rebuilt); //std::cout <<"null message returned\n";
 	//printMessage(rebuilt);
 	
 	if ((*m3) == (*rebuilt))
@@ -350,7 +353,9 @@ comp2->addResolver(a100);
 //if (forcomp == forcomp2 ) cout<<"comparation good\n";
 //else cout<<"comparation failed";
 
-	
+		//if (!rebuilt); //std::cout <<"null message returned\n";
+	//printMessage(rebuilt);
+
  /* 
    
   	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;

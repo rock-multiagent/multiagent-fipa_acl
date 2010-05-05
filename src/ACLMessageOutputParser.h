@@ -25,6 +25,7 @@ namespace acl {
     extern bool operator== (AgentAID &a, AgentAID &b);
     extern bool operator== (UserdefParam &a, UserdefParam &b);
     
+    
 class ACLMessageOutputParser {
 
        private:
