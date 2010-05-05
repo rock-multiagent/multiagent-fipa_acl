@@ -104,6 +104,121 @@ bool operator== (ACLMessage &a, ACLMessage &b)
     return true;
 }
 */
+
+ACLMessage::ACLMessage(ACLMessage &mes)
+{
+    initializeObject();
+    if (!mes.getLanguage().empty()) language = mes.getLanguage();
+    if (!mes.getEncoding().empty()) encoding = mes.getEncoding();
+    if (!mes.getOntology().empty()) ontology = mes.getOntology();
+    if (!mes.getProtocol().empty()) protocol = mes.getProtocol();
+    if (!mes.getConversationID().empty()) conversation_id = mes.getConversationID();
+    if (!mes.getReplyWith().empty()) reply_with = mes.getReplyWith();
+    if (!mes.getInReplyTo().empty()) in_reply_to = mes.getInReplyTo();
+    if (!mes.getReplyBy1().empty()) reply_by1 = mes.getReplyBy1();
+    if (!mes.getContent().empty()) content = mes.getContent();
+    
+    if (mes.getSender() != NULL)
+        sender = mes.getSender();
+    if (!mes.getAllReceivers()->empty()) 
+    {
+        AgentAID *temp = new AgentAID();
+        std::set<AgentAID*>* mesrec = mes.getAllReceivers();
+        std::set<AgentAID*>::iterator recit= mesrec->begin();
+        for (recit; recit != mesrec->end(); recit++)
+        {
+	  *temp = (*(*recit));
+	  receivers->insert(temp);
+        }
+    }
+    if (!mes.getAllReplyTo()->empty()) 
+    {
+        AgentAID *temp = new AgentAID();
+        std::set<AgentAID*>* mesrec = mes.getAllReceivers();
+        std::set<AgentAID*>::iterator recit= mesrec->begin();
+        for (recit; recit != mesrec->end(); recit++)
+        {
+	  *temp = (*(*recit));
+	  reply_to->insert(temp);
+        }
+    }
+    
+    if (!mes.getUserdefParams()->empty())
+    {
+         std::set<UserdefParam*>* mesparams = mes.getUserdefParams();
+        std::set<UserdefParam*>::iterator paramit = mesparams->begin();
+    
+        UserdefParam *temp2 = new UserdefParam();
+    
+        for (paramit; paramit != mesparams->end(); paramit++)
+        {
+	  *temp2 = (*(*paramit));
+	  params->insert(temp2);
+        }
+    }  
+        
+}
+ACLMessage& ACLMessage::operator=(ACLMessage &mes)
+{
+    params->clear();
+    reply_to->clear();
+    receivers->clear();
+    if (this != &mes)
+    {
+            initializeObject();	
+        if (!mes.getPerformative().empty()) performative = mes.getPerformative();
+        if (!mes.getLanguage().empty()) language = mes.getLanguage();
+        if (!mes.getEncoding().empty()) encoding = mes.getEncoding();
+        if (!mes.getOntology().empty()) ontology = mes.getOntology();
+        if (!mes.getProtocol().empty()) protocol = mes.getProtocol();
+        if (!mes.getConversationID().empty()) conversation_id = mes.getConversationID();
+        if (!mes.getReplyWith().empty()) reply_with = mes.getReplyWith();
+        if (!mes.getInReplyTo().empty()) in_reply_to = mes.getInReplyTo();
+        if (!mes.getReplyBy1().empty()) reply_by1 = mes.getReplyBy1();
+        if (!mes.getContent().empty()) content = mes.getContent();
+        
+        if (mes.getSender() != NULL)
+	  sender = mes.getSender();
+        if (!mes.getAllReceivers()->empty()) 
+        {
+	  AgentAID *temp = new AgentAID();
+	  std::set<AgentAID*>* mesrec = mes.getAllReceivers();
+	  std::set<AgentAID*>::iterator recit= mesrec->begin();
+	  for (recit; recit != mesrec->end(); recit++)
+	  {
+	      *temp = (*(*recit));
+	      receivers->insert(temp);
+	  }
+        }
+        if (!mes.getAllReplyTo()->empty()) 
+        {
+	  AgentAID *temp = new AgentAID();
+	  std::set<AgentAID*>* mesrec = mes.getAllReplyTo();
+	  std::set<AgentAID*>::iterator recit= mesrec->begin();
+	  for (recit; recit != mesrec->end(); recit++)
+	  {
+	      *temp = (*(*recit));
+	      reply_to->insert(temp);
+	  }
+        }
+        
+        if (!mes.getUserdefParams()->empty())
+        {
+	  std::set<UserdefParam*>* mesparams = mes.getUserdefParams();
+	  std::set<UserdefParam*>::iterator paramit = mesparams->begin();
+        
+	  UserdefParam *temp2 = new UserdefParam();
+        
+	  for (paramit; paramit != mesparams->end(); paramit++)
+	  {
+	      *temp2 = (*(*paramit));
+	      params->insert(temp2);
+	  }
+        }  
+    }
+    
+    return *this;
+}
   
 void ACLMessage::initializeObject()
 {

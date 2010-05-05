@@ -35,6 +35,9 @@ class UserdefParam {
 /*
 	setter and getter methods so far
 */
+	    UserdefParam();
+	    UserdefParam(UserdefParam &copy);
+	    UserdefParam& operator=(UserdefParam& copy);
               std::string getValue();
               void setValue(std::string val);
               std::string getName();

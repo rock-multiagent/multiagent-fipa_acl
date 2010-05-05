@@ -94,10 +94,14 @@ private:
        };   
 */
 public:
-	void initializeObject();
+	
+       void initializeObject();
        ACLMessage();
+       ACLMessage(ACLMessage &mes);
+       ACLMessage& operator=(ACLMessage &mes);
        ACLMessage(int perf);
        ACLMessage(std::string perf);
+       
        void setPerformative(std::string str);
        std::string getPerformative();
        void addReceiver(AgentAID* aid);

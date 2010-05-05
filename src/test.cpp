@@ -206,9 +206,9 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	//if (!rebuilt); //std::cout <<"null message returned\n";
 	//printMessage(rebuilt);
 	
-	if ((*m3) == (*rebuilt))
-	    std::cout<<"messages are equal\n";
-	else std::cout<<"messages are not equal\n";
+	//if ((*m3) == (*rebuilt))
+	//    std::cout<<"messages are equal\n";
+	//else std::cout<<"messages are not equal\n";
 	
 	
 	
@@ -244,20 +244,28 @@ a100->setName(string("a100"));
 a100->addAdress(string("adress1"));
 if (a100->getAdresses()->empty()) cout<<"empty\n";
 AgentAID *a10 = new AgentAID;
-a10->setName(string("a100"));
+a10->setName(string("a10"));
 a10->addAdress(string("adress1"));
 
-AgentAID a101 =  *a100;
-AgentAID *a11 = new AgentAID();
+a100->addResolver(a10);
+
+AgentAID *a101 =  new AgentAID();
+*a101 = *a100;
+printAgentAID(a101);
+
 //*a11 = *a10;
 //delete a100;
 //delete a101.getAdresses();
 //cout<< (*a100->getAdresses()->begin())<<endl;
 
-memmove(a11,a10,sizeof(a10));
+ACLMessage *m4 = new ACLMessage(*m3);
+printMessage(m3);
+printMessage(m4);
+
+
 
 //a11->getAdresses()->erase(a11->getAdresses()->begin());
-cout<< (*a11->getAdresses()->begin())<<endl;
+//cout<< (*a11->getAdresses()->begin())<<endl;
 
 
     /*

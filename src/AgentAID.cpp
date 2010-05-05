@@ -85,6 +85,99 @@ bool operator== (AgentAID &a, AgentAID &b)
 }
 */
     
+AgentAID::AgentAID(AgentAID &aid)
+{
+    initializeFields();
+    
+    name = aid.getName();
+   if (!aid.getAdresses()->empty())
+   {
+        std::set<std::string> * aidAdr = aid.getAdresses();
+        std::set<std::string>::iterator otherSit = aidAdr->begin();
+        for (otherSit; otherSit != aidAdr->end(); otherSit++)
+        {
+	  std::string mystring = std::string(*otherSit);
+	  adresses->insert(mystring);
+        }
+   }
+   if (!aid.getResolvers()->empty())
+   {
+        AgentAID *temp = new AgentAID();
+        std::set<AgentAID*>* aidres = aid.getResolvers();
+        std::set<AgentAID*>::iterator aidit= aidres->begin();
+        for (aidit; aidit != aidres->end(); aidit++)
+        {
+	  *temp = (*(*aidit));
+	  resolvers->insert(temp);
+        }
+   }
+    if (!aid.getUserdefParams()->empty())
+    { 
+        std::set<UserdefParam*>* aidparams = aid.getUserdefParams();
+        std::set<UserdefParam*>::iterator paramit = aidparams->begin();
+        
+        UserdefParam *temp2 = new UserdefParam();
+        
+        for (paramit; paramit != aidparams->end(); paramit++)
+        {
+	  *temp2 = (*(*paramit));
+	  params->insert(temp2);
+        }
+    }
+}
+    
+AgentAID& AgentAID::operator=(AgentAID &aid)
+{
+    if (this != &aid)
+    {
+        
+        params->clear();
+        adresses->clear();
+        resolvers->clear();
+        
+        initializeFields();
+    
+        name = aid.getName();
+        if (!aid.getAdresses()->empty())
+        {
+	  std::set<std::string> * aidAdr = aid.getAdresses();
+	  std::set<std::string>::iterator otherSit = aidAdr->begin();
+	  for (otherSit; otherSit != aidAdr->end(); otherSit++)
+	  {
+	      std::string mystring = std::string(*otherSit);
+	      adresses->insert(mystring);
+	  }
+        }
+        if (!aid.getResolvers()->empty())
+        {	  
+	  AgentAID *temp = new AgentAID();
+	  std::set<AgentAID*>* aidres = aid.getResolvers();
+	  std::set<AgentAID*>::iterator aidit= aidres->begin();
+	  for (aidit; aidit != aidres->end(); aidit++)
+	  {
+	      *temp = (*(*aidit));
+	      resolvers->insert(temp);
+	  }	
+        }
+        if (!aid.getUserdefParams()->empty())
+        {
+	  std::set<UserdefParam*>* aidparams = aid.getUserdefParams();
+	  std::set<UserdefParam*>::iterator paramit = aidparams->begin();
+    
+	  UserdefParam *temp2 = new UserdefParam();
+    
+	  for (paramit; paramit != aidparams->end(); paramit++)
+	  {
+	      *temp2 = (*(*paramit));
+	      params->insert(temp2);
+	  }
+        }
+    }
+    
+    
+    return *this;
+}
+    
 AgentAID::AgentAID()
 {
 	name = std::string();

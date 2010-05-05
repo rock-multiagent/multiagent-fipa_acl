@@ -22,6 +22,26 @@ bool operator== (UserdefParam &a, UserdefParam &b)
         return false;
 }
 */
+UserdefParam::UserdefParam()
+{
+}
+
+UserdefParam::UserdefParam(UserdefParam &copy)
+{
+    name = copy.getName();
+    value = copy.getValue();
+}
+
+UserdefParam& UserdefParam::operator=(UserdefParam &copy)
+{
+    if (this != &copy) {
+    name.clear();
+    value.clear();
+    name = copy.getName();
+    value = copy.getValue(); }
+    return *this;
+}
+
 std::string UserdefParam::getValue() {return value;}
 
 void UserdefParam::setValue(std::string val) {value = val;}
