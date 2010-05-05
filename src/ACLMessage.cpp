@@ -134,7 +134,7 @@ ACLMessage::ACLMessage(ACLMessage &mes)
     if (!mes.getAllReplyTo()->empty()) 
     {
         AgentAID *temp = new AgentAID();
-        std::set<AgentAID*>* mesrec = mes.getAllReceivers();
+        std::set<AgentAID*>* mesrec = mes.getAllReplyTo();
         std::set<AgentAID*>::iterator recit= mesrec->begin();
         for (recit; recit != mesrec->end(); recit++)
         {

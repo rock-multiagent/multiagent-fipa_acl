@@ -129,7 +129,8 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	//(*a6).addResolver(a7);
 	//(*a6).addResolver(a2);
 	
-	(*m3).addReceiver(a3); 
+	(*m3).addReceiver(a3);
+	(*m3).addReceiver(a1);
 	
 	(*a7).addAdress(std::string("adr1"));
 	(*a7).addAdress(std::string("adr2"));	
@@ -242,16 +243,19 @@ int found_one = 0;
 AgentAID *a100 = new AgentAID;
 a100->setName(string("a100"));
 a100->addAdress(string("adress1"));
+a100->addAdress(string("adress2"));
 if (a100->getAdresses()->empty()) cout<<"empty\n";
 AgentAID *a10 = new AgentAID;
 a10->setName(string("a10"));
 a10->addAdress(string("adress1"));
 
 a100->addResolver(a10);
+a100->addResolver(a1);
 
 AgentAID *a101 =  new AgentAID();
 *a101 = *a100;
 printAgentAID(a101);
+cout<<"\n\n\n\n";
 
 //*a11 = *a10;
 //delete a100;
@@ -260,6 +264,7 @@ printAgentAID(a101);
 
 ACLMessage *m4 = new ACLMessage(*m3);
 printMessage(m3);
+cout<<"\n\n\n\n";
 printMessage(m4);
 
 
