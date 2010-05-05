@@ -21,6 +21,243 @@
 namespace fipa {
 
 namespace acl {
+    
+
+bool operator== (UserdefParam &a, UserdefParam &b)
+{
+    if (a.getName().compare(b.getName()))
+        return false;
+    if (a.getValue().compare(b.getValue()))
+        return false;
+}
+
+    
+bool operator== (AgentAID &a, AgentAID &b)
+{
+    
+    if (a.getName().compare(b.getName()))
+        return false;
+    
+    // comparing adresses
+    std::set<std::string>* addrA = a.getAdresses();
+    std::set<std::string>* addrB = b.getAdresses();
+    std::set<std::string>::iterator sita = addrA->begin();
+    std::set<std::string>::iterator sitb = addrB->begin();
+    int found_one = 0; // flag variable to control flow through inner loops
+    while (sita != addrA->end())
+    {
+        found_one = 0;
+        sitb = addrB->begin();
+        while (sitb != addrB->end())
+        {
+	  if (!(*sita).compare(*sitb)) 
+	  {
+	      addrA->erase(sita);
+	      sita = addrA->begin();
+	      addrB->erase(sitb);
+	      sitb = addrB->end();
+	      found_one = 1;
+	      
+	  } else sitb++;
+	  
+        }
+        if (!found_one) sita++;
+	  
+    }
+    if (!addrA->empty())
+        return false;
+    if (!addrB->empty())
+        return false;
+    
+    // comparing resolvers
+    std::set<AgentAID*>* agentsA = a.getResolvers();
+    std::set<AgentAID*>* agentsB = b.getResolvers();
+    std::set<AgentAID*>::iterator ait = agentsA->begin();
+    std::set<AgentAID*>::iterator bit = agentsB->begin();
+    
+    while (ait != agentsA->end())
+    {
+        found_one = 0;
+        bit = agentsB->begin();
+        while (bit != agentsB->end())
+        {
+	  if ( (*(*ait)) == (*(*bit))) 
+	  {
+	      agentsA->erase(ait);
+	      ait = agentsA->begin();
+	      agentsB->erase(bit);
+	      bit = agentsB->end();
+	      found_one = 1;
+	      
+	  } else bit++;
+	  
+        }
+        if (!found_one) ait++;
+	  
+    }
+    if (!agentsA->empty())
+        return false;
+    if (!agentsB->empty())
+        return false;
+    
+    // comparing userdefined parameters
+    std::set<UserdefParam*>* paramsA = a.getUserdefParams();
+    std::set<UserdefParam*>* paramsB = b.getUserdefParams();
+    std::set<UserdefParam*>::iterator pita = paramsA->begin();
+    std::set<UserdefParam*>::iterator pitb = paramsB->begin();
+     
+    while (pita != paramsA->end())
+    {
+        found_one = 0;
+        pitb = paramsB->begin();
+        while (pitb!=paramsB->end())
+        {
+	  if ( (*(*pita)) == (*(*pitb))) 
+	  {
+	      
+	      paramsA->erase(pita);
+	      pita = paramsA->begin();
+	      paramsB->erase(pitb);
+	      pitb = paramsB->end();
+	      found_one = 1;
+	  }
+	  else pitb++;
+        }
+	  if (!found_one) pita++;
+	 
+	  
+    }
+    if (!paramsA->empty())
+        return false;
+    if (!paramsB->empty())
+        return false;
+    
+    return true;
+    
+}
+    
+bool operator== (ACLMessage &a, ACLMessage &b)
+{
+    if (a.getPerformative().compare(b.getPerformative()))
+        return false;
+    if (a.getContent().compare(b.getContent()))
+        return false;
+    if (a.getLanguage().compare(b.getLanguage()))
+        return false;
+    if (a.getEncoding().compare(b.getEncoding()))
+        return false;
+    if (a.getOntology().compare(b.getOntology()))
+        return false;
+    if (a.getProtocol().compare(b.getProtocol()))
+        return false;
+    if (a.getConversationID().compare(b.getConversationID()))
+        return false;
+    if (a.getReplyWith().compare(b.getReplyWith()))
+        return false;
+    if (a.getInReplyTo().compare(b.getInReplyTo()))
+        return false;
+    if (a.getReplyBy1().compare(b.getReplyBy1()))
+        return false;
+    
+    if ((*a.getSender()) == (*b.getSender()));
+    else return false;
+    
+    // checking if receivers sets of the message are the same
+    std::set<AgentAID*>* agentsA = a.getAllReceivers();
+    std::set<AgentAID*>* agentsB = b.getAllReceivers();
+    std::set<AgentAID*>::iterator ait = agentsA->begin();
+    std::set<AgentAID*>::iterator bit = agentsB->begin();
+    int found_one = 0; // flag variable to control flow through inner loops
+    while (ait != agentsA->end())
+    {
+        found_one = 0;
+        bit = agentsB->begin();
+        while (bit != agentsB->end())
+        {
+	  if ( (*(*ait)) == (*(*bit))) 
+	  {
+	      agentsA->erase(ait);
+	      ait = agentsA->begin();
+	      agentsB->erase(bit);
+	      bit = agentsB->end();
+	      found_one = 1;
+	      
+	  } else bit++;
+	  
+        }
+        if (!found_one) ait++;
+	  
+    }
+    if (!agentsA->empty())
+        return false;
+    if (!agentsB->empty())
+        return false;
+    
+    //checking if reply_to sets of the message are  the same
+    agentsA = a.getAllReplyTo();
+    agentsB = b.getAllReplyTo();
+    ait = agentsA->begin();
+    bit = agentsB->begin();
+    while (ait != agentsA->end())
+    {
+        found_one = 0;
+        bit = agentsB->begin();
+        while (bit != agentsB->end())
+        {
+	  if ( (*(*ait)) == (*(*bit))) 
+	  {
+	      agentsA->erase(ait);
+	      ait = agentsA->begin();
+	      agentsB->erase(bit);
+	      bit = agentsB->end();
+	      found_one = 1;
+	      
+	  } else bit++;
+	  
+        }
+        if (!found_one) ait++;
+	  
+    }
+    if (!agentsA->empty())
+        return false;
+    if (!agentsB->empty())
+        return false;
+    
+    
+    std::set<UserdefParam*>* paramsA = a.getUserdefParams();
+    std::set<UserdefParam*>* paramsB = b.getUserdefParams();
+    std::set<UserdefParam*>::iterator pita = paramsA->begin();
+    std::set<UserdefParam*>::iterator pitb = paramsB->begin();
+     
+    while (pita != paramsA->end())
+    {
+        found_one = 0;
+        pitb = paramsB->begin();
+        while (pitb!=paramsB->end())
+        {
+	  if ( (*(*pita)) == (*(*pitb))) 
+	  {
+	      
+	      paramsA->erase(pita);
+	      pita = paramsA->begin();
+	      paramsB->erase(pitb);
+	      pitb = paramsB->end();
+	      found_one = 1;
+	  }
+	  else pitb++;
+        }
+	  if (!found_one) pita++;
+	 
+	  
+    }
+    if (!paramsA->empty())
+        return false;
+    if (!paramsB->empty())
+        return false;
+   
+    return true;
+}
+    
 
 /*
 	both constructors initialize the object fields
@@ -42,7 +279,7 @@ ACLMessageOutputParser::ACLMessageOutputParser()
                   useCodeTables = 0;
                   updateCodeTables = 1;
                   version = "1.0";
-                  res_depth = 1; 
+                  res_depth = 100; 
 			                   
 }
 

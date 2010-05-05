@@ -17,6 +17,8 @@
 #include "ACLMessageOutputParser.h"
 #include "UserdefParam.h"
 
+#include "../../message-parser/src/grammar_bitefficient.h"
+
 #include "../../message-parser/src/message_parser.h"
 
 
@@ -84,25 +86,18 @@ void printUserdefParamset(set<UserdefParam*>* params)
 
 int main(int argc, char** argv)
 {
-//    ACLMessage* m = new ACLMessage();
-//	(*m).setPerformative(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
-//	(*m).setConversationID(std::string("convid"));
-
-// std::cout<<int(char(0xfa))<<std::endl<<int(char(0x0d))<<std::endl<<int(char(0xff))<<std::endl;
-
-//ACLMessage* m2 = new ACLMessage(std::string("abcd"));
 
 ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
 
 	
-    //(*m3).setConversationID("plm");
+ 
     (*m3).setReplyBy1("20091201010101111");
 
-	//UserdefParam *p = new UserdefParam();
-//std::cout<<"1\n";
-	//(*p).setName(std::string("cretzu")); 
-	//(*p).setValue(std::string("mare"));
-	//(*m3).addUserdefParam(p); 
+	  UserdefParam *p = new UserdefParam();
+	  
+	  (*p).setName(std::string("cretzu")); 
+	  (*p).setValue(std::string("mare"));
+	  (*m3).addUserdefParam(p); 
 	
 	UserdefParam *p1 = new UserdefParam();
 
@@ -129,29 +124,26 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	(*a6).addAdress(std::string("adr1"));
 	(*a6).addAdress(std::string("adr2"));	
 	(*m3).addReplyTo(a6);
-	(*a6).addResolver(a7);
-	(*a6).addResolver(a2);
+	//(*a6).addResolver(a7);
+	//(*a6).addResolver(a2);
 	
 	(*m3).addReceiver(a3); 
 	
 	(*a7).addAdress(std::string("adr1"));
 	(*a7).addAdress(std::string("adr2"));	
 	(*m3).addReplyTo(a7);
-	(*a7).addResolver(a6);
+	//(*a7).addResolver(a6);
 
 	
-	(*a1).addResolver(a2);	
+	//(*a1).addResolver(a2);	
 	(*m3).addReceiver(a2); 
 	
-	(*a1).addResolver(a4);	
+	//(*a1).addResolver(a4);	
 	(*m3).addReceiver(a4); 
 	
 	
-	(*a2).addResolver(a5);	
+	//(*a2).addResolver(a5);	
 
-	
-	
-	
 	
 	UserdefParam *p2 = new UserdefParam();
 	(*p2).setName(std::string("cretzu")); 
@@ -197,19 +189,7 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	//if (!a.printParsedMessage(std::string("TestMessage26.txt")))
 	//	return 1;
 
-delete m3;
-delete p1;
-delete a1;
-delete a2;
-delete a3;
-delete a4;
-delete a5;
-delete a6;
-delete a7;
-//delete p3;  
-//delete p;
 
-//delete p2;
   
 
         //std::cout<<"written\n";
@@ -221,7 +201,156 @@ delete a7;
 	ACLMessage* rebuilt = rebuilder.parseData(storage);
 	
 	if (!rebuilt); //std::cout <<"null message returned\n";
-	printMessage(rebuilt);
+	//printMessage(rebuilt);
+	
+	if ((*m3) == (*rebuilt))
+	    std::cout<<"messages are equal\n";
+	else std::cout<<"messages are not equal\n";
+	
+	
+	
+	
+	ACLMessage forcomp, forcomp2;
+	
+	
+	forcomp.setPerformative(std::string("perf"));
+	forcomp2.setPerformative(std::string("perf"));
+
+forcomp.setProtocol(std::string("myprotocol")); 
+forcomp.setLanguage(std::string("mylang")); 
+forcomp.setReplyWith(std::string("myreplywith"));
+forcomp.setInReplyTo(std::string("inreplyto"));
+forcomp.setEncoding(std::string("encoding"));
+forcomp.setOntology(std::string("myontology"));
+forcomp.setContent(std::string("my_content"));
+forcomp.setConversationID(std::string("convID"));	
+
+forcomp2.setProtocol(std::string("myprotocol")); 
+forcomp2.setLanguage(std::string("mylang")); 
+forcomp2.setReplyWith(std::string("myreplywith"));
+forcomp2.setInReplyTo(std::string("inreplyto"));
+forcomp2.setEncoding(std::string("encoding"));
+forcomp2.setOntology(std::string("myontology"));
+forcomp2.setContent(std::string("my_content"));
+forcomp2.setConversationID(std::string("convID"));
+
+int found_one = 0;
+
+AgentAID *a100 = new AgentAID;
+a100->setName(string("a100"));
+a100->addAdress(string("adress1"));
+if (a100->getAdresses()->empty()) cout<<"empty\n";
+AgentAID *a10 = new AgentAID;
+a10->setName(string("a100"));
+a10->addAdress(string("adress1"));
+
+AgentAID a101 =  *a100;
+AgentAID *a11 = new AgentAID();
+//*a11 = *a10;
+//delete a100;
+//delete a101.getAdresses();
+//cout<< (*a100->getAdresses()->begin())<<endl;
+
+memmove(a11,a10,sizeof(a10));
+
+//a11->getAdresses()->erase(a11->getAdresses()->begin());
+cout<< (*a11->getAdresses()->begin())<<endl;
+
+
+    /*
+
+    std::set<std::string>* addrA = a101.getAdresses();
+    std::set<std::string>* addrB = a11.getAdresses();
+    std::set<std::string>::iterator sita = addrA->begin();
+    std::set<std::string>::iterator sitb = addrB->begin();
+   
+    while (sita != addrA->end())
+    {
+        cout <<"outer\n";
+        found_one = 0;
+        sitb = addrB->begin();
+        while (sitb != addrB->end())
+        {
+	  cout <<"inner\n";
+	  if (!(*sita).compare(*sitb)) 
+	  {
+	      cout<<"found one\n";
+	      addrA->erase(sita);
+	      sita = addrA->begin();
+	      addrB->erase(sitb);
+	      sitb = addrB->end();
+	      found_one = 1;
+	      
+	  } else sitb++;
+	  
+        }
+        if (!found_one) sita++;
+	  
+    }
+    if (!addrA->empty())
+        cout<<"11\n";
+    if (!addrB->empty())
+        cout<<"22\n";
+
+if (a100->getAdresses()->empty()) cout<<"empty\n";
+if (a10->getAdresses()->empty()) cout<<"empty\n";
+/*
+AgentAID *comp1 = new AgentAID(std::string("agname"));
+AgentAID *comp2 = new AgentAID(std::string("agname"));
+cout<<"control\n";
+comp1->addResolver(a100);
+cout <<"control\n";
+comp2->addResolver(a100);
+
+
+    std::set<AgentAID*>* agentsA = (*comp1).getResolvers();
+    cout<<"retrieved resolvers\n";
+    std::set<AgentAID*>* agentsB = (*comp2).getResolvers();
+    cout<<"retrieved resolvers\n";
+    std::set<AgentAID*>::iterator ait = agentsA->begin();
+    std::set<AgentAID*>::iterator bit = agentsB->begin();
+    cout<<"iterators created\n";
+    
+    while (ait != agentsA->end())
+    {
+        cout <<"outer\n";
+        found_one = 0;
+        bit = agentsB->begin();
+        while (bit != agentsB->end())
+        {
+	  
+	  cout<<"inner\n";
+	  if ( (*(*ait)) == (*(*bit))) 
+	  {
+	      cout<<"found one\n";
+	      agentsA->erase(ait);
+	      ait = agentsA->begin();
+	      agentsB->erase(bit);
+	      bit = agentsB->end();
+	      found_one = 1;
+	      
+	  } else bit++;
+	  
+        }
+        if (!found_one) ait++;
+	  
+    }
+    if (!agentsA->empty())
+        cout<<"1\n";
+    if (!agentsB->empty())
+        cout<<"2\n";
+    else cout<<"agents are equal\n";
+
+*/
+//if ((*comp1) == (*comp2)) cout<<"agents are equal\n";
+
+
+ 
+
+//if (forcomp == forcomp2 ) cout<<"comparation good\n";
+//else cout<<"comparation failed";
+
+	
  /* 
    
   	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
@@ -245,21 +374,25 @@ delete a7;
     //std::cout<<(*rebuilt).getReplyWith()<<std::endl;
   
   
+    delete m3;
+    delete p1;
+    delete a1;
+    delete a2;
+    delete a3;
+    delete a4;
+    delete a5;
+    delete a6;
+    delete a7;
+    //delete p3;  
+    delete p;
+    //delete comp1;
+    //delete comp2;
+    //delete a100;
+   
+
+    //delete p2;
+        
     return 0;
 }
- /*               
-}
 
-void parseBitEfficient(std::string stream)
-{
-     std::fstream out(stream, std::ios::out | std::ios::binary);
-	std::string output = getBitMessage();
-	for (int i = 0; i < output.length(); i++)
-		out.put(output[i]);
-
-	out.close();
-     
-     
-}
-*/
 

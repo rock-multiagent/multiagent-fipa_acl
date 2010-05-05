@@ -18,6 +18,7 @@ namespace fipa {
 
 namespace acl {
 
+    //extern bool operator== (UserdefParam &a, UserdefParam &b);
 
 class UserdefParam {
        

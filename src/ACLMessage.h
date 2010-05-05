@@ -1,3 +1,11 @@
+/**
+ *
+ * \file ACLMessage.h
+ * \author Mircea Cretu Stancu
+ * \brief describes the general data structure of a message in conformity with the fipa specifications. The methods are pretty straight forward getter and setter methods. The set container is used for various colective fields, in order to avoid duplicates
+ * 
+ * \version 1.0
+ */
 #ifndef ACLMessage_H_
 #define ACLMessage_H_
 
@@ -10,6 +18,8 @@ namespace fipa {
 
 namespace acl {
 
+    //extern bool operator== (ACLMessage &a, ACLMessage &b);
+    
 class ACLMessage {
 
 private:
@@ -128,7 +138,8 @@ public:
        
 };
 
-}//end of acl namespace
+
+}//end of acl namespace
 
 }// end of fipa namespace
 #endif

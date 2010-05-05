@@ -13,6 +13,78 @@ namespace fipa {
 
 namespace acl {
 
+    /*
+bool operator== (AgentAID &a, AgentAID &b)
+{
+    if (a.getName().compare(b.getName()))
+        return false;
+    
+    // comparing adresses
+    std::set<std::string>* addrA = a.getAdresses();
+    std::set<std::string>* addrB = b.getAdresses();
+    std::set<std::string>::iterator sita = addrA->begin();
+    std::set<std::string>::iterator sitb = addrB->begin();
+    for (sita; sita != addrA->end(); sita++)
+    {
+        for (sitb; sitb != addrB->end(); sitb++)
+	  if (sita->comapre(sitb) == 0)
+	  {
+	      addrA->erase(sita);
+	      addrB->erase(sitb);
+	      sitb = addrB->end();
+	  }
+    }
+    if (addrA->begin() != addrA.end())
+        return false;
+    if (addrB->begin() != addrB->end())
+        return false;
+    
+    // comparing resolvers
+    std::set<AgentAID*>* agentsA = a.getRezolvers();
+    std::set<AgentAID*>* agentsB = b.getRezolvers();
+    std::set<AgentAID*>::iterator ait = agentsA->begin();
+    std::set<AgentAID*>::iterator bit = agentsB->begin();
+    for (ait; ait != agentsA->end(); ait++)
+    {
+        for (bit; bit != agentsB->end(); bit++)
+	  if ( (*(*ait)) == (*(*bit))) 
+	  {
+	      agentsA->erase(ait);
+	      agentsB->erase(bit);
+	      bit = agentsB->end();
+	      
+	  }
+    }
+    if (agentsA->begin() != agentsA->end())
+        return false;
+    if (agentsB->begin() != agentsB->end())
+        return false;
+    // comparing userdefined parameters
+    std::set<UserdefParam*>* paramsA = a.getUserdefParams();
+    std::set<UserdefParam*>* paramsB = b.getUserdefParams();
+    std::set<UserdefParam*>::iterator pita = paramsA->begin();
+    std::set<UserdefParam*>::iterator pitb = paramsB->begin();
+    for (pita; pita != paramsA->end(); pita++)
+    {
+        for (pitb; pitb != paramsB->end(); pitb++)
+	  if ( (*(*pita)) == (*(*pitb))) 
+	  {
+	      paramsA->erase(pita);
+	      paramsB->erase(pitb);
+	      pitb = paramsB->end();
+	      
+	  }
+    }
+    if (paramsA->begin() != paramsA->end())
+        return false;
+    if (paramsB->begin() != paramsB->end())
+        return false;
+    
+    return true;
+    
+}
+*/
+    
 AgentAID::AgentAID()
 {
 	name = std::string();

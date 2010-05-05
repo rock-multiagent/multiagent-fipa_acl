@@ -13,7 +13,15 @@
 namespace fipa {
 
 namespace acl {
-
+/*  
+bool operator== (UserdefParam &a, UserdefParam &b)
+{
+    if (a.getName().compare(b.getName()))
+        return false;
+    if (a.getValue().compare(b.getValue()))
+        return false;
+}
+*/
 std::string UserdefParam::getValue() {return value;}
 
 void UserdefParam::setValue(std::string val) {value = val;}

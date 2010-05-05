@@ -19,6 +19,8 @@ namespace fipa {
 
 namespace acl {
 
+    //extern bool operator== (AgentAID &a, AgentAID &b);
+    
 class AgentAID {
 
 /*

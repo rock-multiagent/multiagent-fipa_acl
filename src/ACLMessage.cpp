@@ -7,8 +7,103 @@ namespace fipa {
 
 namespace acl {
 
+    
+    
 const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","cfp","confirm","disconfirm","failure","inform","inform-if","inform-ref","not-understood","propagate","propose","proxy","query-if","query-ref","refuse","reject-proposal","request","request-when","request-whenever","subscribe"};
-
+/*
+bool operator== (ACLMessage &a, ACLMessage &b)
+{
+    if (a.getPerformative().compare(b.getPerformative()))
+        return false;
+    if (a.getContent().compare(b.getContent()))
+        return false;
+    if (a.getLanguage().compare(b.getLanguage()))
+        return false;
+    if (a.getEncoding().compare(b.getEncoding()))
+        return false;
+    if (a.getOntology().compare(b.getOntology()))
+        return false;
+    if (a.getProtocol().compare(b.getProtocol()))
+        return false;
+    if (a.getConversationID().compare(b.getConversationID()))
+        return false;
+    if (a.getReplyWith().compare(b.getReplyWith()))
+        return false;
+    if (a.getInReplyTo().compare(b.getInReplyTo()))
+        return false;
+    if (a.getReplyBy1().compare(b.getReplyBy1()))
+        return false;
+    
+    if (a.getSender() == b.getSender());
+    else return false;
+    
+    // checking if receivers sets of the message are the same
+    std::set<AgentAID*>* agentsA = a.getReceivers();
+    std::set<AgentAID*>* agentsB = b.getReceivers();
+    std::set<AgentAID*>::iterator ait = agentsA->begin();
+    std::set<AgentAID*>::iterator bit = agentsB->begin();
+    for (ait; ait != agentsA->end(); ait++)
+    {
+        for (bit; bit != agentsB->end(); bit++)
+	  if ( (*(*ait)) == (*(*bit))) 
+	  {
+	      agentsA->erase(ait);
+	      agentsB->erase(bit);
+	      bit = agentsB->end();
+	      
+	  }
+    }
+    if (agentsA->begin() != agentsA->end())
+        return false;
+    if (agentsB->begin() != agentsB->end())
+        return false;
+    
+    //checking if reply_to sets of the message are  the same
+    agentsA = a.getReplyTo();
+    agentsB = b.getReplyTo();
+    ait = agentsA->begin();
+    bit = agentsB->begin();
+    for (ait; ait != agentsA->end(); ait++)
+    {
+        for (bit; bit != agentsB->end(); bit++)
+	  if ( (*(*ait)) == (*(*bit))) 
+	  {
+	      agentsA->erase(ait);
+	      agentsB->erase(bit);
+	      bit = agentsB->end();
+	      
+	  }
+    }
+    if (agentsA->begin() != agentsA->end())
+        return false;
+    if (agentsB->begin() != agentsB->end())
+        return false;
+    
+    
+    std::set<UserdefParam*>* paramsA = a.getUserdefParams();
+    std::set<UserdefParam*>* paramsB = b.getUserdefParams();
+    std::set<UserdefParam*>::iterator pita = paramsA->begin();
+    std::set<UserdefParam*>::iterator pitb = paramsB->begin();
+    for (pita; pita != paramsA->end(); pita++)
+    {
+        for (pitb; pitb != paramsB->end(); pitb++)
+	  if ( (*(*pita)) == (*(*pitb))) 
+	  {
+	      paramsA->erase(pita);
+	      paramsB->erase(pitb);
+	      pitb = paramsB->end();
+	      
+	  }
+    }
+    if (paramsA->begin() != paramsA->end())
+        return false;
+    if (paramsB->begin() != paramsB->end())
+        return false;
+    
+    
+    return true;
+}
+*/
   
 void ACLMessage::initializeObject()
 {
