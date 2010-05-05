@@ -13,7 +13,6 @@
 #include "../../message-generator/src/ACLMessage.h"
 #include "../../message-generator/src/UserdefParam.h"
 #include "../../message-generator/src/AgentAID.h"
-#include "grammar_bitefficient.h"
 
 #include <vector>
 #include <string>

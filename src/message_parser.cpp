@@ -6,6 +6,7 @@
  * 
  * \version 1.0
  */
+#include "grammar_bitefficient.h"
 #include "message_parser.h"
 
 
@@ -56,8 +57,7 @@ ACLMessage*  MessageParser::parseData(const std::string storage)
   	}
 	
 	return message;
-  // use the stuff as shown in the main.cpp an use the tools given in bitefficient_grammar
-  // to populate the ACLMessage
+
 
 }
 
@@ -65,9 +65,6 @@ ACLMessage* MessageParser::buildMessage(Message parsedMsg)
 {
 	ACLMessage *msg = new ACLMessage();
 	msg->setPerformative(parsedMsg.type);
-	
-	
-	if (parsedMsg.parameters.empty()) std::cout<<"empty param list\n";
 	
 	buildParameters(parsedMsg.parameters,msg);
 	
@@ -111,7 +108,6 @@ int MessageParser::buildPredefMessageParameters(MessageParameter param,ACLMessag
     if (!param.name.compare(std::string("protocol")))	{buildProtocol(param, msg); return 1;}
     if (!param.name.compare(std::string("conversation-id"))){buildConversationID(param, msg); return 1;}
     
-    std::cout<<"no-predef\n";
     return 0;
 }
 

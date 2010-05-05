@@ -1,5 +1,7 @@
-#ifndef RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
-#define RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#ifndef BLA
+#define BLA
+#ifndef _RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#define _RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
 /**
  *
  * \file grammar_bitefficient.h
@@ -415,14 +417,7 @@ namespace fipa
 	// In order to use functions as semantic actions
 	// lazy evaluation is required	
 	
-namespace acl
-{
-
-template <typename Iterator>
-// IMPORTANT: ACLMessage with following () otherwise, compiler error
-struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii::space_type>
-{
-        
+  
         struct extractFromCodetableImpl
 	{
 		template <typename T>
@@ -457,7 +452,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	
 	};
 
-	phoenix::function<extractFromCodetableImpl> extractFromCodetable;
+	extern phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
 	struct buildStringImpl
 	{
@@ -477,7 +472,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 
 	};
-	phoenix::function<buildStringImpl> buildString;
+	extern phoenix::function<buildStringImpl> buildString;
 
 	struct printImpl
 	{
@@ -495,7 +490,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 	};
 
-	phoenix::function<printImpl> print;
+	extern phoenix::function<printImpl> print;
 
 	struct convertToTimeImpl
 	{
@@ -522,7 +517,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		}
 	};
 	
-	phoenix::function<convertToTimeImpl> convertToTime;
+	extern phoenix::function<convertToTimeImpl> convertToTime;
 
 	struct convertToNumberTokenImpl
 	{
@@ -579,7 +574,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		}
 	};
 
-	phoenix::function<convertToNumberTokenImpl> convertToNumberToken;
+	extern phoenix::function<convertToNumberTokenImpl> convertToNumberToken;
 	
 	/**
 	* Convert a string that represents an integer to a string that represent an hexadecimal number
@@ -609,7 +604,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		}
 	};
 
-	phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;
+	extern phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;
 
 	struct convertToStringImpl
 	{
@@ -636,7 +631,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 	};
 
-	phoenix::function<convertToStringImpl> convertToString;
+	extern phoenix::function<convertToStringImpl> convertToString;
 
 	struct convertToCharVectorImpl
 	{
@@ -662,8 +657,17 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 
 	};
 	
-	phoenix::function<convertToCharVectorImpl> convertToCharVector;
+	extern phoenix::function<convertToCharVectorImpl> convertToCharVector;
 
+
+namespace acl
+{
+
+template <typename Iterator>
+// IMPORTANT: ACLMessage with following () otherwise, compiler error
+struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii::space_type>
+{
+      
 	bitefficient_grammar() : bitefficient_grammar::base_type(aclCommunicativeAct, "bitefficient-grammar")
 	{
 		using qi::on_error;
@@ -1126,4 +1130,5 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 } // end namespace acl
 } // end namespace fipa
 
-#endif // RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#endif // _RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#endif

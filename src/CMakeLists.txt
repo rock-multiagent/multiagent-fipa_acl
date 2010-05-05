@@ -17,6 +17,7 @@ SET(module_name ${PROJECT_NAME})
 #)
 set(SOURCES
 	message_parser.cpp
+	grammar_bitefficient.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
