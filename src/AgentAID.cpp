@@ -85,6 +85,15 @@ bool operator== (AgentAID &a, AgentAID &b)
 }
 */
     
+AgentAID::~AgentAID()
+{
+    adresses->clear();
+    delete adresses;
+    params->clear();
+    delete params;
+    resolvers->clear();
+    delete resolvers;
+}
 AgentAID::AgentAID(AgentAID &aid)
 {
     initializeFields();
@@ -102,11 +111,12 @@ AgentAID::AgentAID(AgentAID &aid)
    }
    if (!aid.getResolvers()->empty())
    {
-        AgentAID *temp = new AgentAID();
+        
         std::set<AgentAID*>* aidres = aid.getResolvers();
         std::set<AgentAID*>::iterator aidit= aidres->begin();
         for (aidit; aidit != aidres->end(); aidit++)
         {
+	  AgentAID *temp = new AgentAID();
 	  *temp = (*(*aidit));
 	  resolvers->insert(temp);
         }
@@ -115,11 +125,10 @@ AgentAID::AgentAID(AgentAID &aid)
     { 
         std::set<UserdefParam*>* aidparams = aid.getUserdefParams();
         std::set<UserdefParam*>::iterator paramit = aidparams->begin();
-        
-        UserdefParam *temp2 = new UserdefParam();
-        
+               
         for (paramit; paramit != aidparams->end(); paramit++)
         {
+	  UserdefParam *temp2 = new UserdefParam();
 	  *temp2 = (*(*paramit));
 	  params->insert(temp2);
         }
@@ -150,11 +159,12 @@ AgentAID& AgentAID::operator=(AgentAID &aid)
         }
         if (!aid.getResolvers()->empty())
         {	  
-	  AgentAID *temp = new AgentAID();
+	  
 	  std::set<AgentAID*>* aidres = aid.getResolvers();
 	  std::set<AgentAID*>::iterator aidit= aidres->begin();
 	  for (aidit; aidit != aidres->end(); aidit++)
 	  {
+	      AgentAID *temp = new AgentAID();
 	      *temp = (*(*aidit));
 	      resolvers->insert(temp);
 	  }	
@@ -163,11 +173,10 @@ AgentAID& AgentAID::operator=(AgentAID &aid)
         {
 	  std::set<UserdefParam*>* aidparams = aid.getUserdefParams();
 	  std::set<UserdefParam*>::iterator paramit = aidparams->begin();
-    
-	  UserdefParam *temp2 = new UserdefParam();
-    
+       
 	  for (paramit; paramit != aidparams->end(); paramit++)
 	  {
+	      UserdefParam *temp2 = new UserdefParam();
 	      *temp2 = (*(*paramit));
 	      params->insert(temp2);
 	  }

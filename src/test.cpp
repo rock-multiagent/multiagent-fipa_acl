@@ -251,21 +251,35 @@ a10->addAdress(string("adress1"));
 
 a100->addResolver(a10);
 a100->addResolver(a1);
+a100->addResolver(a7);
+a100->addResolver(a6);
 
 AgentAID *a101 =  new AgentAID();
 *a101 = *a100;
 printAgentAID(a101);
-cout<<"\n\n\n\n";
+cout<<"\n\n\n\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n\n";
 
-//*a11 = *a10;
-//delete a100;
-//delete a101.getAdresses();
-//cout<< (*a100->getAdresses()->begin())<<endl;
 
-ACLMessage *m4 = new ACLMessage(*m3);
+ACLMessage *m4 = new ACLMessage();
+*m4 = *m3;
 printMessage(m3);
 cout<<"\n\n\n\n";
-printMessage(m4);
+//delete a1;
+//delete m4->getSender();
+printMessage(m3);
+
+ACLMessage mes1;
+mes1.setPerformative(string("myperf"));
+mes1.setLanguage(string("mylanguage"));
+mes1.setSender(a101);
+ACLMessage mes2;
+mes2 = mes1;
+printMessage(&mes1);
+printMessage(&mes2);
+
+
+if (*m3 == *m4) cout<<"messages are equal\n";
+else cout<<"messages are diferent\n"; 
 
 
 
@@ -394,7 +408,7 @@ comp2->addResolver(a100);
   
     delete m3;
     delete p1;
-    delete a1;
+    //delete a1;
     delete a2;
     delete a3;
     delete a4;
@@ -403,6 +417,7 @@ comp2->addResolver(a100);
     delete a7;
     //delete p3;  
     delete p;
+    //delete m4;
     //delete comp1;
     //delete comp2;
     //delete a100;

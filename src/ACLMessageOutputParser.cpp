@@ -32,9 +32,11 @@ bool operator== (UserdefParam &a, UserdefParam &b)
 }
 
     
-bool operator== (AgentAID &a, AgentAID &b)
+bool operator== (AgentAID a, AgentAID b)
 {
     
+    //AgentAID a = AgentAID(&c);
+    //AgentAID b = AgentAID(&d);
     if (a.getName().compare(b.getName()))
         return false;
     
@@ -136,8 +138,11 @@ bool operator== (AgentAID &a, AgentAID &b)
     
 }
     
-bool operator== (ACLMessage &a, ACLMessage &b)
+bool operator== (ACLMessage a, ACLMessage b)
 {
+    //ACLMessage a = ACLMessage(&c); 
+    //ACLMessage b = ACLMessage(&d);
+        
     if (a.getPerformative().compare(b.getPerformative()))
         return false;
     if (a.getContent().compare(b.getContent()))

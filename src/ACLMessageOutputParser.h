@@ -21,8 +21,8 @@ namespace fipa {
 
 namespace acl {
 
-    extern bool operator== (ACLMessage &a, ACLMessage &b);
-    extern bool operator== (AgentAID &a, AgentAID &b);
+    extern bool operator== (ACLMessage a, ACLMessage b);
+    extern bool operator== (AgentAID a, AgentAID b);
     extern bool operator== (UserdefParam &a, UserdefParam &b);
     
     

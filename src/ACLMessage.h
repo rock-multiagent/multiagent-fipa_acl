@@ -96,6 +96,7 @@ private:
 public:
 	
        void initializeObject();
+       ~ACLMessage();
        ACLMessage();
        ACLMessage(ACLMessage &mes);
        ACLMessage& operator=(ACLMessage &mes);

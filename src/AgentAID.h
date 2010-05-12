@@ -36,7 +36,8 @@ class AgentAID {
 /*
 	setter and getter methods are all the functionality needed so far
 */
-               AgentAID();
+               ~AgentAID();
+	     AgentAID();
 	     AgentAID(AgentAID &a);
 	     AgentAID& operator=(AgentAID &a);
 	     AgentAID(std::string nam);

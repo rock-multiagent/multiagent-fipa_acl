@@ -119,25 +119,27 @@ ACLMessage::ACLMessage(ACLMessage &mes)
     if (!mes.getContent().empty()) content = mes.getContent();
     
     if (mes.getSender() != NULL)
-        sender = mes.getSender();
+        *sender = *(mes.getSender());
     if (!mes.getAllReceivers()->empty()) 
     {
-        AgentAID *temp = new AgentAID();
+        
         std::set<AgentAID*>* mesrec = mes.getAllReceivers();
         std::set<AgentAID*>::iterator recit= mesrec->begin();
         for (recit; recit != mesrec->end(); recit++)
         {
+	  AgentAID *temp = new AgentAID();
 	  *temp = (*(*recit));
 	  receivers->insert(temp);
         }
     }
     if (!mes.getAllReplyTo()->empty()) 
     {
-        AgentAID *temp = new AgentAID();
+        
         std::set<AgentAID*>* mesrec = mes.getAllReplyTo();
         std::set<AgentAID*>::iterator recit= mesrec->begin();
         for (recit; recit != mesrec->end(); recit++)
         {
+	  AgentAID *temp = new AgentAID();
 	  *temp = (*(*recit));
 	  reply_to->insert(temp);
         }
@@ -145,13 +147,12 @@ ACLMessage::ACLMessage(ACLMessage &mes)
     
     if (!mes.getUserdefParams()->empty())
     {
-         std::set<UserdefParam*>* mesparams = mes.getUserdefParams();
+        std::set<UserdefParam*>* mesparams = mes.getUserdefParams();
         std::set<UserdefParam*>::iterator paramit = mesparams->begin();
-    
-        UserdefParam *temp2 = new UserdefParam();
     
         for (paramit; paramit != mesparams->end(); paramit++)
         {
+	  UserdefParam *temp2 = new UserdefParam();
 	  *temp2 = (*(*paramit));
 	  params->insert(temp2);
         }
@@ -178,25 +179,32 @@ ACLMessage& ACLMessage::operator=(ACLMessage &mes)
         if (!mes.getContent().empty()) content = mes.getContent();
         
         if (mes.getSender() != NULL)
-	  sender = mes.getSender();
+	  {
+	      //AgentAID *temp = new AgentAID();
+	      *sender = *(mes.getSender());
+	      //sender = temp;
+	      
+	  }
         if (!mes.getAllReceivers()->empty()) 
         {
-	  AgentAID *temp = new AgentAID();
+	  
 	  std::set<AgentAID*>* mesrec = mes.getAllReceivers();
 	  std::set<AgentAID*>::iterator recit= mesrec->begin();
 	  for (recit; recit != mesrec->end(); recit++)
 	  {
+	      AgentAID *temp = new AgentAID();
 	      *temp = (*(*recit));
 	      receivers->insert(temp);
 	  }
         }
         if (!mes.getAllReplyTo()->empty()) 
         {
-	  AgentAID *temp = new AgentAID();
+	  
 	  std::set<AgentAID*>* mesrec = mes.getAllReplyTo();
 	  std::set<AgentAID*>::iterator recit= mesrec->begin();
 	  for (recit; recit != mesrec->end(); recit++)
 	  {
+	      AgentAID *temp = new AgentAID();
 	      *temp = (*(*recit));
 	      reply_to->insert(temp);
 	  }
@@ -207,10 +215,9 @@ ACLMessage& ACLMessage::operator=(ACLMessage &mes)
 	  std::set<UserdefParam*>* mesparams = mes.getUserdefParams();
 	  std::set<UserdefParam*>::iterator paramit = mesparams->begin();
         
-	  UserdefParam *temp2 = new UserdefParam();
-        
 	  for (paramit; paramit != mesparams->end(); paramit++)
 	  {
+	      UserdefParam *temp2 = new UserdefParam();
 	      *temp2 = (*(*paramit));
 	      params->insert(temp2);
 	  }
@@ -255,6 +262,18 @@ void ACLMessage::initializeObject()
          content = std::string();
          content.clear();
 }
+
+ACLMessage::~ACLMessage()
+{
+    delete sender;
+    receivers->clear();
+    delete receivers;
+    reply_to->clear();
+    delete reply_to;
+    params->clear();
+    delete params;
+}
+
 ACLMessage::ACLMessage() 
 {
 	initializeObject();
