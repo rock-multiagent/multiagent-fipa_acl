@@ -119,7 +119,12 @@ ACLMessage::ACLMessage(ACLMessage &mes)
     if (!mes.getContent().empty()) content = mes.getContent();
     
     if (mes.getSender() != NULL)
-        *sender = *(mes.getSender());
+        {
+	      AgentAID *temp = new AgentAID();
+	      *temp = *(mes.getSender());
+	      sender = temp;
+	      
+	  }
     if (!mes.getAllReceivers()->empty()) 
     {
         
@@ -180,9 +185,9 @@ ACLMessage& ACLMessage::operator=(ACLMessage &mes)
         
         if (mes.getSender() != NULL)
 	  {
-	      //AgentAID *temp = new AgentAID();
-	      *sender = *(mes.getSender());
-	      //sender = temp;
+	      AgentAID *temp = new AgentAID();
+	      *temp = *(mes.getSender());
+	      sender = temp;
 	      
 	  }
         if (!mes.getAllReceivers()->empty()) 
@@ -230,6 +235,7 @@ ACLMessage& ACLMessage::operator=(ACLMessage &mes)
 void ACLMessage::initializeObject()
 {
 	
+	//sender = new AgentAID();
 	sender = NULL;
         receivers = new std::set<AgentAID*>();
 	if (!(*receivers).empty()) (*receivers).clear();

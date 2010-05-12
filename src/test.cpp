@@ -266,20 +266,14 @@ printMessage(m3);
 cout<<"\n\n\n\n";
 //delete a1;
 //delete m4->getSender();
-printMessage(m3);
+//delete m4;
+printMessage(m4);
 
-ACLMessage mes1;
-mes1.setPerformative(string("myperf"));
-mes1.setLanguage(string("mylanguage"));
-mes1.setSender(a101);
-ACLMessage mes2;
-mes2 = mes1;
-printMessage(&mes1);
-printMessage(&mes2);
 
 
 if (*m3 == *m4) cout<<"messages are equal\n";
 else cout<<"messages are diferent\n"; 
+printMessage(m4);
 
 
 
