@@ -9,21 +9,22 @@
 #ifndef RIMRES_FIPAACL_MESSAGE_PARSER_H_
 #define RIMRES_FIPAACL_MESSAGE_PARSER_H_
 
-//#include "message-generator/ACLMessage.h"
-//#include "message-generator/UserdefParam.h"
-//#include "message-generator/AgentAID.h"
-//#include "grammar_bitefficient.h"
-
-
-#include "../../message-generator/src/ACLMessage.h"
-#include "../../message-generator/src/UserdefParam.h"
-#include "../../message-generator/src/AgentAID.h"
+#include "message-generator/ACLMessage.h"
+#include "message-generator/UserdefParam.h"
+#include "message-generator/AgentAID.h"
 #include "grammar_bitefficient.h"
+
+
+//#include "../../message-generator/src/ACLMessage.h"
+//#include "../../message-generator/src/UserdefParam.h"
+//#include "../../message-generator/src/AgentAID.h"
+//#include "grammar_bitefficient.h"
 
 #include <vector>
 #include <string>
 
 namespace fipa { 
+    
 namespace acl {
 
 class MessageParser
@@ -34,12 +35,18 @@ class MessageParser
 		~MessageParser();
 	
 		/**
-		* \param storage Array of bytes that represent the bitefficient FIPA message
-		* \return A message object for internal use
+		  \brief parses a correctly encoded message according to grammar_bitefficient.h and creates a Message object for internal use
+		* \param storage Array of bytes that represent the bitefficient FIPA encoded  message
+		* \return The decoded ACLMessage object
 		*/	
 		ACLMessage* parseData(const std::string storage);
-		
+		/**
+		    \brief creates an unpopulated message object and passes it around to have its fields populated, along with the parsed message where the data is extracted from
+		    \return the decoded ACLMessage object
+		*/
 		ACLMessage* buildMessage(Message parsedMsg);
+		
+	private:
 		void buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage* msg);
 		int buildPredefMessageParameters(MessageParameter param,ACLMessage* msg);
 		void buildSender(MessageParameter param,ACLMessage* msg);
