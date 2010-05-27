@@ -2,7 +2,7 @@
  *
  * \file UserdefParam.h
  * \author Mircea Cretu Stancu
- * \brief Implements the general User-defined parameters, which are present throughout the fipa specifications(FIPA at http://www.fipa.org).
+ * \brief defines the UserdefParam class
  * 
  * \version 1.0
  *  - has very basic features, only what was needed for the ACLMessage and AgentAID classes
@@ -19,7 +19,9 @@ namespace fipa {
 namespace acl {
 
     //extern bool operator== (UserdefParam &a, UserdefParam &b);
-
+/**
+    \brief Implements the general User-defined parameters, which are present throughout the fipa specifications(FIPA at http://www.fipa.org).
+*/
 class UserdefParam {
        
 /*
@@ -36,8 +38,15 @@ class UserdefParam {
 	setter and getter methods so far
 */
 	    UserdefParam();
+	    /**
+		\brief overloaded copy-constructor
+	    */
 	    UserdefParam(UserdefParam &copy);
+	    /**
+		\brief overloaded assignment operator
+	    */
 	    UserdefParam& operator=(UserdefParam& copy);
+	    /** \brief setter and getter methods */
               std::string getValue();
               void setValue(std::string val);
               std::string getName();

@@ -13,9 +13,9 @@
 #include <string>
 #include <cstring>
 //#include <conio.h>
-#include "ACLMessage.h"
-#include "ACLMessageOutputParser.h"
-#include "UserdefParam.h"
+#include <message-generator/ACLMessage.h>
+#include <message-generator/ACLMessageOutputParser.h>
+#include <message-generator/UserdefParam.h>
 
 
 #include "../../message-parser/src/grammar_bitefficient.h"
@@ -214,29 +214,6 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	
 	
 	
-	ACLMessage forcomp, forcomp2;
-	
-	
-	forcomp.setPerformative(std::string("perf"));
-	forcomp2.setPerformative(std::string("perf"));
-
-forcomp.setProtocol(std::string("myprotocol")); 
-forcomp.setLanguage(std::string("mylang")); 
-forcomp.setReplyWith(std::string("myreplywith"));
-forcomp.setInReplyTo(std::string("inreplyto"));
-forcomp.setEncoding(std::string("encoding"));
-forcomp.setOntology(std::string("myontology"));
-forcomp.setContent(std::string("my_content"));
-forcomp.setConversationID(std::string("convID"));	
-
-forcomp2.setProtocol(std::string("myprotocol")); 
-forcomp2.setLanguage(std::string("mylang")); 
-forcomp2.setReplyWith(std::string("myreplywith"));
-forcomp2.setInReplyTo(std::string("inreplyto"));
-forcomp2.setEncoding(std::string("encoding"));
-forcomp2.setOntology(std::string("myontology"));
-forcomp2.setContent(std::string("my_content"));
-forcomp2.setConversationID(std::string("convID"));
 
 int found_one = 0;
 
@@ -371,34 +348,7 @@ comp2->addResolver(a100);
 
  
 
-//if (forcomp == forcomp2 ) cout<<"comparation good\n";
-//else cout<<"comparation failed";
 
-		//if (!rebuilt); //std::cout <<"null message returned\n";
-	//printMessage(rebuilt);
-
- /* 
-   
-  	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
-	bitefficient_grammar grammar;
-	fipa::acl::Message parseTree;
-
-	using boost::spirit::ascii::space;
-	std::string::const_iterator iter = storage.begin();
-	std::string::const_iterator end = storage.end();
-	bool r = phrase_parse(iter, end, grammar, space, parseTree);
-
-	if(r && iter == end)
-	{
-	ACLMessage *rebuilt;
-	//MessageRebuilder rebuilder = MessageRebuilder(); 
-	//rebuilt = rebuilder.buildMessage(parseTree);
-  	}
-  */
-  
-    //std::cout<<(*rebuilt).getContent().length()<<std::endl;
-    //std::cout<<(*rebuilt).getReplyWith()<<std::endl;
-  
   
     delete m3;
     delete p1;
