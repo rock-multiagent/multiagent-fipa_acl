@@ -20,6 +20,9 @@
 //#include "../../message-generator/src/AgentAID.h"
 //#include "grammar_bitefficient.h"
 
+#include "types.h"
+
+
 #include <vector>
 #include <string>
 
