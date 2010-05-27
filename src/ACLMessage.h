@@ -77,8 +77,8 @@ private:
         std::string content;
                 
 
-       /// all predefined FIPA performatives:
-       public:  static const int ACCEPT_PROPOSAL = 0;
+       // all predefined FIPA performatives:
+      /* public:  static const int ACCEPT_PROPOSAL = 0;
        		static const int AGREE = 1;
        		static const int CANCEL = 2;
        		static const int CALL_FOR_PROPOSAL = 3;
@@ -100,35 +100,10 @@ private:
        		static const int REQUEST_WHEN = 19;
        		static const int REQUEST_WHENEVER = 20;
        		static const int SUBSCRIBE = 21;
-       
+       */
 		/** \param perfs: vector with all predefined message performatives as strings */
        		static const std::string perfs[];
-     /* 
-     static {
-       perfs [ACCEPT_PROPOSAL] = "accept-proposal";
-       perfs [AGREE] = "agree";
-       perfs [CANCEL] = "cancel";
-       perfs [CALL_FOR_PROPOSAL] = "cfp";
-       perfs [CONFIRM] = "confirm";
-       perfs [DISCONFIRM] = "disconfirm";
-       perfs [FAILURE] = "failure";
-       perfs [INFORM] = "inform";
-       perfs [INFORM_IF] = "inform-if";
-       perfs [INFORM_REF] = "inform-ref";
-       perfs [NOT_UNDERSTOOD] = "not-understood";
-       perfs [PROPAGATE] = "propagate";
-       perfs [PROPOSE] = "propose";
-       perfs [PROXY] = "proxy";
-       perfs [QUERY_IF] = "query-if";
-       perfs [QUERY_REF] = "query-ref";
-       perfs [REFUSE] = "refuse";
-       perfs [REJECT_PROPOSAL] = "reject-proposal";
-       perfs [REQUEST] = "request";
-       perfs [REQUEST_WHEN] = "request-when";
-       perfs [REQUEST_WHENEVER] = "request-whenever";
-       perfs [SUBSCRIBE] =  "subscribe";
-       };   
-*/
+     
 public:
         /**
 	  \brief this method does all allocations needed upon creating an ACLMessage. It is to be called by every constructor implemented 
@@ -148,7 +123,7 @@ public:
 	  \brief constructor of an ACLMessage with a predefined performative
 	  \param perf: a predefined fipa performative(represented by its index in the perfs vector)
        */
-       ACLMessage(int perf);
+       ACLMessage(predefinedPerformatives perf);
        /**
 	  \brief constructor of an ACLMessage with a custom performative
 	  \param perf: string representing the custom performative(but it can just as well be one of the pre-defined ones)
