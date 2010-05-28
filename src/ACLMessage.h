@@ -78,31 +78,33 @@ private:
                 
 
        // all predefined FIPA performatives:
-      /* public:  static const int ACCEPT_PROPOSAL = 0;
-       		static const int AGREE = 1;
-       		static const int CANCEL = 2;
-       		static const int CALL_FOR_PROPOSAL = 3;
-       		static const int CONFIRM = 4;
-       		static const int DISCONFIRM = 5;
-       		static const int FAILURE = 6;
-       		static const int INFORM = 7;
-       		static const int INFORM_IF = 8;
-       		static const int INFORM_REF = 9;
-       		static const int NOT_UNDERSTOOD = 10;
-       		static const int PROPAGATE = 11;
-       		static const int PROPOSE = 12;
-       		static const int PROXY = 13;
-       		static const int QUERY_IF = 14;
-       		static const int QUERY_REF = 15;
-       		static const int REFUSE = 16;
-       		static const int REJECT_PROPOSAL = 17;
-       		static const int REQUEST = 18;
-       		static const int REQUEST_WHEN = 19;
-       		static const int REQUEST_WHENEVER = 20;
-       		static const int SUBSCRIBE = 21;
-       */
+       // Stefan: Comment in again for a successfull building
+ public:  
+        static const int ACCEPT_PROPOSAL = 0;
+   		static const int AGREE = 1;
+   		static const int CANCEL = 2;
+   		static const int CALL_FOR_PROPOSAL = 3;
+   		static const int CONFIRM = 4;
+   		static const int DISCONFIRM = 5;
+   		static const int FAILURE = 6;
+   		static const int INFORM = 7;
+   		static const int INFORM_IF = 8;
+   		static const int INFORM_REF = 9;
+   		static const int NOT_UNDERSTOOD = 10;
+   		static const int PROPAGATE = 11;
+   		static const int PROPOSE = 12;
+   		static const int PROXY = 13;
+   		static const int QUERY_IF = 14;
+   		static const int QUERY_REF = 15;
+   		static const int REFUSE = 16;
+   		static const int REJECT_PROPOSAL = 17;
+   		static const int REQUEST = 18;
+   		static const int REQUEST_WHEN = 19;
+   		static const int REQUEST_WHENEVER = 20;
+   		static const int SUBSCRIBE = 21;
+       
 		/** \param perfs: vector with all predefined message performatives as strings */
-       		static const std::string perfs[];
+        static const std::string perfs[];
      
 public:
         /**
@@ -129,6 +131,10 @@ public:
 	  \param perf: string representing the custom performative(but it can just as well be one of the pre-defined ones)
        */
        ACLMessage(std::string perf);
+       /**
+        * Stefan: Added missing declaration for existing definition.
+        */
+       ACLMessage(int perf);
        
        /**
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
