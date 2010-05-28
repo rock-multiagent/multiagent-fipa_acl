@@ -223,7 +223,7 @@ class MessagePrinter
 		printf("version:                  %x\n", msg.header.version); 
 		printf("performative(type):       %s\n", msg.type.c_str());
 		
-		printf("msg-parameters count:     %d\n", msg.parameters.size());
+		printf("msg-parameters count:     %d\n",(int) msg.parameters.size());
 		for(int i=0; i < msg.parameters.size(); i++)
 		{
 			MessageParameter mp = msg.parameters[i];

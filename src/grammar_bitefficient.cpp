@@ -1,6 +1,6 @@
 #include "grammar_bitefficient.h"
 /**
-    \file gramar_bitefficient.cpp
+    \file grammar_bitefficient.cpp
     \brief delcares instances needed for the grammar
     \author Mircea Cretu Stancu
     
