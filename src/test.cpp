@@ -13,9 +13,9 @@
 #include <string>
 #include <cstring>
 //#include <conio.h>
-#include <message-generator/ACLMessage.h>
-#include <message-generator/ACLMessageOutputParser.h>
-#include <message-generator/UserdefParam.h>
+#include <ACLMessage.h>
+#include <ACLMessageOutputParser.h>
+#include <UserdefParam.h>
 
 
 //#include "../../message-parser/src/message_parser.h"
