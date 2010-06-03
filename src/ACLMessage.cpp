@@ -285,7 +285,7 @@ ACLMessage::ACLMessage()
 	initializeObject();
 }
 
-ACLMessage::ACLMessage(int perf)
+ACLMessage::ACLMessage(predefinedPerformatives perf)
 
 {
 	initializeObject();

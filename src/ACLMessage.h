@@ -102,7 +102,7 @@ private:
        		static const int SUBSCRIBE = 21;
        */
 		/** \param perfs: vector with all predefined message performatives as strings */
-       		static const std::string perfs[];
+       		public: static const std::string perfs[];
      
 public:
         /**

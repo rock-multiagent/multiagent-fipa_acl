@@ -15,9 +15,9 @@ install(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION lib
 )	
 
-set(TEST_TARGET test_${PROJECT_NAME})
-add_executable(${TEST_TARGET} test.cpp ${SOURCES})
-target_link_libraries(${TEST_TARGET} ${LIBRARIES})
+#set(TEST_TARGET test_${PROJECT_NAME})
+#add_executable(${TEST_TARGET} test.cpp ${SOURCES})
+#target_link_libraries(${TEST_TARGET} ${LIBRARIES})
 
 
 #SET(main_cpp test.cpp )
