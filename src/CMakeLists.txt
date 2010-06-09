@@ -24,9 +24,14 @@ set(SOURCES
 #target_link_libraries(testParser ${LIBRARIES})
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
-target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
+target_link_libraries(${PROJECT_NAME} message-generator ${LIBRARIES})
 install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
-)	
+	)
+	
+set(TEST_TARGET test_${PROJECT_NAME})
+add_executable(${TEST_TARGET} test.cpp ${SOURCES})
+target_link_libraries(${TEST_TARGET} message-generator ${LIBRARIES})
+
