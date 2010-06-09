@@ -19,7 +19,7 @@ namespace fipa {
 namespace acl {
 
     /**
-        \enum predefinedPerformaives
+        \enum predefinedPerformatives
         \brief an enum of all the predefined fipa message perfomratives so far, presented in the order used in the message and encoding specifications
     */
     enum predefinedPerformatives{ ACCEPT_PROPOSAL = 0, AGREE, CANCEL, CALL_FOR_PROPOSAL, CONFIRM, DISCONFIRM, FAILURE, INFORM,
