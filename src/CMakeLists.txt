@@ -15,9 +15,12 @@ install(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION lib
 )	
 
+#include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
+#pkg_check_modules(MESSAGE_PARSER "message-parser")
+
 #set(TEST_TARGET test_${PROJECT_NAME})
 #add_executable(${TEST_TARGET} test.cpp ${SOURCES})
-#target_link_libraries(${TEST_TARGET} ${LIBRARIES})
+#target_link_libraries(${TEST_TARGET} ${MESSAGE_PARSER_LIBRARY_DIRS} ${LIBRARIES})
 
 
 #SET(main_cpp test.cpp )

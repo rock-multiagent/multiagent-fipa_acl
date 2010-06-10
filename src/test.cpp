@@ -13,12 +13,13 @@
 #include <string>
 #include <cstring>
 //#include <conio.h>
-#include "ACLMessage.h"
+//#include "ACLMessage.h"
 #include "ACLMessageOutputParser.h"
-#include "UserdefParam.h"
+//#include "UserdefParam.h"
+//#include <message-parser/message_parser.h>
 
 
-//#include "../../message-parser/src/message_parser.h"
+#include "../../message-parser/src/message_parser.h"
 
 
 
@@ -87,6 +88,32 @@ void printUserdefParamset(set<UserdefParam*>* params)
 int main(int argc, char** argv)
 {
 
+		fipa::acl::ACLMessage *testmessage = new fipa::acl::ACLMessage(std::string("query-ref"));
+
+                fipa::acl::AgentAID *sender = new fipa::acl::AgentAID(std::string("modulename"));
+                testmessage->setSender(sender);
+
+                fipa::acl::AgentAID *receiver = new fipa::acl::AgentAID(std::string("moduleD"));
+                testmessage->addReceiver(receiver);
+
+                fipa::acl::ACLMessageOutputParser testparser = fipa::acl::ACLMessageOutputParser();
+                testparser.setMessage(testmessage);
+
+                std::string received = testparser.getBitMessage();
+
+
+                MessageParser parser = MessageParser();
+                fipa::acl::ACLMessage* aclmessage = parser.parseData(received);
+                printMessage(aclmessage);
+/*
+                std::set<fipa::acl::AgentAID*>* receivers = aclmessage->getAllReceivers();
+                std::set<fipa::acl::AgentAID*>::iterator it;
+
+                std::vector<std::string> recvs;
+                for (it = receivers->begin(); it != receivers->end(); it++) 
+                        recvs.push_back((*it)->getName());
+
+/*
 ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
 
 	
@@ -212,7 +239,7 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	
 	
 	
-
+/*
 int found_one = 0;
 
 AgentAID *a100 = new AgentAID;
@@ -293,7 +320,7 @@ printMessage(m4);
 
 if (a100->getAdresses()->empty()) cout<<"empty\n";
 if (a10->getAdresses()->empty()) cout<<"empty\n";
-/*
+
 AgentAID *comp1 = new AgentAID(std::string("agname"));
 AgentAID *comp2 = new AgentAID(std::string("agname"));
 cout<<"control\n";
@@ -347,7 +374,7 @@ comp2->addResolver(a100);
  
 
 
-  
+  /*
     delete m3;
     delete p1;
     //delete a1;
@@ -366,7 +393,7 @@ comp2->addResolver(a100);
    
 
     //delete p2;
-        
+    */    
     return 0;
 }
 
