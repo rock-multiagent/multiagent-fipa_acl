@@ -89,8 +89,13 @@ AgentAID::~AgentAID()
 {
     adresses->clear();
     delete adresses;
+    std::set<UserdefParam*>::iterator it = params->begin();
+    for (it; it != params->end(); it++)
     params->clear();
     delete params;
+    
+    std::set<AgentAID*>::iterator it1 = resolvers->begin();
+    for (it1; it1 != resolvers->end(); it1++)
     resolvers->clear();
     delete resolvers;
 }
@@ -211,8 +216,6 @@ void AgentAID::initializeFields()
 	if (!(*adresses).empty()) (*adresses).clear();
 	resolvers = new std::set<AgentAID*>();
 	if (!(*resolvers).empty()) (*resolvers).clear();
-	adresses = new std::set<std::string>();
-	if (!(*adresses).empty()) (*adresses).clear();
 	params = new std::set<UserdefParam*>();
 	if (!(*params).empty()) (*params).clear();
 }
@@ -225,11 +228,21 @@ void AgentAID::addAdress(std::string adr) {(*adresses).insert(adr);}
 
 std::set<std::string>* AgentAID::getAdresses() {return adresses; }
 
-void AgentAID::addResolver(AgentAID* aid) {(*resolvers).insert(aid); }
+void AgentAID::addResolver(AgentAID* aid) 
+{
+    AgentAID *aid1 = new AgentAID();
+    *aid1 = *aid;
+    (*resolvers).insert(aid1); 
+}
 
 std::set<AgentAID*>* AgentAID::getResolvers() {return resolvers;}
 
-void AgentAID::addUserdefParam(UserdefParam* p) {(*params).insert(p); }
+void AgentAID::addUserdefParam(UserdefParam* p) 
+{
+    UserdefParam *p1 = new UserdefParam();
+    *p1 = *p;
+    (*params).insert(p1); 
+}
 
 std::set<UserdefParam*>* AgentAID::getUserdefParams() {return params;}
 

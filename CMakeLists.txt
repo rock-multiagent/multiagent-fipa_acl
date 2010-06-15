@@ -51,6 +51,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
+add_subdirectory(test/unit-testing)
 
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)

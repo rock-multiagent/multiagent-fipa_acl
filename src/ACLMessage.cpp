@@ -272,15 +272,26 @@ void ACLMessage::initializeObject()
 ACLMessage::~ACLMessage()
 {
     delete sender;
+    std::set<AgentAID*>::iterator it = receivers->begin();
+    for (it; it!=receivers->end(); it++)
+        delete (*it);
     receivers->clear();
     delete receivers;
+    
+    it = reply_to->begin();
+    for (it; it != reply_to->end(); it++)
+        delete (*it);
     reply_to->clear();
     delete reply_to;
+    
+    std::set<UserdefParam*>::iterator it2 = params->begin();
+    for (it2; it2 != params->end(); it2++)
+        delete (*it2);
     params->clear();
     delete params;
 }
 
-ACLMessage::ACLMessage() 
+ACLMessage::ACLMessage()
 {
 	initializeObject();
 }
@@ -292,25 +303,47 @@ ACLMessage::ACLMessage(predefinedPerformatives perf)
 	performative = ACLMessage::perfs[perf];
 }
 
-ACLMessage::ACLMessage(std::string perf) {performative = perf; initializeObject();}
+ACLMessage::ACLMessage(std::string perf) {initializeObject(); performative = perf; }
 
 void ACLMessage::setPerformative(std::string str) {performative = str; }
 
 std::string ACLMessage::getPerformative() {return performative; }
 
-void ACLMessage::addReceiver(AgentAID* aid) {(*receivers).insert(aid); }
+void ACLMessage::addReceiver(AgentAID* aid) 
+{
+    AgentAID *myaid = new AgentAID();
+    *myaid = *aid;
+    (*receivers).insert(myaid); 
+}
 
 void ACLMessage::deleteReceiver(AgentAID* aid) {(*receivers).erase(aid); }
 
-void ACLMessage::clearReceivers() {(*receivers).clear(); }
+void ACLMessage::clearReceivers() 
+{
+    std::set<AgentAID*>::iterator it = receivers->begin();
+    for (it; it != receivers->end(); it++)
+        delete (*it);
+    (*receivers).clear(); 
+}
 
 std::set<AgentAID*>* ACLMessage::getAllReceivers() {return receivers; }
 
-void ACLMessage::addReplyTo(AgentAID* aid) {(*reply_to).insert(aid); }
+void ACLMessage::addReplyTo(AgentAID* aid) 
+{
+    AgentAID *myaid = new AgentAID();
+    *myaid = *aid;
+    (*reply_to).insert(myaid); 
+}
 
 void ACLMessage::deleteReplyTo(AgentAID* aid) {(*reply_to).erase(aid); }
 
-void ACLMessage::clearReplyTo() {(*reply_to).clear(); }
+void ACLMessage::clearReplyTo() 
+{
+    std::set<AgentAID*>::iterator it = reply_to->begin();
+    for (it; it != reply_to->end(); it++)
+        delete (*it);
+    (*reply_to).clear(); 
+}
 
 std::set<AgentAID*>* ACLMessage::getAllReplyTo() {return reply_to; }
 
@@ -350,12 +383,27 @@ void ACLMessage::setContent(std::string cont) {content = cont; }
 
 std::string ACLMessage::getContent() {return content; }
 
-void ACLMessage::setSender(AgentAID* sender1) {sender = sender1; }
+void ACLMessage::setSender(AgentAID* sender1) 
+{
+    if (!sender) sender = new AgentAID();
+    *sender = *sender1; 
+}
 
 
-AgentAID* ACLMessage::getSender() {return sender; } 
+AgentAID* ACLMessage::getSender() 
+{
+    AgentAID *retag = new AgentAID();
+    *retag = *sender;
+    return retag; 
+    
+} 
 
-void ACLMessage::addUserdefParam(UserdefParam* p) {(*params).insert(p);}
+void ACLMessage::addUserdefParam(UserdefParam* p) 
+{
+    UserdefParam *p1 = new UserdefParam();
+    *p1 = *p;
+    (*params).insert(p1);
+}
 
 std::set<UserdefParam*>* ACLMessage:: getUserdefParams() {return params;}
 
