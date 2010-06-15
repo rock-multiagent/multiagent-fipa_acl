@@ -16,6 +16,10 @@
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/variant/variant.hpp>
 
+// ENCODING need to be set according to grammar 
+//namespace boost::spirit::ascii;
+namespace encoding = boost::spirit::standard;
+
 namespace fipa { 
 namespace acl {
 
@@ -29,11 +33,8 @@ MessageParser::~MessageParser()
 }
 
 
-ACLMessage*  MessageParser::parseData(const std::string storage)
+bool MessageParser::parseData(const std::string storage, ACLMessage* msg)
 {
- 
-	fipa::acl::ACLMessage* message = NULL;
-	  
 	/*
 	std::string storage;
 	std::vector<uint_8_t>::iterator it = data.begin();
@@ -45,34 +46,29 @@ ACLMessage*  MessageParser::parseData(const std::string storage)
 	bitefficient_grammar grammar;
 	fipa::acl::Message parseTree;
 
-	using boost::spirit::ascii::space;
 	std::string::const_iterator iter = storage.begin();
 	std::string::const_iterator end = storage.end();
-	bool r = phrase_parse(iter, end, grammar, space, parseTree);
-
+	bool r = phrase_parse(iter, end, grammar, encoding::space, parseTree);
+	
 	if(r && iter == end)
 	{
-	//ACLMessage *rebuilt;
-	message = buildMessage(parseTree);
+		return buildMessage(parseTree, msg);
   	}
 	
-	return message;
+	return false;
 
 
 }
 
-ACLMessage* MessageParser::buildMessage(Message parsedMsg)
+bool MessageParser::buildMessage(Message parsedMsg, ACLMessage* msg)
 {
-	ACLMessage *msg = new ACLMessage();
 	msg->setPerformative(parsedMsg.type);
+	buildParameters(parsedMsg.parameters, msg);
 	
-	buildParameters(parsedMsg.parameters,msg);
-	
-	return msg;
-	
+	return true;
 }
 
-void MessageParser::buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage* msg)
+void MessageParser::buildParameters(std::vector<MessageParameter> parsedParams, ACLMessage* msg)
 {
     std::vector<MessageParameter>::iterator it = parsedParams.begin();
     UserdefParam *_param;
@@ -114,7 +110,7 @@ int MessageParser::buildPredefMessageParameters(MessageParameter param,ACLMessag
 void MessageParser::buildSender(MessageParameter param,ACLMessage* msg)
 {
     
-    fipa::acl::ParameterValue mydata; // = new fipa::acl::ParameterValue;
+    fipa::acl::ParameterValue mydata; 
     mydata = param.data;
     
     AgentID temp = boost::get<AgentID>(mydata);
@@ -152,9 +148,7 @@ AgentAID* MessageParser::buildAgentAID(AgentID agent)
 
 void MessageParser::buildResolvers(AgentAID *workAg, AgentID agent)
 {
-    //AgentAID *_resolver;
     struct AgentID unbuiltres;
-    
     
     std::vector<fipa::acl::Resolver>::iterator it = agent.resolvers.begin();
     for (it; it != agent.resolvers.end(); it++)

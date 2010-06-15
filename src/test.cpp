@@ -18,7 +18,6 @@
 //#include "UserdefParam.h"
 //#include <message-parser/message_parser.h>
 
-
 #include "message_parser.h"
 
 
@@ -103,10 +102,11 @@ int main(int argc, char** argv)
 
 
                 MessageParser parser = MessageParser();
-                fipa::acl::ACLMessage* aclmessage = parser.parseData(received);
-                printMessage(aclmessage);
+                fipa::acl::ACLMessage aclmessage;
+	        parser.parseData(received, &aclmessage);
+                printMessage(&aclmessage);
 
-                std::set<fipa::acl::AgentAID*>* receivers = aclmessage->getAllReceivers();
+                std::set<fipa::acl::AgentAID*>* receivers = aclmessage.getAllReceivers();
                 std::set<fipa::acl::AgentAID*>::iterator it;
 
                 std::vector<std::string> recvs;

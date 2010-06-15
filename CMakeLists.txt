@@ -21,6 +21,10 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
 pkg_check_modules(MessageGenerator "message-generator")
 
+set(Boost_LOCALFIRST TRUE)
+set(Boost_ADDITIONAL_VERSION 1.42 1.43)
+find_package(Boost REQUIRED)
+
 include_directories(${MessageGenerator_INCLUDE_DIRS})
 link_directories(${MessageGenerator_LIBRARY_DIRS})
 
