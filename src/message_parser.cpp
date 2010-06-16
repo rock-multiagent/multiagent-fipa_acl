@@ -16,10 +16,6 @@
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/variant/variant.hpp>
 
-// ENCODING need to be set according to grammar 
-namespace encoding = boost::spirit::ascii;
-//namespace encoding = boost::spirit::standard;
-
 namespace fipa { 
 namespace acl {
 
@@ -48,7 +44,7 @@ bool MessageParser::parseData(const std::string storage, ACLMessage* msg)
 
 	std::string::const_iterator iter = storage.begin();
 	std::string::const_iterator end = storage.end();
-	bool r = phrase_parse(iter, end, grammar, encoding::space, parseTree);
+	bool r = parse(iter, end, grammar, parseTree);
 	
 	if(r && iter == end)
 	{

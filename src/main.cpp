@@ -37,20 +37,25 @@ int main(int argc, char** argv)
 	}
 
 	std::string storage; 
-//	in.unsetf(std::ios::skipws); // No white space skipping
-	std::copy(
-		std::istream_iterator<char>(in),
-		std::istream_iterator<char>(),
-		std::back_inserter(storage));
+	
+	// due to special characters don't use std::copy here
+	char buffer;
+	while(true)
+	{
+	   in.get(buffer);
+	   if(!in.eof())
+		   storage += buffer;
+	   else
+		   break;
+	}
 
 	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
 	bitefficient_grammar grammar;
 	fipa::acl::Message parseTree;
 
-	using boost::spirit::ascii::space;
 	std::string::const_iterator iter = storage.begin();
 	std::string::const_iterator end = storage.end();
-	bool r = phrase_parse(iter, end, grammar, space, parseTree);
+	bool r = parse(iter, end, grammar, parseTree);
 
 	if(r && iter == end)
 	{

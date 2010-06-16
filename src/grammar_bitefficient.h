@@ -33,8 +33,8 @@ namespace fusion = boost::fusion;
 namespace phoenix = boost::phoenix;
 namespace spirit = boost::spirit;
 namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
-//namespace ascii = boost::spirit::standard;
+namespace encoding = boost::spirit::ascii;
+//namespace encoding = boost::spirit::standard;
 
 
 
@@ -355,7 +355,7 @@ namespace acl
 
 template <typename Iterator>
 // IMPORTANT: ACLMessage with following () otherwise, compiler error
-struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii::space_type>
+struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 {
       
 	bitefficient_grammar() : bitefficient_grammar::base_type(aclCommunicativeAct, "bitefficient-grammar")
@@ -370,10 +370,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 		
 		// Inbuild parser:
 		// Encoding is ASCII here
-		using ascii::char_;
-		using ascii::string;
-		using ascii::digit;
-		using ascii::alpha;
+		using encoding::char_;
+		using encoding::string;
+		using encoding::digit;
+		using encoding::alpha;
 		using qi::byte_;
 		using qi::short_;
 		using qi::long_;
@@ -736,7 +736,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	// qi::rule<Iterator, synthesized_attribute(inherited_attribute>)> r;
 	// synthesized = type of output value
 	// inherited = actual type the parser gives you
-	qi::rule<Iterator, fipa::acl::Message(), ascii::space_type> aclCommunicativeAct;
+	qi::rule<Iterator, fipa::acl::Message()> aclCommunicativeAct;
 	qi::rule<Iterator> message;
 	qi::rule<Iterator, fipa::acl::Header()> header;
 	qi::rule<Iterator, char()> messageId;
