@@ -33,8 +33,8 @@ namespace fusion = boost::fusion;
 namespace phoenix = boost::phoenix;
 namespace spirit = boost::spirit;
 namespace qi = boost::spirit::qi;
-//namespace ascii = boost::spirit::ascii;
-namespace ascii = boost::spirit::standard;
+namespace ascii = boost::spirit::ascii;
+//namespace ascii = boost::spirit::standard;
 
 
 

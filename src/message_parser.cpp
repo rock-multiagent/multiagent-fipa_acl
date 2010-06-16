@@ -17,8 +17,8 @@
 #include <boost/variant/variant.hpp>
 
 // ENCODING need to be set according to grammar 
-//namespace boost::spirit::ascii;
-namespace encoding = boost::spirit::standard;
+namespace encoding = boost::spirit::ascii;
+//namespace encoding = boost::spirit::standard;
 
 namespace fipa { 
 namespace acl {

@@ -1,9 +1,10 @@
 #!/bin/sh
 
+TESTBINARY=../../build/bin/testParser
 for file in `ls *.txt`
 do 
   ERROR=
-  ERROR=`../../build/bin/message-parser $file | grep -i failed`
+  ERROR=`${TESTBINARY} $file | grep -i failed`
 
   if [ "$ERROR" != "" ]; then 
 	echo "$file \t\t [ERROR]"
