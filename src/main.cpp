@@ -9,8 +9,9 @@
 #include <string>
 #include <vector>
 
-#include "types.h"
 #include "grammar_bitefficient.h"
+
+#include "message_printer.h"
 
 ////////////////////////////////////////////////////////////////////////////
 //  Main program
@@ -23,7 +24,8 @@ int main(int argc, char** argv)
 		filename = argv[1];
 	} else
 	{
-		std::cerr << "Error: no input file provided." << std::endl;
+		std::cerr << "MessageParser core" << std::endl;
+		std::cerr << "Usage: " << argv[0] << " binary-msg-file" << std::endl;
 		return 1;
 	}
 

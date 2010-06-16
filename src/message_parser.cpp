@@ -6,15 +6,15 @@
  * 
  * \version 1.0
  */
-#include "grammar_bitefficient.h"
-#include "message_parser.h"
-
-
 #include <set>
 
 #include <boost/variant/get.hpp>
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/variant/variant.hpp>
+
+#include "message_parser.h"
+#include "grammar_bitefficient.h"
+
 
 namespace fipa { 
 namespace acl {

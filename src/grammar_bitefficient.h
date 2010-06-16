@@ -7,6 +7,8 @@
  * \brief This grammar represents the bitefficient message specification
  * of the Foundation for Intelligent Physical Agents (FIPA at http://www.fipa.org)
  * 
+ * \version 0.2
+ *  - removed space skip parser, to avoid errors with spirit 2.3
  * \version 0.1
  *  - parses valid messages
  *  - extract some field information from messages
@@ -29,10 +31,17 @@
 
 #include "types.h"
 
+#ifdef BOOST_SPIRIT_DEBUG
+// include stream operators
+#include "debug.h"
+#endif
+
 namespace fusion = boost::fusion;
 namespace phoenix = boost::phoenix;
 namespace spirit = boost::spirit;
 namespace qi = boost::spirit::qi;
+
+// Using ascii encoding
 namespace encoding = boost::spirit::ascii;
 //namespace encoding = boost::spirit::standard;
 
@@ -729,6 +738,40 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 			<< val("\"")
 			<< std::endl
                 );
+
+	// Enable debug tree when debug mode is active
+	// // requires the include of stream operators as well
+	#ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(header);
+        BOOST_SPIRIT_DEBUG_NODE(messageId);
+        BOOST_SPIRIT_DEBUG_NODE(version);
+
+        BOOST_SPIRIT_DEBUG_NODE(messageType);
+        BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageType);
+        BOOST_SPIRIT_DEBUG_NODE(messageTypeName);
+
+        BOOST_SPIRIT_DEBUG_NODE(messageParameter);
+        BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageParameter);
+        BOOST_SPIRIT_DEBUG_NODE(predefinedMessageParameter);
+
+        /*
+        BOOST_SPIRIT_DEBUG_NODE(parameterName);
+        BOOST_SPIRIT_DEBUG_NODE(parameterValue);
+        BOOST_SPIRIT_DEBUG_NODE(predefinedMessageType);
+        BOOST_SPIRIT_DEBUG_NODE(year);
+        BOOST_SPIRIT_DEBUG_NODE(month);
+        BOOST_SPIRIT_DEBUG_NODE(day);
+        BOOST_SPIRIT_DEBUG_NODE(hour);
+        BOOST_SPIRIT_DEBUG_NODE(minute);
+        BOOST_SPIRIT_DEBUG_NODE(second);
+        BOOST_SPIRIT_DEBUG_NODE(millisecond);
+        */
+        BOOST_SPIRIT_DEBUG_NODE(binDate);
+	/*
+        BOOST_SPIRIT_DEBUG_NODE(binDateTimeToken);
+        BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
+	*/
+	#endif
 		
 	}
 	
