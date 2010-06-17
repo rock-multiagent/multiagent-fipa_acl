@@ -7,100 +7,109 @@
  
  
 #include "ACLMessageTest.h"
-#include <vector>
+#include "../../src/ACLMessageOutputParser.h"
+
 
 
 using namespace std;
+using namespace fipa::acl;
 
-CPPUNIT_TEST_SUITE_REGISTRATION (BugTest);
+CPPUNIT_TEST_SUITE_REGISTRATION (ACLMessageTest);
 
-void BugTest::setUp()
+void ACLMessageTest::setUp()
 {
-	a = new Bug(); 
-	a->Color = Red;
-	b = new Bug();
-	b->Color = Red;
-	c = new Bug();
+	/*
+	m1 = new ACLMessage();
+	m2 = new ACLMessage();
+	m3 = new ACLMessage();
+	*/
+	a1 = new AgentAID();
+	//a2 = new AgentAID();
+	//a3 = new AgentAID();
+	a4 = new AgentAID();
+	//a5 = new AgentAID();
+	/*
+	p1 = new UserdefParam();
+	p2 = new UserdefParam();
+	p3 = new UserdefParam();
+	p4 = new UserdefParam();
 	
-	c->state = 0;
-	c->Color = Red;
-	c->direction = 1;
-	c->has_food = true;
-	c->pos = Pos(1,1);
-	c->resting = 14;
+	p1->setName(string("param"));
+	p1->setValue(string("!@#$%^&*("));
+	*p2 = *p1;
+	p3->setName(string("param3"));
+	p3->setValue(string("value3"));
+	p4->setName(string("param4"));
+	p4->setValue(string("value4"));
 	
-  instr = Instruction();
-	instr.type = std::string("move");
-	Bug::red_brain.push_back(instr);
+	m1->setPerformative(string("test performative"));
+	m1->setLanguage(string("test language"));
+	m1->setContent(string("test content"));
+	m1->setEncoding(string("test encoding"));
+	m1->setOntology(string("test ontology"));
+	m1->setReplyWith(string("test reply_with"));
+	m1->setReplyBy1(string("test reply_by1"));
+	m1->setInReplyTo(string("test in_reply_to"));
+	m1->setConversationID(string("test conversationID"));
+	m1->setProtocol(string("test protocol"));
+	*/
+	a1->setName(string("agent1"));
+	a1->addAdress(string("addr1"));
+	//a1->addAdress(string("addr2"));
+	//a1->addAdress(string("addr3"));
+	//a1->addUserdefParam(p1);
+	//a1->addUserdefParam(p3);
+	
+	/*
+	a3->setName(string("agent3 5"));
+	a4->setName(string("agent4"));
+	a5->setName(string("agent3 5"));
+	
+	a3->addAdress(string("addr1"));
+	a4->addAdress(string("addr1"));
+	a3->addAdress(string("addr1"));
+	
+	a3->addUserdefParam(p1);
+	
+	a4->addUserdefParam(p4);
+	a5->addUserdefParam(p2);
+	
+	//*a2 = *a1;
+	a5->addResolver(a1);
+	a3->addResolver(a2);
+	*/
+	a1->addResolver(a4);
+	
+	
+	
+    
 	
 	
 }
 
-void BugTest::tearDown()
+void ACLMessageTest::tearDown()
 {
-	delete a;
-	delete b;
-	delete c;
+	//delete m1;	delete m2;	delete m3;
+	delete a1;	/*delete a2;	delete a3;	*/ delete a4;	//delete a5;
+	//delete p1;	delete p2;	delete p3;	delete p4;
 }
 
-void BugTest::instructTest()
+void ACLMessageTest::AgentEqTest()
 {
-     CPPUNIT_ASSERT_EQUAL(c->instruct().type, std::string("move"));
-}
-void BugTest::positionTest()
-{
-     CPPUNIT_ASSERT_EQUAL((c->position()).X_pos,1);
-     CPPUNIT_ASSERT_EQUAL((c->position()).Y_pos,1);
-}
-void BugTest::set_posTest()
-{
-     b->pos = Pos(1,1);
-     a->set_pos(Pos(1,1));
-     CPPUNIT_ASSERT_EQUAL((a->pos).X_pos,(b->pos).X_pos);
-     CPPUNIT_ASSERT_EQUAL((a->pos).Y_pos,(b->pos).Y_pos);
-}
-void BugTest::set_stateTest()
-{
-     b->state = 0;
-     a->set_state(0);
-     CPPUNIT_ASSERT_EQUAL(b->state,a->state);
-}
-void BugTest::set_restingTest()
-{
-     b->resting = 14;
-     a->set_resting(14);
-     CPPUNIT_ASSERT_EQUAL(a->resting,b->resting);
-     
-}
-void BugTest::set_directionTest()
-{
-     b->direction = 1;
-     a->set_direction(1);
-     CPPUNIT_ASSERT_EQUAL(a->direction,b->direction);
-}
-void BugTest::set_has_foodTest()
-{
-     b->has_food = true;
-     a->set_has_food(true);
-     CPPUNIT_ASSERT_EQUAL(a->has_food,b->has_food);
-}
-void BugTest::get_colorTest()
-{
-     CPPUNIT_ASSERT_EQUAL(c->get_color(),0);
-}
-void BugTest::get_stateTest()
-{
-     CPPUNIT_ASSERT_EQUAL(c->get_state(),0);
-}
-void BugTest::get_restingTest()
-{
-     CPPUNIT_ASSERT_EQUAL(c->get_resting(),14);
-}
-void BugTest::get_directionTest()
-{
-         CPPUNIT_ASSERT_EQUAL(c->get_direction(),1);
-}
-void BugTest::get_has_foodTest()
-{
-     CPPUNIT_ASSERT_EQUAL(c->get_has_food(),true);
+    /*
+    CPPUNIT_ASSERT_EQUAL((*a1 == *a2),true);
+    CPPUNIT_ASSERT_EQUAL(((*a5)==(*a3)),true);
+    a3->addUserdefParam(p3);
+    CPPUNIT_ASSERT_EQUAL(((*a5)==(*a3)),false);
+    a5->addUserdefParam(p3);
+    CPPUNIT_ASSERT_EQUAL(((*a5)==(*a3)),true);
+    AgentAID::setResCompDepth(5);
+    CPPUNIT_ASSERT_EQUAL(((*a5)==(*a3)),true);
+    AgentAID::setResCompDepth(1);
+    (*a5->getResolvers()->begin())->addResolver(a4);
+    CPPUNIT_ASSERT_EQUAL(((*a5) == (*a3)),true);
+    AgentAID::setResCompDepth(2);
+    CPPUNIT_ASSERT_EQUAL((*a5==*a3),false);
+    */
+    
 }

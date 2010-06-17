@@ -13,6 +13,9 @@ namespace fipa {
 
 namespace acl {
 
+    
+    int AgentAID::resCompDepth = 1;
+
     /*
 bool operator== (AgentAID &a, AgentAID &b)
 {
@@ -89,14 +92,30 @@ AgentAID::~AgentAID()
 {
     adresses->clear();
     delete adresses;
+    if (params)
+    {
     std::set<UserdefParam*>::iterator it = params->begin();
     for (it; it != params->end(); it++)
+        {
+	  delete (*it);
+	  //params->erase(it);
+        }
     params->clear();
-    delete params;
     
+    }
+    delete params;
+    std::cout<< sizeof(params)<<"\t agent dest \n";
+    if (resolvers!=NULL)
+    {
     std::set<AgentAID*>::iterator it1 = resolvers->begin();
     for (it1; it1 != resolvers->end(); it1++)
+        {	
+	  delete (*it1);
+	  //resolvers->erase(it1);
+        }
     resolvers->clear();
+    
+    }
     delete resolvers;
 }
 AgentAID::AgentAID(AgentAID &aid)
@@ -142,12 +161,33 @@ AgentAID::AgentAID(AgentAID &aid)
     
 AgentAID& AgentAID::operator=(AgentAID &aid)
 {
+    // checking against agent1 = agent1 case
     if (this != &aid)
     {
         
-        params->clear();
-        adresses->clear();
-        resolvers->clear();
+        // freeing previously filled in values for adresses, userdefined parmameters and resolvers
+        
+        if (!params->empty())
+        {
+	  std::set<UserdefParam*>::iterator it = params->begin();
+	  for (it; it != params->end(); it++)
+	      delete (*it);
+	  params->clear();
+        }
+        delete params;
+        
+        if (!adresses->empty())        adresses->clear();
+       
+        
+        if (!resolvers->empty())
+        {
+	  std::set<AgentAID*>::iterator it = resolvers->begin();
+	  for (it; it != resolvers->end(); it++)
+	      delete (*it);
+	  resolvers->clear();
+        }
+        delete resolvers;
+        
         
         initializeFields();
     
@@ -213,11 +253,25 @@ AgentAID::AgentAID(std::string nam)
 void AgentAID::initializeFields()
 {
 	adresses = new std::set<std::string>();
-	if (!(*adresses).empty()) (*adresses).clear();
+	if (!(*adresses).empty()) 
+	  {
+	      
+	      (*adresses).clear();
+	  }
 	resolvers = new std::set<AgentAID*>();
-	if (!(*resolvers).empty()) (*resolvers).clear();
+	if (!(*resolvers).empty()) 
+	  {
+	      for (std::set<AgentAID*>::iterator it = resolvers->begin(); it != resolvers->end(); ++it)
+		delete (*it);
+	      (*resolvers).clear();
+	  }
 	params = new std::set<UserdefParam*>();
-	if (!(*params).empty()) (*params).clear();
+	if (!(*params).empty()) 
+	  {
+	      for (std::set<UserdefParam*>::iterator it = params->begin(); it != params->end(); ++it)
+		delete (*it);
+	      (*params).clear();
+	  }
 }
 
 std::string AgentAID::getName() {return name;}
@@ -245,6 +299,11 @@ void AgentAID::addUserdefParam(UserdefParam* p)
 }
 
 std::set<UserdefParam*>* AgentAID::getUserdefParams() {return params;}
+
+void AgentAID::setResCompDepth(int x) {resCompDepth = x;}
+int AgentAID::getResCompDepth() {return resCompDepth;}
+
+
 
 }//end of acl namespace
 

@@ -166,11 +166,49 @@ ACLMessage::ACLMessage(ACLMessage &mes)
 }
 ACLMessage& ACLMessage::operator=(ACLMessage &mes)
 {
-    params->clear();
-    reply_to->clear();
-    receivers->clear();
+    // checking against message1 = message1 case
     if (this != &mes)
+    {    
+    //freeing any previously filled in values for the userdefined parameters, reply_to, receivers and sender fields
+    if (params)
     {
+    if (!params->empty())
+    {
+        std::set<UserdefParam*>::iterator it = params->begin();
+        for (it; it != params->end(); it++)
+	  delete (*it);
+        params->clear();
+    }
+    delete params;
+    }
+    
+    if (reply_to)
+    {
+    if (!reply_to->empty())
+    {
+        std::set<AgentAID*>::iterator it = reply_to->begin();
+        for (it; it != reply_to->end(); it++)
+	  delete (*it);
+        reply_to->clear();
+    }
+    delete reply_to;
+    }
+    
+    if (receivers)
+    {
+    if (!receivers->empty())
+    {
+        std::set<AgentAID*>::iterator it = receivers->begin();
+        for (it; it != receivers->end(); it++)
+	  delete (*it);
+        receivers->clear();
+    }
+    delete receivers;
+    }
+    
+    if (sender) delete sender;
+    
+    //building the copied message
             initializeObject();	
         if (!mes.getPerformative().empty()) performative = mes.getPerformative();
         if (!mes.getLanguage().empty()) language = mes.getLanguage();
@@ -271,24 +309,33 @@ void ACLMessage::initializeObject()
 
 ACLMessage::~ACLMessage()
 {
-    delete sender;
+    
+    if (sender) delete sender;
+    if (receivers)
+    {
     std::set<AgentAID*>::iterator it = receivers->begin();
     for (it; it!=receivers->end(); it++)
         delete (*it);
     receivers->clear();
     delete receivers;
+    }
     
-    it = reply_to->begin();
+    if (reply_to)
+    {
+    std::set<AgentAID*>::iterator it = reply_to->begin();
     for (it; it != reply_to->end(); it++)
         delete (*it);
     reply_to->clear();
     delete reply_to;
-    
+    }
+    if (params)
+    {
     std::set<UserdefParam*>::iterator it2 = params->begin();
     for (it2; it2 != params->end(); it2++)
         delete (*it2);
     params->clear();
     delete params;
+    }
 }
 
 ACLMessage::ACLMessage()
@@ -386,6 +433,7 @@ std::string ACLMessage::getContent() {return content; }
 void ACLMessage::setSender(AgentAID* sender1) 
 {
     if (!sender) sender = new AgentAID();
+    else {delete sender; sender = new AgentAID();}
     *sender = *sender1; 
 }
 

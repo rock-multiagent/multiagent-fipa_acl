@@ -34,6 +34,8 @@ bool operator== (UserdefParam &a, UserdefParam &b)
     
 bool operator== (AgentAID a, AgentAID b)
 {
+    ///saving the resCompDepth variable for later restoration
+    int depthRestore = AgentAID::getResCompDepth();
     
     //AgentAID a = AgentAID(&c);
     //AgentAID b = AgentAID(&d);
@@ -67,10 +69,20 @@ bool operator== (AgentAID a, AgentAID b)
 	  
     }
     if (!addrA->empty())
+    {
         return false;
-    if (!addrB->empty())
-        return false;
+        if (!addrB->empty())
+        {
+	  return false;
+        }
     
+    }
+    
+    // only check the resolvers if the resCompDepth > 0; 
+    if (depthRestore > 0 )
+    {
+        // the resolvers are compared with up to resCompDepth -1 in the resolver network
+        AgentAID::setResCompDepth(depthRestore-1);
     // comparing resolvers
     std::set<AgentAID*>* agentsA = a.getResolvers();
     std::set<AgentAID*>* agentsB = b.getResolvers();
@@ -97,10 +109,13 @@ bool operator== (AgentAID a, AgentAID b)
         if (!found_one) ait++;
 	  
     }
+    // restoring the comparison depth variable to the initial value; there must be no possible return statements between the 2 changes made to it
+    AgentAID::setResCompDepth(depthRestore);
     if (!agentsA->empty())
         return false;
     if (!agentsB->empty())
         return false;
+    }
     
     // comparing userdefined parameters
     std::set<UserdefParam*>* paramsA = a.getUserdefParams();

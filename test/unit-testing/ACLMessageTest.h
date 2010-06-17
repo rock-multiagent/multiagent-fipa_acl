@@ -5,31 +5,29 @@
  * version: 1.0
  */
 
-#ifndef _BUGTEST_H_
-#define _BUGTEST_H_
+#ifndef _ACLMESSAGETEST_H_
+#define _ACLMESSAGETEST_H_
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+//#include <message-generator/ACLMessage.h>
+
+#include "../../src/ACLMessage.h"
+
+#define STRESS_NR 10
 
 using namespace std;
+using namespace fipa::acl;
 
-class BugTest : public CPPUNIT_NS::TestFixture
+class ACLMessageTest : public CPPUNIT_NS::TestFixture
 {
-	CPPUNIT_TEST_SUITE (BugTest);
+	CPPUNIT_TEST_SUITE (ACLMessageTest);
 	
-	CPPUNIT_TEST (instructTest);
- 	CPPUNIT_TEST (positionTest);
-	CPPUNIT_TEST (set_posTest);
-	CPPUNIT_TEST (set_stateTest);
-	CPPUNIT_TEST (set_restingTest);
-	CPPUNIT_TEST (set_directionTest);
-	CPPUNIT_TEST (set_has_foodTest);
-	CPPUNIT_TEST (get_colorTest);
-	CPPUNIT_TEST (get_stateTest);
-	CPPUNIT_TEST (get_restingTest);
-	CPPUNIT_TEST (get_directionTest);
-	CPPUNIT_TEST (get_has_foodTest);
+	//CPPUNIT_TEST (MessageEqTest);
+	CPPUNIT_TEST (AgentEqTest);
+ 	//CPPUNIT_TEST (ForMemLeakTest);
+	//CPPUNIT_TEST (assignTest);
 	
 	CPPUNIT_TEST_SUITE_END ();
 
@@ -38,23 +36,13 @@ class BugTest : public CPPUNIT_NS::TestFixture
 		void tearDown();
 	
 	protected:
-		void instructTest();
-		void positionTest();
-		void set_posTest();
-		void set_stateTest();
-		void set_restingTest();
-		void set_directionTest();
-		void set_has_foodTest();
-		void get_colorTest();
-		void get_stateTest();
-		void get_restingTest();
-		void get_directionTest();
-		void get_has_foodTest();
+		
+	    void AgentEqTest();
 
 	private:
-		Bug *a, *b, *c;
-		//Pos x;
-		Instruction instr;
+		//ACLMessage *m1, *m2, *m3;
+		//UserdefParam *p1,*p2,*p3,*p4;
+		AgentAID *a1,*a2,*a3,*a4,*a5;
 
 };
 

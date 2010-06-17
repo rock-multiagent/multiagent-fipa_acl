@@ -40,9 +40,16 @@ class AgentAID {
                std::set<AgentAID*>* resolvers;
 	     /** \param params: pointer to a set of UserdefParams(also pointers) representing the parameters of an agent id */
                std::set<UserdefParam*>* params;
+	     /**
+		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe
+	      */
+	      static int resCompDepth;
+	      
                
        public:
-/*
+	 
+	      
+/* 
 	setter and getter methods are all the functionality needed so far
 */
                ~AgentAID();
@@ -68,6 +75,8 @@ class AgentAID {
                std::set<AgentAID*>* getResolvers();
                void addUserdefParam(UserdefParam* p);
                std::set<UserdefParam*>* getUserdefParams();
+	     static void setResCompDepth(int);
+	     static int getResCompDepth();
 	
 	private:
 		/**
