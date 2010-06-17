@@ -153,6 +153,7 @@ namespace fipa
 
 	extern phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 
+	/** Concatenation of two string as 'lazy' implementation for boost spirit*/
 	struct buildStringImpl
 	{
 		template <typename T, typename U, typename V>
@@ -172,7 +173,8 @@ namespace fipa
 
 	};
 	extern phoenix::function<buildStringImpl> buildString;
-
+	
+	/** Debug output */
 	struct printImpl
 	{
 		template <typename T, typename U>
@@ -191,6 +193,7 @@ namespace fipa
 
 	extern phoenix::function<printImpl> print;
 
+	/** Convert String to Time */
 	struct convertToTimeImpl
 	{
 		template <typename T, typename U>
@@ -207,7 +210,7 @@ namespace fipa
 		fipa::acl::Time operator()(std::string arg, std::string msecs) const
 		{
 			fipa::acl::Time	convertedTime;
-			printf("convertToTimeImpl: %s:%s\n", arg.c_str(), msecs.c_str());
+			// printf("convertToTimeImpl: %s:%s\n", arg.c_str(), msecs.c_str());
 			// TODO: windows portage
 			strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
 			convertedTime.tm_msec = atoi(msecs.c_str());
@@ -217,7 +220,8 @@ namespace fipa
 	};
 	
 	extern phoenix::function<convertToTimeImpl> convertToTime;
-
+	
+	/** Convert byte to number according to the FIPA definition */
 	struct convertToNumberTokenImpl
 	{
 		template <typename T>
@@ -304,7 +308,8 @@ namespace fipa
 	};
 
 	extern phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;
-
+        
+	/** Convert types to strings */
 	struct convertToStringImpl
 	{
 		template <typename T>
@@ -332,6 +337,7 @@ namespace fipa
 
 	extern phoenix::function<convertToStringImpl> convertToString;
 
+	/** Convert types to vector of characters */
 	struct convertToCharVectorImpl
 	{
 		template <typename T>
@@ -548,6 +554,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 		
 		// Absolute time, relative +/-
 		// identifier indicate if typeDesignator follows or not
+		// NOTE: When parser fails, make sure the data forwarded to the parser really(!) contains
+		// all characters. Since 0x20 is a special character in normal ASCII some ways of reading the data
+		// or using std::copy might lead to an unexpected failure, since these special characters will be discarded
 		binDateTimeToken = ( byte_(0x20) 			[ phoenix::at_c<0>(label::_val) = ' ' ]
 				    >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
 				   )
@@ -650,6 +659,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 
 		// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
 		// TODO: check value and reset
+		// repeat get the inherited variable as parameter (check were this rule is used) which
+		// defines the number of bytes to read
 		byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToCharVector(label::_1) ]
 			;
 		
@@ -739,8 +750,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 			<< std::endl
                 );
 
-	// Enable debug tree when debug mode is active
-	// // requires the include of stream operators as well
+	// Enables the debug tree when debug mode is active
+	// requires the include of stream operators as well
+	// since every type will be printed to the outputstream (standard is cout)
 	#ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(header);
         BOOST_SPIRIT_DEBUG_NODE(messageId);
@@ -779,6 +791,19 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	// qi::rule<Iterator, synthesized_attribute(inherited_attribute>)> r;
 	// synthesized = type of output value
 	// inherited = actual type the parser gives you
+	//
+	// if you have local variable within your rule you have to specify them here as well by using
+	// qi::locals, i.e.
+	// qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > stringLiteral;
+	// here, the local variable is std::string an can be accessed within the rule as _a, _b, _c, ..
+	// (check the correct namespace)
+	//
+	// inherited attributes: are defined withi the brackets () of the second arg of a rule
+	// and can be accessed within the rule as _r1, _r2, ...
+	// qi::rule<Iterator, std::vector<unsigned char>(boost::uint32_t) > byteSeq;
+	// here, the rule can be called like: byteSeq(20) and will try to match as its synthesised attribute
+	// a vector of 20 characters
+	//
 	qi::rule<Iterator, fipa::acl::Message()> aclCommunicativeAct;
 	qi::rule<Iterator> message;
 	qi::rule<Iterator, fipa::acl::Header()> header;

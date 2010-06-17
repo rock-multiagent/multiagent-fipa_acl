@@ -1,6 +1,7 @@
-Description of TestMessages: 
-
-run "run_tests" to run all tests
+TESTING
+Run 
+$sh testParser
+to test the available messages against the test library
 
 the parser apparently parses the reply-to parameter correctly but it doesn't print it
 
