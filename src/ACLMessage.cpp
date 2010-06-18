@@ -1,5 +1,5 @@
 #include <iostream>
-#include <set>
+#include <vector>
 #include <string>
 #include "ACLMessage.h"
 
@@ -9,10 +9,216 @@ namespace acl {
 
     
     
-const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","cfp","confirm","disconfirm","failure","inform","inform-if","inform-ref","not-understood","propagate","propose","proxy","query-if","query-ref","refuse","reject-proposal","request","request-when","request-whenever","subscribe"};
-/*
-bool operator== (ACLMessage &a, ACLMessage &b)
+const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","cfp","confirm","disconfirm","failure","inform",
+				   "inform-if","inform-ref","not-understood","propagate","propose","proxy","query-if",
+				   "query-ref","refuse","reject-proposal","request","request-when","request-whenever","subscribe"};
+
+
+
+
+  
+void ACLMessage::initializeObject()
 {
+	
+         receivers.clear();
+         reply_to.clear();
+	/*
+         language = std::string();
+         language.clear();
+         encoding = std::string();
+         encoding.clear();
+         ontology = std::string();
+         ontology.clear();
+         protocol = std::string();
+         protocol.clear();
+         conversation_id = std::string();
+         conversation_id.clear();
+         reply_with = std::string();
+         reply_with.clear();
+         in_reply_to = std::string();
+         in_reply_to.clear();
+         reply_by = -1;
+         reply_by1 = std::string();
+         reply_by1.clear();
+         content = std::string();
+         content.clear();
+         */
+         
+         params.clear();        
+         
+}
+
+ACLMessage::~ACLMessage()
+{
+    params.clear();
+    reply_to.clear();
+    receivers.clear();
+    /*
+    if (sender) delete sender;
+    if (receivers)
+    {
+    std::vector<AgentAID*>::iterator it = receivers->begin();
+    for (it; it!=receivers->end(); it++)
+        delete (*it);
+    receivers->clear();
+    delete receivers;
+    }
+    
+    if (reply_to)
+    {
+    std::vector<AgentAID*>::iterator it = reply_to->begin();
+    for (it; it != reply_to->end(); it++)
+        delete (*it);
+    reply_to->clear();
+    delete reply_to;
+    }
+    if (params)
+    {
+    std::vector<UserdefParam*>::iterator it2 = params->begin();
+    for (it2; it2 != params->end(); it2++)
+        delete (*it2);
+    params->clear();
+    delete params;
+    }
+    */
+}
+
+ACLMessage::ACLMessage()
+{
+	initializeObject();
+}
+
+ACLMessage::ACLMessage(predefinedPerformatives perf)
+
+{
+	initializeObject();
+	performative = ACLMessage::perfs[perf];
+}
+
+ACLMessage::ACLMessage(std::string perf) {initializeObject(); performative = perf; }
+
+void ACLMessage::setPerformative(std::string str) {performative = str; }
+
+std::string ACLMessage::getPerformative() const {return performative; }
+
+void ACLMessage::addReceiver(AgentAID &aid) 
+{
+    receivers.insert(receivers.begin(),aid); 
+}
+
+void ACLMessage::deleteReceiver(AgentAID &aid) 
+{
+    std::vector<AgentAID>::iterator it = receivers.begin();
+    for (it; it != receivers.end(); it++)
+       {
+        AgentAID a = *it;
+        if ( a == aid)
+	  receivers.erase(it);
+    }
+}
+
+void ACLMessage::clearReceivers() 
+{
+    receivers.clear();
+}
+
+std::vector<AgentAID> ACLMessage::getAllReceivers() const {return receivers; }
+
+void ACLMessage::addReplyTo(AgentAID &aid) 
+{
+    reply_to.insert(reply_to.begin(),aid); 
+}
+
+void ACLMessage::deleteReplyTo(AgentAID aid) 
+{
+    std::vector<AgentAID>::iterator it = reply_to.begin();
+    for (it; it != reply_to.end(); it++)
+    {
+        AgentAID a = *it;
+        if ( a == aid)
+	  reply_to.erase(it);
+    }
+}
+
+void ACLMessage::clearReplyTo() 
+{
+    reply_to.clear(); 
+}
+
+std::vector<AgentAID> ACLMessage::getAllReplyTo() const {return reply_to; }
+
+void ACLMessage::setReplyBy(long by) {reply_by = by; }
+
+long ACLMessage::getReplyBy() const {return reply_by; }
+
+void ACLMessage::setInReplyTo(std::string str) {in_reply_to = str; }
+
+std::string ACLMessage::getInReplyTo() const {return in_reply_to; }
+
+void ACLMessage::setReplyWith(std::string str) {reply_with = str; }
+
+std::string ACLMessage::getReplyWith() const {return reply_with; }
+
+void ACLMessage::setConversationID(std::string str) {conversation_id = str; }
+
+std::string ACLMessage::getConversationID() const {return conversation_id; }
+
+void ACLMessage::setProtocol(std::string str) {protocol = str; }
+
+std::string ACLMessage::getProtocol() const {return protocol; }
+
+void ACLMessage::setOntology(std::string str) {ontology = str; }
+
+std::string ACLMessage::getOntology() const {return ontology; }
+
+void ACLMessage::setEncoding(std::string str) {encoding = str; }
+
+std::string ACLMessage::getEncoding() const {return encoding; }
+
+void ACLMessage::setLanguage(std::string str) {language = str; }
+
+std::string ACLMessage::getLanguage() const {return language; }
+
+void ACLMessage::setContent(std::string cont) {content = cont; }
+
+std::string ACLMessage::getContent() const {return content; }
+
+void ACLMessage::setSender(AgentAID &sender1) 
+{
+    sender = sender1; 
+}
+
+
+AgentAID ACLMessage::getSender() const 
+{
+    return sender; 
+    
+} 
+
+void ACLMessage::addUserdefParam(UserdefParam &p) 
+{
+    params.insert(params.begin(),p);
+}
+
+std::vector<UserdefParam> ACLMessage:: getUserdefParams() const {return params;}
+
+void ACLMessage::setUserdefParams(std::vector<UserdefParam> p) 
+{
+    params.clear();
+    params.insert(params.begin(),p.begin(),p.end());
+}
+
+
+std::string ACLMessage::getReplyBy1() const {return reply_by1;}
+
+void ACLMessage::setReplyBy1(std::string date1) {reply_by1 = date1;}
+
+/*
+bool operator== ( ACLMessage &a,  ACLMessage &b)
+{
+    //ACLMessage a = ACLMessage(&c); 
+    //ACLMessage b = ACLMessage(&d);
+        
     if (a.getPerformative().compare(b.getPerformative()))
         return false;
     if (a.getContent().compare(b.getContent()))
@@ -38,74 +244,106 @@ bool operator== (ACLMessage &a, ACLMessage &b)
     else return false;
     
     // checking if receivers sets of the message are the same
-    std::set<AgentAID*>* agentsA = a.getReceivers();
-    std::set<AgentAID*>* agentsB = b.getReceivers();
-    std::set<AgentAID*>::iterator ait = agentsA->begin();
-    std::set<AgentAID*>::iterator bit = agentsB->begin();
-    for (ait; ait != agentsA->end(); ait++)
+    std::vector<AgentAID> agentsA = a.getAllReceivers();
+    std::vector<AgentAID> agentsB = b.getAllReceivers();
+    std::vector<AgentAID>::iterator ait = agentsA.begin();
+    std::vector<AgentAID>::iterator bit = agentsB.begin();
+    int found_one = 0; // flag variable to control flow through inner loops
+    while (ait != agentsA.end())
     {
-        for (bit; bit != agentsB->end(); bit++)
-	  if ( (*(*ait)) == (*(*bit))) 
+        found_one = 0;
+        bit = agentsB.begin();
+        while (bit != agentsB.end())
+        {
+	  if ( (*ait) == (*bit)) 
 	  {
-	      agentsA->erase(ait);
-	      agentsB->erase(bit);
-	      bit = agentsB->end();
+	      agentsA.erase(ait);
+	      ait = agentsA.begin();
+	      agentsB.erase(bit);
+	      bit = agentsB.end();
+	      found_one = 1;
 	      
-	  }
+	  } else bit++;
+	  
+        }
+        if (!found_one) ait++;
+	  
     }
-    if (agentsA->begin() != agentsA->end())
+    if (!agentsA.empty())
         return false;
-    if (agentsB->begin() != agentsB->end())
+    if (!agentsB.empty())
         return false;
     
     //checking if reply_to sets of the message are  the same
-    agentsA = a.getReplyTo();
-    agentsB = b.getReplyTo();
-    ait = agentsA->begin();
-    bit = agentsB->begin();
-    for (ait; ait != agentsA->end(); ait++)
+    agentsA = a.getAllReplyTo();
+    agentsB = b.getAllReplyTo();
+    ait = agentsA.begin();
+    bit = agentsB.begin();
+    while (ait != agentsA.end())
     {
-        for (bit; bit != agentsB->end(); bit++)
-	  if ( (*(*ait)) == (*(*bit))) 
+        found_one = 0;
+        bit = agentsB.begin();
+        while (bit != agentsB.end())
+        {
+	  if ( (*ait) == (*bit)) 
 	  {
-	      agentsA->erase(ait);
-	      agentsB->erase(bit);
-	      bit = agentsB->end();
+	      agentsA.erase(ait);
+	      ait = agentsA.begin();
+	      agentsB.erase(bit);
+	      bit = agentsB.end();
+	      found_one = 1;
 	      
-	  }
+	  } else bit++;
+	  
+        }
+        if (!found_one) ait++;
+	  
     }
-    if (agentsA->begin() != agentsA->end())
+    if (!agentsA.empty())
         return false;
-    if (agentsB->begin() != agentsB->end())
+    if (!agentsB.empty())
         return false;
     
     
-    std::set<UserdefParam*>* paramsA = a.getUserdefParams();
-    std::set<UserdefParam*>* paramsB = b.getUserdefParams();
-    std::set<UserdefParam*>::iterator pita = paramsA->begin();
-    std::set<UserdefParam*>::iterator pitb = paramsB->begin();
-    for (pita; pita != paramsA->end(); pita++)
+    std::vector<UserdefParam> paramsA = a.getUserdefParams();
+    std::vector<UserdefParam> paramsB = b.getUserdefParams();
+    std::vector<UserdefParam>::iterator pita = paramsA.begin();
+    std::vector<UserdefParam>::iterator pitb = paramsB.begin();
+     
+    while (pita != paramsA.end())
     {
-        for (pitb; pitb != paramsB->end(); pitb++)
-	  if ( (*(*pita)) == (*(*pitb))) 
+        found_one = 0;
+        pitb = paramsB.begin();
+        while (pitb!=paramsB.end())
+        {
+	  if ( (*pita) == (*pitb)) 
 	  {
-	      paramsA->erase(pita);
-	      paramsB->erase(pitb);
-	      pitb = paramsB->end();
 	      
+	      paramsA.erase(pita);
+	      pita = paramsA.begin();
+	      paramsB.erase(pitb);
+	      pitb = paramsB.end();
+	      found_one = 1;
 	  }
+	  else pitb++;
+        }
+	  if (!found_one) pita++;
+	 
+	  
     }
-    if (paramsA->begin() != paramsA->end())
+    if (!paramsA.empty())
         return false;
-    if (paramsB->begin() != paramsB->end())
+    if (!paramsB.empty())
         return false;
-    
-    
+   
     return true;
 }
 */
 
-ACLMessage::ACLMessage(ACLMessage &mes)
+
+
+
+ACLMessage::ACLMessage(const ACLMessage &mes)
 {
     initializeObject();
     if (!mes.getLanguage().empty()) language = mes.getLanguage();
@@ -118,97 +356,79 @@ ACLMessage::ACLMessage(ACLMessage &mes)
     if (!mes.getReplyBy1().empty()) reply_by1 = mes.getReplyBy1();
     if (!mes.getContent().empty()) content = mes.getContent();
     
-    if (mes.getSender() != NULL)
-        {
-	      AgentAID *temp = new AgentAID();
-	      *temp = *(mes.getSender());
+    
+	      AgentAID temp = AgentAID();
+	      temp = mes.getSender();
 	      sender = temp;
 	      
-	  }
-    if (!mes.getAllReceivers()->empty()) 
+	 
+    if (!mes.getAllReceivers().empty()) 
     {
         
-        std::set<AgentAID*>* mesrec = mes.getAllReceivers();
-        std::set<AgentAID*>::iterator recit= mesrec->begin();
-        for (recit; recit != mesrec->end(); recit++)
+        std::vector<AgentAID> mesrec = mes.getAllReceivers();
+        std::vector<AgentAID>::iterator recit= mesrec.begin();
+        for (recit; recit != mesrec.end(); recit++)
         {
-	  AgentAID *temp = new AgentAID();
-	  *temp = (*(*recit));
-	  receivers->insert(temp);
+	  AgentAID temp = AgentAID();
+	  temp = (*recit);
+	  receivers.insert(receivers.begin(),temp);
         }
     }
-    if (!mes.getAllReplyTo()->empty()) 
+    if (!mes.getAllReplyTo().empty()) 
     {
         
-        std::set<AgentAID*>* mesrec = mes.getAllReplyTo();
-        std::set<AgentAID*>::iterator recit= mesrec->begin();
-        for (recit; recit != mesrec->end(); recit++)
+        std::vector<AgentAID> mesrec = mes.getAllReplyTo();
+        std::vector<AgentAID>::iterator recit= mesrec.begin();
+        for (recit; recit != mesrec.end(); recit++)
         {
-	  AgentAID *temp = new AgentAID();
-	  *temp = (*(*recit));
-	  reply_to->insert(temp);
+	  AgentAID temp = AgentAID();
+	  temp = (*recit);
+	  reply_to.insert(reply_to.begin(),temp);
         }
     }
     
-    if (!mes.getUserdefParams()->empty())
+    if (!mes.getUserdefParams().empty())
     {
-        std::set<UserdefParam*>* mesparams = mes.getUserdefParams();
-        std::set<UserdefParam*>::iterator paramit = mesparams->begin();
+        std::vector<UserdefParam> mesparams = mes.getUserdefParams();
+        std::vector<UserdefParam>::iterator paramit = mesparams.begin();
     
-        for (paramit; paramit != mesparams->end(); paramit++)
+        for (paramit; paramit != mesparams.end(); paramit++)
         {
-	  UserdefParam *temp2 = new UserdefParam();
-	  *temp2 = (*(*paramit));
-	  params->insert(temp2);
+	  UserdefParam temp2 = UserdefParam();
+	  temp2 = (*paramit);
+	  params.insert(params.begin(),temp2);
         }
     }  
         
 }
+
+
+
 ACLMessage& ACLMessage::operator=(ACLMessage &mes)
 {
     // checking against message1 = message1 case
     if (this != &mes)
     {    
     //freeing any previously filled in values for the userdefined parameters, reply_to, receivers and sender fields
-    if (params)
+    
+    if (!params.empty())
     {
-    if (!params->empty())
-    {
-        std::set<UserdefParam*>::iterator it = params->begin();
-        for (it; it != params->end(); it++)
-	  delete (*it);
-        params->clear();
-    }
-    delete params;
+       params.clear();
     }
     
-    if (reply_to)
+    
+   
+    if (!reply_to.empty())
     {
-    if (!reply_to->empty())
-    {
-        std::set<AgentAID*>::iterator it = reply_to->begin();
-        for (it; it != reply_to->end(); it++)
-	  delete (*it);
-        reply_to->clear();
-    }
-    delete reply_to;
+        reply_to.clear();
     }
     
-    if (receivers)
+    if (!receivers.empty())
     {
-    if (!receivers->empty())
-    {
-        std::set<AgentAID*>::iterator it = receivers->begin();
-        for (it; it != receivers->end(); it++)
-	  delete (*it);
-        receivers->clear();
+       receivers.clear();
     }
-    delete receivers;
-    }
-    
-    if (sender) delete sender;
-    
-    //building the copied message
+       
+     //building the copied message
             initializeObject();	
         if (!mes.getPerformative().empty()) performative = mes.getPerformative();
         if (!mes.getLanguage().empty()) language = mes.getLanguage();
@@ -221,246 +441,54 @@ ACLMessage& ACLMessage::operator=(ACLMessage &mes)
         if (!mes.getReplyBy1().empty()) reply_by1 = mes.getReplyBy1();
         if (!mes.getContent().empty()) content = mes.getContent();
         
-        if (mes.getSender() != NULL)
-	  {
-	      AgentAID *temp = new AgentAID();
-	      *temp = *(mes.getSender());
+       
+	      AgentAID temp = AgentAID();
+	      temp = mes.getSender();
 	      sender = temp;
 	      
-	  }
-        if (!mes.getAllReceivers()->empty()) 
+	  
+        if (!mes.getAllReceivers().empty()) 
         {
 	  
-	  std::set<AgentAID*>* mesrec = mes.getAllReceivers();
-	  std::set<AgentAID*>::iterator recit= mesrec->begin();
-	  for (recit; recit != mesrec->end(); recit++)
+	  std::vector<AgentAID> mesrec = mes.getAllReceivers();
+	  std::vector<AgentAID>::iterator recit= mesrec.begin();
+	  for (recit; recit != mesrec.end(); recit++)
 	  {
-	      AgentAID *temp = new AgentAID();
-	      *temp = (*(*recit));
-	      receivers->insert(temp);
+	      AgentAID temp = AgentAID();
+	      temp = (*recit);
+	      receivers.insert(receivers.begin(),temp);
 	  }
         }
-        if (!mes.getAllReplyTo()->empty()) 
+        if (!mes.getAllReplyTo().empty()) 
         {
 	  
-	  std::set<AgentAID*>* mesrec = mes.getAllReplyTo();
-	  std::set<AgentAID*>::iterator recit= mesrec->begin();
-	  for (recit; recit != mesrec->end(); recit++)
+	  std::vector<AgentAID> mesrec = mes.getAllReplyTo();
+	  std::vector<AgentAID>::iterator recit= mesrec.begin();
+	  for (recit; recit != mesrec.end(); recit++)
 	  {
-	      AgentAID *temp = new AgentAID();
-	      *temp = (*(*recit));
-	      reply_to->insert(temp);
+	      AgentAID temp = AgentAID();
+	      temp = (*recit);
+	      reply_to.insert(reply_to.begin(),temp);
 	  }
         }
         
-        if (!mes.getUserdefParams()->empty())
+        if (!mes.getUserdefParams().empty())
         {
-	  std::set<UserdefParam*>* mesparams = mes.getUserdefParams();
-	  std::set<UserdefParam*>::iterator paramit = mesparams->begin();
+	  std::vector<UserdefParam> mesparams = mes.getUserdefParams();
+	  std::vector<UserdefParam>::iterator paramit = mesparams.begin();
         
-	  for (paramit; paramit != mesparams->end(); paramit++)
+	  for (paramit; paramit != mesparams.end(); paramit++)
 	  {
-	      UserdefParam *temp2 = new UserdefParam();
-	      *temp2 = (*(*paramit));
-	      params->insert(temp2);
+	      UserdefParam temp2 = UserdefParam();
+	      temp2 = (*paramit);
+	      params.insert(params.begin(),temp2);
 	  }
         }  
     }
     
     return *this;
 }
-  
-void ACLMessage::initializeObject()
-{
-	
-	//sender = new AgentAID();
-	sender = NULL;
-        receivers = new std::set<AgentAID*>();
-	if (!(*receivers).empty()) (*receivers).clear();
-        reply_to = new std::set<AgentAID*>();
-	if (!(*reply_to).empty()) (*reply_to).clear();
-	
-         language = std::string();
-         language.clear();
-         encoding = std::string();
-         encoding.clear();
-         ontology = std::string();
-         ontology.clear();
-         protocol = std::string();
-         protocol.clear();
-         conversation_id = std::string();
-         conversation_id.clear();
-         reply_with = std::string();
-         reply_with.clear();
-         in_reply_to = std::string();
-         in_reply_to.clear();
-         reply_by = -1;
-         reply_by1 = std::string();
-         reply_by1.clear();
-         
-        params = new std::set<UserdefParam*>();
-		
-	if (!(*params).empty()) (*params).clear();
-		
-        
-         content = std::string();
-         content.clear();
-}
 
-ACLMessage::~ACLMessage()
-{
-    
-    if (sender) delete sender;
-    if (receivers)
-    {
-    std::set<AgentAID*>::iterator it = receivers->begin();
-    for (it; it!=receivers->end(); it++)
-        delete (*it);
-    receivers->clear();
-    delete receivers;
-    }
-    
-    if (reply_to)
-    {
-    std::set<AgentAID*>::iterator it = reply_to->begin();
-    for (it; it != reply_to->end(); it++)
-        delete (*it);
-    reply_to->clear();
-    delete reply_to;
-    }
-    if (params)
-    {
-    std::set<UserdefParam*>::iterator it2 = params->begin();
-    for (it2; it2 != params->end(); it2++)
-        delete (*it2);
-    params->clear();
-    delete params;
-    }
-}
-
-ACLMessage::ACLMessage()
-{
-	initializeObject();
-}
-
-ACLMessage::ACLMessage(predefinedPerformatives perf)
-
-{
-	initializeObject();
-	performative = ACLMessage::perfs[perf];
-}
-
-ACLMessage::ACLMessage(std::string perf) {initializeObject(); performative = perf; }
-
-void ACLMessage::setPerformative(std::string str) {performative = str; }
-
-std::string ACLMessage::getPerformative() {return performative; }
-
-void ACLMessage::addReceiver(AgentAID* aid) 
-{
-    AgentAID *myaid = new AgentAID();
-    *myaid = *aid;
-    (*receivers).insert(myaid); 
-}
-
-void ACLMessage::deleteReceiver(AgentAID* aid) {(*receivers).erase(aid); }
-
-void ACLMessage::clearReceivers() 
-{
-    std::set<AgentAID*>::iterator it = receivers->begin();
-    for (it; it != receivers->end(); it++)
-        delete (*it);
-    (*receivers).clear(); 
-}
-
-std::set<AgentAID*>* ACLMessage::getAllReceivers() {return receivers; }
-
-void ACLMessage::addReplyTo(AgentAID* aid) 
-{
-    AgentAID *myaid = new AgentAID();
-    *myaid = *aid;
-    (*reply_to).insert(myaid); 
-}
-
-void ACLMessage::deleteReplyTo(AgentAID* aid) {(*reply_to).erase(aid); }
-
-void ACLMessage::clearReplyTo() 
-{
-    std::set<AgentAID*>::iterator it = reply_to->begin();
-    for (it; it != reply_to->end(); it++)
-        delete (*it);
-    (*reply_to).clear(); 
-}
-
-std::set<AgentAID*>* ACLMessage::getAllReplyTo() {return reply_to; }
-
-void ACLMessage::setReplyBy(long by) {reply_by = by; }
-
-long ACLMessage::getReplyBy() {return reply_by; }
-
-void ACLMessage::setInReplyTo(std::string str) {in_reply_to = str; }
-
-std::string ACLMessage::getInReplyTo() {return in_reply_to; }
-
-void ACLMessage::setReplyWith(std::string str) {reply_with = str; }
-
-std::string ACLMessage::getReplyWith() {return reply_with; }
-
-void ACLMessage::setConversationID(std::string str) {conversation_id = str; }
-
-std::string ACLMessage::getConversationID() {return conversation_id; }
-
-void ACLMessage::setProtocol(std::string str) {protocol = str; }
-
-std::string ACLMessage::getProtocol() {return protocol; }
-
-void ACLMessage::setOntology(std::string str) {ontology = str; }
-
-std::string ACLMessage::getOntology() {return ontology; }
-
-void ACLMessage::setEncoding(std::string str) {encoding = str; }
-
-std::string ACLMessage::getEncoding() {return encoding; }
-
-void ACLMessage::setLanguage(std::string str) {language = str; }
-
-std::string ACLMessage::getLanguage() {return language; }
-
-void ACLMessage::setContent(std::string cont) {content = cont; }
-
-std::string ACLMessage::getContent() {return content; }
-
-void ACLMessage::setSender(AgentAID* sender1) 
-{
-    if (!sender) sender = new AgentAID();
-    else {delete sender; sender = new AgentAID();}
-    *sender = *sender1; 
-}
-
-
-AgentAID* ACLMessage::getSender() 
-{
-    AgentAID *retag = new AgentAID();
-    *retag = *sender;
-    return retag; 
-    
-} 
-
-void ACLMessage::addUserdefParam(UserdefParam* p) 
-{
-    UserdefParam *p1 = new UserdefParam();
-    *p1 = *p;
-    (*params).insert(p1);
-}
-
-std::set<UserdefParam*>* ACLMessage:: getUserdefParams() {return params;}
-
-void ACLMessage::setUserdefParams(std::set<UserdefParam*>* p) {params = p;}
-
-
-std::string ACLMessage::getReplyBy1(){return reply_by1;}
-
-void ACLMessage::setReplyBy1(std::string date1){reply_by1 = date1;}
 
 }//end of acl namespace
 

@@ -40,9 +40,9 @@ class ACLMessageTest : public CPPUNIT_NS::TestFixture
 	    void AgentEqTest();
 
 	private:
-		//ACLMessage *m1, *m2, *m3;
-		//UserdefParam *p1,*p2,*p3,*p4;
-		AgentAID *a1,*a2,*a3,*a4,*a5;
+		ACLMessage m1, m2, m3;
+		UserdefParam p1,p2,p3,p4;
+		AgentAID a1,a2,a3,a4,a5;
 
 };
 

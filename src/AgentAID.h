@@ -13,13 +13,19 @@
 
 #include"UserdefParam.h"
 #include<string>
-#include<set>
+#include<vector>
 
 namespace fipa {
 
 namespace acl {
 
-    //extern bool operator== (AgentAID &a, AgentAID &b);
+    /**
+	  \brief overloaded equality operator for AgentAID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
+	  
+	  The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
+	  in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
+    */
+        //extern bool operator== ( AgentAID &a,  AgentAID &b);
     
     /**
         \class AgentAID
@@ -35,11 +41,11 @@ class AgentAID {
 	     /** \param name: name of the agent*/
                std::string name;
 	     /** \param adresses: pointer to a set of strings representing the adresses of the agent*/
-               std::set<std::string>* adresses;
+               std::vector<std::string> adresses;
 	     /** \param resolvers: pointer to a set of AgentAIDs(also pointers) representing the resolvers of the current agent */
-               std::set<AgentAID*>* resolvers;
+               std::vector<AgentAID> resolvers;
 	     /** \param params: pointer to a set of UserdefParams(also pointers) representing the parameters of an agent id */
-               std::set<UserdefParam*>* params;
+               std::vector<UserdefParam> params;
 	     /**
 		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe
 	      */
@@ -54,27 +60,29 @@ class AgentAID {
 */
                ~AgentAID();
 	     AgentAID();
+	     
 	     /**
 	      \brief overloaded copy constructor; provides deep-copies for all member fields
 	     */
-	     AgentAID(AgentAID &a);
+	     AgentAID(const AgentAID &a);
 	     /**
 	      \brief overloaded assignment operator; provides deep-copies for all member fields
 	     */
-	     AgentAID& operator=(AgentAID &a);
+	     AgentAID& operator=(const AgentAID &a);
 	     AgentAID(std::string nam);
 	     
 	     /**
 		\brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, but this can be easily changed if needed through the overloaded operator which do
 	     */
-               std::string getName();
-               void setName(std::string nam);
-               void addAdress(std::string adr);
-               std::set<std::string>* getAdresses();
-               void addResolver(AgentAID* aid);
-               std::set<AgentAID*>* getResolvers();
-               void addUserdefParam(UserdefParam* p);
-               std::set<UserdefParam*>* getUserdefParams();
+               std::string getName() const;
+               void setName( std::string nam);
+               void addAdress(std::string &adr);
+               std::vector<std::string> getAdresses() const;
+               void addResolver(AgentAID &aid);
+               std::vector<AgentAID> getResolvers() const;
+	     void deleteResolver(AgentAID&);
+               void addUserdefParam(UserdefParam &p);
+               std::vector<UserdefParam> getUserdefParams() const;
 	     static void setResCompDepth(int);
 	     static int getResCompDepth();
 	
@@ -85,6 +93,7 @@ class AgentAID {
 		void initializeFields();
 };
 
+extern bool operator== ( AgentAID &a,  AgentAID &b);
 
 }//end of acl namespace
 

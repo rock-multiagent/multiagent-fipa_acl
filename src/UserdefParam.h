@@ -18,7 +18,11 @@ namespace fipa {
 
 namespace acl {
 
-    //extern bool operator== (UserdefParam &a, UserdefParam &b);
+    /**
+	  \brief overloaded equality operator for UserdefParam class objects 
+    */
+        //extern bool operator== (UserdefParam &a,UserdefParam &b);
+        
 /**
     \brief Implements the general User-defined parameters, which are present throughout the fipa specifications(FIPA at http://www.fipa.org).
 */
@@ -38,21 +42,23 @@ class UserdefParam {
 	setter and getter methods so far
 */
 	    UserdefParam();
+	   
 	    /**
 		\brief overloaded copy-constructor
 	    */
-	    UserdefParam(UserdefParam &copy);
+	    UserdefParam(const UserdefParam &copy);
 	    /**
 		\brief overloaded assignment operator
 	    */
-	    UserdefParam& operator=(UserdefParam& copy);
+	    UserdefParam& operator=(const UserdefParam& copy);
 	    /** \brief setter and getter methods */
-              std::string getValue();
+              std::string getValue() const;
               void setValue(std::string val);
-              std::string getName();
+              std::string getName() const;
               void setName (std::string nam);
 };
 
+extern bool operator== (UserdefParam &a,UserdefParam &b);
 
 }//end of acl namespace
 

@@ -12,5 +12,5 @@ set(TEST_TARGET2 mytest_${PROJECT_NAME})
 add_executable(${TEST_TARGET} MainTest.cpp ${SOURCES})
 target_link_libraries(${TEST_TARGET} message-generator cppunit ${LIBRARIES})
 
-add_executable(${TEST_TARGET2} mytest.cpp ${SOURCES2})
-target_link_libraries(${TEST_TARGET2} message-generator ${LIBRARIES})
+#add_executable(${TEST_TARGET2} mytest.cpp ${SOURCES2})
+#target_link_libraries(${TEST_TARGET2} message-generator ${LIBRARIES})

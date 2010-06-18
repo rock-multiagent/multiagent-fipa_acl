@@ -9,10 +9,11 @@
 #ifndef ACLMessage_H_
 #define ACLMessage_H_
 
-#include<set>
+#include<vector>
 #include<string>
 #include"AgentAID.h"
 #include"UserdefParam.h"
+//#include "ACLMessageOutputParser.h"
 
 namespace fipa {
 
@@ -27,8 +28,14 @@ namespace acl {
 			    REJECT_PROPOSAL, REQUEST, REQUEST_WHEN, REQUEST_WHENEVER, SUBSCRIBE
 			  };
     
-    
-        //extern bool operator== (ACLMessage &a, ACLMessage &b);
+    /**
+        \brief overloaded equality operator for ACLMessage; the signature of the function was intentionally changed from the normal operator== ( type&, const type&)
+
+        The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
+        in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
+    */
+    //extern bool operator== ( ACLMessage &a,  ACLMessage &b);
+        
 /**
     \class ACLMessage
     \brief The class implements the general structure of an ACLMessage. It follows the FIPA specification 
@@ -48,11 +55,11 @@ class ACLMessage {
 private:
         std::string performative;
         /** \param sender: pointer to the agentAID sending the message */
-        AgentAID* sender;
+        AgentAID sender;
         /** \param receivers: pointer to a set of agentAIDs representing the intended receivers of the message; set was chosen for uniquness of  elements*/
-        std::set<AgentAID*>* receivers;
+        std::vector<AgentAID> receivers;
         /** \param reply_to: pointer to a set of agentAIDs representing where a reply to this message should be deliverred */
-        std::set<AgentAID*>* reply_to;
+        std::vector<AgentAID> reply_to;
         /** \param language: string representing the language used */
         std::string language;
         /** \param encoding: string representing the encoding (encoding of the content; not related to message encoding) */
@@ -72,7 +79,7 @@ private:
         /** \param reply_by1: string version of the reply_by parameter; added for ease of use and implementation of the encoding methods*/
         std::string reply_by1;
         /** \param params: pointer to a set of user defined parameters(also pointers); set container was used for uniqueness of elements*/
-        std::set<UserdefParam*>* params;
+        std::vector<UserdefParam> params;
         /** \param content: string representing the content of the message */
         std::string content;
                 
@@ -115,10 +122,11 @@ public:
        void initializeObject();
        ~ACLMessage();
        ACLMessage();
+      
        /**
 	  \brief copy constructor; provides deep-copy of all fields
        */
-       ACLMessage(ACLMessage &mes);
+       ACLMessage(const ACLMessage &mes);
        /**
 	  \brief overloaded assignment operator; provides deep-copy for all fields
        */
@@ -142,40 +150,40 @@ public:
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
        */
        void setPerformative(std::string str);
-       std::string getPerformative();
-       void addReceiver(AgentAID* aid);
-       void deleteReceiver(AgentAID* aid);
+       std::string getPerformative() const;
+       void addReceiver(AgentAID &aid);
+       void deleteReceiver(AgentAID &aid);
        void clearReceivers();
-       std::set<AgentAID*>* getAllReceivers();
-       void addReplyTo(AgentAID* aid);
-       void deleteReplyTo(AgentAID* aid);
+       std::vector<AgentAID> getAllReceivers() const;
+       void addReplyTo(AgentAID &aid);
+       void deleteReplyTo(AgentAID aid);
        void clearReplyTo();
-       std::set<AgentAID*>* getAllReplyTo();
+       std::vector<AgentAID> getAllReplyTo() const;
        void setReplyBy(long by);
-       long getReplyBy();
+       long getReplyBy() const;
        void setInReplyTo(std::string str);
-       std::string getInReplyTo();
+       std::string getInReplyTo() const;
        void setReplyWith(std::string str);
-       std::string getReplyWith();
+       std::string getReplyWith() const;
        void setConversationID(std::string str);
-       std::string getConversationID();
+       std::string getConversationID() const;
        void setProtocol(std::string str);
-       std::string getProtocol();
+       std::string getProtocol() const;
        void setOntology(std::string str);
-       std::string getOntology();
+       std::string getOntology() const;
        void setEncoding(std::string str);
-       std::string getEncoding();
+       std::string getEncoding() const;
        void setLanguage(std::string str);
-       std::string getLanguage();
+       std::string getLanguage() const;
        void setContent(std::string cont);
-       std::string getContent();
-       void setSender(AgentAID* sender1);
-       AgentAID* getSender();
-       void addUserdefParam(UserdefParam* p);
-       std::set<UserdefParam*>* getUserdefParams();
-       void setUserdefParams(std::set<UserdefParam*>* p);
+       std::string getContent() const;
+       void setSender(AgentAID &sender1);
+       AgentAID getSender() const;
+       void addUserdefParam(UserdefParam &p);
+       std::vector<UserdefParam> getUserdefParams() const;
+       void setUserdefParams(std::vector<UserdefParam> p);
        
-       std::string getReplyBy1();
+       std::string getReplyBy1() const;
        void setReplyBy1(std::string date1);
        
        

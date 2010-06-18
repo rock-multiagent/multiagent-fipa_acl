@@ -26,13 +26,13 @@ UserdefParam::UserdefParam()
 {
 }
 
-UserdefParam::UserdefParam(UserdefParam &copy)
+UserdefParam::UserdefParam(const UserdefParam &copy)
 {
     name = copy.getName();
     value = copy.getValue();
 }
 
-UserdefParam& UserdefParam::operator=(UserdefParam &copy)
+UserdefParam& UserdefParam::operator=(const UserdefParam &copy)
 {
     if (this != &copy) {
     name.clear();
@@ -42,13 +42,23 @@ UserdefParam& UserdefParam::operator=(UserdefParam &copy)
     return *this;
 }
 
-std::string UserdefParam::getValue() {return value;}
+std::string UserdefParam::getValue() const {return value;}
 
 void UserdefParam::setValue(std::string val) {value = val;}
 
-std::string UserdefParam::getName() {return name;}
+std::string UserdefParam::getName() const {return name;}
 
 void UserdefParam::setName (std::string nam) {name = nam;}
+
+
+bool operator== (UserdefParam &a,UserdefParam &b)
+{
+    if (a.getName().compare(b.getName()))
+        return false;
+    if (a.getValue().compare(b.getValue()))
+        return false;
+}
+
 
 }//end of acl namespace
 

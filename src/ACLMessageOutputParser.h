@@ -20,25 +20,10 @@
     namespace fipa {
 
     namespace acl {
-
-        /**
-	  \brief overloaded equality operator for ACLMessage; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
-	  
-	  The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
-	  in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
-        */
-        extern bool operator== (ACLMessage a, ACLMessage b);
-        /**
-	  \brief overloaded equality operator for AgentAID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
-	  
-	  The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
-	  in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
-        */
-        extern bool operator== (AgentAID a, AgentAID b);
-        /**
-	  \brief overloaded equality operator for UserdefParam class objects
-        */
-        extern bool operator== (UserdefParam &a, UserdefParam &b);
+        
+        //extern bool operator== (UserdefParam &a,UserdefParam &b);
+        //extern bool operator== ( AgentAID &a,  AgentAID &b);
+        //extern bool operator== ( ACLMessage &a,  ACLMessage &b);
         
         /**
 	    \class ACLMessageOutputParser
@@ -63,7 +48,7 @@
 	  @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentAID's
 	  * see speciffication for details 
     */
-	      ACLMessage* msg;
+	      ACLMessage msg;
 	      int useCodeTables;
 	      int updateCodeTables;
 	      std::string version;
@@ -85,7 +70,7 @@
 		    /**
 		        \brief not a deep-copy assignment of msg but this should not be a problem as fields are not modified in the encoding process
 		    */
-		    void setMessage(ACLMessage* a);
+		    void setMessage(ACLMessage a);
 		    
 		    /**
 		        \brief prints the parsed message to an ofstream given as argument(as a string)
@@ -108,7 +93,7 @@
 		        \param depth: depth of the resolver tree to be encoded
 		        \return the encoded agentAID as string
 		    */
-		    std::string  getBitAID(AgentAID* aid, int depth);
+		    std::string  getBitAID(AgentAID aid, int depth);
 		    
         
         private:
@@ -156,25 +141,25 @@
 		different from the getBitUserdefMessageParams() method in that there is more general; the former is to be called only for message parameters;
 		difference was imposed by the specification	
 	      */
-	      std::string  getBitUserdefParams(std::set<UserdefParam*>* params);
+	      std::string  getBitUserdefParams(std::vector<UserdefParam> params);
 	      /**
 		\brief parses one user defined parameter
 		the specification does not differentiate at this level between message parameters and other kinds so this method is called by both
 	      */
-	      std::string  bitParseParam(UserdefParam* p);
+	      std::string  bitParseParam(UserdefParam p);
 	      /**
 		\brief currently used to encode the adresses of the AgentAID instances(strings)
 	      */
-	      std::string  getBinURLCol(std::set<std::string>* adrr);
+	      std::string  getBinURLCol(std::vector<std::string> adrr);
 	      /**
 		\brief basically a wrapper function of the getBitAIDColl(), to add the required specific flag
 	      */
-	      std::string  getBitResolvers(std::set<AgentAID*>* aids,int depth);
+	      std::string  getBitResolvers(std::vector<AgentAID> aids,int depth);
 	      /**
 		\brief parses a set of AgentAID instances
 		the resolvers depth variable that is being passed around is not modified in this function
 	      */
-	      std::string  getBitAIDColl(std::set<AgentAID*>* aids, int depth);
+	      std::string  getBitAIDColl(std::vector<AgentAID> aids, int depth);
 	      /**
 		\brief implements the binary expression production of the grammar; not complete(w.r.t. the specification) in functionality
 		implementing the messages without the rest of the architecture makes it difficult to anticipate when and how some productions may/will be used so only a few of the productions were implemented(for the binary expression) and the char parameter was added to choose between them, as no other decission maker/constraint was identified
