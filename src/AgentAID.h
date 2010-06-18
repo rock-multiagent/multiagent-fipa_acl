@@ -49,7 +49,7 @@ class AgentAID {
 	     /**
 		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe
 	      */
-	      static int resCompDepth;
+	     // static int resCompDepth;
 	      
                
        public:
@@ -80,11 +80,11 @@ class AgentAID {
                std::vector<std::string> getAdresses() const;
                void addResolver(AgentAID &aid);
                std::vector<AgentAID> getResolvers() const;
-	     void deleteResolver(AgentAID&);
+	     void deleteResolver(const AgentAID&);
                void addUserdefParam(UserdefParam &p);
                std::vector<UserdefParam> getUserdefParams() const;
-	     static void setResCompDepth(int);
-	     static int getResCompDepth();
+	     //static void setResCompDepth(int);
+	     //static int getResCompDepth();
 	
 	private:
 		/**
@@ -93,7 +93,8 @@ class AgentAID {
 		void initializeFields();
 };
 
-extern bool operator== ( AgentAID &a,  AgentAID &b);
+extern bool operator== (const AgentAID &a,const AgentAID &b);
+extern bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth);
 
 }//end of acl namespace
 

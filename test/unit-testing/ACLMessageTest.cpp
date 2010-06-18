@@ -108,16 +108,16 @@ void ACLMessageTest::AgentEqTest()
     CPPUNIT_ASSERT_EQUAL((a5==a3),false);
     a5.addUserdefParam(p3);
     CPPUNIT_ASSERT_EQUAL((a5==a3),true);
-    AgentAID::setResCompDepth(5);
-    CPPUNIT_ASSERT_EQUAL((a5==a3),true);
-    AgentAID::setResCompDepth(1);
+    //AgentAID::setResCompDepth(5);
+    CPPUNIT_ASSERT_EQUAL(resDepthEqual(a5,a3,5),true);
+    //AgentAID::setResCompDepth(1);
     a5.getResolvers().begin()->addResolver(a4);
     a5.deleteResolver(a1); // a5.addResolver(a5.getResolvers().begin()->addResolver(a4));
     a2.addResolver(a4);
     a5.addResolver(a2);
     CPPUNIT_ASSERT_EQUAL((a5 == a3),true);
-    AgentAID::setResCompDepth(5);
-    CPPUNIT_ASSERT_EQUAL((a5==a3),false);
+    //AgentAID::setResCompDepth(5);
+    CPPUNIT_ASSERT_EQUAL(resDepthEqual(a5,a3,5),false);
     
     
 }

@@ -14,7 +14,7 @@ namespace fipa {
 namespace acl {
 
     
-int AgentAID::resCompDepth = 1;
+//int AgentAID::resCompDepth = 1;
  
 AgentAID::AgentAID()
 {
@@ -72,14 +72,20 @@ void AgentAID::addUserdefParam(UserdefParam &p)
 
 std::vector<UserdefParam> AgentAID::getUserdefParams() const {return params;}
 
-void AgentAID::setResCompDepth(int x) {resCompDepth = x;}
-int AgentAID::getResCompDepth() {return resCompDepth;}
+//void AgentAID::setResCompDepth(int x) {resCompDepth = x;}
+//int AgentAID::getResCompDepth() {return resCompDepth;}
 
 
-bool operator== ( AgentAID &a,  AgentAID &b)
+bool operator== (const AgentAID &a,const  AgentAID &b)
 {
-    ///saving the resCompDepth variable for later restoration
-    int depthRestore = AgentAID::getResCompDepth();
+   return resDepthEqual(a,b,1);
+    
+}
+  
+bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
+{
+     //saving the resCompDepth variable for later restoration
+    //int depthRestore = AgentAID::getResCompDepth();
     
     //AgentAID a = AgentAID(&c);
     //AgentAID b = AgentAID(&d);
@@ -123,10 +129,10 @@ bool operator== ( AgentAID &a,  AgentAID &b)
     
     
     // only check the resolvers if the resCompDepth > 0; 
-    if (depthRestore > 0 )
+    if (depth > 0 )
     {
         // the resolvers are compared with up to resCompDepth -1 in the resolver network
-        AgentAID::setResCompDepth(depthRestore-1);
+        //AgentAID::setResCompDepth(depth-1);
     // comparing resolvers
     std::vector<AgentAID> agentsA = a.getResolvers();
     std::vector<AgentAID> agentsB = b.getResolvers();
@@ -139,7 +145,7 @@ bool operator== ( AgentAID &a,  AgentAID &b)
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( (*ait) == (*bit)) 
+	  if ( resDepthEqual((*ait),(*bit),depth-1) ) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -154,7 +160,7 @@ bool operator== ( AgentAID &a,  AgentAID &b)
 	  
     }
     // restoring the comparison depth variable to the initial value; there must be no possible return statements between the 2 changes made to it
-    AgentAID::setResCompDepth(depthRestore);
+    //AgentAID::setResCompDepth(depthRestore);
     if (!agentsA.empty())
         return false;
     if (!agentsB.empty())
@@ -194,9 +200,7 @@ bool operator== ( AgentAID &a,  AgentAID &b)
         return false;
     
     return true;
-    
 }
-  
 
 
 
