@@ -50,12 +50,6 @@ class MessageParser
 
 		int buildPredefMessageParameters(MessageParameter param,ACLMessage &msg);
 
-		void buildSender(MessageParameter param,ACLMessage &msg);
-
-		void buildParameters(std::vector<MessageParameter> parsedParams, ACLMessage &msg);
-
-		int buildPredefMessageParameters(MessageParameter param, ACLMessage &msg);
-
 		void buildSender(MessageParameter param, ACLMessage &msg);
 
 		AgentAID buildAgentAID(AgentID agent);
@@ -90,7 +84,6 @@ class MessageParser
 
 		void buildContent(MessageParameter param,ACLMessage &msg);
 
-		void buildContent(MessageParameter param, ACLMessage& msg);
 
 
 };

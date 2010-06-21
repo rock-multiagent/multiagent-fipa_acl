@@ -58,7 +58,7 @@ bool MessageParser::parseData(const std::string storage, ACLMessage &msg)
 
 bool MessageParser::buildMessage(Message parsedMsg, ACLMessage &msg)
 {
-	msg->setPerformative(parsedMsg.type);
+	msg.setPerformative(parsedMsg.type);
 	buildParameters(parsedMsg.parameters, msg);
 	
 	return true;
@@ -150,7 +150,8 @@ void MessageParser::buildResolvers(AgentAID &workAg, AgentID agent)
     for (it; it != agent.resolvers.end(); it++)
     {
         unbuiltres = it->get(); // get function of the boost::recursive_wrapper
-        workAg.addResolver(buildAgentAID(unbuiltres));
+        AgentAID res = buildAgentAID(unbuiltres);
+        workAg.addResolver(res);
     }
 }
 
