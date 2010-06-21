@@ -43,7 +43,7 @@ class MessageParser
 		* \param msg The message extracted from the data
 		* \return The decoded ACLMessage object
 		*/	
-		bool parseData(const std::string storage, ACLMessage* msg);
+		bool parseData(const std::string storage, ACLMessage &msg);
 
 		/**
 		    \brief creates an unpopulated message object and passes it around to have its fields populated, along with the parsed message where the data is extracted from
@@ -51,46 +51,46 @@ class MessageParser
 		    \param msg The (final) ACLMessage to be filled with the parsed data
 		    \return the decoded ACLMessage object
 		*/
-		bool buildMessage(Message parsedMsg, ACLMessage* msg);
+		bool buildMessage(Message parsedMsg, ACLMessage &msg);
 		
 	private:
-		void buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage* msg);
+		void buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage &msg);
 
-		int buildPredefMessageParameters(MessageParameter param,ACLMessage* msg);
+		int buildPredefMessageParameters(MessageParameter param,ACLMessage &msg);
 
-		void buildSender(MessageParameter param,ACLMessage* msg);
+		void buildSender(MessageParameter param,ACLMessage &msg);
 
-		AgentAID* buildAgentAID(AgentID agent);
+		AgentAID buildAgentAID(AgentID agent);
 
-		void buildResolvers(AgentAID *workAg, AgentID agent);
+		void buildResolvers(AgentAID &workAg, AgentID agent);
 
-		void buildAgentParameters(AgentAID* workAg, AgentID agent);
+		void buildAgentParameters(AgentAID &workAg, AgentID agent);
 
-		UserdefParam* buildUserdefParameter(UserDefinedParameter param);
+		UserdefParam buildUserdefParameter(UserDefinedParameter param);
 
-		UserdefParam* buildUserdefParameter(MessageParameter param);
+		UserdefParam buildUserdefParameter(MessageParameter param);
 
-		void buildReceiver(MessageParameter param, ACLMessage *msg);
+		void buildReceiver(MessageParameter param, ACLMessage &msg);
 
-		void buildReplyWith(MessageParameter param, ACLMessage *msg);
+		void buildReplyWith(MessageParameter param, ACLMessage &msg);
 
-		void buildReplyBy1(MessageParameter param, ACLMessage *msg);
+		void buildReplyBy1(MessageParameter param, ACLMessage &msg);
 
-		void buildInReplyTo(MessageParameter param, ACLMessage *msg);
+		void buildInReplyTo(MessageParameter param, ACLMessage &msg);
 
-		void buildReplyTo(MessageParameter param, ACLMessage *msg);
+		void buildReplyTo(MessageParameter param, ACLMessage &msg);
 
-		void buildLanguage(MessageParameter param, ACLMessage *msg);
+		void buildLanguage(MessageParameter param, ACLMessage &msg);
 
-		void buildEncoding(MessageParameter param, ACLMessage *msg);
+		void buildEncoding(MessageParameter param, ACLMessage &msg);
 
-		void buildOntology(MessageParameter param, ACLMessage *msg);
+		void buildOntology(MessageParameter param, ACLMessage &msg);
 
-		void buildProtocol(MessageParameter param, ACLMessage *msg);
+		void buildProtocol(MessageParameter param, ACLMessage &msg);
 
-		void buildConversationID(MessageParameter param, ACLMessage *msg);
+		void buildConversationID(MessageParameter param, ACLMessage &msg);
 
-		void buildContent(MessageParameter param,ACLMessage* msg);
+		void buildContent(MessageParameter param,ACLMessage &msg);
 
 };
 
