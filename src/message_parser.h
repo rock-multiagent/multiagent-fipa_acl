@@ -9,22 +9,14 @@
 #ifndef RIMRES_FIPAACL_MESSAGE_PARSER_H_
 #define RIMRES_FIPAACL_MESSAGE_PARSER_H_
 
+#include <vector>
+#include <string>
+
 #include <message-generator/ACLMessage.h>
 #include <message-generator/UserdefParam.h>
 #include <message-generator/AgentAID.h>
-//#include "grammar_bitefficient.h"
-
-
-//#include "../../message-generator/src/ACLMessage.h"
-//#include "../../message-generator/src/UserdefParam.h"
-//#include "../../message-generator/src/AgentAID.h"
-//#include "grammar_bitefficient.h"
 
 #include "types.h"
-
-
-#include <vector>
-#include <string>
 
 namespace fipa { 
     
@@ -60,6 +52,12 @@ class MessageParser
 
 		void buildSender(MessageParameter param,ACLMessage &msg);
 
+		void buildParameters(std::vector<MessageParameter> parsedParams, ACLMessage &msg);
+
+		int buildPredefMessageParameters(MessageParameter param, ACLMessage &msg);
+
+		void buildSender(MessageParameter param, ACLMessage &msg);
+
 		AgentAID buildAgentAID(AgentID agent);
 
 		void buildResolvers(AgentAID &workAg, AgentID agent);
@@ -91,6 +89,9 @@ class MessageParser
 		void buildConversationID(MessageParameter param, ACLMessage &msg);
 
 		void buildContent(MessageParameter param,ACLMessage &msg);
+
+		void buildContent(MessageParameter param, ACLMessage& msg);
+
 
 };
 

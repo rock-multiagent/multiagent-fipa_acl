@@ -76,7 +76,7 @@ namespace acl
 {
 
 template <typename Iterator>
-struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii::space_type>
+struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 {
 
 	bitefficient_grammar() : bitefficient_grammar::base_type(aclCommunicativeAct, "bitefficient-grammar")
@@ -101,7 +101,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message(), ascii:
 	}
 	
 
-	qi::rule<Iterator, fipa::acl::Message(),ascii::space_type> aclCommunicativeAct;
+	qi::rule<Iterator, fipa::acl::Message()> aclCommunicativeAct;
 	qi::rule<Iterator> bytelengthEncodedString;
 	qi::rule<Iterator, boost::uint_least8_t() > len8;
 	qi::rule<Iterator> byteSeq;
