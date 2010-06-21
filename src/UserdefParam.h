@@ -58,7 +58,7 @@ class UserdefParam {
               void setName (std::string nam);
 };
 
-extern bool operator== (UserdefParam &a,UserdefParam &b);
+extern bool operator== (const UserdefParam &a,const UserdefParam &b);
 
 }//end of acl namespace
 

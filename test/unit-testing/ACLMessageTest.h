@@ -15,7 +15,7 @@
 
 #include "../../src/ACLMessage.h"
 
-#define STRESS_NR 10
+#define STRESS_NR 20
 
 using namespace std;
 using namespace fipa::acl;
@@ -24,9 +24,9 @@ class ACLMessageTest : public CPPUNIT_NS::TestFixture
 {
 	CPPUNIT_TEST_SUITE (ACLMessageTest);
 	
-	//CPPUNIT_TEST (MessageEqTest);
+	CPPUNIT_TEST (MessageEqTest);
 	CPPUNIT_TEST (AgentEqTest);
- 	//CPPUNIT_TEST (ForMemLeakTest);
+ 	CPPUNIT_TEST (ForMemLeakTest);
 	//CPPUNIT_TEST (assignTest);
 	
 	CPPUNIT_TEST_SUITE_END ();
@@ -38,6 +38,12 @@ class ACLMessageTest : public CPPUNIT_NS::TestFixture
 	protected:
 		
 	    void AgentEqTest();
+	    void MessageEqTest();
+	    void ForMemLeakTest();
+	    void printMessage( ACLMessage &msg);
+	    void printAgentAID( AgentAID &agent);
+	    void printAgentAIDset( vector<AgentAID> &myset);
+	    void printUserdefParamset( vector<UserdefParam> &params);
 
 	private:
 		ACLMessage m1, m2, m3;

@@ -51,7 +51,7 @@ std::string UserdefParam::getName() const {return name;}
 void UserdefParam::setName (std::string nam) {name = nam;}
 
 
-bool operator== (UserdefParam &a,UserdefParam &b)
+bool operator== (const UserdefParam &a,const UserdefParam &b)
 {
     if (a.getName().compare(b.getName()))
         return false;

@@ -130,7 +130,7 @@ public:
        /**
 	  \brief overloaded assignment operator; provides deep-copy for all fields
        */
-       ACLMessage& operator=(ACLMessage &mes);
+       ACLMessage& operator=(const ACLMessage &mes);
        /**
 	  \brief constructor of an ACLMessage with a predefined performative
 	  \param perf: a predefined fipa performative(represented by its index in the perfs vector)
@@ -140,54 +140,56 @@ public:
 	  \brief constructor of an ACLMessage with a custom performative
 	  \param perf: string representing the custom performative(but it can just as well be one of the pre-defined ones)
        */
-       ACLMessage(std::string perf);
+       ACLMessage(const std::string perf);
        /**
         * Stefan: Added missing declaration for existing definition.
         */
-       ACLMessage(int perf);
+       ACLMessage(const int perf);
        
        /**
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
        */
-       void setPerformative(std::string str);
+       void setPerformative(const std::string str);
        std::string getPerformative() const;
-       void addReceiver(AgentAID &aid);
-       void deleteReceiver(AgentAID &aid);
+       void addReceiver(const AgentAID &aid);
+       void deleteReceiver(const AgentAID &aid);
        void clearReceivers();
        std::vector<AgentAID> getAllReceivers() const;
-       void addReplyTo(AgentAID &aid);
-       void deleteReplyTo(AgentAID aid);
+       void addReplyTo(const AgentAID &aid);
+       void deleteReplyTo(const AgentAID aid);
        void clearReplyTo();
        std::vector<AgentAID> getAllReplyTo() const;
        void setReplyBy(long by);
        long getReplyBy() const;
-       void setInReplyTo(std::string str);
+       void setInReplyTo(const std::string str);
        std::string getInReplyTo() const;
-       void setReplyWith(std::string str);
+       void setReplyWith(const std::string str);
        std::string getReplyWith() const;
-       void setConversationID(std::string str);
+       void setConversationID(const std::string str);
        std::string getConversationID() const;
-       void setProtocol(std::string str);
+       void setProtocol(const std::string str);
        std::string getProtocol() const;
-       void setOntology(std::string str);
+       void setOntology(const std::string str);
        std::string getOntology() const;
-       void setEncoding(std::string str);
+       void setEncoding(const std::string str);
        std::string getEncoding() const;
-       void setLanguage(std::string str);
+       void setLanguage(const std::string str);
        std::string getLanguage() const;
-       void setContent(std::string cont);
+       void setContent(const std::string cont);
        std::string getContent() const;
-       void setSender(AgentAID &sender1);
+       void setSender(const AgentAID &sender1);
        AgentAID getSender() const;
-       void addUserdefParam(UserdefParam &p);
+       void addUserdefParam(const UserdefParam &p);
        std::vector<UserdefParam> getUserdefParams() const;
-       void setUserdefParams(std::vector<UserdefParam> p);
+       void setUserdefParams(const std::vector<UserdefParam> p);
        
        std::string getReplyBy1() const;
-       void setReplyBy1(std::string date1);
+       void setReplyBy1(const std::string date1);
        
        
 };
+
+extern bool operator== (const ACLMessage &a, const ACLMessage &b);
 
 
 }//end of acl namespace

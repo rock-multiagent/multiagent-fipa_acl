@@ -46,13 +46,15 @@ class AgentAID {
                std::vector<AgentAID> resolvers;
 	     /** \param params: pointer to a set of UserdefParams(also pointers) representing the parameters of an agent id */
                std::vector<UserdefParam> params;
-	     /**
-		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe
-	      */
-	     // static int resCompDepth;
+	    
 	      
                
        public:
+	 
+	  /**
+		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe
+	  */
+	     static int resCompDepth;
 	 
 	      
 /* 
@@ -69,19 +71,19 @@ class AgentAID {
 	      \brief overloaded assignment operator; provides deep-copies for all member fields
 	     */
 	     AgentAID& operator=(const AgentAID &a);
-	     AgentAID(std::string nam);
+	     AgentAID(const std::string nam);
 	     
 	     /**
 		\brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, but this can be easily changed if needed through the overloaded operator which do
 	     */
                std::string getName() const;
-               void setName( std::string nam);
-               void addAdress(std::string &adr);
+               void setName(const std::string nam);
+               void addAdress(const std::string &adr);
                std::vector<std::string> getAdresses() const;
-               void addResolver(AgentAID &aid);
+               void addResolver(const AgentAID &aid);
                std::vector<AgentAID> getResolvers() const;
 	     void deleteResolver(const AgentAID&);
-               void addUserdefParam(UserdefParam &p);
+               void addUserdefParam(const UserdefParam &p);
                std::vector<UserdefParam> getUserdefParams() const;
 	     //static void setResCompDepth(int);
 	     //static int getResCompDepth();
@@ -92,8 +94,13 @@ class AgentAID {
 		*/
 		void initializeFields();
 };
-
+/**
+    \brief overloaded equality operator; the depth is the default one kept in the resComDepth member field 
+*/
 extern bool operator== (const AgentAID &a,const AgentAID &b);
+/**
+    \brief alternative function for equality operator; the depth can be specified through the deph param 
+*/
 extern bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth);
 
 }//end of acl namespace

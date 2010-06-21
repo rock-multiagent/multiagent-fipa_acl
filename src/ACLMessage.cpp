@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <string>
 #include "ACLMessage.h"
 
@@ -88,33 +89,32 @@ ACLMessage::ACLMessage()
 	initializeObject();
 }
 
-ACLMessage::ACLMessage(predefinedPerformatives perf)
+ACLMessage::ACLMessage(const predefinedPerformatives perf)
 
 {
 	initializeObject();
 	performative = ACLMessage::perfs[perf];
 }
 
-ACLMessage::ACLMessage(std::string perf) {initializeObject(); performative = perf; }
+ACLMessage::ACLMessage(const std::string perf) {initializeObject(); performative = perf; }
 
-void ACLMessage::setPerformative(std::string str) {performative = str; }
+void ACLMessage::setPerformative(const std::string str) {performative = str; }
 
 std::string ACLMessage::getPerformative() const {return performative; }
 
-void ACLMessage::addReceiver(AgentAID &aid) 
+void ACLMessage::addReceiver(const AgentAID &aid) 
 {
-    receivers.insert(receivers.begin(),aid); 
+    if ( find(receivers.begin(),receivers.end(),aid) == receivers.end() )// prevent entering duplicates
+							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+        receivers.insert(receivers.begin(),aid); 
 }
 
-void ACLMessage::deleteReceiver(AgentAID &aid) 
+void ACLMessage::deleteReceiver(const AgentAID &aid) 
 {
-    std::vector<AgentAID>::iterator it = receivers.begin();
-    for (it; it != receivers.end(); it++)
-       {
-        AgentAID a = *it;
-        if ( a == aid)
-	  receivers.erase(it);
-    }
+    std::vector<AgentAID>::iterator it;
+    if ( (it = find(receivers.begin(),receivers.end(),aid)) != receivers.end() )// prevent entering duplicates
+							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    receivers.erase(it);
 }
 
 void ACLMessage::clearReceivers() 
@@ -124,66 +124,65 @@ void ACLMessage::clearReceivers()
 
 std::vector<AgentAID> ACLMessage::getAllReceivers() const {return receivers; }
 
-void ACLMessage::addReplyTo(AgentAID &aid) 
+void ACLMessage::addReplyTo(const AgentAID &aid) 
 {
+    if ( find(reply_to.begin(),reply_to.end(),aid) == reply_to.end() )// prevent entering duplicates
+							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     reply_to.insert(reply_to.begin(),aid); 
 }
 
-void ACLMessage::deleteReplyTo(AgentAID aid) 
+void ACLMessage::deleteReplyTo(const AgentAID aid) 
 {
-    std::vector<AgentAID>::iterator it = reply_to.begin();
-    for (it; it != reply_to.end(); it++)
-    {
-        AgentAID a = *it;
-        if ( a == aid)
-	  reply_to.erase(it);
-    }
+    std::vector<AgentAID>::iterator it;
+    if ( (it = find(reply_to.begin(),reply_to.end(),aid)) != reply_to.end() )// prevent entering duplicates
+							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    reply_to.erase(it);
 }
 
-void ACLMessage::clearReplyTo() 
+void ACLMessage::clearReplyTo()
 {
     reply_to.clear(); 
 }
 
 std::vector<AgentAID> ACLMessage::getAllReplyTo() const {return reply_to; }
 
-void ACLMessage::setReplyBy(long by) {reply_by = by; }
+void ACLMessage::setReplyBy(const long by) {reply_by = by; }
 
 long ACLMessage::getReplyBy() const {return reply_by; }
 
-void ACLMessage::setInReplyTo(std::string str) {in_reply_to = str; }
+void ACLMessage::setInReplyTo(const std::string str) {in_reply_to = str; }
 
 std::string ACLMessage::getInReplyTo() const {return in_reply_to; }
 
-void ACLMessage::setReplyWith(std::string str) {reply_with = str; }
+void ACLMessage::setReplyWith(const std::string str) {reply_with = str; }
 
 std::string ACLMessage::getReplyWith() const {return reply_with; }
 
-void ACLMessage::setConversationID(std::string str) {conversation_id = str; }
+void ACLMessage::setConversationID(const std::string str) {conversation_id = str; }
 
 std::string ACLMessage::getConversationID() const {return conversation_id; }
 
-void ACLMessage::setProtocol(std::string str) {protocol = str; }
+void ACLMessage::setProtocol(const std::string str) {protocol = str; }
 
 std::string ACLMessage::getProtocol() const {return protocol; }
 
-void ACLMessage::setOntology(std::string str) {ontology = str; }
+void ACLMessage::setOntology(const std::string str) {ontology = str; }
 
 std::string ACLMessage::getOntology() const {return ontology; }
 
-void ACLMessage::setEncoding(std::string str) {encoding = str; }
+void ACLMessage::setEncoding(const std::string str) {encoding = str; }
 
 std::string ACLMessage::getEncoding() const {return encoding; }
 
-void ACLMessage::setLanguage(std::string str) {language = str; }
+void ACLMessage::setLanguage(const std::string str) {language = str; }
 
 std::string ACLMessage::getLanguage() const {return language; }
 
-void ACLMessage::setContent(std::string cont) {content = cont; }
+void ACLMessage::setContent(const std::string cont) {content = cont; }
 
 std::string ACLMessage::getContent() const {return content; }
 
-void ACLMessage::setSender(AgentAID &sender1) 
+void ACLMessage::setSender(const AgentAID &sender1) 
 {
     sender = sender1; 
 }
@@ -195,14 +194,15 @@ AgentAID ACLMessage::getSender() const
     
 } 
 
-void ACLMessage::addUserdefParam(UserdefParam &p) 
+void ACLMessage::addUserdefParam(const UserdefParam &p) 
 {
+    if (find (params.begin(),params.end(),p) == params.end() )
     params.insert(params.begin(),p);
 }
 
 std::vector<UserdefParam> ACLMessage:: getUserdefParams() const {return params;}
 
-void ACLMessage::setUserdefParams(std::vector<UserdefParam> p) 
+void ACLMessage::setUserdefParams(const std::vector<UserdefParam> p) 
 {
     params.clear();
     params.insert(params.begin(),p.begin(),p.end());
@@ -211,14 +211,14 @@ void ACLMessage::setUserdefParams(std::vector<UserdefParam> p)
 
 std::string ACLMessage::getReplyBy1() const {return reply_by1;}
 
-void ACLMessage::setReplyBy1(std::string date1) {reply_by1 = date1;}
+void ACLMessage::setReplyBy1(const std::string date1) {reply_by1 = date1;}
 
-/*
-bool operator== ( ACLMessage &a,  ACLMessage &b)
+
+bool operator== (const ACLMessage &a,const ACLMessage &b)
 {
     //ACLMessage a = ACLMessage(&c); 
     //ACLMessage b = ACLMessage(&d);
-        
+       
     if (a.getPerformative().compare(b.getPerformative()))
         return false;
     if (a.getContent().compare(b.getContent()))
@@ -240,22 +240,52 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
     if (a.getReplyBy1().compare(b.getReplyBy1()))
         return false;
     
-    if (a.getSender() == b.getSender());
-    else return false;
+    if (!(a.getSender() == b.getSender()) )
+    { return false; }
     
     // checking if receivers sets of the message are the same
     std::vector<AgentAID> agentsA = a.getAllReceivers();
     std::vector<AgentAID> agentsB = b.getAllReceivers();
     std::vector<AgentAID>::iterator ait = agentsA.begin();
     std::vector<AgentAID>::iterator bit = agentsB.begin();
+    
+        
     int found_one = 0; // flag variable to control flow through inner loops
+    
+    /* NOTE: This commented version was supposed to work; I have no idea why it does not; I call agentsB.end()->getName() two times below 
+	   and it gives different outputs(should give a segmentation fault in both cases but it doesn't); therefore I will not be using 
+	   STL algorithms for this checkings
+    std::cout<<agentsB.end()->getName()<<"\n";
+    while(1)
+    {
+        if (ait == agentsA.end()) break;
+        bit = find(agentsB.begin(),agentsB.end(),*ait);
+        if (bit == agentsB.end()) 
+        { std::cout<< bit->getName()<<"\t"<< agentsB.end()->getName()<<"\t\tret\n"; 
+        return false;
+        }
+        std::cout<< "\nwhile\t\t";
+        std::cout<< ait->getName()<<"\t\t"<< bit->getName()<<"\n";
+        
+        ait++;
+        agentsB.erase(bit);
+        
+        bit = agentsB.begin();
+        //std::cout<<"\n\n"<< agentsB.begin()->getName()<<"\t\t"<< ait->getName()
+        std::cout<< agentsA.size()<<"\t"<<agentsB.size()<<"local sizes\n";
+        std::cout<< a.getAllReceivers().size()<<"\t"<<b.getAllReceivers().size()<<"sizes from obj\n\n\n";
+       
+    }
+    */
+    
+    
     while (ait != agentsA.end())
     {
         found_one = 0;
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( (*ait) == (*bit)) 
+	  if ( resDepthEqual((*ait),(*bit),AgentAID::resCompDepth)) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -269,10 +299,11 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
         if (!found_one) ait++;
 	  
     }
+    
     if (!agentsA.empty())
-        return false;
+    { return false; }
     if (!agentsB.empty())
-        return false;
+    { return false; }
     
     //checking if reply_to sets of the message are  the same
     agentsA = a.getAllReplyTo();
@@ -285,7 +316,7 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( (*ait) == (*bit)) 
+	  if ( resDepthEqual((*ait),(*bit),AgentAID::resCompDepth)) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -299,46 +330,47 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
         if (!found_one) ait++;
 	  
     }
+    
     if (!agentsA.empty())
-        return false;
+    { return false; }
     if (!agentsB.empty())
-        return false;
+    { return false; }
     
     
     std::vector<UserdefParam> paramsA = a.getUserdefParams();
     std::vector<UserdefParam> paramsB = b.getUserdefParams();
     std::vector<UserdefParam>::iterator pita = paramsA.begin();
     std::vector<UserdefParam>::iterator pitb = paramsB.begin();
-     
-    while (pita != paramsA.end())
+    
+   while (pita != paramsA.end())
     {
         found_one = 0;
         pitb = paramsB.begin();
-        while (pitb!=paramsB.end())
+        while (pitb != paramsB.end())
         {
-	  if ( (*pita) == (*pitb)) 
+	  if (*pita == *pitb) 
 	  {
-	      
 	      paramsA.erase(pita);
 	      pita = paramsA.begin();
 	      paramsB.erase(pitb);
 	      pitb = paramsB.end();
 	      found_one = 1;
-	  }
-	  else pitb++;
+	      
+	  } else pitb++;
+	  
         }
-	  if (!found_one) pita++;
-	 
+        if (!found_one) pita++;
 	  
     }
+    
     if (!paramsA.empty())
-        return false;
+    { return false; }
     if (!paramsB.empty())
-        return false;
+    { return false; }
    
     return true;
 }
-*/
+
 
 
 
@@ -404,7 +436,7 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
 
 
 
-ACLMessage& ACLMessage::operator=(ACLMessage &mes)
+ACLMessage& ACLMessage::operator=(const ACLMessage &mes)
 {
     // checking against message1 = message1 case
     if (this != &mes)

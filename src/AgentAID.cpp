@@ -8,13 +8,14 @@
  */
 #include "AgentAID.h"
 #include <iostream>
+#include <algorithm>
 
 namespace fipa {
 
 namespace acl {
 
     
-//int AgentAID::resCompDepth = 1;
+int AgentAID::resCompDepth = 1;
  
 AgentAID::AgentAID()
 {
@@ -23,7 +24,7 @@ AgentAID::AgentAID()
 	initializeFields();
 }
 
-AgentAID::AgentAID(std::string nam) 
+AgentAID::AgentAID(const std::string nam) 
 {
     initializeFields();      
     name = nam;
@@ -38,14 +39,16 @@ void AgentAID::initializeFields()
 
 std::string AgentAID::getName() const {return name;}
 
-void AgentAID::setName(std::string nam) {name = nam;}
+void AgentAID::setName(const std::string nam) {name = nam;}
 
-void AgentAID::addAdress(std::string &adr) {adresses.insert(adresses.begin(),adr);}
+void AgentAID::addAdress(const std::string &adr) {adresses.insert(adresses.begin(),adr);}
 
 std::vector<std::string> AgentAID::getAdresses() const {return adresses;}
 
-void AgentAID::addResolver(AgentAID &aid) 
+void AgentAID::addResolver(const AgentAID &aid) 
 {
+    if ( find(resolvers.begin(),resolvers.end(),aid) == resolvers.end() )// prevent entering duplicates
+							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     resolvers.insert(resolvers.begin(),aid); 
 }
 
@@ -53,6 +56,11 @@ std::vector<AgentAID> AgentAID::getResolvers() const {return resolvers;}
 
 void AgentAID::deleteResolver(const AgentAID &aid) 
 {
+    std::vector<AgentAID>::iterator it;
+    if ( (it = find(resolvers.begin(),resolvers.end(),aid)) != resolvers.end() )// prevent entering duplicates
+							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    resolvers.erase(it);
+    /*
     std::vector<AgentAID>::iterator it = resolvers.begin();
     for (it; it != resolvers.end(); it++)
        {
@@ -63,9 +71,10 @@ void AgentAID::deleteResolver(const AgentAID &aid)
             break;
         }
     }
+    */
 }
 
-void AgentAID::addUserdefParam(UserdefParam &p) 
+void AgentAID::addUserdefParam(const UserdefParam &p) 
 {
     params.insert(params.begin(),p); 
 }
@@ -78,7 +87,7 @@ std::vector<UserdefParam> AgentAID::getUserdefParams() const {return params;}
 
 bool operator== (const AgentAID &a,const  AgentAID &b)
 {
-   return resDepthEqual(a,b,1);
+   return resDepthEqual(a,b,AgentAID::resCompDepth);
     
 }
   
@@ -98,13 +107,13 @@ bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
     std::vector<std::string>::iterator sita = addrA.begin();
     std::vector<std::string>::iterator sitb = addrB.begin();
     int found_one = 0; // flag variable to control flow through inner loops
-    while (sita != addrA.end())
+     while (sita != addrA.end())
     {
         found_one = 0;
         sitb = addrB.begin();
         while (sitb != addrB.end())
         {
-	  if (!(*sita).compare(*sitb)) 
+	  if (*sita == *sitb) 
 	  {
 	      addrA.erase(sita);
 	      sita = addrA.begin();
@@ -118,13 +127,11 @@ bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
         if (!found_one) sita++;
 	  
     }
-    if (!addrA.empty())
     
-        return false;
-        if (!addrB.empty())
-        {
-	  return false;
-        }
+    if (!addrA.empty())
+    { return false; }
+    if (!addrB.empty())
+    { return false; }
     
     
     
@@ -138,14 +145,15 @@ bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
     std::vector<AgentAID> agentsB = b.getResolvers();
     std::vector<AgentAID>::iterator ait = agentsA.begin();
     std::vector<AgentAID>::iterator bit = agentsB.begin();
+    //std::vector<AgentAID>::iterator aux;
     
-    while (ait != agentsA.end())
+      while (ait != agentsA.end())
     {
         found_one = 0;
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( resDepthEqual((*ait),(*bit),depth-1) ) 
+	  if ( resDepthEqual((*ait),(*bit),depth-1)) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -159,12 +167,12 @@ bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
         if (!found_one) ait++;
 	  
     }
-    // restoring the comparison depth variable to the initial value; there must be no possible return statements between the 2 changes made to it
-    //AgentAID::setResCompDepth(depthRestore);
+    
     if (!agentsA.empty())
-        return false;
+    { return false; }
     if (!agentsB.empty())
-        return false;
+    { return false; }
+    
     }
     
     // comparing userdefined parameters
@@ -173,31 +181,31 @@ bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
     std::vector<UserdefParam>::iterator pita = paramsA.begin();
     std::vector<UserdefParam>::iterator pitb = paramsB.begin();
      
-    while (pita != paramsA.end())
+   while (pita != paramsA.end())
     {
         found_one = 0;
         pitb = paramsB.begin();
-        while (pitb!=paramsB.end())
+        while (pitb != paramsB.end())
         {
-	  if ( (*pita) == (*pitb)) 
+	  if (*pita == *pitb) 
 	  {
-	      
 	      paramsA.erase(pita);
 	      pita = paramsA.begin();
 	      paramsB.erase(pitb);
 	      pitb = paramsB.end();
 	      found_one = 1;
-	  }
-	  else pitb++;
+	      
+	  } else pitb++;
+	  
         }
-	  if (!found_one) pita++;
-	 
+        if (!found_one) pita++;
 	  
     }
+    
     if (!paramsA.empty())
-        return false;
+    { return false; }
     if (!paramsB.empty())
-        return false;
+    { return false; }
     
     return true;
 }
