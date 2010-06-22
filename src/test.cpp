@@ -25,11 +25,11 @@
 using namespace fipa::acl;
 using namespace std;
 
-void printAgentAID(const AgentAID &agent);
-void printAgentAIDset(const set<AgentAID> &myset);
-void printUserdefParamset(const set<UserdefParam> &params);
+void printAgentAID( AgentAID &agent);
+void printAgentAIDset( set<AgentAID> &myset);
+void printUserdefParamset( set<UserdefParam> &params);
 
-void printMessage(const ACLMessage &msg)
+void ACLMessageTest::printMessage( ACLMessage &msg)
 {
     cout<<"=================================Printing Message=================================\n";
     cout<<"performative:\t"<< msg.getPerformative()<<endl;
@@ -43,45 +43,57 @@ void printMessage(const ACLMessage &msg)
     if (!msg.getOntology().empty()) cout<<"ontology:\t"<< msg.getOntology()<<endl;
     if (!msg.getProtocol().empty()) cout<<"protocol:\t"<< msg.getProtocol()<<endl;
     if (!msg.getConversationID().empty()) cout<<"conversation id:\t"<< msg.getConversationID()<<endl;
-    if (msg.getSender() != NULL) {cout<<"sender:\n"; printAgentAID(msg.getSender());}
-    if (!(msg.getAllReceivers().empty())) { cout<<"receivers:\n"; printAgentAIDset(msg.getAllReceivers());}
-    if (!msg.getAllReplyTo().empty()) {cout<<"reply to:\n"; printAgentAIDset(msg.getAllReplyTo());}
-    if (!msg.getUserdefParams().empty()) printUserdefParamset(msg.getUserdefParams());
+    if (&msg.getSender() != NULL) { cout<<"sender:\n"; 
+			      AgentAID aid = msg.getSender();
+			      printAgentAID(aid);}
+    if (!(msg.getAllReceivers().empty())) { cout<<"receivers:\n"; 
+				    std::vector<AgentAID> vec = msg.getAllReceivers();
+				    printAgentAIDset(vec);}
+    if (!msg.getAllReplyTo().empty()) { cout<<"reply to:\n"; 
+				std::vector<AgentAID> vec = msg.getAllReplyTo();
+				printAgentAIDset(vec);}
+    if (!msg.getUserdefParams().empty()) {  vector<UserdefParam> params = msg.getUserdefParams();
+				    printUserdefParamset(params); }
 
 }
 
-void printAgentAIDset(const set<AgentAID> &myset)
+void ACLMessageTest::printAgentAIDset( vector<AgentAID> &myset)
 {
     cout<<"\t==================Agent AID set==================\n";
-    set<AgentAID>::iterator it = myset.begin();
+    vector<AgentAID>::iterator it = myset.begin();
     for(it; it != myset.end(); it++)
         printAgentAID(*it);
 }
-void printAgentAID(const AgentAID &agent)
+void ACLMessageTest::printAgentAID( AgentAID &agent)
 {
     cout<<"\t==================Agent AID==================\n";
     if (!agent.getName().empty()) cout<<"\t\tname:\t"<< agent.getName()<<endl;
     if (!agent.getAdresses().empty())
     {
         cout<<"\t\tadresses:\t\n";
-        set<string>::iterator it = agent.getAdresses().begin();
+        vector<string>::iterator it = agent.getAdresses().begin();
         for(it; it != agent.getAdresses().end(); it++)
 	  cout<<"\t\t\t"<<*it<<endl;
     }
-    if (!agent.getResolvers().empty()) {cout<<"\t\tresolvers:\t\n"; printAgentAIDset(agent.getResolvers());}
-    if (!agent.getUserdefParams().empty()) {cout<<"\t\tUser Defined Parameters:\t\n";printUserdefParamset(agent.getUserdefParams());}
+    if (!agent.getResolvers().empty()) {cout<<"\t\tresolvers:\t\n"; 
+				vector<AgentAID> vec = agent.getResolvers();
+				printAgentAIDset(vec);}
+    if (!agent.getUserdefParams().empty()) {cout<<"\t\tUser Defined Parameters:\t\n";
+				    vector<UserdefParam> params = agent.getUserdefParams();
+				    printUserdefParamset(params);}
 }
 
-void printUserdefParamset(const set<UserdefParam> &params)
+void ACLMessageTest::printUserdefParamset( vector<UserdefParam> &params)
 {
     cout<<"\t\t==================User Defined Parameters==================\n";
-    set<UserdefParam>::iterator it = params.begin();
+    vector<UserdefParam>::iterator it = params.begin();
     for(it; it != params.end(); it++)
     {
         cout<<"\t\tparam name:\t"<< (*it).getName()<<endl;
         cout<<"\t\tparam value:\t"<< (*it).getValue()<<"\n\n";
     }
 }
+
 
 
 int main(int argc, char** argv)
