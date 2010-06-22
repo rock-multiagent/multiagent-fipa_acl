@@ -189,7 +189,7 @@ void ACLMessageTest::EncDecodeTest()
     m5.setEncoding(string("test encoding"));
     m5.setOntology(string("test ontology"));
     m5.setReplyWith(string("test reply with"));
-    m5.setReplyBy1(string("2010062201010"));
+    m5.setReplyBy1(string("2010062201010211"));
     m5.setInReplyTo(string("test in reply to"));
     m5.setConversationID(string("test conversationID"));
     m5.setProtocol(string("test protocol"));
