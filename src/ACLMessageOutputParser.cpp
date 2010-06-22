@@ -23,7 +23,7 @@ namespace fipa {
 namespace acl {
     
 
-void ACLMessageOutputParser::setMessage(ACLMessage a)
+void ACLMessageOutputParser::setMessage(ACLMessage &a)
 {
 	msg = a;
   	
@@ -114,12 +114,15 @@ std::string ACLMessageOutputParser::getBitMessageType()
                                 return std::string(a);
                               }
 		
+		std::cout << "\n userdefined perf~~~~"<<char(0x00) + getBitBinWord(msg.getPerformative())<<"~~~~~\n";
+		std::cout << "\n userdefined perf!!!!!"<<msg.getPerformative()<<"!!!!!!\n";
             return (char(0x00) + getBitBinWord(msg.getPerformative()));
 } 
 
 std::string ACLMessageOutputParser::getBitBinWord(std::string sword)
 {
-		if (useCodeTables == 0) return (char(0x10) + sword + char(0x00));
+		std::cout << "\n\n bin word:~~~~~~`" << sword << "~~~~~~~~\n\n";
+	      if (useCodeTables == 0) return (char(0x10) + sword + char(0x00));
            // return char(0x11) + getCTIndex(sword);
 }
 

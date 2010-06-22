@@ -70,7 +70,7 @@
 		    /**
 		        \brief not a deep-copy assignment of msg but this should not be a problem as fields are not modified in the encoding process
 		    */
-		    void setMessage(ACLMessage a);
+		    void setMessage(ACLMessage &a);
 		    
 		    /**
 		        \brief prints the parsed message to an ofstream given as argument(as a string)

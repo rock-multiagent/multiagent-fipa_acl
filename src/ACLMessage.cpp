@@ -89,14 +89,14 @@ ACLMessage::ACLMessage()
 	initializeObject();
 }
 
-ACLMessage::ACLMessage(const predefinedPerformatives perf)
+ACLMessage::ACLMessage(predefinedPerformatives perf)
 
 {
 	initializeObject();
 	performative = ACLMessage::perfs[perf];
 }
 
-ACLMessage::ACLMessage(const std::string perf) {initializeObject(); performative = perf; }
+ACLMessage::ACLMessage(std::string perf) {initializeObject(); performative = perf; }
 
 void ACLMessage::setPerformative(const std::string str) {performative = str; }
 
@@ -378,6 +378,7 @@ bool operator== (const ACLMessage &a,const ACLMessage &b)
 ACLMessage::ACLMessage(const ACLMessage &mes)
 {
     initializeObject();
+    if (!mes.getPerformative().empty()) performative = mes.getPerformative();
     if (!mes.getLanguage().empty()) language = mes.getLanguage();
     if (!mes.getEncoding().empty()) encoding = mes.getEncoding();
     if (!mes.getOntology().empty()) ontology = mes.getOntology();

@@ -140,11 +140,11 @@ public:
 	  \brief constructor of an ACLMessage with a custom performative
 	  \param perf: string representing the custom performative(but it can just as well be one of the pre-defined ones)
        */
-       ACLMessage(const std::string perf);
+       ACLMessage(std::string perf);
        /**
         * Stefan: Added missing declaration for existing definition.
         */
-       ACLMessage(const int perf);
+       ACLMessage(int perf);
        
        /**
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially

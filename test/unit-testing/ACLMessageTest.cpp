@@ -11,8 +11,8 @@
 #include <iostream>
 #include <fstream>
 #include "ACLMessageTest.h"
-#include "../../src/ACLMessageOutputParser.h"
-//#include "../../../message-parser/src/message_parser.h"
+
+#include <message-generator/ACLMessageOutputParser.h>
 #include <message-parser/message_parser.h>
 
 
@@ -213,25 +213,37 @@ void ACLMessageTest::printMessage( ACLMessage &msg)
     cout<<"=================================Printing Message=================================\n";
     cout<<"performative:\t"<< msg.getPerformative()<<endl;
     
-    if (!msg.getContent().empty()) cout<<"content:\t"<< msg.getContent()<<endl;
-    if (!msg.getReplyWith().empty()) cout<<"reply with:\t"<< msg.getReplyWith()<<endl;
-    if (!msg.getReplyBy1().empty()) cout<<"reply by1:\t"<< msg.getReplyBy1()<<endl;
-    if (!msg.getInReplyTo().empty()) cout<<"in reply to:\t"<< msg.getInReplyTo()<<endl;
-    if (!msg.getLanguage().empty()) cout<<"language:\t"<< msg.getLanguage()<<endl;
-    if (!msg.getEncoding().empty()) cout<<"encoding:\t"<< msg.getEncoding()<<endl;
-    if (!msg.getOntology().empty()) cout<<"ontology:\t"<< msg.getOntology()<<endl;
-    if (!msg.getProtocol().empty()) cout<<"protocol:\t"<< msg.getProtocol()<<endl;
-    if (!msg.getConversationID().empty()) cout<<"conversation id:\t"<< msg.getConversationID()<<endl;
-    if (&msg.getSender() != NULL) { cout<<"sender:\n"; 
-			      AgentAID aid = msg.getSender();
-			      printAgentAID(aid);}
-    if (!(msg.getAllReceivers().empty())) { cout<<"receivers:\n"; 
+    if (!msg.getContent().empty()) 
+        cout<<"content:\t"<< msg.getContent()<<endl;
+    if (!msg.getReplyWith().empty()) 
+        cout<<"reply with:\t"<< msg.getReplyWith()<<endl;
+    if (!msg.getReplyBy1().empty()) 
+        cout<<"reply by1:\t"<< msg.getReplyBy1()<<endl;
+    if (!msg.getInReplyTo().empty()) 
+        cout<<"in reply to:\t"<< msg.getInReplyTo()<<endl;
+    if (!msg.getLanguage().empty()) 
+        cout<<"language:\t"<< msg.getLanguage()<<endl;
+    if (!msg.getEncoding().empty()) 
+        cout<<"encoding:\t"<< msg.getEncoding()<<endl;
+    if (!msg.getOntology().empty()) 
+        cout<<"ontology:\t"<< msg.getOntology()<<endl;
+    if (!msg.getProtocol().empty()) 
+        cout<<"protocol:\t"<< msg.getProtocol()<<endl;
+    if (!msg.getConversationID().empty()) 
+        cout<<"conversation id:\t"<< msg.getConversationID()<<endl;
+    cout<<"sender:\n"; 
+    AgentAID aid = msg.getSender();
+    printAgentAID(aid);
+    if (!(msg.getAllReceivers().empty())) 
+				  { cout<<"receivers:\n"; 
 				    std::vector<AgentAID> vec = msg.getAllReceivers();
 				    printAgentAIDset(vec);}
-    if (!msg.getAllReplyTo().empty()) { cout<<"reply to:\n"; 
+    if (!msg.getAllReplyTo().empty()) 
+			        { cout<<"reply to:\n"; 
 				std::vector<AgentAID> vec = msg.getAllReplyTo();
 				printAgentAIDset(vec);}
-    if (!msg.getUserdefParams().empty()) {  vector<UserdefParam> params = msg.getUserdefParams();
+    if (!msg.getUserdefParams().empty()) 
+				 {  vector<UserdefParam> params = msg.getUserdefParams();
 				    printUserdefParamset(params); }
 
 }

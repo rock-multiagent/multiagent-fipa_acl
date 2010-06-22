@@ -11,9 +11,9 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-//#include <message-generator/ACLMessage.h>
+#include <message-generator/ACLMessage.h>
 
-#include "../../src/ACLMessage.h"
+
 
 #define STRESS_NR 20
 
