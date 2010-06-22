@@ -13,6 +13,7 @@
  *  - parses valid messages
  *  - extract some field information from messages
  */
+#define BOOST_SPIRIT_DEBUG
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -778,7 +779,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(second);
         BOOST_SPIRIT_DEBUG_NODE(millisecond);
         */
-        BOOST_SPIRIT_DEBUG_NODE(binDate);
+        //BOOST_SPIRIT_DEBUG_NODE(binDate);
 	/*
         BOOST_SPIRIT_DEBUG_NODE(binDateTimeToken);
         BOOST_SPIRIT_DEBUG_NODE(typeDesignator);

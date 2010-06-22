@@ -7,31 +7,30 @@
 #include <types.h>
 
 template< typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, Header h)
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::Header h)
 {
 	        return out << h.toString();
 }
 
 template< typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, MessageParameter p)
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::MessageParameter p)
 {
-	        return out << "MessageParameter<" << p.toString() << ">";
+	        return out << "MessageParameter<";// << p.toString() << ">";
 
 }
 
 template<typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, DateTime dt) 
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::DateTime dt) 
 {
 	        std::string dtString = dt.toString();
-		        return out << "DateTime<" << dtString << ">";
+		return out << "DateTime<" << dtString << ">";
 }
 
 template<typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_basic_ostream<C,E>& out, Time t)
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::Time t)
 {
 	        return out << "Time<" << ">";
 }
-
 
 
 #endif 
