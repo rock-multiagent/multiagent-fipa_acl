@@ -45,8 +45,6 @@ class ParameterPrinter : public boost::static_visitor<std::string>
 
 };
 
-
-
 }}
 
 #endif

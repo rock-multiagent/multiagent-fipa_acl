@@ -34,7 +34,7 @@ typedef struct
 	char id;
 	char version;
 
-        std::string toString()
+        std::string toString() const
         {
                 char tmp[100];
                 sprintf(tmp, "Header<id=%x, version=%x>", id, version);
@@ -48,10 +48,10 @@ typedef struct
 	std::string name;
 	fipa::acl::ParameterValue data;
 
-        std::string toString()
+        std::string toString() const
         {
                 std::string tmp = name;
-                name += "<" + boost::apply_visitor(ParameterPrinter(), data) + ">";
+                tmp += "<" + boost::apply_visitor(ParameterPrinter(), data) + ">";
                 return tmp;
         }
 

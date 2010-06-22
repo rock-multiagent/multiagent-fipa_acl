@@ -13,6 +13,7 @@
  *  - parses valid messages
  *  - extract some field information from messages
  */
+//#define BOOST_SPIRIT_DEBUG
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -754,6 +755,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	// requires the include of stream operators as well
 	// since every type will be printed to the outputstream (standard is cout)
 	#ifdef BOOST_SPIRIT_DEBUG
+	// http://boost-spirit.com/home/articles/doc-addendum/debugging/
         BOOST_SPIRIT_DEBUG_NODE(header);
         BOOST_SPIRIT_DEBUG_NODE(messageId);
         BOOST_SPIRIT_DEBUG_NODE(version);
@@ -762,11 +764,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageType);
         BOOST_SPIRIT_DEBUG_NODE(messageTypeName);
 
-        BOOST_SPIRIT_DEBUG_NODE(messageParameter);
+/*        BOOST_SPIRIT_DEBUG_NODE(messageParameter);
+
         BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageParameter);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageParameter);
 
-        /*
         BOOST_SPIRIT_DEBUG_NODE(parameterName);
         BOOST_SPIRIT_DEBUG_NODE(parameterValue);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageType);
@@ -777,8 +779,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(minute);
         BOOST_SPIRIT_DEBUG_NODE(second);
         BOOST_SPIRIT_DEBUG_NODE(millisecond);
-        */
+*/
         BOOST_SPIRIT_DEBUG_NODE(binDate);
+
 	/*
         BOOST_SPIRIT_DEBUG_NODE(binDateTimeToken);
         BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
