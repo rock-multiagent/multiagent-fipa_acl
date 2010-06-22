@@ -51,9 +51,9 @@ int ACLMessageOutputParser::printParsedMessage(std::string stream)
 
 	for (int i = 0; i < output.length(); i++){
 		out.put(output[i]);
-	std::cout<<int(output[i])<<"  ";	
+	//std::cout<<int(output[i])<<"  ";	
 	}
-	std::cout<<std::endl;
+	//std::cout<<std::endl;
 
 	out.close();
 	return 1;
@@ -114,14 +114,12 @@ std::string ACLMessageOutputParser::getBitMessageType()
                                 return std::string(a);
                               }
 		
-		std::cout << "\n userdefined perf~~~~"<<char(0x00) + getBitBinWord(msg.getPerformative())<<"~~~~~\n";
-		std::cout << "\n userdefined perf!!!!!"<<msg.getPerformative()<<"!!!!!!\n";
             return (char(0x00) + getBitBinWord(msg.getPerformative()));
 } 
 
 std::string ACLMessageOutputParser::getBitBinWord(std::string sword)
 {
-		std::cout << "\n\n bin word:~~~~~~`" << sword << "~~~~~~~~\n\n";
+		
 	      if (useCodeTables == 0) return (char(0x10) + sword + char(0x00));
            // return char(0x11) + getCTIndex(sword);
 }
