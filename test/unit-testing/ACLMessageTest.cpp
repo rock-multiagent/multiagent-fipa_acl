@@ -34,7 +34,7 @@ void ACLMessageTest::setUp()
 	p2 = p1;
 	p3.setName(string("param3"));
 	p3.setValue(string("value3"));
-	p4.setName(string("param4"));
+	p4.setName(string("paramfour"));
 	p4.setValue(string("value4"));
 	
 	m1.setPerformative(string("test performative"));
@@ -43,7 +43,7 @@ void ACLMessageTest::setUp()
 	m1.setEncoding(string("test encoding"));
 	m1.setOntology(string("test ontology"));
 	m1.setReplyWith(string("test reply_with"));
-	m1.setReplyBy1(string("test reply_by1"));
+	m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
 	m1.setInReplyTo(string("test in_reply_to"));
 	m1.setConversationID(string("test conversationID"));
 	m1.setProtocol(string("test protocol"));
@@ -54,7 +54,7 @@ void ACLMessageTest::setUp()
 	m2.setEncoding(string("test encoding"));
 	m2.setOntology(string("test ontology"));
 	m2.setReplyWith(string("test reply_with"));
-	m2.setReplyBy1(string("test reply_by1"));
+	m2.setReplyBy1(string("2010-12-23T12:00:37:980"));
 	m2.setInReplyTo(string("test in_reply_to"));
 	m2.setConversationID(string("test conversationID"));
 	m2.setProtocol(string("test protocol"));
@@ -68,7 +68,7 @@ void ACLMessageTest::setUp()
 	
 	
 	a3.setName(string("agent3 5"));
-	a4.setName(string("agent4"));
+	a4.setName(string("agentfour"));
 	a5.setName(string("agent3 5"));
 	
 	a3.addAdress(addr1);
@@ -181,26 +181,27 @@ void ACLMessageTest::ForMemLeakTest()
 
 void ACLMessageTest::EncDecodeTest()
 {
-    ACLMessage m5 = ACLMessage(string("test performative"));
+    ACLMessage m5 = ACLMessage(string("testperformative"));
     
-    m5.setPerformative(string("test performative"));
+    m5.setPerformative(string("testperformative"));
     m5.setLanguage(string("test language"));
     m5.setContent(string("test content"));
     m5.setEncoding(string("test encoding"));
     m5.setOntology(string("test ontology"));
     m5.setReplyWith(string("test reply with"));
-    m5.setReplyBy1(string("2010062201010211"));
+    if(m5.setReplyBy1(string("2010-12-23T12:00:37:980"))) cout<<"date not set\n\n\n\n\n";
+    cout <<"\n\n\n\n"<< m5.getReplyBy1()<<"\n\n\n";
     m5.setInReplyTo(string("test in reply to"));
     m5.setConversationID(string("test conversationID"));
-    m5.setProtocol(string("test protocol"));
+    m5.setProtocol(string("testprotocol"));
     
     m5.setSender(a4);
     
     //printMessage(m5);
-    
+    /*
     char name[] = "TestMessage23.txt";
     
-    /*filebuf fb;
+    filebuf fb;
     fb.open ("TestMessage23.txt",ios::in);
     istream src(&fb);
 
@@ -222,17 +223,18 @@ void ACLMessageTest::EncDecodeTest()
     ACLMessageOutputParser out;
     out.setMessage(m5);
     MessageParser parser;
-    if (!out.printParsedMessage(string("testMessage.txt"))) cout << "ERROR GENERATING..\n";
+    //if (!out.printParsedMessage(string("testMessage.txt"))) cout << "ERROR GENERATING..\n";
     //cout << out.getBitMessage() <<"\n";
     
     
     ACLMessage restored;
     if ( ! parser.parseData(out.getBitMessage(),restored)) cout << "ERROR PARSING...\n";
+   
     cout<<"\n";
     //cout<<m1.getProtocol()<<"\t\t"<<restored.getProtocol()<<"\n\n\n\n\n";
-    //printMessage (m1);
+    printMessage (m5);
     printMessage(restored);
-    //CPPUNIT_ASSERT_EQUAL((m1 == restored),true);
+    //CPPUNIT_ASSERT_EQUAL((m5 == restored),true);
 }
 
 void ACLMessageTest::printMessage( ACLMessage &msg)
@@ -244,8 +246,8 @@ void ACLMessageTest::printMessage( ACLMessage &msg)
         cout<<"content:\t"<< msg.getContent()<<endl; 
     if (!msg.getReplyWith().empty()) 
         cout<<"reply with:\t"<< msg.getReplyWith()<<endl;
-    if (!msg.getReplyBy1().empty()) 
-        cout<<"reply by1:\t"<< msg.getReplyBy1()<<endl;
+    //if (!msg.getReplyBy1().empty()) 
+        cout<<"reply by1:\t"<< msg.getReplyBy1(1)<<endl;
     if (!msg.getInReplyTo().empty()) 
         cout<<"in reply to:\t"<< msg.getInReplyTo()<<endl;
     if (!msg.getLanguage().empty()) 
