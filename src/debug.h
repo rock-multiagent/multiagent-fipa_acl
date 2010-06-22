@@ -4,19 +4,12 @@
 #include <iosfwd>
 #include <utility>
 
-#include <types.h>
+#include "types.h"
 
 template< typename C, typename E>
 std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::Header h)
 {
 	        return out << h.toString();
-}
-
-template< typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::MessageParameter p)
-{
-	        return out << "MessageParameter<";// << p.toString() << ">";
-
 }
 
 template<typename C, typename E>
@@ -30,6 +23,20 @@ template<typename C, typename E>
 std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::Time t)
 {
 	        return out << "Time<" << ">";
+}
+
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::ParameterValue& p)
+{
+	        std::string tmp = boost::apply_visitor(fipa::acl::ParameterPrinter(), p);
+                return out << "Parameter" << tmp;
+}
+
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::MessageParameter& p)
+{
+	        return out << "MessageParameter<" << p.toString() << ">";
+
 }
 
 
