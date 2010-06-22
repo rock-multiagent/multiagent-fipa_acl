@@ -11,8 +11,8 @@
 #include <iostream>
 #include <fstream>
 #include "ACLMessageTest.h"
-#include "../../src/ACLMessageOutputParser.h"
-//#include "../../../message-parser/src/message_parser.h"
+
+#include <message-generator/ACLMessageOutputParser.h>
 #include <message-parser/message_parser.h>
 
 
@@ -167,8 +167,40 @@ void ACLMessageTest::ForMemLeakTest()
     a1.addResolver(a2);
     a2.addResolver(a3);
     a3.addResolver(a5);
+    
+    
+    for (i = 0; i< STRESS_NR; i++)
+    {
+        
+        mes[i].addReceiver(a1); mes[i].addReceiver(a2); mes[i].addReceiver(a3);
+        mes[i].addReplyTo(a2); mes[i].addReplyTo(a3); mes[i].addReplyTo(a4);
+        mes[i].addUserdefParam(p3); mes[i].addUserdefParam(p2); mes[i].addUserdefParam(p4);
+    }
+    CPPUNIT_ASSERT_EQUAL(true,true);// just a test to create many messages and observe the memory leaks the generate
+}
+
+void ACLMessageTest::EncDecodeTest()
+{
+    ACLMessage m5 = ACLMessage(string("test performative"));
+    
+    m5.setPerformative(string("test performative"));
+    m5.setLanguage(string("test language"));
+    m5.setContent(string("test content"));
+    m5.setEncoding(string("test encoding"));
+    m5.setOntology(string("test ontology"));
+    m5.setReplyWith(string("test reply with"));
+    m5.setReplyBy1(string("2010062201010"));
+    m5.setInReplyTo(string("test in reply to"));
+    m5.setConversationID(string("test conversationID"));
+    m5.setProtocol(string("test protocol"));
+    
+    m5.setSender(a4);
+    
+    //printMessage(m5);
+    
     char name[] = "TestMessage23.txt";
-    filebuf fb;
+    
+    /*filebuf fb;
     fb.open ("TestMessage23.txt",ios::in);
     istream src(&fb);
 
@@ -185,27 +217,22 @@ void ACLMessageTest::ForMemLeakTest()
 	   else
 		   break;
 	}
-    
+	*/
+    cout<<"\n";
     ACLMessageOutputParser out;
-    out.setMessage(m1);
+    out.setMessage(m5);
     MessageParser parser;
+    if (!out.printParsedMessage(string("testMessage.txt"))) cout << "ERROR GENERATING..\n";
+    //cout << out.getBitMessage() <<"\n";
     
     
     ACLMessage restored;
-    parser.parseData(storage,restored);
-    cout<<restored.getProtocol()<<"\n\n\n\n\n";
+    if ( ! parser.parseData(out.getBitMessage(),restored)) cout << "ERROR PARSING...\n";
+    cout<<"\n";
+    //cout<<m1.getProtocol()<<"\t\t"<<restored.getProtocol()<<"\n\n\n\n\n";
     //printMessage (m1);
     printMessage(restored);
     //CPPUNIT_ASSERT_EQUAL((m1 == restored),true);
-    
-    for (i = 0; i< STRESS_NR; i++)
-    {
-        
-        mes[i].addReceiver(a1); mes[i].addReceiver(a2); mes[i].addReceiver(a3);
-        mes[i].addReplyTo(a2); mes[i].addReplyTo(a3); mes[i].addReplyTo(a4);
-        mes[i].addUserdefParam(p3); mes[i].addUserdefParam(p2); mes[i].addUserdefParam(p4);
-    }
-    CPPUNIT_ASSERT_EQUAL(true,true);// just a test to create many messages and observe the memory leaks the generate
 }
 
 void ACLMessageTest::printMessage( ACLMessage &msg)
@@ -213,25 +240,37 @@ void ACLMessageTest::printMessage( ACLMessage &msg)
     cout<<"=================================Printing Message=================================\n";
     cout<<"performative:\t"<< msg.getPerformative()<<endl;
     
-    if (!msg.getContent().empty()) cout<<"content:\t"<< msg.getContent()<<endl;
-    if (!msg.getReplyWith().empty()) cout<<"reply with:\t"<< msg.getReplyWith()<<endl;
-    if (!msg.getReplyBy1().empty()) cout<<"reply by1:\t"<< msg.getReplyBy1()<<endl;
-    if (!msg.getInReplyTo().empty()) cout<<"in reply to:\t"<< msg.getInReplyTo()<<endl;
-    if (!msg.getLanguage().empty()) cout<<"language:\t"<< msg.getLanguage()<<endl;
-    if (!msg.getEncoding().empty()) cout<<"encoding:\t"<< msg.getEncoding()<<endl;
-    if (!msg.getOntology().empty()) cout<<"ontology:\t"<< msg.getOntology()<<endl;
-    if (!msg.getProtocol().empty()) cout<<"protocol:\t"<< msg.getProtocol()<<endl;
-    if (!msg.getConversationID().empty()) cout<<"conversation id:\t"<< msg.getConversationID()<<endl;
-    if (&msg.getSender() != NULL) { cout<<"sender:\n"; 
-			      AgentAID aid = msg.getSender();
-			      printAgentAID(aid);}
-    if (!(msg.getAllReceivers().empty())) { cout<<"receivers:\n"; 
+    if (!msg.getContent().empty()) 
+        cout<<"content:\t"<< msg.getContent()<<endl; 
+    if (!msg.getReplyWith().empty()) 
+        cout<<"reply with:\t"<< msg.getReplyWith()<<endl;
+    if (!msg.getReplyBy1().empty()) 
+        cout<<"reply by1:\t"<< msg.getReplyBy1()<<endl;
+    if (!msg.getInReplyTo().empty()) 
+        cout<<"in reply to:\t"<< msg.getInReplyTo()<<endl;
+    if (!msg.getLanguage().empty()) 
+        cout<<"language:\t"<< msg.getLanguage()<<endl;
+    if (!msg.getEncoding().empty()) 
+        cout<<"encoding:\t"<< msg.getEncoding()<<endl;
+    if (!msg.getOntology().empty()) 
+        cout<<"ontology:\t"<< msg.getOntology()<<endl; 
+    if (!msg.getProtocol().empty()) 
+        cout<<"protocol:\t"<< msg.getProtocol()<<endl;
+    if (!msg.getConversationID().empty()) 
+        cout<<"conversation id:\t"<< msg.getConversationID()<<endl;
+    cout<<"sender:\n";
+    AgentAID aid = msg.getSender();
+    printAgentAID(aid); 
+    if (!(msg.getAllReceivers().empty())) 
+				  { cout<<"receivers:\n"; 
 				    std::vector<AgentAID> vec = msg.getAllReceivers();
 				    printAgentAIDset(vec);}
-    if (!msg.getAllReplyTo().empty()) { cout<<"reply to:\n"; 
+    if (!msg.getAllReplyTo().empty()) 
+			        { cout<<"reply to:\n"; 
 				std::vector<AgentAID> vec = msg.getAllReplyTo();
 				printAgentAIDset(vec);}
-    if (!msg.getUserdefParams().empty()) {  vector<UserdefParam> params = msg.getUserdefParams();
+    if (!msg.getUserdefParams().empty()) 
+				 {  vector<UserdefParam> params = msg.getUserdefParams();
 				    printUserdefParamset(params); }
 
 }
@@ -250,9 +289,10 @@ void ACLMessageTest::printAgentAID( AgentAID &agent)
     if (!(agent.getAdresses().empty()))
     {
         cout<<"\t\tadresses:\t\n";
-        vector<string>::iterator it = agent.getAdresses().begin();
-        for(it; it != (agent.getAdresses().end()); it++)
-	  cout<<"\t\t\t"<<*it<<endl;
+        vector<string> addr = agent.getAdresses();
+        vector<string>::iterator it = addr.begin();
+        for(it; it != addr.end(); it++)
+	  cout<<"\t\t\t"<< *it<<endl;
     }
     if (!(agent.getResolvers().empty())) {cout<<"\t\tresolvers:\t\n"; 
 				vector<AgentAID> vec = agent.getResolvers();

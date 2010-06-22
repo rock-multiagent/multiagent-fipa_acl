@@ -11,9 +11,9 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-//#include <message-generator/ACLMessage.h>
+#include <message-generator/ACLMessage.h>
 
-#include "../../src/ACLMessage.h"
+
 
 #define STRESS_NR 20
 
@@ -27,6 +27,7 @@ class ACLMessageTest : public CPPUNIT_NS::TestFixture
 	CPPUNIT_TEST (MessageEqTest);
 	CPPUNIT_TEST (AgentEqTest);
  	CPPUNIT_TEST (ForMemLeakTest);
+	CPPUNIT_TEST (EncDecodeTest);
 	//CPPUNIT_TEST (assignTest);
 	
 	CPPUNIT_TEST_SUITE_END ();
@@ -40,6 +41,7 @@ class ACLMessageTest : public CPPUNIT_NS::TestFixture
 	    void AgentEqTest();
 	    void MessageEqTest();
 	    void ForMemLeakTest();
+	    void EncDecodeTest();
 	    void printMessage( ACLMessage &msg);
 	    void printAgentAID( AgentAID &agent);
 	    void printAgentAIDset( vector<AgentAID> &myset);
