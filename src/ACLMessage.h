@@ -27,6 +27,10 @@ namespace acl {
 			    INFORM_IF, INFORM_REF, NOT_UNDERSTOOD, PROPAGATE, PROPOSE, PROXY, QUERY_IF, QUERY_REF, REFUSE,
 			    REJECT_PROPOSAL, REQUEST, REQUEST_WHEN, REQUEST_WHENEVER, SUBSCRIBE
 			  };
+   /** \param illegalWordChars: string containing illegal characters according to the fipa definition of a word*/
+   const extern std::string illegalWordChars;
+   /** \param illegalWordStart: string containing illegal first characters according to the fipa definition of a word*/
+   const extern std::string illegalWordStart;
     
     /**
         \brief overloaded equality operator for ACLMessage; the signature of the function was intentionally changed from the normal operator== ( type&, const type&)
@@ -82,6 +86,7 @@ private:
         std::vector<UserdefParam> params;
         /** \param content: string representing the content of the message */
         std::string content;
+       
                 
 
        // all predefined FIPA performatives:
@@ -149,7 +154,11 @@ public:
        /**
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
        */
-       void setPerformative(const std::string str);
+       /**
+	  \brief the method checks whether the passed performative string is a word or not(according to the fipa spec)
+	  \return 0 if successful 1 otherwise(performative is un-alterred)
+       */
+       int setPerformative(const std::string str);
        std::string getPerformative() const;
        void addReceiver(const AgentAID &aid);
        void deleteReceiver(const AgentAID &aid);
@@ -167,7 +176,11 @@ public:
        std::string getReplyWith() const;
        void setConversationID(const std::string str);
        std::string getConversationID() const;
-       void setProtocol(const std::string str);
+        /**
+	  \brief the method checks whether the passed protocol string is a word or not(according to the fipa spec)
+	  \return 0 if successful 1 otherwise(protocol is un-alterred)
+       */
+       int setProtocol(const std::string str);
        std::string getProtocol() const;
        void setOntology(const std::string str);
        std::string getOntology() const;
@@ -182,9 +195,18 @@ public:
        void addUserdefParam(const UserdefParam &p);
        std::vector<UserdefParam> getUserdefParams() const;
        void setUserdefParams(const std::vector<UserdefParam> p);
-       
-       std::string getReplyBy1() const;
-       void setReplyBy1(const std::string date1);
+       /**
+	  \param formated: option to get the parameter as it is stored or formated. default is formated,call with 0 to get unformatted
+	  
+       */
+       std::string getReplyBy1(int formated = 0) const;
+       /**
+	  \brief the method checks whether the passed date string is formatted correctly or not;
+	  example of correctly formated date: "2010-12-23T23:12:45:100" -- any separatators can be used instead of "-:T"
+	  the minimum required is the date; if the following values are not speciffied they are default-ed to 0
+	  \return 0 if successful 1 if length is bad 2 if wrong format
+       */
+       int setReplyBy1(const std::string date1);
        
        
 };

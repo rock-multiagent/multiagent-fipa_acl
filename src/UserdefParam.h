@@ -55,7 +55,11 @@ class UserdefParam {
               std::string getValue() const;
               void setValue(std::string val);
               std::string getName() const;
-              void setName (std::string nam);
+              /**
+		\brief the method checks whether the passed name string is a word or not(according to the fipa spec)
+		\return 0 if successful 1 otherwise(name is un-alterred)
+	      */
+	    int setName (std::string nam);
 };
 
 extern bool operator== (const UserdefParam &a,const UserdefParam &b);

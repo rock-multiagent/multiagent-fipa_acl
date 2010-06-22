@@ -140,7 +140,7 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
             if (!(msg.getAllReceivers().empty())) retstr =retstr + char(0x03) + getBitAIDColl(msg.getAllReceivers(),res_depth); 
             if (!msg.getContent().empty()) retstr = retstr + char(0x04) + getBitBinString(msg.getContent(),0); 
             if (!msg.getReplyWith().empty()) retstr = retstr + char(0x05) + getBitBinExpression(msg.getReplyWith(),'s'); 
-            if (!msg.getReplyBy1().empty()) retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy1()); 
+            if (!msg.getReplyBy1(0).empty()) retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy1(0)); 
             if (!msg.getInReplyTo().empty()) retstr = retstr + char(0x07) + getBitBinExpression(msg.getInReplyTo(),'s'); 
             if (!msg.getAllReplyTo().empty()) retstr = retstr + char(0x08) + getBitAIDColl(msg.getAllReplyTo(),res_depth);
             if (!msg.getLanguage().empty()) retstr = retstr + char(0x09) + getBitBinExpression(msg.getLanguage(),'s'); 

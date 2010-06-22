@@ -9,6 +9,7 @@
  */
 
 #include "UserdefParam.h"
+#include "ACLMessage.h"
 
 namespace fipa {
 
@@ -48,7 +49,12 @@ void UserdefParam::setValue(std::string val) {value = val;}
 
 std::string UserdefParam::getName() const {return name;}
 
-void UserdefParam::setName (std::string nam) {name = nam;}
+int UserdefParam::setName (std::string nam) 
+{
+    if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
+    return 1;
+    name = nam; return 0;
+}
 
 
 bool operator== (const UserdefParam &a,const UserdefParam &b)

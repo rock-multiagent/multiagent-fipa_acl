@@ -7,6 +7,7 @@
  * \version 1.0
  */
 #include "AgentAID.h"
+#include "ACLMessage.h"
 #include <iostream>
 #include <algorithm>
 
@@ -26,8 +27,10 @@ AgentAID::AgentAID()
 
 AgentAID::AgentAID(const std::string nam) 
 {
-    initializeFields();      
+    initializeFields();
+    if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
     name = nam;
+    else name.clear();
 }
 
 void AgentAID::initializeFields()
@@ -39,9 +42,19 @@ void AgentAID::initializeFields()
 
 std::string AgentAID::getName() const {return name;}
 
-void AgentAID::setName(const std::string nam) {name = nam;}
+int AgentAID::setName(const std::string nam) 
+{
+    if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
+    return 1;
+    name = nam; return 0;
+}
 
-void AgentAID::addAdress(const std::string &adr) {adresses.insert(adresses.begin(),adr);}
+int AgentAID::addAdress(const std::string &adr) 
+{
+    if ( (adr.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(adr.c_str()[0]) != -1) )
+    return 1;
+    adresses.insert(adresses.begin(),adr); return 0;
+}
 
 std::vector<std::string> AgentAID::getAdresses() const {return adresses;}
 

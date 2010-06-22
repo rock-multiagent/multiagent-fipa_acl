@@ -14,6 +14,9 @@ const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","c
 				   "inform-if","inform-ref","not-understood","propagate","propose","proxy","query-if",
 				   "query-ref","refuse","reject-proposal","request","request-when","request-whenever","subscribe"};
 
+const std::string illegalWordChars = std::string("() ") + char(0x00);
+const std::string illegalWordStart = std::string("@#-0123456789"); 
+
 
 
 
@@ -96,9 +99,21 @@ ACLMessage::ACLMessage(predefinedPerformatives perf)
 	performative = ACLMessage::perfs[perf];
 }
 
-ACLMessage::ACLMessage(std::string perf) {initializeObject(); performative = perf; }
+ACLMessage::ACLMessage(std::string perf) 
+{
+    initializeObject(); 
+    
+    if ( (perf.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(perf.c_str()[0]) != -1) )
+    performative.clear();
+    else performative = perf;
+}
 
-void ACLMessage::setPerformative(const std::string str) {performative = str; }
+int ACLMessage::setPerformative(const std::string str) 
+{
+    if ( (str.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(str.c_str()[0]) != -1) )
+    return 1;
+    performative = str; return 0;
+}
 
 std::string ACLMessage::getPerformative() const {return performative; }
 
@@ -162,7 +177,12 @@ void ACLMessage::setConversationID(const std::string str) {conversation_id = str
 
 std::string ACLMessage::getConversationID() const {return conversation_id; }
 
-void ACLMessage::setProtocol(const std::string str) {protocol = str; }
+int ACLMessage::setProtocol(const std::string str) 
+{
+    if ( (str.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(str.c_str()[0]) != -1) )
+    return 1;
+    protocol = str; return 0;
+}
 
 std::string ACLMessage::getProtocol() const {return protocol; }
 
@@ -209,9 +229,81 @@ void ACLMessage::setUserdefParams(const std::vector<UserdefParam> p)
 }
 
 
-std::string ACLMessage::getReplyBy1() const {return reply_by1;}
+std::string ACLMessage::getReplyBy1(int formated) const
+{
+    if (formated == 0) {return reply_by1;}
+    if (reply_by1.size() < 17) return reply_by1;
+    std::string trim;
+   
+    
+    trim.clear();
+    trim += reply_by1.substr(0,4) + '-' + reply_by1.substr(4,2) + '-' + reply_by1.substr(6,2) + 'T' +
+	  reply_by1.substr(8,2) + ':' + reply_by1.substr(10,2) + ':' + reply_by1.substr(12,2) + ':' + reply_by1.substr(14,3);	
+    
+    return trim;
+    
+}
 
-void ACLMessage::setReplyBy1(const std::string date1) {reply_by1 = date1;}
+int ACLMessage::setReplyBy1(const std::string date1) 
+{
+    std::string trim,aux;
+    trim.clear();
+    
+    if ((date1.size() < 10) || (date1.size() > 23)) {return 1;}
+    else;
+    aux.assign(date1.substr(0,4));
+    if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking year
+        else;
+    trim.append(aux);
+    
+    aux.assign(date1.substr(5,2));
+    if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking month
+        else;
+    trim.append(aux);
+    
+    aux.assign(date1.substr(8,2));
+    if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking day
+        else;
+    trim.append(aux);
+    
+    if (date1.size() >= 13)
+    {
+        aux.assign(date1.substr(11,2));
+        if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking hour
+	  else;
+        trim.append(aux);
+        if (date1.size() >= 16) 
+        {
+	  aux = date1.substr(14,2);
+	  if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking minutes
+	      else;
+	  trim.append(aux);
+	  if (date1.size() >= 19)
+	  {
+	      aux = date1.substr(17,2);
+	      
+	      if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking seconds
+		else;
+	      trim.append(aux);
+	      if (date1.size() == 23)
+	      {
+		aux = date1.substr(20,3);
+		if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking miliseconds
+		    else;
+		trim.append(aux);
+		
+	      } else trim.append(std::string("000"));
+	      
+	  } else trim.append(std::string("00000"));
+	  
+        } else trim.append(std::string("0000000"));
+        
+    }
+    else trim.append(std::string("000000000")); //fill the rest in with default if not specified
+    
+    reply_by1 = trim;
+    return 0;
+}
 
 
 bool operator== (const ACLMessage &a,const ACLMessage &b)

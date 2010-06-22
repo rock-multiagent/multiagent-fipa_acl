@@ -77,8 +77,16 @@ class AgentAID {
 		\brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, but this can be easily changed if needed through the overloaded operator which do
 	     */
                std::string getName() const;
-               void setName(const std::string nam);
-               void addAdress(const std::string &adr);
+	     /**
+		\brief the method checks whether the passed name string is a word or not(according to the fipa spec)
+		\return 0 if successful 1 otherwise(name is un-alterred)
+	      */
+               int setName(const std::string nam);
+	     /**
+		\brief the method checks whether the passed adress string is a word or not(according to the fipa spec)
+		\return 0 if successful 1 otherwise(adress is not inserted)
+	      */
+               int addAdress(const std::string &adr);
                std::vector<std::string> getAdresses() const;
                void addResolver(const AgentAID &aid);
                std::vector<AgentAID> getResolvers() const;
