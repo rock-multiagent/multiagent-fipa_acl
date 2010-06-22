@@ -8,7 +8,8 @@
  
 //#include <algorithm>
 //#include <vector>
-
+#include <iostream>
+#include <fstream>
 #include "ACLMessageTest.h"
 #include "../../src/ACLMessageOutputParser.h"
 //#include "../../../message-parser/src/message_parser.h"
@@ -166,14 +167,35 @@ void ACLMessageTest::ForMemLeakTest()
     a1.addResolver(a2);
     a2.addResolver(a3);
     a3.addResolver(a5);
-    //ACLMessageOutputParser out;
-    //out.setMessage(m1);
-    //MessageParser parser;
+    char name[] = "TestMessage23.txt";
+    filebuf fb;
+    fb.open ("TestMessage23.txt",ios::in);
+    istream src(&fb);
+
+    //ifstream src = ifstream(name, ios_base::in);
+    std::string storage; 
+	
+	// due to special characters don't use std::copy here
+	char buffer;
+	while(true)
+	{
+	   src.get(buffer);
+	   if(!src.eof())
+		   storage += buffer;
+	   else
+		   break;
+	}
     
-    //ACLMessage restored;
-    //parser.parseData(out.getBitMessage(),restored);
+    ACLMessageOutputParser out;
+    out.setMessage(m1);
+    MessageParser parser;
+    
+    
+    ACLMessage restored;
+    parser.parseData(storage,restored);
+    cout<<restored.getProtocol()<<"\n\n\n\n\n";
     //printMessage (m1);
-    //printMessage(restored);
+    printMessage(restored);
     //CPPUNIT_ASSERT_EQUAL((m1 == restored),true);
     
     for (i = 0; i< STRESS_NR; i++)
