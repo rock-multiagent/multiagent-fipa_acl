@@ -13,7 +13,8 @@
 #include "ACLMessageTest.h"
 
 #include <message-generator/ACLMessageOutputParser.h>
-#include <message-parser/message_parser.h>
+//#include <message-parser/message_parser.h>
+#include "../../src/message_parser.h"
 
 
 
