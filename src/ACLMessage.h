@@ -207,6 +207,7 @@ public:
 	  \return 0 if successful 1 if length is bad 2 if wrong format
        */
        int setReplyBy1(const std::string date1);
+       void _setReplyBy1 (const std::string date1);
        
        
 };

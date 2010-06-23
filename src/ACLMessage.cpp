@@ -244,6 +244,11 @@ std::string ACLMessage::getReplyBy1(int formated) const
     
 }
 
+void ACLMessage::_setReplyBy1(const std::string date1)
+{
+    reply_by1 = date1;
+}
+
 int ACLMessage::setReplyBy1(const std::string date1) 
 {
     std::string trim,aux;
@@ -252,43 +257,44 @@ int ACLMessage::setReplyBy1(const std::string date1)
     if ((date1.size() < 10) || (date1.size() > 23)) {return 1;}
     else;
     aux.assign(date1.substr(0,4));
-    if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking year
+    //std::cout<<"\n\n failing string:\t"<<aux<<"\n\n";
+    if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking year
         else;
     trim.append(aux);
     
     aux.assign(date1.substr(5,2));
-    if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking month
+    if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking month
         else;
     trim.append(aux);
     
     aux.assign(date1.substr(8,2));
-    if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking day
+    if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking day
         else;
     trim.append(aux);
     
     if (date1.size() >= 13)
     {
         aux.assign(date1.substr(11,2));
-        if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking hour
+        if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking hour
 	  else;
         trim.append(aux);
         if (date1.size() >= 16) 
         {
 	  aux = date1.substr(14,2);
-	  if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking minutes
+	  if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking minutes
 	      else;
 	  trim.append(aux);
 	  if (date1.size() >= 19)
 	  {
 	      aux = date1.substr(17,2);
 	      
-	      if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking seconds
+	      if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking seconds
 		else;
 	      trim.append(aux);
 	      if (date1.size() == 23)
 	      {
 		aux = date1.substr(20,3);
-		if (aux.find_first_not_of(std::string("0123456789")) != -1) return 2; //checking miliseconds
+		if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking miliseconds
 		    else;
 		trim.append(aux);
 		
@@ -329,8 +335,13 @@ bool operator== (const ACLMessage &a,const ACLMessage &b)
         return false;
     if (a.getInReplyTo().compare(b.getInReplyTo()))
         return false;
-    if (a.getReplyBy1().compare(b.getReplyBy1()))
-        return false;
+    //if (a.getReplyBy1().compare(b.getReplyBy1()))
+        //return false;
+        
+    /// comapring the reply_by1 parameters without the milisecons, as they are not yet supported by the parser    
+    std::string repa, repb;
+    if (repa.substr(0,repa.size()-3).compare(repb.substr(0,repb.size()-3)) )
+	  return false;
     
     if (!(a.getSender() == b.getSender()) )
     { return false; }

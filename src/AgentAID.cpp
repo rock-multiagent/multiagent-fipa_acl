@@ -29,8 +29,8 @@ AgentAID::AgentAID(const std::string nam)
 {
     initializeFields();
     if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
-    name = nam;
-    else name.clear();
+    name.clear();
+    else name = nam;
 }
 
 void AgentAID::initializeFields()
