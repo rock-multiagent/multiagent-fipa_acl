@@ -118,8 +118,9 @@ void MessageParser::buildSender(MessageParameter param,ACLMessage &msg)
 
 AgentAID MessageParser::buildAgentAID(AgentID agent)
 {
-    AgentAID retAg = AgentAID(agent.name);
-    
+    AgentAID retAg = AgentAID();
+    //if (retAg.setName(agent.name))
+    retAg.setName(agent.name);
     // setting the adresses
     if (!agent.addresses.empty()) 
     {
@@ -218,8 +219,13 @@ void MessageParser::buildReplyBy1(MessageParameter param, ACLMessage &msg)
 {
      DateTime _value;
      _value = boost::get<DateTime>(param.data);
-     
-     msg.setReplyBy1(_value.toString());
+     std::string mydate = _value.toString();
+     /// the first char in the parsed date is for relative time, that feature is not yet supported by the generator, thus the byte is 
+     /// simply discarded; if it is to be used in the reconstruction of the message, this is where it should be done
+     if (mydate.c_str()[0] == ' ') {mydate.assign(mydate,1,2000);}
+          
+     //if (msg.setReplyBy1(mydate) != 0) 
+     msg.setReplyBy1(mydate);
 }
 
 void MessageParser::buildReplyTo(MessageParameter param, ACLMessage &msg)

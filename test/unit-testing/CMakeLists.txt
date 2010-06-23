@@ -6,7 +6,7 @@ set(SOURCES
 #set (SOURCES2 mytest.cpp)
 
 include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
-pkg_check_modules(MESSAGE_PARSER REQUIRED "message-parser")
+#pkg_check_modules(MESSAGE_PARSER REQUIRED "message-parser")
 pkg_check_modules(MESSAGE_GENERATOR REQUIRED "message-generator")
 
 include_directories( ${MESSAGE_GENERATOR_INCLUDE_DIRS}

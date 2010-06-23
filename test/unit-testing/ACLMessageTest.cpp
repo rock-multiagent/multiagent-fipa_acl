@@ -190,7 +190,7 @@ void ACLMessageTest::EncDecodeTest()
     m5.setOntology(string("test ontology"));
     m5.setReplyWith(string("test reply with"));
     if(m5.setReplyBy1(string("2010-12-23T12:00:37:980"))) cout<<"date not set\n\n\n\n\n";
-    cout <<"\n\n\n\n"<< m5.getReplyBy1()<<"\n\n\n";
+    //cout <<"\n\n\n\n"<< m5.getReplyBy1()<<"\n\n\n";
     m5.setInReplyTo(string("test in reply to"));
     m5.setConversationID(string("test conversationID"));
     m5.setProtocol(string("testprotocol"));
@@ -219,22 +219,18 @@ void ACLMessageTest::EncDecodeTest()
 		   break;
 	}
 	*/
-    cout<<"\n";
+    
     ACLMessageOutputParser out;
     out.setMessage(m5);
     MessageParser parser;
     //if (!out.printParsedMessage(string("testMessage.txt"))) cout << "ERROR GENERATING..\n";
-    //cout << out.getBitMessage() <<"\n";
-    
-    
     ACLMessage restored;
     if ( ! parser.parseData(out.getBitMessage(),restored)) cout << "ERROR PARSING...\n";
-   
-    cout<<"\n";
-    //cout<<m1.getProtocol()<<"\t\t"<<restored.getProtocol()<<"\n\n\n\n\n";
-    printMessage (m5);
-    printMessage(restored);
-    //CPPUNIT_ASSERT_EQUAL((m5 == restored),true);
+    //printMessage (m5);
+    //printMessage (m1);
+    //printMessage (m2);
+    //printMessage(restored);
+    CPPUNIT_ASSERT_EQUAL((m5 == restored),true);
 }
 
 void ACLMessageTest::printMessage( ACLMessage &msg)
