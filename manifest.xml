@@ -1,0 +1,21 @@
+<package>
+  <description brief="Control a fipa agent converstation based on an interaction protocol definition">
+  Fipa agent use a well defined sequence of message to talk to each other, defined by interaction protocol. This library generates a state machine from a configuration file, which defines the interaction protocol. This state machine can be used to validate the correct message flow.
+  </description>
+  <author>Thomas Roehr/thomas.roehr@dfki.de</author>
+  <license></license>
+  <url>http://</url>
+  <logo>http://</logo>
+ <!--
+   To add any dependencies use the depend tag
+  <depend package="dummy-dependency-0" />
+	...
+  <depend package="dummy-dependency-n-1" />
+  <depend package="dummy-dependency-n" />
+-->
+<!--DEPEND-ENTRY-->
+  <versioncontrol type="git" url="" />
+  <export>
+    <cpp cflags="" lflags="" />
+  </export>
+</package>
