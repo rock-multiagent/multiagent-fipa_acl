@@ -1,6 +1,7 @@
 
 #include "Transition.h"
 #include "State.h"
+#include "StateMachine.h"
 
 namespace fipa {
 namespace acl {

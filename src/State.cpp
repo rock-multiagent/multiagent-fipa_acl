@@ -1,5 +1,6 @@
 
 #include "State.h"
+#include "StateMachine.h"
 
 
 namespace fipa {
@@ -13,7 +14,7 @@ State::State()
     transitions.clear();
     subSM.clear();
     archive.clear();
-    involvedAgents.celar();
+    involvedAgents.clear();
 }
 State::State(std::string _uid)
 {

@@ -72,6 +72,8 @@ class Transition
         void removeAllAgentsBut(AgentAID&,std::vector<AgentAID>&);
         
 };
+
+extern bool unloadedEqual(Transition &a, Transition &b);
     
 } // end of acl
 } // end of fipa

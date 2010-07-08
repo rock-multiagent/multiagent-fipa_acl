@@ -2,7 +2,7 @@
 #define _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
 
 #include <message-generator/ACLMessage.h>
-#include "StateMachine.h"
+//#include "StateMachine.h"
 #include "Transition.h"
 
 
@@ -10,6 +10,8 @@
 
 namespace fipa {
 namespace acl {
+    
+    class StateMachine;
     
 class State 
 {

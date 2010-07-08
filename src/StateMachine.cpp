@@ -1,5 +1,6 @@
 
 #include "StateMachine.h"
+#include "State.h"
 
 namespace fipa {
 namespace acl {
