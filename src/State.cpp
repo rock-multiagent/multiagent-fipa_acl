@@ -48,8 +48,8 @@ void State::generateDefaultTransitions()
 	  t.setTo(trit->getFrom());
 	  t.setNextStateName(StateMachine::NOT_UNDERSTOOD);
 	  //t.setMessageParity(true);
-	  if (nextState != NULL)  trit->nextState->addTransition(t);
-	  else getStateByName(StateMachine::NOT_UNDERSTOOD);
+	  if (trit->getNextState() != NULL)  trit->getNextState()->addTransition(t);
+	  else addTransition(t);
 	  
         }
 }
@@ -64,7 +64,7 @@ int State::consumeMessage(ACLMessage &msg)
         for (smit = subSM.begin(); smit != subSM.end(); smit++)
         {
 	  if (smit->isActive() )
-	      if (smit->IsConversationOver() ) continue;
+	      if (smit->isConversationOver() ) continue;
 	      else {  stillActiveSubSM = true;
 		    if (smit->consumeMessage(msg) == 0) 
 		    {
@@ -113,21 +113,23 @@ bool State::checkAllAgentsAccountedFor()
     }
     return true;
 }
-void updateInvolvedAgentsMap(Transition &it)
+void State::updateInvolvedAgentsMap(Transition &it)
 {
-    std::vector<AgentAID> temp = it->getExpectedSenders();
-    std::vector<AgentAID>:iterator agit;
+    std::vector<AgentAID> temp = it.getExpectedSenders();
+    std::vector<AgentAID>::iterator agit;
     for (agit = temp.begin(); agit != temp.end(); agit++)
     {
-        if ( (found = involvedAgents.find(*agit)) == involvedAgents.end() )
+        std::map<AgentAID,bool>::iterator found;
+        if ( (found = involvedAgents.find((*agit) ) ) == involvedAgents.end() )
         {
 	  std::pair<AgentAID,bool> mypair = std::pair<AgentAID,bool>(*agit,false);
 	  involvedAgents.insert(mypair);
         }
     }
-    temp = it->getExpectedSenders();
+    temp = it.getExpectedSenders();
     for (agit = temp.begin(); agit != temp.end(); agit++)
     {
+        std::map<AgentAID,bool>::iterator found;
         if ( (found = involvedAgents.find(*agit)) == involvedAgents.end() )
         {
 	  std::pair<AgentAID,bool> mypair = std::pair<AgentAID,bool>(*agit,false);
@@ -150,7 +152,7 @@ void State::loadParameters()
 void State::updateAllAgentRoles()
 {
     std::vector<Transition>::iterator it;
-    std::map<AgentMapping>::iterator found;
+    //std::map<AgentMapping>::iterator found;
     for (it = transitions.begin(); it != transitions.end(); it++)
     {    
         it->updateRoles();
@@ -189,7 +191,7 @@ ACLMessage* State::searchArchiveBySenderReceiver(AgentAID m1,AgentAID m2)
     for (it = archive.begin(); it != archive.end(); it++)
     {
         std::vector<AgentAID> recep = it->getAllReceivers();
-        if ( (it->getSender() == m1) && (find(recep.begin(),recep.end(),m2) != recep.end()) ) return (*it);
+        if ( (it->getSender() == m1) && (find(recep.begin(),recep.end(),m2) != recep.end()) ) return &(*it);
     }
     return NULL;
 }
@@ -198,7 +200,7 @@ void State::setUID(std::string _uid)
 {
     uid = _uid;
 }
-std::string State::getUID()
+std::string State::getUID() const
 {
     return uid;
 }
@@ -210,7 +212,11 @@ void State::addToArchive(ACLMessage &msg)
 
 bool operator==(const State &a,const std::string &b)
 {
-    if (a.getUID.compare(b) ) return false;
+    if (a.getUID().compare(b) ) return false;
+    return true;
+}
+bool operator<(const AgentAID &a,const AgentAID &b)
+{
     return true;
 }
 

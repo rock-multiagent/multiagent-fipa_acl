@@ -34,7 +34,7 @@ class State
         ACLMessage* searchArchiveBySenderReceiver(AgentAID,AgentAID);
         void addToArchive(ACLMessage &msg);
         
-        int consumeMessage(ACLMessage msg);
+        int consumeMessage(ACLMessage &msg);
         void generateDefaultTransitions();
         bool checkAllAgentsAccountedFor();
         void loadInvolvedAgents();
@@ -49,9 +49,9 @@ class State
         bool getFinal();
         void setFinal(bool _final);
         void setUID(std::string);
-        std::string getUID();
+        std::string getUID() const;
     private:
-        void updateInvolvedAgentsMap();
+        void updateInvolvedAgentsMap(Transition &it);
         
         
     
@@ -60,6 +60,7 @@ class State
 //extern operator==(const State&, const State&);
 extern bool operator==(const State&, const std::string&);
 //extern bool operator==(const std::string&, const State&);
+extern bool operator<(const AgentAID&,const AgentAID&);
 
 } // end of acl
 } // end of fipa

@@ -319,6 +319,10 @@ bool StateMachine::isConversationOver()
 {
     return conversationOver;
 }
+bool StateMachine::isActive()
+{
+    return active;
+}
 bool StateMachine::checkIfRoleExists(Role myrole)
 {
     std::vector<AgentMapping>::iterator it;

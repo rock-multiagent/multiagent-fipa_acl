@@ -35,17 +35,22 @@ class Transition
         bool validateMessage(ACLMessage &msg);
         void loadParameters();
         void updateRoles();
+        
         void setPrecedingState(State*);
                 
         void setExpectedPerformative	(std::string);
         void setNextStateName		(std::string);
         void setFrom		(std::string);
         void setTo			(std::string);
+        //void setNextState		(State*);
         
         std::string getExpectedPerformative();
         std::string getNextStateName();
         std::string getFrom();
         std::string getTo();
+        State* getNextState();
+        std::vector<AgentAID> getExpectedSenders();
+        std::vector<AgentAID> getExpectedRecepients();
 
     private:
         void initializeFields();

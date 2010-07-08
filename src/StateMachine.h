@@ -55,6 +55,7 @@ class StateMachine
         State* getStateByName(std::string);
         
         bool isConversationOver();
+        bool isActive();
         void addRole(Role role);
         bool setRole(Role myrole,AgentAID myagent);
         bool setRole(Role myrole,std::vector<AgentAID> agents);

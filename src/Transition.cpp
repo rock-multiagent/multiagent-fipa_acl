@@ -290,6 +290,9 @@ std::string Transition::getExpectedPerformative()	{return expectedPerf; }
 std::string Transition::getNextStateName()	{return nextStateName; }
 std::string Transition::getFrom()		{return from; }
 std::string Transition::getTo()		{return to; }
+State* Transition::getNextState()		{return nextState; }
+std::vector<AgentAID> Transition::getExpectedSenders() 	{return expectedSenders; }
+std::vector<AgentAID> Transition::getExpectedRecepients()	{return expectedRecepients; }
 
 
 
