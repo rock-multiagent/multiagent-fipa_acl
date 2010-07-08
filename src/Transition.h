@@ -1,6 +1,9 @@
 #ifndef _RIMRES_FIPAACL_CONVMONITOR_TRANSITION_H_
 #define _RIMRES_FIPAACL_CONVMONITOR_TRANSITION_H_
 
+#include "StatMachine.h"
+#include <algorithm>
+
 namespace fipa {
 namespace acl {
     
@@ -24,10 +27,24 @@ class Transition
         Transition();
         int consumeMessage(ACLMessage &msg);
         int validateMessage(ACLMessage &msg);
+        void loadParameters();
+        void updateRoles();
+        void setPrecedingState(State*);
+                
+        void setExpectedPerformative	(std::string);
+        void setNextStateName		(std::string);
+        void setFrom		(std::string);
+        void setTo			(std::string);
         
+        std::string getExpectedPerformative();
+        std::string getNextStateName();
+        std::string getFrom();
+        std::string getTo();
+
     private:
         void initializeFields();
         int loadTransitionParameters();
+        bool updateRoles(ACLMessage&);
         
         void performWithStateExit(ACLMessage &msg);
         void performOnStateExit(ACLMessage &msg);
@@ -44,6 +61,9 @@ class Transition
         bool validatePerformative	(ACLMessage &msg);
         bool validateSender 		(ACLMessage &msg);
         bool validateRecepients 	(ACLMessage &msg);
+        
+        //void removeAllRecepientsBut(AgentAID&);
+        void removeAllAgentsBut(AgentAID&,std::vector<AgentAID>&);
         
 }
     

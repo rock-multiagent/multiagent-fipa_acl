@@ -1,6 +1,11 @@
 #ifndef _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
 #define _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
 
+#include "StateMachine.h"
+#include "Transition.h"
+
+#include <map>
+
 namespace fipa {
 namespace acl {
     
@@ -20,12 +25,29 @@ class State
         
     public:
         State();
+        State(std::string _uid);
         ~State();
         ACLMessage* searchArchiveBySenderReceiver(AgentAID&,AgentAID&);
+        void loadParameters();
         int consumeMessage(ACLMessage msg);
         void generateDefaultTransitions();
         bool checkAllAgentsAccountedFor();
         void loadInvolvedAgents();
+        void tickInvolvedAgent(AgentAID&);
+        void tickInvolvedAgent(std::vector<AgentAID>&);
+        void loadParameters();
+        void updateAllAgentRoles();
+        void resetInvolvedAgentsTicks();
+        void setAllPrecedingStates(State*);
+        
+        void addTransition(Transition &t);
+        bool getFinal();
+        void setFinal(bool _final);
+        void setUID(std::string);
+        std::string getUID();
+    private:
+        void updateInvolvedAgentsMap();
+        
         
     
 };    

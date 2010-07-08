@@ -7,7 +7,7 @@
 #include <message-generator/ACLMessage.h>
 
 #include <vector>
-#include <multimap>
+//#include <multimap>
 
 namespace fipa {
 namespace acl {
@@ -43,29 +43,37 @@ class StateMachine
         
         StateMachine();
         ~StateMachine();
+        bool setInitialState(State*);
+        bool setInitialState(std::string);
+        bool setOwner(AgentAID);
         int startMachine(ACLMessage msg);
         int consumeMessage(ACLMessage msg);
-        int initializeMachineFields(ACLMessage msg);
-        int createAndStartNewCancelMetaP(ACLMessage &msg);
-        int generateCancelMetaProtocol();
+        //int initializeMachineFields(ACLMessage msg);
         
-        Role getAgentRole(AgentAID &agent);
+        
+        
         State* getStateByName(std::string);
         
-        bool checkConversationOver();
+        bool isConversationOver();
         void addRole(Role role);
         bool setRole(Role myrole,AgentAID myagent);
         bool setRole(Role myrole,std::vector<AgentAID> agents);
         bool checkIfAgentAssigned(AgentAID&);
-        bool checkIfRoleAssigned(Role&);
+        bool checkIfRoleExists(Role &myrole);
+        Role getAgentRole(AgentAID &agent);
+        bool checkIfRoleSet(Role&);
         void removeInterlocutor(AgentAID&);
         void removeInterlocutor(std::vector<AgentAID>&);
+        void updateAllAgentRoles();
+        
     private:
         void initializeFields();
         void removeInterlocutor(AgentAID &agent);
         void removeInterlocutor(std::vector<AgentAID> &agents);
         void loadAllTransitionParameters(ACLMessage &msg);
         void UpdateAllAgentRoles();
+        int createAndStartNewCancelMetaP(ACLMessage &msg);
+        StateMachine generateCancelMetaProtocol(Role);
         
         
     
