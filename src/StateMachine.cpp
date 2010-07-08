@@ -284,7 +284,7 @@ void StateMachine::removeInterlocutor(AgentAID &ag)
     //}
 }
 
-void StateMachine::removeInterlocutor(std::vector<AgentAID> &agents)
+void StateMachine::removeInterlocutor(std::vector<AgentAID> agents)
 {
     //for_each(agents.begin(), agents.end(), removeInterlocutor);
     std::vector<AgentAID>::iterator it;
@@ -292,7 +292,7 @@ void StateMachine::removeInterlocutor(std::vector<AgentAID> &agents)
         removeInterlocutor(*it);
 }
 
-bool StateMachine::checkIfAgentAssigned(AgentAID &ag)
+bool StateMachine::checkIfAgentAssigned(AgentAID ag)
 {
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)

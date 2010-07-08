@@ -12,7 +12,7 @@
 namespace fipa {
 namespace acl {
 
-    typedef
+   
     
 class StateMachine 
 {
@@ -62,8 +62,8 @@ class StateMachine
         bool checkIfRoleExists(Role &myrole);
         Role getAgentRole(AgentAID &agent);
         bool checkIfRoleSet(Role&);
-        void removeInterlocutor(AgentAID&);
-        void removeInterlocutor(std::vector<AgentAID>&);
+        void removeInterlocutor(AgentAID);
+        void removeInterlocutor(std::vector<AgentAID>);
         void updateAllAgentRoles();
         
     private:

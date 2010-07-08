@@ -2,6 +2,7 @@
 #define _RIMRES_FIPAACL_CONVMONITOR_TYPES_
 
 //#include <map>
+#include <message-generator/AgentAID.h>
 
 namespace fipa {
 namespace acl {

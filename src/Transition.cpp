@@ -1,5 +1,6 @@
 
 #include "Transition.h"
+#include "State.h"
 
 namespace fipa {
 namespace acl {
@@ -13,7 +14,7 @@ int Transition::consumeMessage(ACLMessage &msg)
         //if ( checkAllSendersAccountedFor(msg) && checkAllRecepientsAccountedFor(msg) )
         if (owningState->checkAllAgentsAccountedFor() )
         {
-	  performOnStateExit();
+	  performOnStateExit(msg);
         } else 
 	  {
 	      if (nextState->getFinal()) 
@@ -59,7 +60,7 @@ void Transition::loadParameters()
 {
     nextState = machine->getStateByName(nextStateName);
     expectedSenders.clear();
-    expectedReceivers.clear();
+    expectedRecepients.clear();
     if (machine->checkIfRoleExists(from) )
     {
         if(machine->checkIfRoleSet(from) )
@@ -82,7 +83,7 @@ void Transition::loadParameters()
 	  std::vector<AgentMapping>::iterator it;
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
-	      if (!it->role.compare(to) ) expectedReceivers.push_back(it->agent);
+	      if (!it->role.compare(to) ) expectedRecepients.push_back(it->agent);
 	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); it = machine->involvedAgents.end(); }
 	  }
         } else;
@@ -92,7 +93,7 @@ void Transition::loadParameters()
 void Transition::updateRoles()
 {
     expectedSenders.clear();
-    expectedReceivers.clear();
+    expectedRecepients.clear();
     if (machine->checkIfRoleExists(from) )
     {
         if(machine->checkIfRoleSet(from) )
@@ -105,7 +106,7 @@ void Transition::updateRoles()
 	  }
         } else; 
 	  
-    } else return false; //TODO: twrow some violation of protocol error
+    } else ; //TODO: twrow some violation of protocol error
     
     if (machine->checkIfRoleExists(to) )
     {
@@ -114,17 +115,17 @@ void Transition::updateRoles()
 	  std::vector<AgentMapping>::iterator it;
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
-	      if (!it->role.compare(to) ) expectedReceivers.push_back(it->agent);
+	      if (!it->role.compare(to) ) expectedRecepients.push_back(it->agent);
 	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); it = machine->involvedAgents.end(); }
 	  }
         } else;
 	 
-    } else return false; //TODO: throw some violation of protocol error
+    } else ; //TODO: throw some violation of protocol error
 }
 bool Transition::updateRoles(ACLMessage &msg)
 {
     if (!expectedSenders.empty() ) expectedSenders.clear();
-    if (!expectedRecepients.empty() ) expectedReceivers.clear();
+    if (!expectedRecepients.empty() ) expectedRecepients.clear();
     if (machine->checkIfRoleExists(from) )
     {
         if(machine->checkIfRoleSet(from) )
@@ -164,7 +165,7 @@ bool Transition::updateRoles(ACLMessage &msg)
     } else return false; //TODO: throw some violation of protocol error
     return true;
 }
-void Transition::performWithoutExit(ACLMessage &msg)
+void Transition::performWithoutStateExit(ACLMessage &msg)
 {
     owningState->addToArchive(msg);
     owningState->tickInvolvedAgent(msg.getAllReceivers());
@@ -218,7 +219,7 @@ bool Transition::validateRecepients (ACLMessage &msg)
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
         std::vector<AgentAID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
-        if (found != expectedReceivers.end() ) ;
+        if (found != expectedRecepients.end() ) ;
         else return false;
     }
     return true;
@@ -250,7 +251,7 @@ bool Transition::validateProtocol (ACLMessage &msg)
     if (machine->protocol.compare(msg.getProtocol()) ) return false;
     return true;
 }
-bool Transition::validateConversationID (ACLMessage &msg)
+bool Transition::validateConvID (ACLMessage &msg)
 {
     if (machine->convid.compare(msg.getConversationID()) ) return false;
     return true;
@@ -264,7 +265,7 @@ void Transition::removeAllAgentsBut(AgentAID &ag,std::vector<AgentAID> &agents)
 
 
 
-bool unloadedEqual(Transition &a, Transition %b)
+bool unloadedEqual(Transition &a, Transition &b)
 {
     if (a.getExpectedPerformative().compare(b.getExpectedPerformative()) ) return false;
     if (a.getFrom().compare(b.getFrom()) ) return false;
@@ -279,15 +280,15 @@ void Transition::setPrecedingState(State *st)
     precedingState = st;
 }
 
-void setExpectedPerformative	(std::string _performative) 	{ expectedPerformative = _performative; }
-void setNextStateName	(std::string _state) 	{ nestStateName = _state; }
-void setFrom		(std::string _from) 	{ from = _from; }
-void setTo		(std::string _to) 		{ to = _to; }
+void Transition::setExpectedPerformative(std::string _performative) 	{ expectedPerf = _performative; }
+void Transition::setNextStateName	(std::string _state) 	{ nextStateName = _state; }
+void Transition::setFrom		(std::string _from) 	{ from = _from; }
+void Transition::setTo		(std::string _to) 		{ to = _to; }
     
-std::string getExpectedPerformative()	{return expectedPerformative; }
-std::string getNextStateName()	{return nextStateName; }
-std::string getFrom()		{return from; }
-std::string getTo()			{return to; }
+std::string Transition::getExpectedPerformative()	{return expectedPerf; }
+std::string Transition::getNextStateName()	{return nextStateName; }
+std::string Transition::getFrom()		{return from; }
+std::string Transition::getTo()		{return to; }
 
 
 

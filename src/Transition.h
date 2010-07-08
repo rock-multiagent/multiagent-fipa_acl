@@ -1,11 +1,17 @@
 #ifndef _RIMRES_FIPAACL_CONVMONITOR_TRANSITION_H_
 #define _RIMRES_FIPAACL_CONVMONITOR_TRANSITION_H_
 
-#include "StatMachine.h"
+//#include "StateMachine.h"
+#include "types.h"
+#include <message-generator/ACLMessage.h>
+#include <message-generator/types.h>
 #include <algorithm>
 
 namespace fipa {
 namespace acl {
+
+    class StateMachine;
+    class State;
     
 class Transition 
 {
@@ -26,7 +32,7 @@ class Transition
     public:
         Transition();
         int consumeMessage(ACLMessage &msg);
-        int validateMessage(ACLMessage &msg);
+        bool validateMessage(ACLMessage &msg);
         void loadParameters();
         void updateRoles();
         void setPrecedingState(State*);
@@ -46,13 +52,13 @@ class Transition
         int loadTransitionParameters();
         bool updateRoles(ACLMessage&);
         
-        void performWithStateExit(ACLMessage &msg);
+        void performWithoutStateExit(ACLMessage &msg);
         void performOnStateExit(ACLMessage &msg);
         
         bool checkAllExpectedSendersAccountedFor   (ACLMessage &msg);
         bool checkAllExpectedRecepientsAccountedFor(ACLMessage &msg);
         bool validateConvID   	(ACLMessage &msg);
-        bool validateInReplyTo	(ACLMesasge &msg);
+        bool validateInReplyTo	(ACLMessage &msg);
         bool validateLanguage 	(ACLMessage &msg);
         bool validateOntology 	(ACLMessage &msg);
         bool validateProtocol 	(ACLMessage &msg);
@@ -65,7 +71,7 @@ class Transition
         //void removeAllRecepientsBut(AgentAID&);
         void removeAllAgentsBut(AgentAID&,std::vector<AgentAID>&);
         
-}
+};
     
 } // end of acl
 } // end of fipa

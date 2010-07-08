@@ -1,8 +1,10 @@
 #ifndef _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
 #define _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
 
+#include <message-generator/ACLMessage.h>
 #include "StateMachine.h"
 #include "Transition.h"
+
 
 #include <map>
 
@@ -27,14 +29,15 @@ class State
         State();
         State(std::string _uid);
         ~State();
-        ACLMessage* searchArchiveBySenderReceiver(AgentAID&,AgentAID&);
-        void loadParameters();
+        ACLMessage* searchArchiveBySenderReceiver(AgentAID,AgentAID);
+        void addToArchive(ACLMessage &msg);
+        
         int consumeMessage(ACLMessage msg);
         void generateDefaultTransitions();
         bool checkAllAgentsAccountedFor();
         void loadInvolvedAgents();
-        void tickInvolvedAgent(AgentAID&);
-        void tickInvolvedAgent(std::vector<AgentAID>&);
+        void tickInvolvedAgent(AgentAID);
+        void tickInvolvedAgent(std::vector<AgentAID>);
         void loadParameters();
         void updateAllAgentRoles();
         void resetInvolvedAgentsTicks();
@@ -52,9 +55,9 @@ class State
     
 };    
 
-extern operator==(const State&, const State&);
-extern operator==(const State&, const std::string&);
-//extern operator==(const std::string&, const State&);
+//extern operator==(const State&, const State&);
+extern bool operator==(const State&, const std::string&);
+//extern bool operator==(const std::string&, const State&);
 
 } // end of acl
 } // end of fipa

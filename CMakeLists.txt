@@ -16,6 +16,12 @@ include(CommonSetup)
 include_directories(${PROJECT_SOURCE_DIR}/external/include)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
+include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
+pkg_check_modules(MessageGenerator "message-generator")
+
+include_directories(${MessageGenerator_INCLUDE_DIRS})
+link_directories(${MessageGenerator_LIBRARY_DIRS})
+
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
 

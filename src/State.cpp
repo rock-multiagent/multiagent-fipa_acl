@@ -85,7 +85,7 @@ int State::consumeMessage(ACLMessage &msg)
     return 1;
 }
 
-void State::tickInvolvedAgent(AgentAID &ag)
+void State::tickInvolvedAgent(AgentAID ag)
 {
     std::map<AgentAID,bool>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
@@ -94,7 +94,7 @@ void State::tickInvolvedAgent(AgentAID &ag)
     }
 }
 
-void State::tickInvolvedAgent(std::vector<AgentAID> & agents)
+void State::tickInvolvedAgent(std::vector<AgentAID> agents)
 {
     std::vector<AgentAID>::iterator it;
     for (it = agents.begin(); it != agents.end(); it++)
@@ -182,7 +182,7 @@ void State::setAllPrecedingStates(State *st)
     }
 }
 
-ACLMessage* State::searchArchiveBySenderReceiver(AgentAID &m1,AgentAID &m2)
+ACLMessage* State::searchArchiveBySenderReceiver(AgentAID m1,AgentAID m2)
 {
     std::vector<ACLMessage>::iterator it;
     for (it = archive.begin(); it != archive.end(); it++)
@@ -200,6 +200,11 @@ void State::setUID(std::string _uid)
 std::string State::getUID()
 {
     return uid;
+}
+
+void State::addToArchive(ACLMessage &msg)
+{
+    archive.push_back(msg);
 }
 
 bool operator==(const State &a,const std::string &b)
