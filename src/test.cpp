@@ -29,7 +29,7 @@ void printAgentAID( AgentAID &agent);
 void printAgentAIDset( set<AgentAID> &myset);
 void printUserdefParamset( set<UserdefParam> &params);
 
-void ACLMessageTest::printMessage( ACLMessage &msg)
+void printMessage( ACLMessage &msg)
 {
     cout<<"=================================Printing Message=================================\n";
     cout<<"performative:\t"<< msg.getPerformative()<<endl;
@@ -57,14 +57,14 @@ void ACLMessageTest::printMessage( ACLMessage &msg)
 
 }
 
-void ACLMessageTest::printAgentAIDset( vector<AgentAID> &myset)
+void printAgentAIDset( vector<AgentAID> &myset)
 {
     cout<<"\t==================Agent AID set==================\n";
     vector<AgentAID>::iterator it = myset.begin();
     for(it; it != myset.end(); it++)
         printAgentAID(*it);
 }
-void ACLMessageTest::printAgentAID( AgentAID &agent)
+void printAgentAID( AgentAID &agent)
 {
     cout<<"\t==================Agent AID==================\n";
     if (!agent.getName().empty()) cout<<"\t\tname:\t"<< agent.getName()<<endl;
@@ -83,7 +83,7 @@ void ACLMessageTest::printAgentAID( AgentAID &agent)
 				    printUserdefParamset(params);}
 }
 
-void ACLMessageTest::printUserdefParamset( vector<UserdefParam> &params)
+void printUserdefParamset( vector<UserdefParam> &params)
 {
     cout<<"\t\t==================User Defined Parameters==================\n";
     vector<UserdefParam>::iterator it = params.begin();
