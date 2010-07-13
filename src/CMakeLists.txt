@@ -30,6 +30,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} ${EXTERNAL_LIBS} ${moc_cpp} ${ui_c
 #
 target_link_libraries(${PROJECT_NAME} message-generator ${LIBRARIES} ${EXTERNAL_LIBS})
 
+
 install(TARGETS ${PROJECT_NAME} 
     RUNTIME DESTINATION bin
     ARCHIVE DESTINATION lib

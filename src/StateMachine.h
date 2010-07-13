@@ -40,8 +40,10 @@ class StateMachine
         static const std::string NOT_UNDERSTOOD;
         static const std::string CONV_CANCELLED;
         static const std::string INITIAL;
+        static const std::string INITIATOR;
         
         StateMachine();
+        StateMachine(AgentAID _owner);
         ~StateMachine();
         bool setInitialState(State*);
         bool setInitialState(std::string);
@@ -53,27 +55,29 @@ class StateMachine
         
         
         State* getStateByName(std::string);
-        
+        void generateDefaultStates();
+        void generateDefaultTransitions();
+        bool addState(State);
         bool isConversationOver();
         bool isActive();
         void addRole(Role role);
         bool setRole(Role myrole,AgentAID myagent);
         bool setRole(Role myrole,std::vector<AgentAID> agents);
-        bool checkIfAgentAssigned(AgentAID&);
-        bool checkIfRoleExists(Role &myrole);
-        Role getAgentRole(AgentAID &agent);
+        bool checkIfAgentAssigned(AgentAID);
+        bool checkIfRoleExists(Role myrole);
+        Role getAgentRole(AgentAID ag);
         bool checkIfRoleSet(Role&);
-        void removeInterlocutor(AgentAID);
-        void removeInterlocutor(std::vector<AgentAID>);
+        //void removeInterlocutor(AgentAID);
+        //void removeInterlocutor(std::vector<AgentAID>);
         void updateAllAgentRoles();
         
     private:
-        void initializeFields();
-        void removeInterlocutor(AgentAID &agent);
-        void removeInterlocutor(std::vector<AgentAID> &agents);
+        void initializeObjectFields();
+        void removeInterlocutor(AgentAID ag);
+        void removeInterlocutor(std::vector<AgentAID> agents);
         void loadAllTransitionParameters(ACLMessage &msg);
         void UpdateAllAgentRoles();
-        int createAndStartNewCancelMetaP(ACLMessage &msg);
+        int createAndStartNewCancelMetaProtocol(ACLMessage &msg);
         StateMachine generateCancelMetaProtocol(Role);
         
         

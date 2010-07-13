@@ -5,9 +5,10 @@
 namespace fipa {
 namespace acl {
 
-const std::string NOT_UNDERSTOOD = std::string("not-understood");
-const std::string CONV_CANCELLED = std::string("conv-cancelled");
-const std::string INITIAL = std::string("initial");
+const std::string StateMachine::NOT_UNDERSTOOD = std::string("not-understood");
+const std::string StateMachine::CONV_CANCELLED = std::string("conv-cancelled");
+const std::string StateMachine::INITIAL = std::string("initial");
+const std::string StateMachine::INITIATOR = std::string("initiator");
 void StateMachine::initializeObjectFields()
 {
     
@@ -15,7 +16,7 @@ void StateMachine::initializeObjectFields()
     involvedAgents.clear();
     states.clear();
     currentState = NULL;
-    owner = Agent();
+    owner = AgentAID();
     conversationOver = false;
     active = false;
     cancelMetaP.clear();
@@ -23,7 +24,7 @@ void StateMachine::initializeObjectFields()
     language.clear();
     ontology.clear();
     protocol.clear();
-    conversationID.clear();
+    convid.clear();
     encoding.clear();
     
 
@@ -74,7 +75,7 @@ void StateMachine::generateDefaultTransitions()
     std::vector<State>::iterator it;
     for (it = states.begin(); it != states.end(); it++)
     {
-        if (!it->getUid().compare(StateMachine::NOT_UNDERSTOOD)) continue;
+        if (!it->getUID().compare(StateMachine::NOT_UNDERSTOOD)) continue;
         //if (!it->getUid().compare(StateMachine::CONV_CANCELLED)) continue;
         //if (!it->getUid().compare(StateMachine::INITIAL) continue;
         
@@ -87,13 +88,14 @@ void StateMachine::generateDefaultTransitions()
 int StateMachine::createAndStartNewCancelMetaProtocol(ACLMessage &msg)
 {
     std::vector<AgentAID> interlocutors = msg.getAllReceivers();
-    for (std::vector<AgentAID>::iterator it = interlocutors.begin; it != interlocutors.end(); it++)
+    for (std::vector<AgentAID>::iterator it = interlocutors.begin(); it != interlocutors.end(); it++)
     {
         cancelMetaP.push_back(generateCancelMetaProtocol(std::string("with")));
         if (cancelMetaP.back().startMachine(msg)) return 1;
     }
     return 0;
 }
+
 StateMachine StateMachine::generateCancelMetaProtocol(Role with)
 {
     //std::vector<AgentMapping>::iterator it;
@@ -110,9 +112,9 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
         currentState = &(*find(states.begin(),states.end(),StateMachine::INITIAL));
         temp.generateDefaultStates();
         
-        State first = State(std::String("1"));
+        State first = State(std::string("1"));
         first.setFinal(false);
-        State second = State(std::String("2"));
+        State second = State(std::string("2"));
         second.setFinal(true);
         
         temp.addState(first);
@@ -124,7 +126,7 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
         t1.setTo(with);
         t1.setNextStateName(std::string("1"));
         //t1.setMessageParity(true);
-        temp.getStateByName(StateMachine::INITIAL)->addTranstition(t1);
+        temp.getStateByName(StateMachine::INITIAL)->addTransition(t1);
         
         Transition t2 = Transition();
         t2.setExpectedPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
@@ -149,17 +151,17 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
 
 StateMachine::StateMachine(AgentAID _owner)
 {
-    initializeFields();
+    initializeObjectFields();
     owner = _owner;
     
 }
 
-int StateMachine::startMachine(ACLmessage &msg)
+int StateMachine::startMachine(ACLMessage msg)
 {
     int x;
     active = true;
-    if ((x = consumeMessge(msg)) != 0) return x;
-    conversationID = msg.getConversationID();
+    if ((x = consumeMessage(msg)) != 0) return x;
+    convid = msg.getConversationID();
     protocol = msg.getProtocol();
     encoding = msg.getEncoding();
     language = msg.getLanguage();
@@ -177,18 +179,18 @@ int StateMachine::consumeMessage(ACLMessage msg)
     {
         if (it->isActive() )
         {	  
-	  if (it->consumeMessage() == 0) return 0;
+	  if (it->consumeMessage(msg) == 0) return 0;
 	  //x= 1;
         }
     }
-    if (!msg.getPerformative().compare(ACLMessage::CANCEL) )
+    if (!msg.getPerformative().compare(ACLMessage::perfs[ACLMessage::CANCEL]) )
         if (!getAgentRole(msg.getSender()).compare(StateMachine::INITIATOR) )
-	  return createAndStartNewMetaCancelP(msg);
+	  return createAndStartNewCancelMetaProtocol(msg);
         else return 1;
     else;
     
     if (currentState->consumeMessage(msg) == 0)   
-        if (currentState->isFinal() ) { conversationOver = true; active = false; return 0;}
+        if (currentState->getFinal() ) { conversationOver = true; active = false; return 0;}
     return 1;
 }
 
@@ -207,16 +209,16 @@ State* StateMachine::getStateByName(std::string _name)
     if (it == states.end()) return NULL;
     return (&(*it));
 }
-void StateMachine::removeInterlocutor(AgentAID &agent)
+void StateMachine::removeInterlocutor(AgentAID ag)
 {
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
     {
-        if (it->agent == agent)
-	  if (it->check) involvedAgents.erase(it);
+        if (it->agent == ag)
+	  if (it->check) { involvedAgents.erase(it); break; }
     }
 }
-void StateMachine::removeInterlocutor(std::vector<AgentAID> &agents)
+void StateMachine::removeInterlocutor(std::vector<AgentAID> agents)
 {
     std::vector<AgentAID>::iterator it;
     for (it = agents.begin(); it != agents.end(); it++)
@@ -243,7 +245,7 @@ bool StateMachine::setRole(Role myrole, std::vector<AgentAID> agents)
 {
     //if (checkIfRoleSet(myrole) ) return false;
     std::vector<AgentAID>::iterator agit;
-    for (agit = agents.begin(); agit != agents.end(); it++)
+    for (agit = agents.begin(); agit != agents.end(); agit++)
     {
         if (checkIfAgentAssigned(*agit) ) return false;
     }
@@ -262,35 +264,6 @@ bool StateMachine::setRole(Role myrole, std::vector<AgentAID> agents)
         element.check = true;
         involvedAgents.push_back(element);
     }
-}
-
-void StateMachine::removeInterlocutor(AgentAID &ag)
-{
-    std::vector<AgentMapping>::iterator it;
-    //bool flag = true;
-    //while (flag)
-    //{
-        //flag = true;
-        for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
-        {
-	  if (it->agent == ag)
-	      if (it->check)
-	  {
-	      involvedAgents.erase(it);
-	      //flag = false;
-	      //it = involvedAgents.end();
-	      break;
-	  }
-        }
-    //}
-}
-
-void StateMachine::removeInterlocutor(std::vector<AgentAID> agents)
-{
-    //for_each(agents.begin(), agents.end(), removeInterlocutor);
-    std::vector<AgentAID>::iterator it;
-    for (it = agents.begin(); it != agents.end(); it++)
-        removeInterlocutor(*it);
 }
 
 bool StateMachine::checkIfAgentAssigned(AgentAID ag)
@@ -331,6 +304,21 @@ bool StateMachine::checkIfRoleExists(Role myrole)
         if (!it->role.compare(myrole) ) return true;
     }
     return false;
+}
+
+bool StateMachine::addState(State _state)
+{
+    std::string name = _state.getUID();
+    if (find(states.begin(),states.end(),name) != states.end() ) {states.push_back(_state); return true;}
+    return false;
+}
+
+Role StateMachine::getAgentRole(AgentAID ag)
+{
+    std::vector<AgentMapping>::iterator it;
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+        if (it->agent == ag) return it->role;
+        return std::string("");
 }
 
 
