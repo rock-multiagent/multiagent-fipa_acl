@@ -60,7 +60,7 @@ class StateMachine
         bool addState(State);
         bool isConversationOver();
         bool isActive();
-        void addRole(Role role);
+        void addRole(Role myrole);
         bool setRole(Role myrole,AgentAID myagent);
         bool setRole(Role myrole,std::vector<AgentAID> agents);
         bool checkIfAgentAssigned(AgentAID);

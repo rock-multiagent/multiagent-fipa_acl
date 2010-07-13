@@ -149,11 +149,21 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
     //}
 }
 
+StateMachine::StateMachine()
+{
+    initializeObjectFields();
+}
 StateMachine::StateMachine(AgentAID _owner)
 {
     initializeObjectFields();
     owner = _owner;
     
+}
+StateMachine::~StateMachine()
+{
+    states.clear();
+    involvedAgents.clear();
+    cancelMetaP.clear();
 }
 
 int StateMachine::startMachine(ACLMessage msg)
@@ -321,8 +331,12 @@ Role StateMachine::getAgentRole(AgentAID ag)
         return std::string("");
 }
 
-void StateMachine::addRole(const Role& role)
+void StateMachine::addRole(Role myrole)
 {
+    if (checkIfRoleExists(myrole) ) return;
+    AgentMapping newRole;
+    newRole.role = myrole;
+    newRole.check = false;
 
 }
 

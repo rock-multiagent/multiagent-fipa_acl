@@ -6,6 +6,11 @@
 namespace fipa {
 namespace acl {
     
+Transition::Transition()
+{
+    
+}
+    
 int Transition::consumeMessage(ACLMessage &msg)
 {
     if (validateMessage(msg))
@@ -245,6 +250,21 @@ bool Transition::validateInReplyTo(ACLMessage &msg)
 bool Transition::validatePerformative (ACLMessage &msg)
 {
     if (expectedPerf.compare(msg.getPerformative()) ) return false;
+    return true;
+}
+bool Transition::validateOntology (ACLMessage &msg)
+{
+    if (machine->ontology.compare(msg.getOntology()) ) return false;
+    return true;
+}
+bool Transition::validateEncoding (ACLMessage &msg)
+{
+    if (machine->encoding.compare(msg.getEncoding()) ) return false;
+    return true;
+}
+bool Transition::validateLanguage (ACLMessage &msg)
+{
+    if (machine->encoding.compare(msg.getLanguage()) ) return false;
     return true;
 }
 bool Transition::validateProtocol (ACLMessage &msg)
