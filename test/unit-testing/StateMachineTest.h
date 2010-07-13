@@ -16,13 +16,9 @@
 #include "../../src/State.h"
 #include "../../src/Transition.h"
 
-
-
-
-
 using namespace std;
-using namespace fipa::acl;
 
+namespace fipa { namespace acl {
 class StateMachineTest : public CPPUNIT_NS::TestFixture
 {
 	CPPUNIT_TEST_SUITE (StateMachineTest);
@@ -50,5 +46,7 @@ class StateMachineTest : public CPPUNIT_NS::TestFixture
 		StateMachine req;
 
 };
+
+}}
 
 #endif

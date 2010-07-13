@@ -26,6 +26,10 @@ State::State(std::string _uid)
     involvedAgents.clear();
 }
 
+State::~State()
+{
+}
+
 void State::addTransition(Transition &t)
 {
     std::vector<Transition>::iterator it;

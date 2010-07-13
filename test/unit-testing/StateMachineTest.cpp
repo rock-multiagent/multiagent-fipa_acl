@@ -20,9 +20,10 @@
 
 
 using namespace std;
-using namespace fipa::acl;
 
-CPPUNIT_TEST_SUITE_REGISTRATION (StateMachineTest);
+CPPUNIT_TEST_SUITE_REGISTRATION (fipa::acl::StateMachineTest);
+
+namespace fipa { namespace acl {
 
 void StateMachineTest::setUp()
 {
@@ -176,3 +177,4 @@ void StateMachineTest::printUserdefParamset( vector<UserdefParam> &params)
     }
 }
 
+}}

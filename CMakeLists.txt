@@ -51,6 +51,6 @@ set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
-#add_subdirectory(test/unit-testing)
+add_subdirectory(test/unit-testing)
 
 

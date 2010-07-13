@@ -321,6 +321,11 @@ Role StateMachine::getAgentRole(AgentAID ag)
         return std::string("");
 }
 
+void StateMachine::addRole(const Role& role)
+{
+
+}
+
 
 
 

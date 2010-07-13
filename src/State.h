@@ -11,7 +11,7 @@
 namespace fipa {
 namespace acl {
     
-    class StateMachine;
+class StateMachine;
     
 class State 
 {
@@ -52,8 +52,6 @@ class State
         std::string getUID() const;
     private:
         void updateInvolvedAgentsMap(Transition &it);
-        
-        
     
 };    
 

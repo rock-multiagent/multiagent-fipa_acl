@@ -1,15 +1,6 @@
-###### Uncomment the following block for Qt setup
-# include_directories(${CMAKE_CURRENT_BINARY_DIR})
-# # Add your .ui files ot the following line (and uncomment it)
-# QT4_WRAP_UI(ui_cpp myproject.ui)
-# # Add the .h files that define QObject subclasses (that have a Q_OBJECT
-# # statement)
-# QT4_WRAP_CPP(moc_cpp dummy.h)
-
 SET(module_name ${PROJECT_NAME})
 
 set(SOURCES
-	
 	Transition.cpp
 	State.cpp
 	StateMachine.cpp
@@ -21,7 +12,7 @@ set(SOURCES
 
 ###### Define a library
 # Note: the library and executable names can't be the same
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${EXTERNAL_LIBS} ${moc_cpp} ${ui_cpp})
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${EXTERNAL_LIBS})
 # Link the defined target (either binary or library, see above) to libraries.
 # You must use ${QT_LIBRARIES} if you have enabled Qt support in the root
 # CMakeLists.txt, and ${Boost_LIBRARIES} for boost libraries
@@ -29,7 +20,6 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES} ${EXTERNAL_LIBS} ${moc_cpp} ${ui_c
 # If you want to use a library defined in this package, just use its name
 #
 target_link_libraries(${PROJECT_NAME} message-generator ${LIBRARIES} ${EXTERNAL_LIBS})
-
 
 install(TARGETS ${PROJECT_NAME} 
     RUNTIME DESTINATION bin
