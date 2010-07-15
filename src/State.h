@@ -24,8 +24,11 @@ class State
         std::vector<ACLMessage> archive;
         std::map<AgentAID,bool> involvedAgents;
         
+        StateMachine* owningMachine;
+        
         
         friend class Transition;
+        friend class StateMachineTest;
         
     public:
         State();
@@ -50,6 +53,8 @@ class State
         void setFinal(bool _final);
         void setUID(std::string);
         std::string getUID() const;
+        StateMachine* getOwningMachine();
+        void setOwningMachine(StateMachine*);
     private:
         void updateInvolvedAgentsMap(Transition &it);
     

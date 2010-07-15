@@ -43,7 +43,8 @@ class StateMachineTest : public CPPUNIT_NS::TestFixture
 	    void printUserdefParamset( vector<UserdefParam> &params);
 
 	private:
-		StateMachine req;
+		//StateMachine req;
+		AgentAID a1,a2;
 
 };
 

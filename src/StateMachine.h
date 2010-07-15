@@ -35,6 +35,7 @@ class StateMachine
         //ReplyWith replyWith;
         
         friend class Transition;
+        friend class StateMachineTest;
         
     public:
         static const std::string NOT_UNDERSTOOD;
@@ -55,6 +56,7 @@ class StateMachine
         
         
         State* getStateByName(std::string);
+        State* getStateByName(State);
         void generateDefaultStates();
         void generateDefaultTransitions();
         bool addState(State);
@@ -70,6 +72,7 @@ class StateMachine
         //void removeInterlocutor(AgentAID);
         //void removeInterlocutor(std::vector<AgentAID>);
         void updateAllAgentRoles();
+        
         
     private:
         void initializeObjectFields();

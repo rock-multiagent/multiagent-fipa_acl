@@ -8,7 +8,15 @@ namespace acl {
     
 Transition::Transition()
 {
-    
+    from.clear();
+    to.clear();
+    expectedPerf.clear();
+    machine = NULL;
+    owningState = NULL;
+    precedingState = NULL;
+    nextState = NULL;
+    expectedSenders.clear();
+    expectedRecepients.clear();
 }
     
 int Transition::consumeMessage(ACLMessage &msg)
@@ -305,6 +313,7 @@ void Transition::setExpectedPerformative(std::string _performative) 	{ expectedP
 void Transition::setNextStateName	(std::string _state) 	{ nextStateName = _state; }
 void Transition::setFrom		(std::string _from) 	{ from = _from; }
 void Transition::setTo		(std::string _to) 		{ to = _to; }
+void Transition::setOwningState	(State* _state)		{owningState = _state;}
     
 std::string Transition::getExpectedPerformative()	{return expectedPerf; }
 std::string Transition::getNextStateName()	{return nextStateName; }

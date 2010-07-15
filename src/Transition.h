@@ -27,6 +27,8 @@ class Transition
         std::vector<AgentAID> expectedSenders;
         std::vector<AgentAID> expectedRecepients;
         
+        friend class StateMachineTest;
+        
         
         
     public:
@@ -42,6 +44,7 @@ class Transition
         void setNextStateName		(std::string);
         void setFrom		(std::string);
         void setTo			(std::string);
+        void setOwningState		(State*);
         //void setNextState		(State*);
         
         std::string getExpectedPerformative();

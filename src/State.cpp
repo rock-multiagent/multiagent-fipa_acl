@@ -2,6 +2,8 @@
 #include "State.h"
 #include "StateMachine.h"
 
+#include <iostream>
+
 
 namespace fipa {
 namespace acl {
@@ -28,6 +30,10 @@ State::State(std::string _uid)
 
 State::~State()
 {
+    transitions.clear();
+    subSM.clear();
+    archive.clear();
+    involvedAgents.clear();
 }
 
 void State::addTransition(Transition &t)
@@ -35,6 +41,8 @@ void State::addTransition(Transition &t)
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
         if (unloadedEqual(*it,t) ) return;
+        //std::cout<<"\t\ttransition added to state .."<<uid<<"\n";
+    t.setOwningState(this);
     transitions.push_back(t);
 }
 
@@ -46,14 +54,20 @@ void State::generateDefaultTransitions()
 	  // i don't generate a not-understood transition for the not-understood message...
 	  if (!trit->getExpectedPerformative().compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]) ) continue;
 	  
+	  //std::cout<< trit->getExpectedPerformative()<< "..exp perf for the current transition\n";
+	  
 	  Transition t = Transition();
 	  t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]);
 	  t.setFrom(trit->getTo());
 	  t.setTo(trit->getFrom());
+	  
 	  t.setNextStateName(StateMachine::NOT_UNDERSTOOD);
+	  //std::cout<<"check2\n";
 	  //t.setMessageParity(true);
-	  if (trit->getNextState() != NULL)  trit->getNextState()->addTransition(t);
+	  if (!trit->getNextStateName().empty())  {(owningMachine->getStateByName(trit->getNextStateName()))->addTransition(t);}
 	  else addTransition(t);
+	  //std::cout<<"check1\n";
+	  //std::cout<<uid<<"..state generating default trans for\n";
 	  
         }
 }
@@ -222,6 +236,16 @@ bool operator==(const State &a,const std::string &b)
 bool operator<(const AgentAID &a,const AgentAID &b)
 {
     return true;
+}
+
+StateMachine* State::getOwningMachine()
+{
+    return owningMachine;
+}
+
+void State::setOwningMachine(StateMachine *_machine)
+{
+    owningMachine = _machine;
 }
 
 } // end of acl

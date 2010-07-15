@@ -1,6 +1,7 @@
 
 #include "StateMachine.h"
 #include "State.h"
+#include <iostream>
 
 namespace fipa {
 namespace acl {
@@ -218,6 +219,20 @@ State* StateMachine::getStateByName(std::string _name)
     std::vector<State>::iterator it = find(states.begin(),states.end(),_name);
     if (it == states.end()) return NULL;
     return (&(*it));
+    
+    /*for (it = states.begin(); it != states.end(); it ++)
+    {
+        if (!it->getUID().compare(_name)) return (&(*it));
+    }
+    return NULL;*/
+}
+
+State* StateMachine::getStateByName(State _name)
+{
+    std::string searchName = _name.getUID();
+    std::vector<State>::iterator it = find(states.begin(),states.end(),searchName);
+    if (it == states.end()) return NULL;
+    return (&(*it));
 }
 void StateMachine::removeInterlocutor(AgentAID ag)
 {
@@ -319,7 +334,7 @@ bool StateMachine::checkIfRoleExists(Role myrole)
 bool StateMachine::addState(State _state)
 {
     std::string name = _state.getUID();
-    if (find(states.begin(),states.end(),name) != states.end() ) {states.push_back(_state); return true;}
+    if (find(states.begin(),states.end(),name) == states.end() ) {states.push_back(_state); return true;}
     return false;
 }
 
