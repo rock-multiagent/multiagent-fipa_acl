@@ -74,8 +74,10 @@ void State::generateDefaultTransitions()
 
 int State::consumeMessage(ACLMessage &msg)
 {
+    std::cout<<"state's\t"<<uid<<"\tconsumeMessage call\n";
     if (!subSM.empty())
     {
+        std::cout<<"checking the sub-state machines..\n";
         bool found_one = false;
         bool stillActiveSubSM = false;
         std::vector<StateMachine>::iterator smit;
@@ -96,9 +98,11 @@ int State::consumeMessage(ACLMessage &msg)
 	  else return 1;
         else;
     }
+    std::cout<<"not enterred the subSM if..\n";
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
     {
+        std::cout<<"sending mesage to a transition of state.. "<<uid<<"\n";
         if (it->consumeMessage(msg) == 0) return 0;
     }
     return 1;

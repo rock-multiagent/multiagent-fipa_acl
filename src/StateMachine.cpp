@@ -184,12 +184,15 @@ int StateMachine::startMachine(ACLMessage msg)
 
 int StateMachine::consumeMessage(ACLMessage msg)
 {
+    std::cout<<"enter consume..\n";
+    if (!active) return startMachine(msg);
     int x = 0; // return code received from the current state
     std::vector<StateMachine>::iterator it;
     for (it = cancelMetaP.begin(); it != cancelMetaP.end(); it++)
     {
         if (it->isActive() )
         {	  
+	  std::cout<<"meta conversation active..\n";
 	  if (it->consumeMessage(msg) == 0) return 0;
 	  //x= 1;
         }
@@ -200,8 +203,14 @@ int StateMachine::consumeMessage(ACLMessage msg)
         else return 1;
     else;
     
-    if (currentState->consumeMessage(msg) == 0)   
+    std::cout<<"sending the message to the current state..\n";
+    if (currentState)
+    {
+        std::cout<<"current state not-null..\n";
+        if (currentState->consumeMessage(msg) == 0)   
         if (currentState->getFinal() ) { conversationOver = true; active = false; return 0;}
+        else return 0;
+    }else; //TODO: twrow some error here
     return 1;
 }
 
@@ -348,10 +357,11 @@ Role StateMachine::getAgentRole(AgentAID ag)
 
 void StateMachine::addRole(Role myrole)
 {
-    if (checkIfRoleExists(myrole) ) return;
+    if (checkIfRoleExists(myrole) ) return; //either this or throw some roleAlreadyExists error
     AgentMapping newRole;
     newRole.role = myrole;
     newRole.check = false;
+    involvedAgents.push_back(newRole);
 
 }
 

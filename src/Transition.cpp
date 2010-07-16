@@ -2,6 +2,7 @@
 #include "Transition.h"
 #include "State.h"
 #include "StateMachine.h"
+#include <iostream>
 
 namespace fipa {
 namespace acl {
@@ -51,19 +52,19 @@ int Transition::consumeMessage(ACLMessage &msg)
 
 bool Transition::validateMessage(ACLMessage &msg)
 {
-    if (!validatePerformative(msg)) return false;
-    if (from.empty() || to.empty() ) 
-        if (!updateRoles(msg)) return false;
+    if (!validatePerformative(msg)){std::cout<<"\t\t\t\t*******1"; return false; }
+    if (expectedSenders.empty() || expectedRecepients.empty() ) 
+    {std::cout<<"agents not set yet..\n"; if (!updateRoles(msg)) return false; std::cout<<"agents set now..\n";}
         
-    if (!validateSender(msg)) return false;
-    if (!validateRecepients(msg)) return false;
+    if (!validateSender(msg)) {std::cout<<"\t\t\t\t*******2"; return false; }
+    if (!validateRecepients(msg)) {std::cout<<"\t\t\t\t*******3"; return false; }
     
-    if (!validateConvID(msg)) return false;
-    if (!validateProtocol(msg)) return false;
-    if (!validateEncoding(msg)) return false;
-    if (!validateLanguage(msg)) return false;
-    if (!validateOntology(msg)) return false;
-    if (!validateInReplyTo(msg)) return false;
+    if (!validateConvID(msg)) {std::cout<<"\t\t\t\t*******4"; return false; }
+    if (!validateProtocol(msg)) {std::cout<<"\t\t\t\t*******5"; return false; }
+    if (!validateEncoding(msg)) {std::cout<<"\t\t\t\t*******6"; return false; }
+    if (!validateLanguage(msg)) {std::cout<<"\t\t\t\t*******7"; return false; }
+    if (!validateOntology(msg)) {std::cout<<"\t\t\t\t*******8"; return false; }
+    if (!validateInReplyTo(msg)) {std::cout<<"\t\t\t\t*******9"; return false; }
     //if (!validateReplyBy(msg)) return false;
     
     
@@ -142,8 +143,10 @@ bool Transition::updateRoles(ACLMessage &msg)
     if (!expectedRecepients.empty() ) expectedRecepients.clear();
     if (machine->checkIfRoleExists(from) )
     {
+        std::cout<<"\trole to be updated exists..\n";
         if(machine->checkIfRoleSet(from) )
         {
+	  std::cout<<"\trole to be updated is set..\n";
 	  std::vector<AgentMapping>::iterator it;
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
@@ -152,8 +155,11 @@ bool Transition::updateRoles(ACLMessage &msg)
 	  }
         } else 
 	  {
+	      std::cout<<"setting new role..\n";
 	      if (!machine->setRole(from,msg.getSender())) return false;
+	      std::cout<<"setting the new role suceeded, sending an update signal..\n";
 	      machine->updateAllAgentRoles();
+	      std::cout<<"roles updated with the new set role";
 	  }
         
     } else return false; //TODO: twrow some violation of protocol error
@@ -257,11 +263,13 @@ bool Transition::validateInReplyTo(ACLMessage &msg)
 
 bool Transition::validatePerformative (ACLMessage &msg)
 {
+    
     if (expectedPerf.compare(msg.getPerformative()) ) return false;
     return true;
 }
 bool Transition::validateOntology (ACLMessage &msg)
 {
+    if (machine->ontology.empty() ) {machine->ontology = msg.getOntology(); return true;}
     if (machine->ontology.compare(msg.getOntology()) ) return false;
     return true;
 }
@@ -272,16 +280,19 @@ bool Transition::validateEncoding (ACLMessage &msg)
 }
 bool Transition::validateLanguage (ACLMessage &msg)
 {
+    if (machine->encoding.empty() ) {machine->encoding = msg.getEncoding(); return true;}
     if (machine->encoding.compare(msg.getLanguage()) ) return false;
     return true;
 }
 bool Transition::validateProtocol (ACLMessage &msg)
 {
+    if (machine->protocol.empty() ) {machine->protocol = msg.getProtocol(); return true;}
     if (machine->protocol.compare(msg.getProtocol()) ) return false;
     return true;
 }
 bool Transition::validateConvID (ACLMessage &msg)
 {
+    if (machine->convid.empty() ) {machine->convid = msg.getConversationID(); return true;}
     if (machine->convid.compare(msg.getConversationID()) ) return false;
     return true;
 }
