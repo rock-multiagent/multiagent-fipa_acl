@@ -35,6 +35,6 @@ add_subdirectory(test/unit-testing)
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} )
 
 
