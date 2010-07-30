@@ -30,7 +30,7 @@ link_directories(${MessageGenerator_LIBRARY_DIRS})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
-add_subdirectory(test/unit-testing)
+#add_subdirectory(test/unit-testing)
 
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
