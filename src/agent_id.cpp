@@ -2,15 +2,15 @@
 
 namespace fipa { namespace acl {
 
-AgentIDPrinter::AgentIDPrinter()
+AgentIdentifierPrinter::AgentIdentifierPrinter()
 {
 }
 
-AgentIDPrinter::~AgentIDPrinter()
+AgentIdentifierPrinter::~AgentIdentifierPrinter()
 {
 }
 
-void AgentIDPrinter::print(const fipa::acl::AgentID& aid)
+void AgentIdentifierPrinter::print(const fipa::acl::AgentIdentifier& aid)
 {
 	printf("\t\tname: %s\n", aid.name.c_str());
 	for(int a=0; a < aid.addresses.size(); a++)
@@ -20,7 +20,7 @@ void AgentIDPrinter::print(const fipa::acl::AgentID& aid)
 	printf("\t\tresolvers:\n");
 	for(int r=0; r < aid.resolvers.size(); r++)
 	{
-		fipa::acl::AgentID resolver = aid.resolvers[r].get();
+		fipa::acl::AgentIdentifier resolver = aid.resolvers[r].get();
 		print(resolver);
 	}
 

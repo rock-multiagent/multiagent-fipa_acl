@@ -7,7 +7,7 @@
 
 namespace fipa { namespace acl {
 
-typedef boost::variant<std::string, fipa::acl::AgentID, std::vector<fipa::acl::AgentID>, fipa::acl::ByteSequence, fipa::acl::DateTime, fipa::acl::ByteString > ParameterValue;
+typedef boost::variant<std::string, fipa::acl::AgentIdentifier, std::vector<fipa::acl::AgentIdentifier>, fipa::acl::ByteSequence, fipa::acl::DateTime, fipa::acl::ByteString > ParameterValue;
 
 class ParameterPrinter : public boost::static_visitor<std::string>
 {
@@ -17,15 +17,15 @@ class ParameterPrinter : public boost::static_visitor<std::string>
                         return s;
                 }
 
-                std::string operator()(fipa::acl::AgentID agentID) const
+                std::string operator()(fipa::acl::AgentIdentifier agentID) const
                 {
-                        return "AgentID";
+                        return "AgentIdentifier";
                 }
 
-                std::string operator()(std::vector<fipa::acl::AgentID> ids) const
+                std::string operator()(std::vector<fipa::acl::AgentIdentifier> ids) const
                 {
 
-                        return "AgentIDs";
+                        return "AgentIdentifiers";
                 }
 
                 std::string operator()(fipa::acl::ByteSequence seq) const

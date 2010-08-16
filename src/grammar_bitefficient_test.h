@@ -25,16 +25,16 @@ namespace fipa
 namespace acl
 {
 
-struct AgentID;
-typedef boost::recursive_wrapper<AgentID> Resolver;
+struct AgentIdentifier;
+typedef boost::recursive_wrapper<AgentIdentifier> Resolver;
 
-struct AgentID
+struct AgentIdentifier
 {
 	std::string name;
 	std::vector<fipa::acl::Resolver> resolvers;
 };
 
-typedef boost::variant< std::string, std::vector<fipa::acl::AgentID> > ParameterValue;
+typedef boost::variant< std::string, std::vector<fipa::acl::AgentIdentifier> > ParameterValue;
 
 // Define the final message structure here
 struct Message

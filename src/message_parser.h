@@ -14,7 +14,7 @@
 
 #include <message-generator/ACLMessage.h>
 #include <message-generator/UserdefParam.h>
-#include <message-generator/AgentAID.h>
+#include <message-generator/AgentID.h>
 
 #include "types.h"
 
@@ -52,11 +52,11 @@ class MessageParser
 
 		void buildSender(MessageParameter param, ACLMessage &msg);
 
-		AgentAID buildAgentAID(AgentID agent);
+		AgentID buildAgentID(AgentIdentifier agent);
 
-		void buildResolvers(AgentAID &workAg, AgentID agent);
+		void buildResolvers(AgentID &workAg, AgentIdentifier agent);
 
-		void buildAgentParameters(AgentAID &workAg, AgentID agent);
+		void buildAgentParameters(AgentID &workAg, AgentIdentifier agent);
 
 		UserdefParam buildUserdefParameter(UserDefinedParameter param);
 
