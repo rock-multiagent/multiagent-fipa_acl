@@ -1,12 +1,12 @@
 /**
  *
- * \file AgentAID.cpp
+ * \file AgentID.cpp
  * \author Mircea Cretu Stancu
- * \brief Implements the general AgentAID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org).
+ * \brief Implements the general AgentID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org).
  * 
  * \version 1.0
  */
-#include "AgentAID.h"
+#include "AgentID.h"
 #include "ACLMessage.h"
 #include <iostream>
 #include <algorithm>
@@ -16,16 +16,16 @@ namespace fipa {
 namespace acl {
 
     
-int AgentAID::resCompDepth = 1;
+int AgentID::resCompDepth = 1;
  
-AgentAID::AgentAID()
+AgentID::AgentID()
 {
 	name = std::string();
 	name.clear();
 	initializeFields();
 }
 
-AgentAID::AgentAID(const std::string nam) 
+AgentID::AgentID(const std::string nam) 
 {
     initializeFields();
     if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
@@ -33,51 +33,51 @@ AgentAID::AgentAID(const std::string nam)
     else name = nam;
 }
 
-void AgentAID::initializeFields()
+void AgentID::initializeFields()
 {
 	params.clear();
-	adresses.clear();
+	addresses.clear();
 	resolvers.clear();
 }
 
-std::string AgentAID::getName() const {return name;}
+std::string AgentID::getName() const {return name;}
 
-int AgentAID::setName(const std::string nam) 
+int AgentID::setName(const std::string nam) 
 {
     if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
     return 1;
     name = nam; return 0;
 }
 
-int AgentAID::addAdress(const std::string &adr) 
+int AgentID::addAddress(const std::string &adr) 
 {
     if ( (adr.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(adr.c_str()[0]) != -1) )
     return 1;
-    adresses.insert(adresses.begin(),adr); return 0;
+    addresses.insert(addresses.begin(),adr); return 0;
 }
 
-std::vector<std::string> AgentAID::getAdresses() const {return adresses;}
+std::vector<std::string> AgentID::getAddresses() const {return addresses;}
 
-void AgentAID::addResolver(const AgentAID &aid) 
+void AgentID::addResolver(const AgentID &aid) 
 {
     if ( find(resolvers.begin(),resolvers.end(),aid) == resolvers.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     resolvers.insert(resolvers.begin(),aid); 
 }
 
-std::vector<AgentAID> AgentAID::getResolvers() const {return resolvers;}
+std::vector<AgentID> AgentID::getResolvers() const {return resolvers;}
 
-void AgentAID::deleteResolver(const AgentAID &aid) 
+void AgentID::deleteResolver(const AgentID &aid) 
 {
-    std::vector<AgentAID>::iterator it;
+    std::vector<AgentID>::iterator it;
     if ( (it = find(resolvers.begin(),resolvers.end(),aid)) != resolvers.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     resolvers.erase(it);
     /*
-    std::vector<AgentAID>::iterator it = resolvers.begin();
+    std::vector<AgentID>::iterator it = resolvers.begin();
     for (it; it != resolvers.end(); it++)
        {
-        AgentAID a = *it;
+        AgentID a = *it;
         if ( a == aid)
         {
 	  resolvers.erase(it);
@@ -87,36 +87,36 @@ void AgentAID::deleteResolver(const AgentAID &aid)
     */
 }
 
-void AgentAID::addUserdefParam(const UserdefParam &p) 
+void AgentID::addUserdefParam(const UserdefParam &p) 
 {
     params.insert(params.begin(),p); 
 }
 
-std::vector<UserdefParam> AgentAID::getUserdefParams() const {return params;}
+std::vector<UserdefParam> AgentID::getUserdefParams() const {return params;}
 
-//void AgentAID::setResCompDepth(int x) {resCompDepth = x;}
-//int AgentAID::getResCompDepth() {return resCompDepth;}
+//void AgentID::setResCompDepth(int x) {resCompDepth = x;}
+//int AgentID::getResCompDepth() {return resCompDepth;}
 
 
-bool operator== (const AgentAID &a,const  AgentAID &b)
+bool operator== (const AgentID &a,const  AgentID &b)
 {
-   return resDepthEqual(a,b,AgentAID::resCompDepth);
+   return resDepthEqual(a,b,AgentID::resCompDepth);
     
 }
   
-bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
+bool resDepthEqual(const AgentID &a,const AgentID &b, int depth)
 {
      //saving the resCompDepth variable for later restoration
-    //int depthRestore = AgentAID::getResCompDepth();
+    //int depthRestore = AgentID::getResCompDepth();
     
-    //AgentAID a = AgentAID(&c);
-    //AgentAID b = AgentAID(&d);
+    //AgentID a = AgentID(&c);
+    //AgentID b = AgentID(&d);
     if (a.getName().compare(b.getName()))
         return false;
     
-    // comparing adresses
-    std::vector<std::string> addrA = a.getAdresses();
-    std::vector<std::string> addrB = b.getAdresses();
+    // comparing addresses
+    std::vector<std::string> addrA = a.getAddresses();
+    std::vector<std::string> addrB = b.getAddresses();
     std::vector<std::string>::iterator sita = addrA.begin();
     std::vector<std::string>::iterator sitb = addrB.begin();
     int found_one = 0; // flag variable to control flow through inner loops
@@ -152,13 +152,13 @@ bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
     if (depth > 0 )
     {
         // the resolvers are compared with up to resCompDepth -1 in the resolver network
-        //AgentAID::setResCompDepth(depth-1);
+        //AgentID::setResCompDepth(depth-1);
     // comparing resolvers
-    std::vector<AgentAID> agentsA = a.getResolvers();
-    std::vector<AgentAID> agentsB = b.getResolvers();
-    std::vector<AgentAID>::iterator ait = agentsA.begin();
-    std::vector<AgentAID>::iterator bit = agentsB.begin();
-    //std::vector<AgentAID>::iterator aux;
+    std::vector<AgentID> agentsA = a.getResolvers();
+    std::vector<AgentID> agentsB = b.getResolvers();
+    std::vector<AgentID>::iterator ait = agentsA.begin();
+    std::vector<AgentID>::iterator bit = agentsB.begin();
+    //std::vector<AgentID>::iterator aux;
     
       while (ait != agentsA.end())
     {
@@ -225,11 +225,11 @@ bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth)
 
 
 
-AgentAID::~AgentAID()
+AgentID::~AgentID()
 {
     /*
-    adresses->clear();
-    delete adresses;
+    addresses->clear();
+    delete addresses;
     if (params)
     {
     std::vector<UserdefParam*>::iterator it = params->begin();
@@ -245,7 +245,7 @@ AgentAID::~AgentAID()
     std::cout<< sizeof(params)<<"\t agent dest \n";
     if (resolvers!=NULL)
     {
-    std::vector<AgentAID*>::iterator it1 = resolvers->begin();
+    std::vector<AgentID*>::iterator it1 = resolvers->begin();
     for (it1; it1 != resolvers->end(); it1++)
         {	
 	  delete (*it1);
@@ -259,29 +259,29 @@ AgentAID::~AgentAID()
 }
 
 
-AgentAID::AgentAID(const AgentAID &aid)
+AgentID::AgentID(const AgentID &aid)
 {
     initializeFields();
     
     name = aid.getName();
-   if (!aid.getAdresses().empty())
+   if (!aid.getAddresses().empty())
    {
-        std::vector<std::string> aidAdr = aid.getAdresses();
+        std::vector<std::string> aidAdr = aid.getAddresses();
         std::vector<std::string>::iterator otherSit = aidAdr.begin();
         for (otherSit; otherSit != aidAdr.end(); otherSit++)
         {
 	  std::string mystring = std::string(*otherSit);
-	  adresses.insert(adresses.begin(),mystring);
+	  addresses.insert(addresses.begin(),mystring);
         }
    }
    if (!aid.getResolvers().empty())
    {
         
-        std::vector<AgentAID> aidres = aid.getResolvers();
-        std::vector<AgentAID>::iterator aidit= aidres.begin();
+        std::vector<AgentID> aidres = aid.getResolvers();
+        std::vector<AgentID>::iterator aidit= aidres.begin();
         for (aidit; aidit != aidres.end(); aidit++)
         {
-	  AgentAID temp = AgentAID();
+	  AgentID temp = AgentID();
 	  temp = (*aidit);
 	  resolvers.insert(resolvers.begin(),temp);
         }
@@ -301,14 +301,14 @@ AgentAID::AgentAID(const AgentAID &aid)
 }
 
 
-AgentAID& AgentAID::operator=(const AgentAID &aid)
+AgentID& AgentID::operator=(const AgentID &aid)
 {
     
     // checking against agent1 = agent1 case
     if (this != &aid)
     {
         
-        // freeing previously filled in values for adresses, userdefined parmameters and resolvers
+        // freeing previously filled in values for addresses, userdefined parmameters and resolvers
         
         if (!params.empty())
         {
@@ -317,7 +317,7 @@ AgentAID& AgentAID::operator=(const AgentAID &aid)
         }
        
         
-        if (!adresses.empty())        adresses.clear();
+        if (!addresses.empty())        addresses.clear();
        
         
         if (!resolvers.empty())
@@ -330,24 +330,24 @@ AgentAID& AgentAID::operator=(const AgentAID &aid)
         initializeFields();
     
         name = aid.getName();
-        if (!aid.getAdresses().empty())
+        if (!aid.getAddresses().empty())
         {
-	  std::vector<std::string> aidAdr = aid.getAdresses();
+	  std::vector<std::string> aidAdr = aid.getAddresses();
 	  std::vector<std::string>::iterator otherSit = aidAdr.begin();
 	  for (otherSit; otherSit != aidAdr.end(); otherSit++)
 	  {
 	      std::string mystring = std::string(*otherSit);
-	      adresses.insert(adresses.begin(),mystring);
+	      addresses.insert(addresses.begin(),mystring);
 	  }
         }
         if (!aid.getResolvers().empty())
         {	  
 	  
-	  std::vector<AgentAID> aidres = aid.getResolvers();
-	  std::vector<AgentAID>::iterator aidit= aidres.begin();
+	  std::vector<AgentID> aidres = aid.getResolvers();
+	  std::vector<AgentID>::iterator aidit= aidres.begin();
 	  for (aidit; aidit != aidres.end(); aidit++)
 	  {
-	      AgentAID temp = AgentAID();
+	      AgentID temp = AgentID();
 	      temp = (*aidit);
 	      resolvers.insert(resolvers.begin(),temp);
 	  }	

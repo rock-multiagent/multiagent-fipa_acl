@@ -5,7 +5,7 @@
  * \brief defines the UserdefParam class
  * 
  * \version 1.0
- *  - has very basic features, only what was needed for the ACLMessage and AgentAID classes
+ *  - has very basic features, only what was needed for the ACLMessage and AgentID classes
  *  - may need to be expanded/derived from depending on future needs
  */
 

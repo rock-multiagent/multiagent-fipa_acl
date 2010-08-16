@@ -2,7 +2,7 @@ SET(module_name ${PROJECT_NAME})
 
 set(SOURCES
 	ACLMessage.cpp
-	AgentAID.cpp
+	AgentID.cpp
 	UserdefParam.cpp
 	ACLMessageOutputParser.cpp
 )

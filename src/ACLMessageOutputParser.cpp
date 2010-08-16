@@ -16,7 +16,7 @@
 #include "ACLMessageOutputParser.h"
 #include "ACLMessage.h"
 #include "UserdefParam.h"
-#include "AgentAID.h"
+#include "AgentID.h"
 
 namespace fipa {
 
@@ -184,18 +184,18 @@ std::string ACLMessageOutputParser::bitParseParam(UserdefParam p)
 }
 
 
-std::string ACLMessageOutputParser::getBitAID(AgentAID aid, int depth)
+std::string ACLMessageOutputParser::getBitAID(AgentID aid, int depth)
 {
             if (depth > 0)
             return char(0x02) + getBitBinWord(aid.getName())+
-            (( aid.getAdresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAdresses()))) +
+            (( aid.getAddresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAddresses()))) +
             (( aid.getResolvers().empty() == true)? "" : getBitResolvers(aid.getResolvers(),depth-1)) +
             (( aid.getUserdefParams().empty() == true)? "" : getBitUserdefParams(aid.getUserdefParams())) +
             getBitEndOfColl();
              
                          
            return char(0x02) + getBitBinWord(aid.getName())+
-            (( aid.getAdresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAdresses()))) +
+            (( aid.getAddresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAddresses()))) +
             
             (( aid.getUserdefParams().empty() == true)? "" : getBitUserdefParams(aid.getUserdefParams())) +
             getBitEndOfColl();
@@ -213,15 +213,15 @@ std::string ACLMessageOutputParser::getBinURLCol(std::vector<std::string> adrr)
             return retstr;
 }
 
-std::string ACLMessageOutputParser::getBitResolvers(std::vector<AgentAID> aids,int depth)
+std::string ACLMessageOutputParser::getBitResolvers(std::vector<AgentID> aids,int depth)
 {
             return (char(0x03) + getBitAIDColl(aids,depth));
 }
 
-std::string ACLMessageOutputParser::getBitAIDColl(std::vector<AgentAID> aids, int depth)
+std::string ACLMessageOutputParser::getBitAIDColl(std::vector<AgentID> aids, int depth)
 {
             std::string retstr = std::string();
-            std::vector<AgentAID>::iterator it = aids.begin();
+            std::vector<AgentID>::iterator it = aids.begin();
             for (it; it != aids.end(); it++)
                 retstr = retstr + getBitAID(*it, depth);
             return retstr + getBitEndOfColl();
@@ -379,10 +379,10 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
     else return false;
     
     // checking if receivers sets of the message are the same
-    std::vector<AgentAID> agentsA = a.getAllReceivers();
-    std::vector<AgentAID> agentsB = b.getAllReceivers();
-    std::vector<AgentAID>::iterator ait = agentsA.begin();
-    std::vector<AgentAID>::iterator bit = agentsB.begin();
+    std::vector<AgentID> agentsA = a.getAllReceivers();
+    std::vector<AgentID> agentsB = b.getAllReceivers();
+    std::vector<AgentID>::iterator ait = agentsA.begin();
+    std::vector<AgentID>::iterator bit = agentsB.begin();
     int found_one = 0; // flag variable to control flow through inner loops
     while (ait != agentsA.end())
     {
@@ -475,19 +475,19 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
 }
 
 
-bool operator== ( AgentAID &a,  AgentAID &b)
+bool operator== ( AgentID &a,  AgentID &b)
 {
     ///saving the resCompDepth variable for later restoration
-    int depthRestore = AgentAID::getResCompDepth();
+    int depthRestore = AgentID::getResCompDepth();
     
-    //AgentAID a = AgentAID(&c);
-    //AgentAID b = AgentAID(&d);
+    //AgentID a = AgentID(&c);
+    //AgentID b = AgentID(&d);
     if (a.getName().compare(b.getName()))
         return false;
     
-    // comparing adresses
-    std::vector<std::string> addrA = a.getAdresses();
-    std::vector<std::string> addrB = b.getAdresses();
+    // comparing addresses
+    std::vector<std::string> addrA = a.getAddresses();
+    std::vector<std::string> addrB = b.getAddresses();
     std::vector<std::string>::iterator sita = addrA.begin();
     std::vector<std::string>::iterator sitb = addrB.begin();
     int found_one = 0; // flag variable to control flow through inner loops
@@ -525,12 +525,12 @@ bool operator== ( AgentAID &a,  AgentAID &b)
     if (depthRestore > 0 )
     {
         // the resolvers are compared with up to resCompDepth -1 in the resolver network
-        AgentAID::setResCompDepth(depthRestore-1);
+        AgentID::setResCompDepth(depthRestore-1);
     // comparing resolvers
-    std::vector<AgentAID> agentsA = a.getResolvers();
-    std::vector<AgentAID> agentsB = b.getResolvers();
-    std::vector<AgentAID>::iterator ait = agentsA.begin();
-    std::vector<AgentAID>::iterator bit = agentsB.begin();
+    std::vector<AgentID> agentsA = a.getResolvers();
+    std::vector<AgentID> agentsB = b.getResolvers();
+    std::vector<AgentID>::iterator ait = agentsA.begin();
+    std::vector<AgentID>::iterator bit = agentsB.begin();
     
     while (ait != agentsA.end())
     {
@@ -553,7 +553,7 @@ bool operator== ( AgentAID &a,  AgentAID &b)
 	  
     }
     // restoring the comparison depth variable to the initial value; there must be no possible return statements between the 2 changes made to it
-    AgentAID::setResCompDepth(depthRestore);
+    AgentID::setResCompDepth(depthRestore);
     if (!agentsA.empty())
         return false;
     if (!agentsB.empty())

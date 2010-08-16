@@ -3,8 +3,8 @@
 # version: 1.0
 
 
-objects = ../bin/ACLMessage.o ../bin/AgentAID.o ../bin/UserdefParam.o ../bin/ACLMessageOutputParser.o
-headers = ACLMessage.h AgentAID.h UserdefParam.h ACLMessageOutputParser.h 
+objects = ../bin/ACLMessage.o ../bin/AgentID.o ../bin/UserdefParam.o ../bin/ACLMessageOutputParser.o
+headers = ACLMessage.h AgentID.h UserdefParam.h ACLMessageOutputParser.h 
 
 ../bin : ../bin/test.o $(objects)
 	g++ ../bin/test.o ../../message-parser/bin/message_parser.o ../../message-parser/bin/grammar_bitefficient.o $(objects) -o ../bin/Project
@@ -16,8 +16,8 @@ headers = ACLMessage.h AgentAID.h UserdefParam.h ACLMessageOutputParser.h
 ../bin/ACLMessage.o : ACLMessage.cpp ACLMessage.h $(headers)
 	g++ -c ACLMessage.cpp -o ../bin/ACLMessage.o
 
-../bin/AgentAID.o : AgentAID.cpp AgentAID.h
-	g++ -c AgentAID.cpp -o ../bin/AgentAID.o
+../bin/AgentID.o : AgentID.cpp AgentID.h
+	g++ -c AgentID.cpp -o ../bin/AgentID.o
 
 ../bin/UserdefParam.o : UserdefParam.cpp UserdefParam.h $(headers)
 	g++ -c UserdefParam.cpp -o ../bin/UserdefParam.o

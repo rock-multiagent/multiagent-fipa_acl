@@ -11,7 +11,7 @@
 
 #include<vector>
 #include<string>
-#include"AgentAID.h"
+#include"AgentID.h"
 #include"UserdefParam.h"
 //#include "ACLMessageOutputParser.h"
 
@@ -59,11 +59,11 @@ class ACLMessage {
 private:
         std::string performative;
         /** \param sender: pointer to the agentAID sending the message */
-        AgentAID sender;
+        AgentID sender;
         /** \param receivers: pointer to a set of agentAIDs representing the intended receivers of the message; set was chosen for uniquness of  elements*/
-        std::vector<AgentAID> receivers;
+        std::vector<AgentID> receivers;
         /** \param reply_to: pointer to a set of agentAIDs representing where a reply to this message should be deliverred */
-        std::vector<AgentAID> reply_to;
+        std::vector<AgentID> reply_to;
         /** \param language: string representing the language used */
         std::string language;
         /** \param encoding: string representing the encoding (encoding of the content; not related to message encoding) */
@@ -160,14 +160,14 @@ public:
        */
        int setPerformative(const std::string str);
        std::string getPerformative() const;
-       void addReceiver(const AgentAID &aid);
-       void deleteReceiver(const AgentAID &aid);
+       void addReceiver(const AgentID &aid);
+       void deleteReceiver(const AgentID &aid);
        void clearReceivers();
-       std::vector<AgentAID> getAllReceivers() const;
-       void addReplyTo(const AgentAID &aid);
-       void deleteReplyTo(const AgentAID aid);
+       std::vector<AgentID> getAllReceivers() const;
+       void addReplyTo(const AgentID &aid);
+       void deleteReplyTo(const AgentID aid);
        void clearReplyTo();
-       std::vector<AgentAID> getAllReplyTo() const;
+       std::vector<AgentID> getAllReplyTo() const;
        void setReplyBy(long by);
        long getReplyBy() const;
        void setInReplyTo(const std::string str);
@@ -190,8 +190,8 @@ public:
        std::string getLanguage() const;
        void setContent(const std::string cont);
        std::string getContent() const;
-       void setSender(const AgentAID &sender1);
-       AgentAID getSender() const;
+       void setSender(const AgentID &sender1);
+       AgentID getSender() const;
        void addUserdefParam(const UserdefParam &p);
        std::vector<UserdefParam> getUserdefParams() const;
        void setUserdefParams(const std::vector<UserdefParam> p);

@@ -1,15 +1,15 @@
 /**
  *
- * \file AgentAID.h
+ * \file AgentID.h
  * \author Mircea Cretu Stancu
- * \brief Defines the AgentAID class
+ * \brief Defines the AgentID class
  * 
  * \version 1.0
  *  - has very basic features, only what was needed for the ACLMessage class
  *  - may need to be expanded/derived from depending on future needs
  */
-#ifndef AgentAID_H_
-#define AgentAID_H_
+#ifndef AgentID_H_
+#define AgentID_H_
 
 #include"UserdefParam.h"
 #include<string>
@@ -20,19 +20,19 @@ namespace fipa {
 namespace acl {
 
     /**
-	  \brief overloaded equality operator for AgentAID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
+	  \brief overloaded equality operator for AgentID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
 	  
 	  The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
 	  in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
     */
-        //extern bool operator== ( AgentAID &a,  AgentAID &b);
+        //extern bool operator== ( AgentID &a,  AgentID &b);
     
     /**
-        \class AgentAID
-        \brief Implements the general AgentAID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org). Functionality may need to be extended as further modules are implemented
-        Important notice: the probably main field of an AgentAID, the actual id, is not yet declared/implemented, as it was not need for the encoding and it was not discussed what should it be 
+        \class AgentID
+        \brief Implements the general AgentID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org). Functionality may need to be extended as further modules are implemented
+        Important notice: the probably main field of an AgentID, the actual id, is not yet declared/implemented, as it was not need for the encoding and it was not discussed what should it be 
     */
-class AgentAID {
+class AgentID {
 
 /**
 	the fields are not based on the Architecture specification and utilities, but rather on the bit-Efficient encoding specification, so they have the name, values and functionality needed to implement this specification(they happen to coincide almost completely though)
@@ -40,10 +40,10 @@ class AgentAID {
        private:
 	     /** \param name: name of the agent*/
                std::string name;
-	     /** \param adresses: pointer to a set of strings representing the adresses of the agent*/
-               std::vector<std::string> adresses;
-	     /** \param resolvers: pointer to a set of AgentAIDs(also pointers) representing the resolvers of the current agent */
-               std::vector<AgentAID> resolvers;
+	     /** \param addresses: pointer to a set of strings representing the addresses of the agent*/
+               std::vector<std::string> addresses;
+	     /** \param resolvers: pointer to a set of AgentIDs(also pointers) representing the resolvers of the current agent */
+               std::vector<AgentID> resolvers;
 	     /** \param params: pointer to a set of UserdefParams(also pointers) representing the parameters of an agent id */
                std::vector<UserdefParam> params;
 	    
@@ -60,18 +60,18 @@ class AgentAID {
 /* 
 	setter and getter methods are all the functionality needed so far
 */
-               ~AgentAID();
-	     AgentAID();
+               ~AgentID();
+	     AgentID();
 	     
 	     /**
 	      \brief overloaded copy constructor; provides deep-copies for all member fields
 	     */
-	     AgentAID(const AgentAID &a);
+	     AgentID(const AgentID &a);
 	     /**
 	      \brief overloaded assignment operator; provides deep-copies for all member fields
 	     */
-	     AgentAID& operator=(const AgentAID &a);
-	     AgentAID(const std::string nam);
+	     AgentID& operator=(const AgentID &a);
+	     AgentID(const std::string nam);
 	     
 	     /**
 		\brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, but this can be easily changed if needed through the overloaded operator which do
@@ -83,14 +83,14 @@ class AgentAID {
 	      */
                int setName(const std::string nam);
 	     /**
-		\brief the method checks whether the passed adress string is a word or not(according to the fipa spec)
-		\return 0 if successful 1 otherwise(adress is not inserted)
+		\brief the method checks whether the passed address string is a word or not(according to the fipa spec)
+		\return 0 if successful 1 otherwise(address is not inserted)
 	      */
-               int addAdress(const std::string &adr);
-               std::vector<std::string> getAdresses() const;
-               void addResolver(const AgentAID &aid);
-               std::vector<AgentAID> getResolvers() const;
-	     void deleteResolver(const AgentAID&);
+               int addAddress(const std::string &adr);
+               std::vector<std::string> getAddresses() const;
+               void addResolver(const AgentID &aid);
+               std::vector<AgentID> getResolvers() const;
+	     void deleteResolver(const AgentID&);
                void addUserdefParam(const UserdefParam &p);
                std::vector<UserdefParam> getUserdefParams() const;
 	     //static void setResCompDepth(int);
@@ -105,11 +105,11 @@ class AgentAID {
 /**
     \brief overloaded equality operator; the depth is the default one kept in the resComDepth member field 
 */
-extern bool operator== (const AgentAID &a,const AgentAID &b);
+extern bool operator== (const AgentID &a,const AgentID &b);
 /**
     \brief alternative function for equality operator; the depth can be specified through the deph param 
 */
-extern bool resDepthEqual(const AgentAID &a,const AgentAID &b, int depth);
+extern bool resDepthEqual(const AgentID &a,const AgentID &b, int depth);
 
 }//end of acl namespace
 

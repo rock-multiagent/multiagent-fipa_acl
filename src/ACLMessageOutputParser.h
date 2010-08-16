@@ -13,7 +13,7 @@
     #ifndef ACLMessageOutputParser_H_
     #define ACLMessageOutputParser_H_
     #include<string>
-    #include"AgentAID.h"
+    #include"AgentID.h"
     #include"UserdefParam.h"
     #include"ACLMessage.h"
 
@@ -22,7 +22,7 @@
     namespace acl {
         
         //extern bool operator== (UserdefParam &a,UserdefParam &b);
-        //extern bool operator== ( AgentAID &a,  AgentAID &b);
+        //extern bool operator== ( AgentID &a,  AgentID &b);
         //extern bool operator== ( ACLMessage &a,  ACLMessage &b);
         
         /**
@@ -45,7 +45,7 @@
 	  * needed by the speciffication; initialized to "1.0"
 	  * important restraint: as the speciffication states the version must be of strictly 2 digits;
 	  
-	  @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentAID's
+	  @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentID's
 	  * see speciffication for details 
     */
 	      ACLMessage msg;
@@ -84,16 +84,16 @@
 		    */
 		    std::string getBitMessage();
 		    /**
-		        \brief encodes an AgentAID instance
+		        \brief encodes an AgentID instance
 		        
 		        as some fields are optional the method first checks for their existance
 		        it also keeps record of the res_depth
 		        
-		        \param aid: AgentAID object pointer to be encoded
+		        \param aid: AgentID object pointer to be encoded
 		        \param depth: depth of the resolver tree to be encoded
 		        \return the encoded agentAID as string
 		    */
-		    std::string  getBitAID(AgentAID aid, int depth);
+		    std::string  getBitAID(AgentID aid, int depth);
 		    
         
         private:
@@ -148,18 +148,18 @@
 	      */
 	      std::string  bitParseParam(UserdefParam p);
 	      /**
-		\brief currently used to encode the adresses of the AgentAID instances(strings)
+		\brief currently used to encode the addresses of the AgentID instances(strings)
 	      */
 	      std::string  getBinURLCol(std::vector<std::string> adrr);
 	      /**
 		\brief basically a wrapper function of the getBitAIDColl(), to add the required specific flag
 	      */
-	      std::string  getBitResolvers(std::vector<AgentAID> aids,int depth);
+	      std::string  getBitResolvers(std::vector<AgentID> aids,int depth);
 	      /**
-		\brief parses a set of AgentAID instances
+		\brief parses a set of AgentID instances
 		the resolvers depth variable that is being passed around is not modified in this function
 	      */
-	      std::string  getBitAIDColl(std::vector<AgentAID> aids, int depth);
+	      std::string  getBitAIDColl(std::vector<AgentID> aids, int depth);
 	      /**
 		\brief implements the binary expression production of the grammar; not complete(w.r.t. the specification) in functionality
 		implementing the messages without the rest of the architecture makes it difficult to anticipate when and how some productions may/will be used so only a few of the productions were implemented(for the binary expression) and the char parameter was added to choose between them, as no other decission maker/constraint was identified
