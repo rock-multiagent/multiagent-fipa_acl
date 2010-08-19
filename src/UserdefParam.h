@@ -42,6 +42,8 @@ class UserdefParam {
 	setter and getter methods so far
 */
 	    UserdefParam();
+
+	    UserdefParam(const std::string& name);
 	   
 	    /**
 		\brief overloaded copy-constructor

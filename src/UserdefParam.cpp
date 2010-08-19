@@ -27,6 +27,10 @@ UserdefParam::UserdefParam()
 {
 }
 
+UserdefParam::UserdefParam(const std::string& _name) : name(_name)
+{
+}
+
 UserdefParam::UserdefParam(const UserdefParam &copy)
 {
     name = copy.getName();

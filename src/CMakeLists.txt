@@ -15,6 +15,15 @@ install(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION lib
 )	
 
+set(GENERATOR fipa-msg-generator)
+add_executable(${GENERATOR} generator.cpp ${SOURCES})
+target_link_libraries(${GENERATOR} ${LIBRARIES})
+install(TARGETS ${GENERATOR}
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+)
+
 #include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
 #pkg_check_modules(MESSAGE_PARSER "message-parser")
 

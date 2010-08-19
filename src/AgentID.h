@@ -57,21 +57,24 @@ class AgentID {
 	     static int resCompDepth;
 	 
 	      
-/* 
-	setter and getter methods are all the functionality needed so far
-*/
-               ~AgentID();
+		/* 
+			setter and getter methods are all the functionality needed so far
+		*/
+             ~AgentID();
+
 	     AgentID();
 	     
 	     /**
-	      \brief overloaded copy constructor; provides deep-copies for all member fields
-	     */
+	      * \brief overloaded copy constructor; provides deep-copies for all member fields
+	      */
 	     AgentID(const AgentID &a);
+
 	     /**
-	      \brief overloaded assignment operator; provides deep-copies for all member fields
-	     */
+	      * \brief overloaded assignment operator; provides deep-copies for all member fields
+	      */
 	     AgentID& operator=(const AgentID &a);
-	     AgentID(const std::string nam);
+
+	     AgentID(const std::string name);
 	     
 	     /**
 		\brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, but this can be easily changed if needed through the overloaded operator which do
@@ -79,20 +82,38 @@ class AgentID {
                std::string getName() const;
 	     /**
 		\brief the method checks whether the passed name string is a word or not(according to the fipa spec)
+                \param name Name
 		\return 0 if successful 1 otherwise(name is un-alterred)
 	      */
-               int setName(const std::string nam);
+             int setName(const std::string name);
 	     /**
 		\brief the method checks whether the passed address string is a word or not(according to the fipa spec)
+		\param adr Address
 		\return 0 if successful 1 otherwise(address is not inserted)
 	      */
-               int addAddress(const std::string &adr);
-               std::vector<std::string> getAddresses() const;
-               void addResolver(const AgentID &aid);
-               std::vector<AgentID> getResolvers() const;
-	     void deleteResolver(const AgentID&);
-               void addUserdefParam(const UserdefParam &p);
-               std::vector<UserdefParam> getUserdefParams() const;
+             int addAddress(const std::string &adr);
+	
+		/**
+		* Retrieve list of addresses
+ 		* \return List of addresses
+		*/
+		std::vector<std::string> getAddresses() const;
+
+	       /**
+		* Add resolver
+		* \param aid Resolver identified by its agentid
+		*/
+		void addResolver(const AgentID &aid);
+	
+ 	       /**
+		* Get list of resolvers
+		* \return list of resolvers, i.e. agentids
+		*/
+		std::vector<AgentID> getResolvers() const;
+
+		void deleteResolver(const AgentID&);
+              	void addUserdefParam(const UserdefParam &p);
+               	std::vector<UserdefParam> getUserdefParams() const;
 	     //static void setResCompDepth(int);
 	     //static int getResCompDepth();
 	
