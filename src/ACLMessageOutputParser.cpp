@@ -26,7 +26,6 @@ namespace acl {
 void ACLMessageOutputParser::setMessage(ACLMessage &a)
 {
 	msg = a;
-  	
 }
 
 
@@ -68,7 +67,7 @@ std::string ACLMessageOutputParser::getBitMessage()
       std::string mes = std::string();
 	mes.clear();
 
-      mes = getBitHeader() + getBitMessageType() + getBitMessageParameters() + getBitEndOfColl();
+      mes = getBitHeader() + getBitMessageType() +getBitMessageParameters() + getBitEndOfColl();
 	
 	return mes;
 }
@@ -107,14 +106,25 @@ char ACLMessageOutputParser::getBitMessageVersion()
 
 std::string ACLMessageOutputParser::getBitMessageType()
 {
-            for (int i = 0; i < 22; i++)
-                if (!ACLMessage::perfs[i].compare(msg.getPerformative()))
-                              { 				
-                                char a[2]; a[0] = char(i+1); a[1] = '\0'; 
-                                return std::string(a);
-                              }
-		
-            return (char(0x00) + getBitBinWord(msg.getPerformative()));
+
+   // Check if we have one of the predefined performatives
+   for (int i = 0; i < 22; i++)
+   {
+	if (!ACLMessage::perfs[i].compare(msg.getPerformative()))
+       { 				
+	    char a[2]; 
+	    a[0] = char(i+1); 
+	    a[1] = '\0'; 
+	    return std::string(a);
+       }
+
+  }
+  
+  // actually we will have user defined performative here
+  if(msg.getPerformative().empty())
+	throw MessageGeneratorException("Performative cannot be empty");
+	
+  return (char(0x00) + getBitBinWord(msg.getPerformative()));
 } 
 
 std::string ACLMessageOutputParser::getBitBinWord(std::string sword)
@@ -138,7 +148,9 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
 	    // Check if entries exists for the predefined message parameters
 	    // sender is not always required, 
             if ( !(msg.getSender().empty()) )
+	    {
 		retstr = retstr + char(0x02) + getBitAID(msg.getSender(), res_depth); 
+	    }
             if (!(msg.getAllReceivers().empty()))
 		 retstr =retstr + char(0x03) + getBitAIDColl(msg.getAllReceivers(),res_depth); 
             if (!msg.getContent().empty())
@@ -171,7 +183,10 @@ std::string ACLMessageOutputParser::getBitUserdefMessageParams()
 	    retstr.clear();
 
             std::vector<UserdefParam> s = msg.getUserdefParams();
-	    if(s.empty()) return retstr;
+	    if( s.empty() )
+		 return retstr;
+
+	    printf("there ar userdef params: %d", (int) s.size());
 	
             std::vector<UserdefParam>::iterator it; 
 	    it = s.begin();

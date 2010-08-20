@@ -12,10 +12,11 @@
     */
     #ifndef ACLMessageOutputParser_H_
     #define ACLMessageOutputParser_H_
-    #include<string>
-    #include"AgentID.h"
-    #include"UserdefParam.h"
-    #include"ACLMessage.h"
+    #include <string>
+    #include "AgentID.h"
+    #include "UserdefParam.h"
+    #include "ACLMessage.h"
+    #include "Exception.h"
 
     namespace fipa {
 
@@ -81,6 +82,7 @@
 		    /**
 		       \brief  main function in the production tree, returns the encoded message as a sequence of bytes kept in a string object
 		       \return string containing the encoded message
+		       \throw MessageGeneratorException when the message could not be created correctly
 		    */
 		    std::string getBitMessage();
 		    /**

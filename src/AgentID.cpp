@@ -374,9 +374,9 @@ AgentID& AgentID::operator=(const AgentID &aid)
 bool AgentID::empty()
 {
 	if(name == "")
-		return false;
+		return true;
 
-	return true;
+	return false;
 }
 
 
