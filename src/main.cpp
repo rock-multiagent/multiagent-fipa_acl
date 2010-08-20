@@ -8,28 +8,80 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
+
+#include <message-generator/ACLMessageOutputParser.h>
 
 #include "grammar_bitefficient.h"
-
 #include "message_printer.h"
 
-////////////////////////////////////////////////////////////////////////////
-//  Main program
-////////////////////////////////////////////////////////////////////////////
-int main(int argc, char** argv)
+std::map<std::string, std::string> options;
+
+
+void info(char** argv)
 {
-	char const* filename;
-	if(argc > 1)
+	printf("usage: %s -b <binary-message-file> -i \n", argv[0]);
+	printf("-b require a binary message file as input");
+	printf("-i interactive mode");
+	exit(0);
+}
+
+bool usage(int argc, char** argv)
+{
+	int option;
+
+	while( (option = getopt(argc, argv, "hb:i")) != -1 )
 	{
-		filename = argv[1];
-	} else
-	{
-		std::cerr << "MessageParser core" << std::endl;
-		std::cerr << "Usage: " << argv[0] << " binary-msg-file" << std::endl;
-		return 1;
+		switch(option)
+		{
+			case 'b':
+				options["binary-msg-file"] = optarg;
+				break;
+			case 'i':
+				options["interactive"] = "Y";
+				break;
+                        case 'h':
+				info(argv);
+				break;
+			default:
+				break;
+		}
 	}
 
-	std::ifstream in(filename, std::ios_base::in);
+	return true;
+}
+
+bool parseMsg(const std::string& storage)
+{
+	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
+	bitefficient_grammar grammar;
+	fipa::acl::Message parseTree;
+
+	std::string::const_iterator iter = storage.begin();
+	std::string::const_iterator end = storage.end();
+	bool r = parse(iter, end, grammar, parseTree);
+
+	if(r && iter == end)
+	{
+		std::cout << "------------------------------------\n";
+		std::cout << " Parsing succeeded\n";
+		std::cout << "------------------------------------\n";
+
+		fipa::acl::MessagePrinter printer;
+		printer.print(parseTree);
+
+	        return true;
+	} else {
+
+		std::cout << " Parsing failed\n";
+		return false;
+	}
+}
+
+
+bool parseFile(const std::string& filename)
+{
+	std::ifstream in(filename.c_str(), std::ios_base::in);
 
 	if (!in)
 	{
@@ -51,27 +103,54 @@ int main(int argc, char** argv)
 		   break;
 	}
 
-	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
-	bitefficient_grammar grammar;
-	fipa::acl::Message parseTree;
+	
+	return parseMsg(storage);
+}
 
-	std::string::const_iterator iter = storage.begin();
-	std::string::const_iterator end = storage.end();
-	bool r = parse(iter, end, grammar, parseTree);
 
-	if(r && iter == end)
+bool parseInteractive()
+{
+
+	fipa::acl::ACLMessage msg; 
+	char buffer[512];
+	printf("Performative: \n");
+	//scanf(buffer, "%s");
+	msg.setPerformative("inform");
+	
+	printf("Content: \n");
+	getchar();
+	//scanf(buffer, "%s");
+	msg.setContent("");
+	
+	fipa::acl::ACLMessageOutputParser mop;
+	mop.setMessage(msg);
+	std::string bitefficientMessage = mop.getBitMessage();
+	
+	return parseMsg(bitefficientMessage);
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////
+//  Main program
+////////////////////////////////////////////////////////////////////////////
+int main(int argc, char** argv)
+{
+
+	if( !usage(argc, argv) )
+		return 0;
+
+	std::string filename;
+	if( ( filename = options["binary-msg-file"]) != "")
+	{ 
+		parseFile(filename);
+	} else if (options["interactive"] != "")
 	{
-		std::cout << "------------------------------------\n";
-		std::cout << " Parsing succeeded\n";
-		std::cout << "------------------------------------\n";
-
-		fipa::acl::MessagePrinter printer;
-		printer.print(parseTree);
-
-	        return 0;	
-	} else {
-
-		std::cout << " Parsing failed\n";
+		parseInteractive();	
+	} else
+	{
+		info(argv);
 	}
 
     return 0;
