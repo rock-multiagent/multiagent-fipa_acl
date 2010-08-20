@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 
    for(int i = 0; i < size; i++)
    {
-	fprintf(stderr, "%x", bitefficientMsg[i]);
+	fprintf(stderr, "%x ", bitefficientMsg[i]);
    }
 
    fprintf(stderr, "\n");

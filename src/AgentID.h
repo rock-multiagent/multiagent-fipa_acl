@@ -116,6 +116,11 @@ class AgentID {
                	std::vector<UserdefParam> getUserdefParams() const;
 	     //static void setResCompDepth(int);
 	     //static int getResCompDepth();
+
+		/**
+		* Check if AgentId is empty, i.e. does not contain a name
+		*/
+		bool empty();
 	
 	private:
 		/**

@@ -23,7 +23,6 @@ const std::string illegalWordStart = std::string("@#-0123456789");
   
 void ACLMessage::initializeObject()
 {
-	
          receivers.clear();
          reply_to.clear();
 	/*

@@ -30,13 +30,13 @@ void ACLMessageOutputParser::setMessage(ACLMessage &a)
 }
 
 
-ACLMessageOutputParser::ACLMessageOutputParser() /// here we set the default values
+ACLMessageOutputParser::ACLMessageOutputParser()
 {
-                  useCodeTables = 0;
-                  updateCodeTables = 1;
-                  version = "1.0";
-                  res_depth = 1; 
-			                   
+	/// here we set the default values
+       useCodeTables = 0;
+       updateCodeTables = 1;
+       version = "1.0";
+       res_depth = 1; 
 }
 
 
@@ -135,19 +135,32 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
             std::string retstr = std::string();
 	    retstr.clear();
 
-            //if (msg.getSender());
-	  retstr = retstr + char(0x02) + getBitAID(msg.getSender(), res_depth); 
-            if (!(msg.getAllReceivers().empty())) retstr =retstr + char(0x03) + getBitAIDColl(msg.getAllReceivers(),res_depth); 
-            if (!msg.getContent().empty()) retstr = retstr + char(0x04) + getBitBinString(msg.getContent(),0); 
-            if (!msg.getReplyWith().empty()) retstr = retstr + char(0x05) + getBitBinExpression(msg.getReplyWith(),'s'); 
-            if (!msg.getReplyBy1(0).empty()) retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy1(0)); 
-            if (!msg.getInReplyTo().empty()) retstr = retstr + char(0x07) + getBitBinExpression(msg.getInReplyTo(),'s'); 
-            if (!msg.getAllReplyTo().empty()) retstr = retstr + char(0x08) + getBitAIDColl(msg.getAllReplyTo(),res_depth);
-            if (!msg.getLanguage().empty()) retstr = retstr + char(0x09) + getBitBinExpression(msg.getLanguage(),'s'); 
-            if (!msg.getEncoding().empty()) retstr = retstr + char(0x0a) + getBitBinExpression(msg.getEncoding(),'s');
-            if (!msg.getOntology().empty()) retstr = retstr + char(0x0b) + getBitBinExpression(msg.getOntology(),'s'); 
-            if (!msg.getProtocol().empty()) retstr = retstr + char(0x0c) + getBitBinWord(msg.getProtocol());
-            if (!msg.getConversationID().empty()) retstr = retstr + char(0x0d) + getBitBinExpression(msg.getConversationID(),'s');
+	    // Check if entries exists for the predefined message parameters
+	    // sender is not always required, 
+            if ( !(msg.getSender().empty()) )
+		retstr = retstr + char(0x02) + getBitAID(msg.getSender(), res_depth); 
+            if (!(msg.getAllReceivers().empty()))
+		 retstr =retstr + char(0x03) + getBitAIDColl(msg.getAllReceivers(),res_depth); 
+            if (!msg.getContent().empty())
+		retstr = retstr + char(0x04) + getBitBinString(msg.getContent(),0); 
+            if (!msg.getReplyWith().empty())
+		 retstr = retstr + char(0x05) + getBitBinExpression(msg.getReplyWith(),'s'); 
+            if (!msg.getReplyBy1(0).empty())
+		 retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy1(0)); 
+            if (!msg.getInReplyTo().empty())
+		 retstr = retstr + char(0x07) + getBitBinExpression(msg.getInReplyTo(),'s'); 
+            if (!msg.getAllReplyTo().empty()) 
+		 retstr = retstr + char(0x08) + getBitAIDColl(msg.getAllReplyTo(),res_depth);
+            if (!msg.getLanguage().empty())
+		 retstr = retstr + char(0x09) + getBitBinExpression(msg.getLanguage(),'s'); 
+            if (!msg.getEncoding().empty())
+		 retstr = retstr + char(0x0a) + getBitBinExpression(msg.getEncoding(),'s');
+            if (!msg.getOntology().empty())
+		 retstr = retstr + char(0x0b) + getBitBinExpression(msg.getOntology(),'s'); 
+            if (!msg.getProtocol().empty())
+		 retstr = retstr + char(0x0c) + getBitBinWord(msg.getProtocol());
+            if (!msg.getConversationID().empty())
+		 retstr = retstr + char(0x0d) + getBitBinExpression(msg.getConversationID(),'s');
             
             return retstr;
 }
