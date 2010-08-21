@@ -19,7 +19,7 @@ namespace fipa {
 
 namespace acl {
 
-    /**
+    /*
 	  \brief overloaded equality operator for AgentID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
 	  
 	  The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
@@ -55,13 +55,12 @@ class AgentID {
 		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe
 	  */
 	     static int resCompDepth;
-	 
 	      
-		/* 
-			setter and getter methods are all the functionality needed so far
-		*/
              ~AgentID();
 
+ 	     /**
+	      * \brief Default constructor
+              */
 	     AgentID();
 	     
 	     /**
@@ -74,18 +73,26 @@ class AgentID {
 	      */
 	     AgentID& operator=(const AgentID &a);
 
+	     /**
+	      * \brief Construct an AgentID by name
+	      * \param name
+              */
 	     AgentID(const std::string name);
+
+	     /* NOTE: setter and getter methods are all the functionality needed so far */
 	     
 	     /**
 		\brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, but this can be easily changed if needed through the overloaded operator which do
 	     */
                std::string getName() const;
+
 	     /**
 		\brief the method checks whether the passed name string is a word or not(according to the fipa spec)
                 \param name Name
 		\return 0 if successful 1 otherwise(name is un-alterred)
 	      */
              int setName(const std::string name);
+
 	     /**
 		\brief the method checks whether the passed address string is a word or not(according to the fipa spec)
 		\param adr Address
@@ -94,31 +101,47 @@ class AgentID {
              int addAddress(const std::string &adr);
 	
 		/**
-		* Retrieve list of addresses
+		* \brief Retrieve list of addresses
  		* \return List of addresses
 		*/
 		std::vector<std::string> getAddresses() const;
 
 	       /**
-		* Add resolver
+		* \brief Add resolver
 		* \param aid Resolver identified by its agentid
 		*/
 		void addResolver(const AgentID &aid);
 	
  	       /**
-		* Get list of resolvers
+		* \brief Get list of resolvers
 		* \return list of resolvers, i.e. agentids
 		*/
 		std::vector<AgentID> getResolvers() const;
 
-		void deleteResolver(const AgentID&);
+		/**
+		 * \brief Delete a resolver
+		 * \param id Resolver to delete
+                 */
+		void deleteResolver(const AgentID& id);
+		
+		/**
+		 * \brief Add a userdefined parameter
+		 * \param p The userdefined parameter
+                 */
               	void addUserdefParam(const UserdefParam &p);
+ 		
+		/**
+		 * \brief Get the all userdefined parameter
+		 * \return List of userdefined parameters
+		 */
                	std::vector<UserdefParam> getUserdefParams() const;
-	     //static void setResCompDepth(int);
-	     //static int getResCompDepth();
+
+	        //static void setResCompDepth(int);
+	        //static int getResCompDepth();
 
 		/**
-		* Check if AgentId is empty, i.e. does not contain a name
+		* \brief Check if AgentId is empty, i.e. does not contain a name
+		* \return True, if empty, False otherwise
 		*/
 		bool empty();
 	
@@ -128,6 +151,8 @@ class AgentID {
 		*/
 		void initializeFields();
 };
+
+
 /**
     \brief overloaded equality operator; the depth is the default one kept in the resComDepth member field 
 */

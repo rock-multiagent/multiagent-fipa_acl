@@ -15,24 +15,36 @@
 #include"UserdefParam.h"
 //#include "ACLMessageOutputParser.h"
 
+/**
+* \brief Foundation of Physical Intelligent Agents
+*/
 namespace fipa {
 
+/**
+* \brief Agent Communication Language
+*/
 namespace acl {
 
     /**
         \enum predefinedPerformatives
-        \brief an enum of all the predefined fipa message perfomratives so far, presented in the order used in the message and encoding specifications
+        \brief an enum of all the predefined fipa message performatives so far, presented in the order used in the message and encoding specifications
     */
     enum predefinedPerformatives{ ACCEPT_PROPOSAL = 0, AGREE, CANCEL, CALL_FOR_PROPOSAL, CONFIRM, DISCONFIRM, FAILURE, INFORM,
 			    INFORM_IF, INFORM_REF, NOT_UNDERSTOOD, PROPAGATE, PROPOSE, PROXY, QUERY_IF, QUERY_REF, REFUSE,
 			    REJECT_PROPOSAL, REQUEST, REQUEST_WHEN, REQUEST_WHENEVER, SUBSCRIBE
 			  };
-   /** \param illegalWordChars: string containing illegal characters according to the fipa definition of a word*/
+
+   /**
+    * \param illegalWordChars: string containing illegal characters according to the fipa definition of a word
+    */
    const extern std::string illegalWordChars;
-   /** \param illegalWordStart: string containing illegal first characters according to the fipa definition of a word*/
+
+   /** 
+    * \param illegalWordStart: string containing illegal first characters according to the fipa definition of a word
+    */
    const extern std::string illegalWordStart;
     
-    /**
+    /*
         \brief overloaded equality operator for ACLMessage; the signature of the function was intentionally changed from the normal operator== ( type&, const type&)
 
         The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
@@ -42,18 +54,17 @@ namespace acl {
         
 /**
     \class ACLMessage
-    \brief The class implements the general structure of an ACLMessage. It follows the FIPA specification 
-    \brief SC00061(http://www.fipa.org/specs/fipa00061/index.html) with emphasis of what is needed in order to encode it
-    \brief (so far according to the bit efficient specification SC00069 -  http://www.fipa.org/specs/fipa00069/index.html)
-    
-    \brief Important notice regarding using the class: The copy constructor provided and the overloaded assignment operator
-    \brief provide deep-copy methods for the class objects, HOWEVER the setter and getter methods(for the pointer fields i.e. sender) do not.
-    \brief Some fields were made pointers for reasons of using as little memory as possible at runtime; if the conclusion is reached
-    \brief that this is not needed, it should be a fairly simple task to make the class own all of its fields(even by leaving 
-    \brief the fields as pointers)with the provided deep-copy methods(just allocate memory for the owned field
-    \brief and use the asignment operator to assign the value of the passed parameter)
+    \brief This class provides a representation of a message conforming to the FIPA specification SC00061
+    \details The class implements the general structure of an ACLMessage. It follows the FIPA specification 
+           SC00061(http://www.fipa.org/specs/fipa00061/index.html) with emphasis of what is needed in order to encode it
+           (so far according to the bit efficient specification SC00069 -  http://www.fipa.org/specs/fipa00069/index.html)
+           Important notice regarding using the class: The copy constructor provided and the overloaded assignment operator
+           provide deep-copy methods for the class objects, HOWEVER the setter and getter methods(for the pointer fields i.e. sender) do not.
+    Some fields were made pointers for reasons of using as little memory as possible at runtime; if the conclusion is reached
+    that this is not needed, it should be a fairly simple task to make the class own all of its fields(even by leaving 
+    the fields as pointers)with the provided deep-copy methods(just allocate memory for the owned field
+    and use the asignment operator to assign the value of the passed parameter)
 */
-
 class ACLMessage {
 
 private:
@@ -86,38 +97,35 @@ private:
         std::vector<UserdefParam> params;
         /** \param content: string representing the content of the message */
         std::string content;
-       
-                
 
-       // all predefined FIPA performatives:
-       // Stefan: Comment in again for a successfull building
  public:  
-        static const int ACCEPT_PROPOSAL = 0;
-   		static const int AGREE = 1;
-   		static const int CANCEL = 2;
-   		static const int CALL_FOR_PROPOSAL = 3;
-   		static const int CONFIRM = 4;
-   		static const int DISCONFIRM = 5;
-   		static const int FAILURE = 6;
-   		static const int INFORM = 7;
-   		static const int INFORM_IF = 8;
-   		static const int INFORM_REF = 9;
-   		static const int NOT_UNDERSTOOD = 10;
-   		static const int PROPAGATE = 11;
-   		static const int PROPOSE = 12;
-   		static const int PROXY = 13;
-   		static const int QUERY_IF = 14;
-   		static const int QUERY_REF = 15;
-   		static const int REFUSE = 16;
-   		static const int REJECT_PROPOSAL = 17;
-   		static const int REQUEST = 18;
-   		static const int REQUEST_WHEN = 19;
-   		static const int REQUEST_WHENEVER = 20;
-   		static const int SUBSCRIBE = 21;
-       
-		/** \param perfs: vector with all predefined message performatives as strings */
 
-       		public: static const std::string perfs[];
+	// all predefined FIPA performatives:
+	static const int ACCEPT_PROPOSAL = 0;
+	static const int AGREE = 1;
+	static const int CANCEL = 2;
+	static const int CALL_FOR_PROPOSAL = 3;
+	static const int CONFIRM = 4;
+	static const int DISCONFIRM = 5;
+	static const int FAILURE = 6;
+	static const int INFORM = 7;
+	static const int INFORM_IF = 8;
+	static const int INFORM_REF = 9;
+	static const int NOT_UNDERSTOOD = 10;
+	static const int PROPAGATE = 11;
+	static const int PROPOSE = 12;
+	static const int PROXY = 13;
+	static const int QUERY_IF = 14;
+	static const int QUERY_REF = 15;
+	static const int REFUSE = 16;
+	static const int REJECT_PROPOSAL = 17;
+	static const int REQUEST = 18;
+	static const int REQUEST_WHEN = 19;
+	static const int REQUEST_WHENEVER = 20;
+	static const int SUBSCRIBE = 21;
+
+	/** \param perfs: vector with all predefined message performatives as strings */
+	public: static const std::string perfs[];
 
      
 public:
@@ -125,40 +133,51 @@ public:
 	  \brief this method does all allocations needed upon creating an ACLMessage. It is to be called by every constructor implemented 
         */
        void initializeObject();
+    
+       /** 
+        * \brief Default deconstructor
+        */
        ~ACLMessage();
+
+       /**
+        * \brief Default constructor
+        */
        ACLMessage();
       
        /**
 	  \brief copy constructor; provides deep-copy of all fields
+          \param message ACLMessage to construct from
        */
-       ACLMessage(const ACLMessage &mes);
+       ACLMessage(const ACLMessage &message);
+
        /**
 	  \brief overloaded assignment operator; provides deep-copy for all fields
+          \param message Message to compare with
        */
-       ACLMessage& operator=(const ACLMessage &mes);
+       ACLMessage& operator=(const ACLMessage &message);
+
        /**
 	  \brief constructor of an ACLMessage with a predefined performative
-	  \param perf: a predefined fipa performative(represented by its index in the perfs vector)
+	  \param perf a predefined fipa performative(represented by its index in the perfs vector)
        */
        ACLMessage(predefinedPerformatives perf);
+
        /**
 	  \brief constructor of an ACLMessage with a custom performative
-	  \param perf: string representing the custom performative(but it can just as well be one of the pre-defined ones)
+	  \param perf string representing the custom performative(but it can just as well be one of the pre-defined ones)
        */
        ACLMessage(std::string perf);
-       /**
-        * Stefan: Added missing declaration for existing definition.
-        */
-       ACLMessage(int perf);
-       
+              
        /**
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
        */
+
        /**
 	  \brief the method checks whether the passed performative string is a word or not(according to the fipa spec)
 	  \return 0 if successful 1 otherwise(performative is un-alterred)
        */
        int setPerformative(const std::string str);
+
        std::string getPerformative() const;
        void addReceiver(const AgentID &aid);
        void deleteReceiver(const AgentID &aid);
@@ -176,6 +195,7 @@ public:
        std::string getReplyWith() const;
        void setConversationID(const std::string str);
        std::string getConversationID() const;
+
         /**
 	  \brief the method checks whether the passed protocol string is a word or not(according to the fipa spec)
 	  \return 0 if successful 1 otherwise(protocol is un-alterred)
@@ -195,11 +215,13 @@ public:
        void addUserdefParam(const UserdefParam &p);
        std::vector<UserdefParam> getUserdefParams() const;
        void setUserdefParams(const std::vector<UserdefParam> p);
+
        /**
-	  \param formated: option to get the parameter as it is stored or formated. default is formated,call with 0 to get unformatted
+	  \param formatted option to get the parameter as it is stored or formated. default is formatted,call with 0 to get unformatted
 	  
        */
-       std::string getReplyBy1(int formated = 0) const;
+       std::string getReplyBy1(int formatted = 0) const;
+
        /**
 	  \brief the method checks whether the passed date string is formatted correctly or not;
 	  example of correctly formated date: "2010-12-23T23:12:45:100" -- any separatators can be used instead of "-:T"
@@ -207,11 +229,13 @@ public:
 	  \return 0 if successful 1 if length is bad 2 if wrong format
        */
        int setReplyBy1(const std::string date1);
+
        void _setReplyBy1 (const std::string date1);
-       
-       
 };
 
+/**
+* Overloaded equals operator for ACLMessage
+*/
 extern bool operator== (const ACLMessage &a, const ACLMessage &b);
 
 

@@ -60,9 +60,10 @@ std::vector<std::string> AgentID::getAddresses() const {return addresses;}
 
 void AgentID::addResolver(const AgentID &aid) 
 {
-    if ( find(resolvers.begin(),resolvers.end(),aid) == resolvers.end() )// prevent entering duplicates
-							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
-    resolvers.insert(resolvers.begin(),aid); 
+    // prevent entering duplicates
+    // NOTE: this function searches for the resolver and uses the overloaded == op not the resDepthEq()
+    if ( find(resolvers.begin(),resolvers.end(),aid) == resolvers.end() )
+	    resolvers.insert(resolvers.begin(),aid); 
 }
 
 std::vector<AgentID> AgentID::getResolvers() const {return resolvers;}
@@ -70,21 +71,10 @@ std::vector<AgentID> AgentID::getResolvers() const {return resolvers;}
 void AgentID::deleteResolver(const AgentID &aid) 
 {
     std::vector<AgentID>::iterator it;
-    if ( (it = find(resolvers.begin(),resolvers.end(),aid)) != resolvers.end() )// prevent entering duplicates
-							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
-    resolvers.erase(it);
-    /*
-    std::vector<AgentID>::iterator it = resolvers.begin();
-    for (it; it != resolvers.end(); it++)
-       {
-        AgentID a = *it;
-        if ( a == aid)
-        {
-	  resolvers.erase(it);
-            break;
-        }
-    }
-    */
+    // prevent entering duplicates
+    // NOTE: this function searches for the resolver using the overloaded == op not the resDepthEq()
+    if ( (it = find(resolvers.begin(),resolvers.end(),aid)) != resolvers.end() )
+	    resolvers.erase(it);
 }
 
 void AgentID::addUserdefParam(const UserdefParam &p) 
@@ -151,111 +141,94 @@ bool resDepthEqual(const AgentID &a,const AgentID &b, int depth)
     // only check the resolvers if the resCompDepth > 0; 
     if (depth > 0 )
     {
-        // the resolvers are compared with up to resCompDepth -1 in the resolver network
-        //AgentID::setResCompDepth(depth-1);
-    // comparing resolvers
-    std::vector<AgentID> agentsA = a.getResolvers();
-    std::vector<AgentID> agentsB = b.getResolvers();
-    std::vector<AgentID>::iterator ait = agentsA.begin();
-    std::vector<AgentID>::iterator bit = agentsB.begin();
-    //std::vector<AgentID>::iterator aux;
-    
-      while (ait != agentsA.end())
-    {
-        found_one = 0;
-        bit = agentsB.begin();
-        while (bit != agentsB.end())
-        {
-	  if ( resDepthEqual((*ait),(*bit),depth-1)) 
-	  {
-	      agentsA.erase(ait);
-	      ait = agentsA.begin();
-	      agentsB.erase(bit);
-	      bit = agentsB.end();
-	      found_one = 1;
-	      
-	  } else bit++;
-	  
-        }
-        if (!found_one) ait++;
-	  
-    }
-    
-    if (!agentsA.empty())
-    { return false; }
-    if (!agentsB.empty())
-    { return false; }
+	    // the resolvers are compared with up to resCompDepth -1 in the resolver network
+	    //AgentID::setResCompDepth(depth-1);
+	    // comparing resolvers
+	    std::vector<AgentID> agentsA = a.getResolvers();
+	    std::vector<AgentID> agentsB = b.getResolvers();
+	    std::vector<AgentID>::iterator ait = agentsA.begin();
+	    std::vector<AgentID>::iterator bit = agentsB.begin();
+	    
+	    while (ait != agentsA.end())
+	    {
+		found_one = 0;
+		bit = agentsB.begin();
+		while (bit != agentsB.end())
+		{
+		  if ( resDepthEqual((*ait),(*bit),depth-1)) 
+		  {
+		      agentsA.erase(ait);
+		      ait = agentsA.begin();
+		      agentsB.erase(bit);
+		      bit = agentsB.end();
+		      found_one = 1;
+		      
+		  } else {
+			bit++;
+		  }
+		  
+		}
+
+		if (!found_one)
+			 ait++;
+	    }
+	    
+	    if (!agentsA.empty())
+	    	 return false; 
+	    if (!agentsB.empty())
+	   	 return false; 
     
     }
     
     // comparing userdefined parameters
+    // Copy lists and delete identical elements
+    // When both list are empty the compared objects are equal
     std::vector<UserdefParam> paramsA = a.getUserdefParams();
     std::vector<UserdefParam> paramsB = b.getUserdefParams();
     std::vector<UserdefParam>::iterator pita = paramsA.begin();
     std::vector<UserdefParam>::iterator pitb = paramsB.begin();
      
-   while (pita != paramsA.end())
+    while (pita != paramsA.end())
     {
         found_one = 0;
         pitb = paramsB.begin();
+
         while (pitb != paramsB.end())
         {
 	  if (*pita == *pitb) 
 	  {
 	      paramsA.erase(pita);
-	      pita = paramsA.begin();
 	      paramsB.erase(pitb);
+
+	      pita = paramsA.begin();
+	      // in order to break the inner while, set it to end()
 	      pitb = paramsB.end();
+
 	      found_one = 1;
 	      
-	  } else pitb++;
+	  } else { 
+		pitb++;
+	  }
 	  
         }
-        if (!found_one) pita++;
+
+        if (!found_one) 
+		pita++;
 	  
     }
     
-    if (!paramsA.empty())
-    { return false; }
-    if (!paramsB.empty())
-    { return false; }
+    // Both lists are empty when they contained the same Parameters
+    // before
+    if ( paramsA.empty() && paramsB.empty())
+     	return true;
     
-    return true;
+    return false;
 }
 
 
 
 AgentID::~AgentID()
 {
-    /*
-    addresses->clear();
-    delete addresses;
-    if (params)
-    {
-    std::vector<UserdefParam*>::iterator it = params->begin();
-    for (it; it != params->end(); it++)
-        {
-	  delete (*it);
-	  //params->erase(it);
-        }
-    params->clear();
-    
-    }
-    delete params;
-    std::cout<< sizeof(params)<<"\t agent dest \n";
-    if (resolvers!=NULL)
-    {
-    std::vector<AgentID*>::iterator it1 = resolvers->begin();
-    for (it1; it1 != resolvers->end(); it1++)
-        {	
-	  delete (*it1);
-	  //resolvers->erase(it1);
-        }
-    resolvers->clear();
-    
-    }
-    delete resolvers;
-    */
 }
 
 
@@ -309,24 +282,17 @@ AgentID& AgentID::operator=(const AgentID &aid)
     {
         
         // freeing previously filled in values for addresses, userdefined parmameters and resolvers
-        
         if (!params.empty())
-        {
-	 
-	  params.clear();
-        }
-       
+		params.clear();
         
-        if (!addresses.empty())        addresses.clear();
-       
+        if (!addresses.empty()) 
+		addresses.clear();
         
         if (!resolvers.empty())
-        {
-	 resolvers.clear();
-        }
-        
-        
-        
+		resolvers.clear();
+       
+
+        // now fill with the values from the reference object 
         initializeFields();
     
         name = aid.getName();
@@ -340,6 +306,7 @@ AgentID& AgentID::operator=(const AgentID &aid)
 	      addresses.insert(addresses.begin(),mystring);
 	  }
         }
+
         if (!aid.getResolvers().empty())
         {	  
 	  
@@ -352,6 +319,7 @@ AgentID& AgentID::operator=(const AgentID &aid)
 	      resolvers.insert(resolvers.begin(),temp);
 	  }	
         }
+
         if (!aid.getUserdefParams().empty())
         {
 	  std::vector<UserdefParam> aidparams = aid.getUserdefParams();
@@ -365,7 +333,6 @@ AgentID& AgentID::operator=(const AgentID &aid)
 	  }
         }
     }
-    
     
     return *this;
     
