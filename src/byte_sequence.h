@@ -73,7 +73,8 @@ public:
 };
 
 /**
- * \class Bytesequence 
+ * \class ByteSequence 
+ * \brief Representation of a byte sequence. We also embed information about the encoding
  * \details whereas the encoding is defined by a natural number, i.e. 
  * postprocessing has to be performed to convert it to string
  */
