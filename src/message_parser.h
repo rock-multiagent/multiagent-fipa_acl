@@ -2,6 +2,7 @@
  *
  * \file message_parser.h
  * \author Mircea Cretu Stancu
+ * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief rebuilds an ACLMessage from a parsed bit-efficient encoded received message
  * 
  * \version 1.0
@@ -18,10 +19,27 @@
 
 #include "types.h"
 
+/**
+* \brief Foundation of Physical Intelligent Agents
+*/
 namespace fipa { 
-    
+
+/** 
+* \brief Agent Communication Language
+*/
 namespace acl {
 
+/**
+* \class MessageParser
+* \brief Allows to parse a bytestream that conforms to the bitefficient representation of FIPA messages to a ACLMessage
+* \details Given a bytestream that conforms to the FIPA Standard for the bitefficient representation of messages, this class can be used
+* to parse this stream into a ACLMessage. The parsing makes extensive use of the boost::spirit library, a library whose contribution
+* we want to acknowledge here. The Spirit library has been used to define the grammar and the underlying parser, i.e. the core of this library. 
+* 
+* Internals: Since the parser works with a number of customized data structures to facilitate parsing, a number of function have been implemented
+* in order to perform the conversion to the datastructure required for a ACLMessage. Yet (by August 2010), we haven't done any performance evaluation of the library. 
+*  
+*/
 class MessageParser
 {
 	
@@ -46,6 +64,7 @@ class MessageParser
 		bool buildMessage(Message parsedMsg, ACLMessage &msg);
 		
 	private:
+ 		/* Since the parser relies heavily on customized data structures, we require to apply conversion functions*/
 		void buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage &msg);
 
 		int buildPredefMessageParameters(MessageParameter param,ACLMessage &msg);

@@ -24,7 +24,9 @@ typedef struct
 	fipa::acl::UserDefinedParameterValue data;
 } UserDefinedParameter;
 
-
+/**
+* \brief Definition for AgentIdentifier
+*/
 struct AgentIdentifier
 {
 	std::string name;
@@ -33,13 +35,20 @@ struct AgentIdentifier
 	std::vector<fipa::acl::UserDefinedParameter> parameters;
 };
 
+/**
+* \brief This class can be used to print the AgentIdentifier
+*/
 class AgentIdentifierPrinter
 {
 
 public:
 	AgentIdentifierPrinter();
 	~AgentIdentifierPrinter();
-	
+
+        /**
+	 * \brief Print an AgentIdentifier
+         * \param aid AgentIdentifier
+         */
 	void print(const fipa::acl::AgentIdentifier& aid);
 
 };
