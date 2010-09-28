@@ -52,9 +52,9 @@ class AgentID {
        public:
 	 
 	  /**
-		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe; --worked around it
+		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe; worked around it, only relevance it has now is that of an implicit value for the comparison, saved as a static variable
 	  */
-	     //static int resCompDepth;
+	     static int resCompDepth;
 	      
              ~AgentID();
 
