@@ -45,6 +45,7 @@ class Transition
         void setFrom		(std::string);
         void setTo			(std::string);
         void setOwningState		(State*);
+        void setMachine		(StateMachine*);
         //void setNextState		(State*);
         
         std::string getExpectedPerformative();
@@ -54,6 +55,7 @@ class Transition
         State* getNextState();
         std::vector<AgentAID> getExpectedSenders();
         std::vector<AgentAID> getExpectedRecepients();
+        StateMachine* getMachine();
 
     private:
         void initializeFields();

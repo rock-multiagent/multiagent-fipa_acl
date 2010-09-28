@@ -43,6 +43,8 @@ void State::addTransition(Transition &t)
         if (unloadedEqual(*it,t) ) return;
         //std::cout<<"\t\ttransition added to state .."<<uid<<"\n";
     t.setOwningState(this);
+    if (t.getMachine() == NULL);
+        t.setMachine(owningMachine);
     transitions.push_back(t);
 }
 

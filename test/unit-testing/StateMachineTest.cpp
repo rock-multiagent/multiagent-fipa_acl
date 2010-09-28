@@ -80,6 +80,7 @@ void StateMachineTest::RequestProtocolTest()
     req.addRole("initiator");
     req.addRole("B");
      std::vector<AgentMapping>::iterator invit;
+     std::cout<<"-----------list of roles currently in the involvedAgents vector:----------\n";
     for (invit = req.involvedAgents.begin(); invit != req.involvedAgents.end(); invit++)
     {
         std::cout<<"role: "<< invit->role<<((invit->check == true)?" set\n":" unset\n");
@@ -125,7 +126,7 @@ void StateMachineTest::RequestProtocolTest()
     t.setNextStateName("5");
     req.getStateByName("4")->addTransition(t);
     std::cout<<"transition added\n";
-    
+      
     req.generateDefaultTransitions();
     req.setInitialState("1");
     
@@ -188,10 +189,12 @@ void StateMachineTest::RequestProtocolTest()
     flow.push_back(m1);
     
     std::cout<<"flow of messages built..\n";
+     std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     if (req.startMachine(*it)!=0) std::cout<<"failure to start!!!!!!!!!\n";
     else std::cout<<"machine started..\n";
+   
     int i=0;
     while(it != flow.end() && !req.isConversationOver() && i<10)
     {

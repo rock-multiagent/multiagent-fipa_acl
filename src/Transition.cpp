@@ -22,6 +22,7 @@ Transition::Transition()
     
 int Transition::consumeMessage(ACLMessage &msg)
 {
+    std::cout<<"\towningState is:\t\t"<< owningState->getUID() <<"\n";
     if (validateMessage(msg))
     {
         //if (expectedPerf.compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
@@ -33,8 +34,10 @@ int Transition::consumeMessage(ACLMessage &msg)
         } else 
 	  {
 	      if (nextState->getFinal()) 
+	      {
 		if (machine->owner == msg.getSender() ) machine->removeInterlocutor(msg.getAllReceivers() );
 		else machine->removeInterlocutor(msg.getSender());
+	      }
 	  }
 	  return 0;
     }
@@ -54,7 +57,8 @@ bool Transition::validateMessage(ACLMessage &msg)
 {
     if (!validatePerformative(msg)){std::cout<<"\t\t\t\t*******1"; return false; }
     if (expectedSenders.empty() || expectedRecepients.empty() ) 
-    {std::cout<<"agents not set yet..\n"; if (!updateRoles(msg)) return false; std::cout<<"agents set now..\n";}
+    {std::cout<<"agents not set yet..\n"; if (!updateRoles(msg)) 
+        { std::cout<<"updateRoles(msg) returned 0\n"; return false;} std::cout<<"agents set now..\n";}
         
     if (!validateSender(msg)) {std::cout<<"\t\t\t\t*******2"; return false; }
     if (!validateRecepients(msg)) {std::cout<<"\t\t\t\t*******3"; return false; }
@@ -107,35 +111,46 @@ void Transition::loadParameters()
 }
 void Transition::updateRoles()
 {
+    
+    std::cout<<"\t@entered update without message in transition\n";
     expectedSenders.clear();
     expectedRecepients.clear();
     if (machine->checkIfRoleExists(from) )
     {
+        std::cout<<"\t@update role \"from\" exists\n";
         if(machine->checkIfRoleSet(from) )
         {
+	  std::cout<<"\t@\"from\" role is set\n";
 	  std::vector<AgentMapping>::iterator it;
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
-	      if (!it->role.compare(from) ) expectedSenders.push_back(it->agent);
-	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedSenders); it = machine->involvedAgents.end(); }
+	      if (!it->role.compare(from) ) {expectedSenders.push_back(it->agent);
+				        std::cout<<"\t@an agent added to expectedSenders\n";}
+	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedSenders); //it = machine->involvedAgents.end(); 
+					  break;
+					  std::cout<<"\t@removed extra-agents\n"; }
 	  }
         } else; 
 	  
     } else ; //TODO: twrow some violation of protocol error
     
+        std::cout<<"cheking for the to role:\n";
     if (machine->checkIfRoleExists(to) )
     {
+         std::cout<<"\t@update role \"to\" exists\n";
         if (machine->checkIfRoleSet(to) )
         {
+	  std::cout<<"\t@\"to\" role is set\n";
 	  std::vector<AgentMapping>::iterator it;
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
 	      if (!it->role.compare(to) ) expectedRecepients.push_back(it->agent);
-	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); it = machine->involvedAgents.end(); }
+	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); break; }
 	  }
-        } else;
+        } else std::cout<<"\t@\"to\" role is NOT set\n";;
 	 
     } else ; //TODO: throw some violation of protocol error
+        std::cout<<"\t!exit update without message in transition------\n\n";
 }
 bool Transition::updateRoles(ACLMessage &msg)
 {
@@ -159,7 +174,15 @@ bool Transition::updateRoles(ACLMessage &msg)
 	      if (!machine->setRole(from,msg.getSender())) return false;
 	      std::cout<<"setting the new role suceeded, sending an update signal..\n";
 	      machine->updateAllAgentRoles();
-	      std::cout<<"roles updated with the new set role";
+	      std::cout<<"roles updated with the new set role\tfrom\n";
+	      int myc = 0;
+	      std::vector<State>::iterator trcount;
+    for (trcount = (machine->states).begin(); trcount != (machine->states).end(); trcount++)
+    {
+        myc += trcount->transitions.size(); 
+    }
+    std::cout<<"&&&&&&&there are currently "<<myc<<" transitions in the SM\n";
+    std::cout<<"&&&&&&&there are currently "<< machine->states.size() <<" states in the SM\n";
 	  }
         
     } else return false; //TODO: twrow some violation of protocol error
@@ -172,17 +195,21 @@ bool Transition::updateRoles(ACLMessage &msg)
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
 	      if (!it->role.compare(to) ) expectedRecepients.push_back(it->agent);
-	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); it = machine->involvedAgents.end(); }
+	      if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); break; }
 	  }
         } else
 	  {
 	      //std::vector<AgentAID> myvec = msg.getAllReceivers();
 	      //for (std::vector<AgentAID>::iterator it = myvec.begin(); it != myvec.end())
 		//machine->setRole(to,*it);
-	      if (!machine->setRole(to,msg.getAllReceivers()) ) return false;
+		std::cout<<"setting new role..\n";
+	      if (!(machine->setRole(to,msg.getAllReceivers())) ) return false;
+	      std::cout<<"setting the new role suceeded, sending an update signal..\n";
 	      machine->updateAllAgentRoles();
+	      std::cout<<"roles updated with the new set role\tto";
 	  }
     } else return false; //TODO: throw some violation of protocol error
+        std::cout<<"!!!exit update transition with message as param%%%%%%%%5\n";
     return true;
 }
 void Transition::performWithoutStateExit(ACLMessage &msg)
@@ -325,6 +352,7 @@ void Transition::setNextStateName	(std::string _state) 	{ nextStateName = _state
 void Transition::setFrom		(std::string _from) 	{ from = _from; }
 void Transition::setTo		(std::string _to) 		{ to = _to; }
 void Transition::setOwningState	(State* _state)		{owningState = _state;}
+void Transition::setMachine		(StateMachine* _machine)	{machine = _machine;}
     
 std::string Transition::getExpectedPerformative()	{return expectedPerf; }
 std::string Transition::getNextStateName()	{return nextStateName; }
@@ -333,6 +361,7 @@ std::string Transition::getTo()		{return to; }
 State* Transition::getNextState()		{return nextState; }
 std::vector<AgentAID> Transition::getExpectedSenders() 	{return expectedSenders; }
 std::vector<AgentAID> Transition::getExpectedRecepients()	{return expectedRecepients; }
+StateMachine* Transition::getMachine()			{return machine;}
 
 
 
