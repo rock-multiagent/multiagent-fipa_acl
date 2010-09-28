@@ -52,9 +52,9 @@ class AgentID {
        public:
 	 
 	  /**
-		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe
+		\param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; very not thread safe; --worked around it
 	  */
-	     static int resCompDepth;
+	     //static int resCompDepth;
 	      
              ~AgentID();
 
@@ -158,7 +158,7 @@ class AgentID {
 */
 extern bool operator== (const AgentID &a,const AgentID &b);
 /**
-    \brief alternative function for equality operator; the depth can be specified through the deph param 
+    \brief alternative function for equality operator; the depth can be specified through the depth param 
 */
 extern bool resDepthEqual(const AgentID &a,const AgentID &b, int depth);
 
