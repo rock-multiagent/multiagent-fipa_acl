@@ -63,6 +63,7 @@ bool operator== (const UserdefParam &a,const UserdefParam &b)
         return false;
     if (a.getValue().compare(b.getValue()))
         return false;
+    return true;
 }
 
 

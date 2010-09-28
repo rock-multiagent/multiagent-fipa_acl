@@ -99,6 +99,13 @@ ACLMessage::ACLMessage(predefinedPerformatives perf)
 	performative = ACLMessage::perfs[perf];
 }
 
+ACLMessage::ACLMessage(int perf)
+
+{
+	initializeObject();
+	performative = ACLMessage::perfs[perf];
+}
+
 ACLMessage::ACLMessage(std::string perf) 
 {
     initializeObject(); 
