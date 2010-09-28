@@ -23,7 +23,6 @@ const std::string illegalWordStart = std::string("@#-0123456789");
   
 void ACLMessage::initializeObject()
 {
-	
          receivers.clear();
          reply_to.clear();
 	/*
@@ -61,7 +60,7 @@ ACLMessage::~ACLMessage()
     if (sender) delete sender;
     if (receivers)
     {
-    std::vector<AgentAID*>::iterator it = receivers->begin();
+    std::vector<AgentID*>::iterator it = receivers->begin();
     for (it; it!=receivers->end(); it++)
         delete (*it);
     receivers->clear();
@@ -70,7 +69,7 @@ ACLMessage::~ACLMessage()
     
     if (reply_to)
     {
-    std::vector<AgentAID*>::iterator it = reply_to->begin();
+    std::vector<AgentID*>::iterator it = reply_to->begin();
     for (it; it != reply_to->end(); it++)
         delete (*it);
     reply_to->clear();
@@ -124,16 +123,16 @@ int ACLMessage::setPerformative(const std::string str)
 
 std::string ACLMessage::getPerformative() const {return performative; }
 
-void ACLMessage::addReceiver(const AgentAID &aid) 
+void ACLMessage::addReceiver(const AgentID &aid) 
 {
     if ( find(receivers.begin(),receivers.end(),aid) == receivers.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
         receivers.insert(receivers.begin(),aid); 
 }
 
-void ACLMessage::deleteReceiver(const AgentAID &aid) 
+void ACLMessage::deleteReceiver(const AgentID &aid) 
 {
-    std::vector<AgentAID>::iterator it;
+    std::vector<AgentID>::iterator it;
     if ( (it = find(receivers.begin(),receivers.end(),aid)) != receivers.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     receivers.erase(it);
@@ -144,18 +143,18 @@ void ACLMessage::clearReceivers()
     receivers.clear();
 }
 
-std::vector<AgentAID> ACLMessage::getAllReceivers() const {return receivers; }
+std::vector<AgentID> ACLMessage::getAllReceivers() const {return receivers; }
 
-void ACLMessage::addReplyTo(const AgentAID &aid) 
+void ACLMessage::addReplyTo(const AgentID &aid) 
 {
     if ( find(reply_to.begin(),reply_to.end(),aid) == reply_to.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     reply_to.insert(reply_to.begin(),aid); 
 }
 
-void ACLMessage::deleteReplyTo(const AgentAID aid) 
+void ACLMessage::deleteReplyTo(const AgentID aid) 
 {
-    std::vector<AgentAID>::iterator it;
+    std::vector<AgentID>::iterator it;
     if ( (it = find(reply_to.begin(),reply_to.end(),aid)) != reply_to.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     reply_to.erase(it);
@@ -166,7 +165,7 @@ void ACLMessage::clearReplyTo()
     reply_to.clear(); 
 }
 
-std::vector<AgentAID> ACLMessage::getAllReplyTo() const {return reply_to; }
+std::vector<AgentID> ACLMessage::getAllReplyTo() const {return reply_to; }
 
 void ACLMessage::setReplyBy(const long by) {reply_by = by; }
 
@@ -209,13 +208,13 @@ void ACLMessage::setContent(const std::string cont) {content = cont; }
 
 std::string ACLMessage::getContent() const {return content; }
 
-void ACLMessage::setSender(const AgentAID &sender1) 
+void ACLMessage::setSender(const AgentID &sender1) 
 {
     sender = sender1; 
 }
 
 
-AgentAID ACLMessage::getSender() const 
+AgentID ACLMessage::getSender() const 
 {
     return sender; 
     
@@ -354,10 +353,10 @@ bool operator== (const ACLMessage &a,const ACLMessage &b)
     { return false; }
     
     // checking if receivers sets of the message are the same
-    std::vector<AgentAID> agentsA = a.getAllReceivers();
-    std::vector<AgentAID> agentsB = b.getAllReceivers();
-    std::vector<AgentAID>::iterator ait = agentsA.begin();
-    std::vector<AgentAID>::iterator bit = agentsB.begin();
+    std::vector<AgentID> agentsA = a.getAllReceivers();
+    std::vector<AgentID> agentsB = b.getAllReceivers();
+    std::vector<AgentID>::iterator ait = agentsA.begin();
+    std::vector<AgentID>::iterator bit = agentsB.begin();
     
         
     int found_one = 0; // flag variable to control flow through inner loops
@@ -395,7 +394,7 @@ bool operator== (const ACLMessage &a,const ACLMessage &b)
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( resDepthEqual((*ait),(*bit),AgentAID::resCompDepth)) 
+	  if ( resDepthEqual((*ait),(*bit),AgentID::resCompDepth)) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -426,7 +425,7 @@ bool operator== (const ACLMessage &a,const ACLMessage &b)
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( resDepthEqual((*ait),(*bit),AgentAID::resCompDepth)) 
+	  if ( resDepthEqual((*ait),(*bit),AgentID::resCompDepth)) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -500,7 +499,7 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
     if (!mes.getContent().empty()) content = mes.getContent();
     
     
-	      AgentAID temp = AgentAID();
+	      AgentID temp = AgentID();
 	      temp = mes.getSender();
 	      sender = temp;
 	      
@@ -508,11 +507,11 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
     if (!mes.getAllReceivers().empty()) 
     {
         
-        std::vector<AgentAID> mesrec = mes.getAllReceivers();
-        std::vector<AgentAID>::iterator recit= mesrec.begin();
+        std::vector<AgentID> mesrec = mes.getAllReceivers();
+        std::vector<AgentID>::iterator recit= mesrec.begin();
         for (recit; recit != mesrec.end(); recit++)
         {
-	  AgentAID temp = AgentAID();
+	  AgentID temp = AgentID();
 	  temp = (*recit);
 	  receivers.insert(receivers.begin(),temp);
         }
@@ -520,11 +519,11 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
     if (!mes.getAllReplyTo().empty()) 
     {
         
-        std::vector<AgentAID> mesrec = mes.getAllReplyTo();
-        std::vector<AgentAID>::iterator recit= mesrec.begin();
+        std::vector<AgentID> mesrec = mes.getAllReplyTo();
+        std::vector<AgentID>::iterator recit= mesrec.begin();
         for (recit; recit != mesrec.end(); recit++)
         {
-	  AgentAID temp = AgentAID();
+	  AgentID temp = AgentID();
 	  temp = (*recit);
 	  reply_to.insert(reply_to.begin(),temp);
         }
@@ -585,7 +584,7 @@ ACLMessage& ACLMessage::operator=(const ACLMessage &mes)
         if (!mes.getContent().empty()) content = mes.getContent();
         
        
-	      AgentAID temp = AgentAID();
+	      AgentID temp = AgentID();
 	      temp = mes.getSender();
 	      sender = temp;
 	      
@@ -593,11 +592,11 @@ ACLMessage& ACLMessage::operator=(const ACLMessage &mes)
         if (!mes.getAllReceivers().empty()) 
         {
 	  
-	  std::vector<AgentAID> mesrec = mes.getAllReceivers();
-	  std::vector<AgentAID>::iterator recit= mesrec.begin();
+	  std::vector<AgentID> mesrec = mes.getAllReceivers();
+	  std::vector<AgentID>::iterator recit= mesrec.begin();
 	  for (recit; recit != mesrec.end(); recit++)
 	  {
-	      AgentAID temp = AgentAID();
+	      AgentID temp = AgentID();
 	      temp = (*recit);
 	      receivers.insert(receivers.begin(),temp);
 	  }
@@ -605,11 +604,11 @@ ACLMessage& ACLMessage::operator=(const ACLMessage &mes)
         if (!mes.getAllReplyTo().empty()) 
         {
 	  
-	  std::vector<AgentAID> mesrec = mes.getAllReplyTo();
-	  std::vector<AgentAID>::iterator recit= mesrec.begin();
+	  std::vector<AgentID> mesrec = mes.getAllReplyTo();
+	  std::vector<AgentID>::iterator recit= mesrec.begin();
 	  for (recit; recit != mesrec.end(); recit++)
 	  {
-	      AgentAID temp = AgentAID();
+	      AgentID temp = AgentID();
 	      temp = (*recit);
 	      reply_to.insert(reply_to.begin(),temp);
 	  }

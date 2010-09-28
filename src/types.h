@@ -3,7 +3,10 @@
 
 namespace fipa {
 namespace acl {
-    
+ 
+    /**
+     * Typedefinition for generic fiedls of a fipa message
+     */
     typedef std::string Ontology;
     typedef std::string Language;
     typedef std::string Content;

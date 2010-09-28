@@ -2,7 +2,7 @@ SET(module_name ${PROJECT_NAME})
 
 set(SOURCES
 	ACLMessage.cpp
-	AgentAID.cpp
+	AgentID.cpp
 	UserdefParam.cpp
 	ACLMessageOutputParser.cpp
 )
@@ -14,6 +14,15 @@ install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
 )	
+
+set(GENERATOR fipa-msg-generator)
+add_executable(${GENERATOR} generator.cpp ${SOURCES})
+target_link_libraries(${GENERATOR} ${LIBRARIES})
+install(TARGETS ${GENERATOR}
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+)
 
 #include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
 #pkg_check_modules(MESSAGE_PARSER "message-parser")

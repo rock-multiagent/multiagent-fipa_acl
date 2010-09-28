@@ -16,7 +16,7 @@
 #include "ACLMessageOutputParser.h"
 #include "ACLMessage.h"
 #include "UserdefParam.h"
-#include "AgentAID.h"
+#include "AgentID.h"
 
 namespace fipa {
 
@@ -26,17 +26,16 @@ namespace acl {
 void ACLMessageOutputParser::setMessage(ACLMessage &a)
 {
 	msg = a;
-  	
 }
 
 
-ACLMessageOutputParser::ACLMessageOutputParser() /// here we set the default values
+ACLMessageOutputParser::ACLMessageOutputParser()
 {
-                  useCodeTables = 0;
-                  updateCodeTables = 1;
-                  version = "1.0";
-                  res_depth = 1; 
-			                   
+	/// here we set the default values
+       useCodeTables = 0;
+       updateCodeTables = 1;
+       version = "1.0";
+       res_depth = 1; 
 }
 
 
@@ -68,7 +67,7 @@ std::string ACLMessageOutputParser::getBitMessage()
       std::string mes = std::string();
 	mes.clear();
 
-      mes = getBitHeader() + getBitMessageType() + getBitMessageParameters() + getBitEndOfColl();
+      mes = getBitHeader() + getBitMessageType() +getBitMessageParameters() + getBitEndOfColl();
 	
 	return mes;
 }
@@ -107,14 +106,25 @@ char ACLMessageOutputParser::getBitMessageVersion()
 
 std::string ACLMessageOutputParser::getBitMessageType()
 {
-            for (int i = 0; i < 22; i++)
-                if (!ACLMessage::perfs[i].compare(msg.getPerformative()))
-                              { 				
-                                char a[2]; a[0] = char(i+1); a[1] = '\0'; 
-                                return std::string(a);
-                              }
-		
-            return (char(0x00) + getBitBinWord(msg.getPerformative()));
+
+   // Check if we have one of the predefined performatives
+   for (int i = 0; i < 22; i++)
+   {
+	if (!ACLMessage::perfs[i].compare(msg.getPerformative()))
+       { 				
+	    char a[2]; 
+	    a[0] = char(i+1); 
+	    a[1] = '\0'; 
+	    return std::string(a);
+       }
+
+  }
+  
+  // actually we will have user defined performative here
+  if(msg.getPerformative().empty())
+	throw MessageGeneratorException("Performative cannot be empty");
+	
+  return (char(0x00) + getBitBinWord(msg.getPerformative()));
 } 
 
 std::string ACLMessageOutputParser::getBitBinWord(std::string sword)
@@ -135,19 +145,34 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
             std::string retstr = std::string();
 	    retstr.clear();
 
-            //if (msg.getSender());
-	  retstr = retstr + char(0x02) + getBitAID(msg.getSender(), res_depth); 
-            if (!(msg.getAllReceivers().empty())) retstr =retstr + char(0x03) + getBitAIDColl(msg.getAllReceivers(),res_depth); 
-            if (!msg.getContent().empty()) retstr = retstr + char(0x04) + getBitBinString(msg.getContent(),0); 
-            if (!msg.getReplyWith().empty()) retstr = retstr + char(0x05) + getBitBinExpression(msg.getReplyWith(),'s'); 
-            if (!msg.getReplyBy1(0).empty()) retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy1(0)); 
-            if (!msg.getInReplyTo().empty()) retstr = retstr + char(0x07) + getBitBinExpression(msg.getInReplyTo(),'s'); 
-            if (!msg.getAllReplyTo().empty()) retstr = retstr + char(0x08) + getBitAIDColl(msg.getAllReplyTo(),res_depth);
-            if (!msg.getLanguage().empty()) retstr = retstr + char(0x09) + getBitBinExpression(msg.getLanguage(),'s'); 
-            if (!msg.getEncoding().empty()) retstr = retstr + char(0x0a) + getBitBinExpression(msg.getEncoding(),'s');
-            if (!msg.getOntology().empty()) retstr = retstr + char(0x0b) + getBitBinExpression(msg.getOntology(),'s'); 
-            if (!msg.getProtocol().empty()) retstr = retstr + char(0x0c) + getBitBinWord(msg.getProtocol());
-            if (!msg.getConversationID().empty()) retstr = retstr + char(0x0d) + getBitBinExpression(msg.getConversationID(),'s');
+	    // Check if entries exists for the predefined message parameters
+	    // sender is not always required, 
+            if ( !(msg.getSender().empty()) )
+	    {
+		retstr = retstr + char(0x02) + getBitAID(msg.getSender(), res_depth); 
+	    }
+            if (!(msg.getAllReceivers().empty()))
+		 retstr =retstr + char(0x03) + getBitAIDColl(msg.getAllReceivers(),res_depth); 
+            if (!msg.getContent().empty())
+		retstr = retstr + char(0x04) + getBitBinString(msg.getContent(),0); 
+            if (!msg.getReplyWith().empty())
+		 retstr = retstr + char(0x05) + getBitBinExpression(msg.getReplyWith(),'s'); 
+            if (!msg.getReplyBy1(0).empty())
+		 retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy1(0)); 
+            if (!msg.getInReplyTo().empty())
+		 retstr = retstr + char(0x07) + getBitBinExpression(msg.getInReplyTo(),'s'); 
+            if (!msg.getAllReplyTo().empty()) 
+		 retstr = retstr + char(0x08) + getBitAIDColl(msg.getAllReplyTo(),res_depth);
+            if (!msg.getLanguage().empty())
+		 retstr = retstr + char(0x09) + getBitBinExpression(msg.getLanguage(),'s'); 
+            if (!msg.getEncoding().empty())
+		 retstr = retstr + char(0x0a) + getBitBinExpression(msg.getEncoding(),'s');
+            if (!msg.getOntology().empty())
+		 retstr = retstr + char(0x0b) + getBitBinExpression(msg.getOntology(),'s'); 
+            if (!msg.getProtocol().empty())
+		 retstr = retstr + char(0x0c) + getBitBinWord(msg.getProtocol());
+            if (!msg.getConversationID().empty())
+		 retstr = retstr + char(0x0d) + getBitBinExpression(msg.getConversationID(),'s');
             
             return retstr;
 }
@@ -158,7 +183,10 @@ std::string ACLMessageOutputParser::getBitUserdefMessageParams()
 	    retstr.clear();
 
             std::vector<UserdefParam> s = msg.getUserdefParams();
-	    if(s.empty()) return retstr;
+	    if( s.empty() )
+		 return retstr;
+
+	    printf("there ar userdef params: %d", (int) s.size());
 	
             std::vector<UserdefParam>::iterator it; 
 	    it = s.begin();
@@ -184,18 +212,18 @@ std::string ACLMessageOutputParser::bitParseParam(UserdefParam p)
 }
 
 
-std::string ACLMessageOutputParser::getBitAID(AgentAID aid, int depth)
+std::string ACLMessageOutputParser::getBitAID(AgentID aid, int depth)
 {
             if (depth > 0)
             return char(0x02) + getBitBinWord(aid.getName())+
-            (( aid.getAdresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAdresses()))) +
+            (( aid.getAddresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAddresses()))) +
             (( aid.getResolvers().empty() == true)? "" : getBitResolvers(aid.getResolvers(),depth-1)) +
             (( aid.getUserdefParams().empty() == true)? "" : getBitUserdefParams(aid.getUserdefParams())) +
             getBitEndOfColl();
              
                          
            return char(0x02) + getBitBinWord(aid.getName())+
-            (( aid.getAdresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAdresses()))) +
+            (( aid.getAddresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAddresses()))) +
             
             (( aid.getUserdefParams().empty() == true)? "" : getBitUserdefParams(aid.getUserdefParams())) +
             getBitEndOfColl();
@@ -213,15 +241,15 @@ std::string ACLMessageOutputParser::getBinURLCol(std::vector<std::string> adrr)
             return retstr;
 }
 
-std::string ACLMessageOutputParser::getBitResolvers(std::vector<AgentAID> aids,int depth)
+std::string ACLMessageOutputParser::getBitResolvers(std::vector<AgentID> aids,int depth)
 {
             return (char(0x03) + getBitAIDColl(aids,depth));
 }
 
-std::string ACLMessageOutputParser::getBitAIDColl(std::vector<AgentAID> aids, int depth)
+std::string ACLMessageOutputParser::getBitAIDColl(std::vector<AgentID> aids, int depth)
 {
             std::string retstr = std::string();
-            std::vector<AgentAID>::iterator it = aids.begin();
+            std::vector<AgentID>::iterator it = aids.begin();
             for (it; it != aids.end(); it++)
                 retstr = retstr + getBitAID(*it, depth);
             return retstr + getBitEndOfColl();
@@ -379,10 +407,10 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
     else return false;
     
     // checking if receivers sets of the message are the same
-    std::vector<AgentAID> agentsA = a.getAllReceivers();
-    std::vector<AgentAID> agentsB = b.getAllReceivers();
-    std::vector<AgentAID>::iterator ait = agentsA.begin();
-    std::vector<AgentAID>::iterator bit = agentsB.begin();
+    std::vector<AgentID> agentsA = a.getAllReceivers();
+    std::vector<AgentID> agentsB = b.getAllReceivers();
+    std::vector<AgentID>::iterator ait = agentsA.begin();
+    std::vector<AgentID>::iterator bit = agentsB.begin();
     int found_one = 0; // flag variable to control flow through inner loops
     while (ait != agentsA.end())
     {
@@ -475,19 +503,19 @@ bool operator== ( ACLMessage &a,  ACLMessage &b)
 }
 
 
-bool operator== ( AgentAID &a,  AgentAID &b)
+bool operator== ( AgentID &a,  AgentID &b)
 {
     ///saving the resCompDepth variable for later restoration
-    int depthRestore = AgentAID::getResCompDepth();
+    int depthRestore = AgentID::getResCompDepth();
     
-    //AgentAID a = AgentAID(&c);
-    //AgentAID b = AgentAID(&d);
+    //AgentID a = AgentID(&c);
+    //AgentID b = AgentID(&d);
     if (a.getName().compare(b.getName()))
         return false;
     
-    // comparing adresses
-    std::vector<std::string> addrA = a.getAdresses();
-    std::vector<std::string> addrB = b.getAdresses();
+    // comparing addresses
+    std::vector<std::string> addrA = a.getAddresses();
+    std::vector<std::string> addrB = b.getAddresses();
     std::vector<std::string>::iterator sita = addrA.begin();
     std::vector<std::string>::iterator sitb = addrB.begin();
     int found_one = 0; // flag variable to control flow through inner loops
@@ -525,12 +553,12 @@ bool operator== ( AgentAID &a,  AgentAID &b)
     if (depthRestore > 0 )
     {
         // the resolvers are compared with up to resCompDepth -1 in the resolver network
-        AgentAID::setResCompDepth(depthRestore-1);
+        AgentID::setResCompDepth(depthRestore-1);
     // comparing resolvers
-    std::vector<AgentAID> agentsA = a.getResolvers();
-    std::vector<AgentAID> agentsB = b.getResolvers();
-    std::vector<AgentAID>::iterator ait = agentsA.begin();
-    std::vector<AgentAID>::iterator bit = agentsB.begin();
+    std::vector<AgentID> agentsA = a.getResolvers();
+    std::vector<AgentID> agentsB = b.getResolvers();
+    std::vector<AgentID>::iterator ait = agentsA.begin();
+    std::vector<AgentID>::iterator bit = agentsB.begin();
     
     while (ait != agentsA.end())
     {
@@ -553,7 +581,7 @@ bool operator== ( AgentAID &a,  AgentAID &b)
 	  
     }
     // restoring the comparison depth variable to the initial value; there must be no possible return statements between the 2 changes made to it
-    AgentAID::setResCompDepth(depthRestore);
+    AgentID::setResCompDepth(depthRestore);
     if (!agentsA.empty())
         return false;
     if (!agentsB.empty())

@@ -26,8 +26,8 @@
 using namespace fipa::acl;
 using namespace std;
 
-void printAgentAID(AgentAID *agent);
-void printAgentAIDset(set<AgentAID*>* myset);
+void printAgentID(AgentID *agent);
+void printAgentIDset(set<AgentID*>* myset);
 void printUserdefParamset(set<UserdefParam*>* params);
 
 void printMessage(ACLMessage *msg)
@@ -44,32 +44,32 @@ void printMessage(ACLMessage *msg)
     if (!(*msg).getOntology().empty()) cout<<"ontology:\t"<< msg->getOntology()<<endl;
     if (!(*msg).getProtocol().empty()) cout<<"protocol:\t"<< msg->getProtocol()<<endl;
     if (!(*msg).getConversationID().empty()) cout<<"conversation id:\t"<< msg->getConversationID()<<endl;
-    if ((*msg).getSender() != NULL) {cout<<"sender:\n"; printAgentAID(msg->getSender());}
-    if (!((*msg).getAllReceivers()->empty())) { cout<<"receivers:\n"; printAgentAIDset(msg->getAllReceivers());}
-    if (!(*msg).getAllReplyTo()->empty()) {cout<<"reply to:\n"; printAgentAIDset(msg->getAllReplyTo());}
+    if ((*msg).getSender() != NULL) {cout<<"sender:\n"; printAgentID(msg->getSender());}
+    if (!((*msg).getAllReceivers()->empty())) { cout<<"receivers:\n"; printAgentIDset(msg->getAllReceivers());}
+    if (!(*msg).getAllReplyTo()->empty()) {cout<<"reply to:\n"; printAgentIDset(msg->getAllReplyTo());}
     if (!(*msg).getUserdefParams()->empty()) printUserdefParamset(msg->getUserdefParams());
 
 }
 
-void printAgentAIDset(set<AgentAID*>* myset)
+void printAgentIDset(set<AgentID*>* myset)
 {
     cout<<"\t==================Agent AID set==================\n";
-    set<AgentAID*>::iterator it = myset->begin();
+    set<AgentID*>::iterator it = myset->begin();
     for(it; it != myset->end(); it++)
-        printAgentAID(*it);
+        printAgentID(*it);
 }
-void printAgentAID(AgentAID *agent)
+void printAgentID(AgentID *agent)
 {
     cout<<"\t==================Agent AID==================\n";
     if (!agent->getName().empty()) cout<<"\t\tname:\t"<< agent->getName()<<endl;
-    if (!agent->getAdresses()->empty())
+    if (!agent->getAddresses()->empty())
     {
-        cout<<"\t\tadresses:\t\n";
-        set<string>::iterator it = agent->getAdresses()->begin();
-        for(it; it != agent->getAdresses()->end(); it++)
+        cout<<"\t\taddresses:\t\n";
+        set<string>::iterator it = agent->getAddresses()->begin();
+        for(it; it != agent->getAddresses()->end(); it++)
 	  cout<<"\t\t\t"<<*it<<endl;
     }
-    if (!agent->getResolvers()->empty()) {cout<<"\t\tresolvers:\t\n"; printAgentAIDset(agent->getResolvers());}
+    if (!agent->getResolvers()->empty()) {cout<<"\t\tresolvers:\t\n"; printAgentIDset(agent->getResolvers());}
     if (!agent->getUserdefParams()->empty()) {cout<<"\t\tUser Defined Parameters:\t\n";printUserdefParamset(agent->getUserdefParams());}
 }
 
@@ -90,10 +90,10 @@ int main(int argc, char** argv)
 
 		fipa::acl::ACLMessage *testmessage = new fipa::acl::ACLMessage(std::string("query-ref"));
 
-                fipa::acl::AgentAID *sender = new fipa::acl::AgentAID(std::string("modulename"));
+                fipa::acl::AgentID *sender = new fipa::acl::AgentID(std::string("modulename"));
                 testmessage->setSender(sender);
 
-                fipa::acl::AgentAID *receiver = new fipa::acl::AgentAID(std::string("moduleD"));
+                fipa::acl::AgentID *receiver = new fipa::acl::AgentID(std::string("moduleD"));
                 testmessage->addReceiver(receiver);
 
                 fipa::acl::ACLMessageOutputParser testparser = fipa::acl::ACLMessageOutputParser();
@@ -106,8 +106,8 @@ int main(int argc, char** argv)
                 fipa::acl::ACLMessage* aclmessage = parser.parseData(received);
                 printMessage(aclmessage);
 /*
-                std::set<fipa::acl::AgentAID*>* receivers = aclmessage->getAllReceivers();
-                std::set<fipa::acl::AgentAID*>::iterator it;
+                std::set<fipa::acl::AgentID*>* receivers = aclmessage->getAllReceivers();
+                std::set<fipa::acl::AgentID*>::iterator it;
 
                 std::vector<std::string> recvs;
                 for (it = receivers->begin(); it != receivers->end(); it++) 
@@ -133,23 +133,23 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	(*m3).addUserdefParam(p1); 
 	
 	
-	AgentAID *a1 = new AgentAID(std::string("r1"));
-	(*a1).addAdress(std::string("adr1"));
-	(*a1).addAdress(std::string("adr2"));	
+	AgentID *a1 = new AgentID(std::string("r1"));
+	(*a1).addAddress(std::string("adr1"));
+	(*a1).addAddress(std::string("adr2"));	
 	(*m3).setSender(a1);
 	(*a1).addUserdefParam(p1);
 	
-	AgentAID *a2 = new AgentAID(std::string("r2"));
-	AgentAID *a3 = new AgentAID(std::string("r3"));
-	AgentAID *a4 = new AgentAID(std::string("r4"));
-	AgentAID *a5 = new AgentAID(std::string("r5"));
-	AgentAID *a6 = new AgentAID(std::string("r6"));
-	AgentAID *a7 = new AgentAID(std::string("r7"));
+	AgentID *a2 = new AgentID(std::string("r2"));
+	AgentID *a3 = new AgentID(std::string("r3"));
+	AgentID *a4 = new AgentID(std::string("r4"));
+	AgentID *a5 = new AgentID(std::string("r5"));
+	AgentID *a6 = new AgentID(std::string("r6"));
+	AgentID *a7 = new AgentID(std::string("r7"));
 	UserdefParam *p4 = new UserdefParam();
 	
 	
-	(*a6).addAdress(std::string("adr1"));
-	(*a6).addAdress(std::string("adr2"));	
+	(*a6).addAddress(std::string("adr1"));
+	(*a6).addAddress(std::string("adr2"));	
 	(*m3).addReplyTo(a6);
 	//(*a6).addResolver(a7);
 	//(*a6).addResolver(a2);
@@ -157,8 +157,8 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	(*m3).addReceiver(a3);
 	(*m3).addReceiver(a1);
 	
-	(*a7).addAdress(std::string("adr1"));
-	(*a7).addAdress(std::string("adr2"));	
+	(*a7).addAddress(std::string("adr1"));
+	(*a7).addAddress(std::string("adr2"));	
 	(*m3).addReplyTo(a7);
 	//(*a7).addResolver(a6);
 
@@ -242,23 +242,23 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 /*
 int found_one = 0;
 
-AgentAID *a100 = new AgentAID;
+AgentID *a100 = new AgentID;
 a100->setName(string("a100"));
-a100->addAdress(string("adress1"));
-a100->addAdress(string("adress2"));
-if (a100->getAdresses()->empty()) cout<<"empty\n";
-AgentAID *a10 = new AgentAID;
+a100->addAddress(string("address1"));
+a100->addAddress(string("address2"));
+if (a100->getAddresses()->empty()) cout<<"empty\n";
+AgentID *a10 = new AgentID;
 a10->setName(string("a10"));
-a10->addAdress(string("adress1"));
+a10->addAddress(string("address1"));
 
 a100->addResolver(a10);
 a100->addResolver(a1);
 a100->addResolver(a7);
 a100->addResolver(a6);
 
-AgentAID *a101 =  new AgentAID();
+AgentID *a101 =  new AgentID();
 *a101 = *a100;
-printAgentAID(a101);
+printAgentID(a101);
 cout<<"\n\n\n\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n\n";
 
 
@@ -279,14 +279,14 @@ printMessage(m4);
 
 
 
-//a11->getAdresses()->erase(a11->getAdresses()->begin());
-//cout<< (*a11->getAdresses()->begin())<<endl;
+//a11->getAddresses()->erase(a11->getAddresses()->begin());
+//cout<< (*a11->getAddresses()->begin())<<endl;
 
 
     /*
 
-    std::set<std::string>* addrA = a101.getAdresses();
-    std::set<std::string>* addrB = a11.getAdresses();
+    std::set<std::string>* addrA = a101.getAddresses();
+    std::set<std::string>* addrB = a11.getAddresses();
     std::set<std::string>::iterator sita = addrA->begin();
     std::set<std::string>::iterator sitb = addrB->begin();
    
@@ -318,23 +318,23 @@ printMessage(m4);
     if (!addrB->empty())
         cout<<"22\n";
 
-if (a100->getAdresses()->empty()) cout<<"empty\n";
-if (a10->getAdresses()->empty()) cout<<"empty\n";
+if (a100->getAddresses()->empty()) cout<<"empty\n";
+if (a10->getAddresses()->empty()) cout<<"empty\n";
 
-AgentAID *comp1 = new AgentAID(std::string("agname"));
-AgentAID *comp2 = new AgentAID(std::string("agname"));
+AgentID *comp1 = new AgentID(std::string("agname"));
+AgentID *comp2 = new AgentID(std::string("agname"));
 cout<<"control\n";
 comp1->addResolver(a100);
 cout <<"control\n";
 comp2->addResolver(a100);
 
 
-    std::set<AgentAID*>* agentsA = (*comp1).getResolvers();
+    std::set<AgentID*>* agentsA = (*comp1).getResolvers();
     cout<<"retrieved resolvers\n";
-    std::set<AgentAID*>* agentsB = (*comp2).getResolvers();
+    std::set<AgentID*>* agentsB = (*comp2).getResolvers();
     cout<<"retrieved resolvers\n";
-    std::set<AgentAID*>::iterator ait = agentsA->begin();
-    std::set<AgentAID*>::iterator bit = agentsB->begin();
+    std::set<AgentID*>::iterator ait = agentsA->begin();
+    std::set<AgentID*>::iterator bit = agentsB->begin();
     cout<<"iterators created\n";
     
     while (ait != agentsA->end())
