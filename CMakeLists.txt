@@ -23,18 +23,21 @@ pkg_check_modules(MessageGenerator "message-generator")
 
 set(Boost_LOCALFIRST TRUE)
 set(Boost_ADDITIONAL_VERSION 1.42 1.43)
-find_package(Boost REQUIRED)
+find_package(Boost 1.42 REQUIRED)
 
 include_directories(${MessageGenerator_INCLUDE_DIRS})
 link_directories(${MessageGenerator_LIBRARY_DIRS})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
-add_subdirectory(test/unit-testing)
+#add_subdirectory(test/unit-testing)
+# Disabled to avoid automatic installation of cpp-test 
+# TODO: change to boost-testing
+#add_subdirectory(test/unit-testing)
 
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} )
 
 

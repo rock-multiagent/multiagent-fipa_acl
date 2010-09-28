@@ -9,7 +9,14 @@
 
 namespace fipa { namespace acl {
 
+/**
+* \brief Definition of a length - internally used by the parser 
+*/
 typedef boost::variant<boost::uint_least8_t,boost::uint_least16_t, boost::uint_least32_t> LengthValue;
+
+/**
+* \brief Definition of a ByteString
+*/
 typedef boost::variant<std::string, std::vector<unsigned char> > ByteString;
 
 /**
@@ -18,9 +25,13 @@ typedef boost::variant<std::string, std::vector<unsigned char> > ByteString;
 */
 class ByteStringPrinter : public boost::static_visitor<std::string>
 {
-
+	
+	/** Character encoding to be used */
 	std::string encoding;
 public: 
+	/**
+         * Constructor using a given encoding, userdefined by a string representation
+        */
 
 	ByteStringPrinter(std::string enc) : encoding(enc) {}
 	
@@ -61,14 +72,23 @@ public:
 	}
 };
 
-// Bytesequence - whereas the encoding is defined by a natural number, i.e. 
-// postprocessing has to be performed 
+/**
+ * \class ByteSequence 
+ * \brief Representation of a byte sequence. We also embed information about the encoding
+ * \details whereas the encoding is defined by a natural number, i.e. 
+ * postprocessing has to be performed to convert it to string
+ */
 struct ByteSequence
 {
 	std::string encoding;
 	fipa::acl::LengthValue length;
 	fipa::acl::ByteString bytes;
 
+	/**
+         * Convert a bytesequence to a string representation
+         * This will be a defined format: see ByteStringPrinter for that
+	 * \return A string containing the byte sequence
+         */
 	std::string toString()
 	{
 		std::string tmp;
@@ -76,7 +96,6 @@ struct ByteSequence
 		tmp += boost::apply_visitor( ByteStringPrinter(encoding), bytes);
 		return tmp;
 	}
-
 };
 
 

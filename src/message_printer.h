@@ -5,12 +5,19 @@
 
 namespace fipa { namespace acl {
 
+/**
+* \brief Allows printing of a newly constructed fipa::acl::Message
+*/
 class MessagePrinter 
 {
 public:
 	MessagePrinter();
 	~MessagePrinter();
-
+	
+	/**
+         * Print the output of a fipa message to stdout
+	 * \param msg
+         */
 	void print(const fipa::acl::Message& msg);
 };
 

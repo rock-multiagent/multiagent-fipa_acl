@@ -109,24 +109,24 @@ void MessageParser::buildSender(MessageParameter param,ACLMessage &msg)
     fipa::acl::ParameterValue mydata; 
     mydata = param.data;
     
-    AgentID temp = boost::get<AgentID>(mydata);
-    AgentAID _sender = buildAgentAID(temp);
+    AgentIdentifier temp = boost::get<AgentIdentifier>(mydata);
+    AgentID _sender = buildAgentID(temp);
     
     msg.setSender(_sender);
     
 }
 
-AgentAID MessageParser::buildAgentAID(AgentID agent)
+AgentID MessageParser::buildAgentID(AgentIdentifier agent)
 {
-    AgentAID retAg = AgentAID();
+    AgentID retAg = AgentID();
     //if (retAg.setName(agent.name))
     retAg.setName(agent.name);
-    // setting the adresses
+    // setting the addresses
     if (!agent.addresses.empty()) 
     {
         std::vector<std::string>::iterator it = agent.addresses.begin();
         for(it; it != agent.addresses.end(); it++)
-	  retAg.addAdress(*it);
+	  retAg.addAddress(*it);
     }
     // building resolvers
     if (!agent.resolvers.empty())
@@ -143,20 +143,20 @@ AgentAID MessageParser::buildAgentAID(AgentID agent)
     return retAg;
 }
 
-void MessageParser::buildResolvers(AgentAID &workAg, AgentID agent)
+void MessageParser::buildResolvers(AgentID &workAg, AgentIdentifier agent)
 {
-    struct AgentID unbuiltres;
+    struct AgentIdentifier unbuiltres;
     
     std::vector<fipa::acl::Resolver>::iterator it = agent.resolvers.begin();
     for (it; it != agent.resolvers.end(); it++)
     {
         unbuiltres = it->get(); // get function of the boost::recursive_wrapper
-        AgentAID res = buildAgentAID(unbuiltres);
+        AgentID res = buildAgentID(unbuiltres);
         workAg.addResolver(res);
     }
 }
 
-void MessageParser::buildAgentParameters(AgentAID &workAg, AgentID agent)
+void MessageParser::buildAgentParameters(AgentID &workAg, AgentIdentifier agent)
 {
     
     std::vector<UserDefinedParameter>::iterator it = agent.parameters.begin();
@@ -195,13 +195,13 @@ UserdefParam MessageParser::buildUserdefParameter(MessageParameter param)
 
 void MessageParser::buildReceiver(MessageParameter param, ACLMessage &msg)
 {
-    AgentAID _receiver;    
+    AgentID _receiver;    
     
-    std::vector<AgentID> unbuiltReceivers = boost::get<std::vector<AgentID> >(param.data); // boost::get() -> to return a specific type value from a boost::variant
-    std::vector<AgentID>::iterator it = unbuiltReceivers.begin();
+    std::vector<AgentIdentifier> unbuiltReceivers = boost::get<std::vector<AgentIdentifier> >(param.data); // boost::get() -> to return a specific type value from a boost::variant
+    std::vector<AgentIdentifier>::iterator it = unbuiltReceivers.begin();
     for (it; it!= unbuiltReceivers.end(); it++)
     {
-        _receiver = buildAgentAID(*it);
+        _receiver = buildAgentID(*it);
         msg.addReceiver(_receiver);
     }
    
@@ -230,15 +230,15 @@ void MessageParser::buildReplyBy1(MessageParameter param, ACLMessage &msg)
 
 void MessageParser::buildReplyTo(MessageParameter param, ACLMessage &msg)
 {
-    AgentAID result;
+    AgentID result;
           
-     std::vector<AgentID> _value;
-     _value = boost::get<std::vector<AgentID> >(param.data);
+     std::vector<AgentIdentifier> _value;
+     _value = boost::get<std::vector<AgentIdentifier> >(param.data);
      
-     std::vector<AgentID>::iterator it = _value.begin();
+     std::vector<AgentIdentifier>::iterator it = _value.begin();
      for (it; it != _value.end(); it++)
      {
-         result = buildAgentAID(*it);
+         result = buildAgentID(*it);
          msg.addReplyTo(result);
      }
 }

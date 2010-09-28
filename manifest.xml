@@ -7,6 +7,7 @@
   <url>http://www.fipa.org</url>
   <logo>http://</logo>
   <depend package="fipa/acl/message-generator" />
+<!--  <depend package="libcppunit" /> -->
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="" />

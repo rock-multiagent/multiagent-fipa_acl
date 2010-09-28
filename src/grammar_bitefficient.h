@@ -93,7 +93,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-	fipa::acl::AgentID,
+	fipa::acl::AgentIdentifier,
 	(std::string, name)
 	(std::vector<std::string>, addresses)
 	(std::vector<fipa::acl::Resolver>, resolvers)
@@ -828,7 +828,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 
 	qi::rule<Iterator, std::string() > predefinedMessageType;
 	
-	qi::rule<Iterator, fipa::acl::AgentID()> agentIdentifier;
+	qi::rule<Iterator, fipa::acl::AgentIdentifier()> agentIdentifier;
 	qi::rule<Iterator, std::string() > agentName;
 	qi::rule<Iterator, std::vector<std::string>() > addresses;
 	qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > resolvers;
@@ -836,12 +836,12 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	
 	qi::rule<Iterator, std::vector<std::string>() > urlCollection;
 	qi::rule<Iterator, std::string() > url;
-	qi::rule<Iterator, std::vector<fipa::acl::AgentID>() > recipientExpr;
+	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > recipientExpr;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > msgContent;
 	qi::rule<Iterator, std::string() > replyWithParam;
 	qi::rule<Iterator, fipa::acl::DateTime() > replyByParam;
 	qi::rule<Iterator, std::string() > inReplyToParam;
-	qi::rule<Iterator, std::vector<fipa::acl::AgentID>() > replyToParam;
+	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > replyToParam;
 	qi::rule<Iterator, std::string() > language;
 	qi::rule<Iterator, std::string() > encoding;
 	qi::rule<Iterator, std::string() > ontology;

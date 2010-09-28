@@ -32,13 +32,13 @@ void MessagePrinter::print(const fipa::acl::Message& msg)
 	
 		if(mp.name == "sender")
 		{
-			AgentIDPrinter aidPrinter;
-			fipa::acl::AgentID& aid = boost::get<fipa::acl::AgentID>(mp.data);
+			AgentIdentifierPrinter aidPrinter;
+			fipa::acl::AgentIdentifier& aid = boost::get<fipa::acl::AgentIdentifier>(mp.data);
 			aidPrinter.print(aid);
 		} else if(mp.name == "receiver")
 		{
-			AgentIDPrinter aidPrinter;
-			std::vector<fipa::acl::AgentID> aids = boost::get<std::vector<fipa::acl::AgentID> >(mp.data);
+			AgentIdentifierPrinter aidPrinter;
+			std::vector<fipa::acl::AgentIdentifier> aids = boost::get<std::vector<fipa::acl::AgentIdentifier> >(mp.data);
 			int length = aids.size();
 
 			printf("Receiver: \n");
@@ -72,8 +72,8 @@ void MessagePrinter::print(const fipa::acl::Message& msg)
 
 		} else if(mp.name == "reply-to")
 		{
-			AgentIDPrinter aidPrinter;
-			std::vector<fipa::acl::AgentID> aids = boost::get<std::vector<fipa::acl::AgentID> >(mp.data);
+			AgentIdentifierPrinter aidPrinter;
+			std::vector<fipa::acl::AgentIdentifier> aids = boost::get<std::vector<fipa::acl::AgentIdentifier> >(mp.data);
 			int length = aids.size();
 
 			printf("ReplyTo: \n");

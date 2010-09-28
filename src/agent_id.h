@@ -11,9 +11,9 @@
 
 namespace fipa { namespace acl {
 
-// AgentID needs Resolvers, since AgentID is recursive
-struct AgentID;
-typedef boost::recursive_wrapper<AgentID> Resolver;
+// AgentIdentifier needs Resolvers, since AgentIdentifier is recursive
+struct AgentIdentifier;
+typedef boost::recursive_wrapper<AgentIdentifier> Resolver;
 
 // To avoid dealing with circular dependecies we use a 'similar' definition to ParameterValue 
 typedef boost::variant<std::string, fipa::acl::Resolver, std::vector<fipa::acl::Resolver>, fipa::acl::ByteSequence, fipa::acl::ByteString > UserDefinedParameterValue;
@@ -24,8 +24,10 @@ typedef struct
 	fipa::acl::UserDefinedParameterValue data;
 } UserDefinedParameter;
 
-
-struct AgentID
+/**
+* \brief Definition for AgentIdentifier
+*/
+struct AgentIdentifier
 {
 	std::string name;
 	std::vector<std::string> addresses;	
@@ -33,14 +35,21 @@ struct AgentID
 	std::vector<fipa::acl::UserDefinedParameter> parameters;
 };
 
-class AgentIDPrinter
+/**
+* \brief This class can be used to print the AgentIdentifier
+*/
+class AgentIdentifierPrinter
 {
 
 public:
-	AgentIDPrinter();
-	~AgentIDPrinter();
-	
-	void print(const fipa::acl::AgentID& aid);
+	AgentIdentifierPrinter();
+	~AgentIdentifierPrinter();
+
+        /**
+	 * \brief Print an AgentIdentifier
+         * \param aid AgentIdentifier
+         */
+	void print(const fipa::acl::AgentIdentifier& aid);
 
 };
 
