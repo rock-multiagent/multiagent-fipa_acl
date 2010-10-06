@@ -38,13 +38,13 @@ class StateMachineTest : public CPPUNIT_NS::TestFixture
 	    void RequestProtocolTest();
 	    
 	    void printMessage( ACLMessage &msg);
-	    void printAgentAID( AgentAID &agent);
-	    void printAgentAIDset( vector<AgentAID> &myset);
+	    void printAgentID( AgentID &agent);
+	    void printAgentIDset( vector<AgentID> &myset);
 	    void printUserdefParamset( vector<UserdefParam> &params);
 
 	private:
 		//StateMachine req;
-		AgentAID a1,a2;
+		AgentID a1,a2;
 
 };
 

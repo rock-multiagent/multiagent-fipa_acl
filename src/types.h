@@ -2,7 +2,7 @@
 #define _RIMRES_FIPAACL_CONVMONITOR_TYPES_
 
 //#include <map>
-#include <message-generator/AgentAID.h>
+#include <message-generator/AgentID.h>
 
 namespace fipa {
 namespace acl {
@@ -11,7 +11,7 @@ namespace acl {
     
     typedef struct {
         Role role;
-        AgentAID agent;
+        AgentID agent;
         bool check;
     } AgentMapping;
     

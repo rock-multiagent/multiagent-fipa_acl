@@ -22,7 +22,7 @@ class State
         std::vector<Transition> transitions;
         std::vector<StateMachine> subSM;
         std::vector<ACLMessage> archive;
-        std::map<AgentAID,bool> involvedAgents;
+        std::map<AgentID,bool> involvedAgents;
         
         StateMachine* owningMachine;
         
@@ -34,15 +34,15 @@ class State
         State();
         State(std::string _uid);
         ~State();
-        ACLMessage* searchArchiveBySenderReceiver(AgentAID,AgentAID);
+        ACLMessage* searchArchiveBySenderReceiver(AgentID,AgentID);
         void addToArchive(ACLMessage &msg);
         
         int consumeMessage(ACLMessage &msg);
         void generateDefaultTransitions();
         bool checkAllAgentsAccountedFor();
         void loadInvolvedAgents();
-        void tickInvolvedAgent(AgentAID);
-        void tickInvolvedAgent(std::vector<AgentAID>);
+        void tickInvolvedAgent(AgentID);
+        void tickInvolvedAgent(std::vector<AgentID>);
         void loadParameters();
         void updateAllAgentRoles();
         void resetInvolvedAgentsTicks();
@@ -63,7 +63,7 @@ class State
 //extern operator==(const State&, const State&);
 extern bool operator==(const State&, const std::string&);
 //extern bool operator==(const std::string&, const State&);
-extern bool operator<(const AgentAID&,const AgentAID&);
+extern bool operator<(const AgentID&,const AgentID&);
 
 } // end of acl
 } // end of fipa

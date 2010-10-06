@@ -35,7 +35,10 @@ int Transition::consumeMessage(ACLMessage &msg)
 	  {
 	      if (nextState->getFinal()) 
 	      {
-		if (machine->owner == msg.getSender() ) machine->removeInterlocutor(msg.getAllReceivers() );
+		AgentID a1,a2;
+		a1 = machine->owner;
+		a2 = msg.getSender();
+		if (a1 == a2 ) machine->removeInterlocutor(msg.getAllReceivers() );
 		else machine->removeInterlocutor(msg.getSender());
 	      }
 	  }
@@ -199,8 +202,8 @@ bool Transition::updateRoles(ACLMessage &msg)
 	  }
         } else
 	  {
-	      //std::vector<AgentAID> myvec = msg.getAllReceivers();
-	      //for (std::vector<AgentAID>::iterator it = myvec.begin(); it != myvec.end())
+	      //std::vector<AgentID> myvec = msg.getAllReceivers();
+	      //for (std::vector<AgentID>::iterator it = myvec.begin(); it != myvec.end())
 		//machine->setRole(to,*it);
 		std::cout<<"setting new role..\n";
 	      if (!(machine->setRole(to,msg.getAllReceivers())) ) return false;
@@ -209,7 +212,7 @@ bool Transition::updateRoles(ACLMessage &msg)
 	      std::cout<<"roles updated with the new set role\tto";
 	  }
     } else return false; //TODO: throw some violation of protocol error
-        std::cout<<"!!!exit update transition with message as param%%%%%%%%5\n";
+        std::cout<<"!!!exit update transition with message as param%%%%%%%%\n";
     return true;
 }
 void Transition::performWithoutStateExit(ACLMessage &msg)
@@ -230,7 +233,7 @@ void Transition::performOnStateExit(ACLMessage &msg)
 /*
 bool Transition::checkAllSendersAccountedFor(ACLMessage &msg)
 {
-    std::map<AgentAID,bool>::iterator check;
+    std::map<AgentID,bool>::iterator check;
     for (check = owningState->expectedSenders.begin(); check != owningState->expectedSenders.end(); check++)
     {
         if (check->second == false) return false;
@@ -241,7 +244,7 @@ bool Transition::checkAllSendersAccountedFor(ACLMessage &msg)
 
 bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 {
-    std::map<AgentAID,bool>::iterator check;
+    std::map<AgentID,bool>::iterator check;
     for (check = expectedRecepients.begin(); check != expectedRecepients.end(); check++)
     {
         if (check->second == false) return false;
@@ -253,19 +256,20 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 
 bool Transition::validateSender (ACLMessage &msg)
 {
-    AgentAID agent = msg.getSender();
-    std::vector<AgentAID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
+    AgentID agent = msg.getSender();
+    std::vector<AgentID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
     if ( found != expectedSenders.end() ) return true;
     return false;
 }
 
 bool Transition::validateRecepients (ACLMessage &msg)
 {
-    std::vector<AgentAID> recepients = msg.getAllReceivers();
-    std::vector<AgentAID>::iterator it;
+    std::vector<AgentID> recepients = msg.getAllReceivers();
+    std::vector<AgentID>::iterator it;
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
-        std::vector<AgentAID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
+        std::cout<< expectedRecepients.begin()->getName() <<"\t"<< it->getName() <<"\n\n";
+        std::vector<AgentID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
         if (found != expectedRecepients.end() ) ;
         else return false;
     }
@@ -275,8 +279,8 @@ bool Transition::validateRecepients (ACLMessage &msg)
 bool Transition::validateInReplyTo(ACLMessage &msg)
 {
     ACLMessage *fromArchive;
-    std::vector<AgentAID> recepients = msg.getAllReceivers();
-    std::vector<AgentAID>::iterator it;
+    std::vector<AgentID> recepients = msg.getAllReceivers();
+    std::vector<AgentID>::iterator it;
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
         if ( (fromArchive = precedingState->searchArchiveBySenderReceiver(msg.getSender(),*it)) == NULL ) return false;
@@ -324,7 +328,7 @@ bool Transition::validateConvID (ACLMessage &msg)
     return true;
 }
 
-void Transition::removeAllAgentsBut(AgentAID &ag,std::vector<AgentAID> &agents)
+void Transition::removeAllAgentsBut(AgentID &ag,std::vector<AgentID> &agents)
 {
     agents.clear();
     agents.push_back(ag);
@@ -359,8 +363,8 @@ std::string Transition::getNextStateName()	{return nextStateName; }
 std::string Transition::getFrom()		{return from; }
 std::string Transition::getTo()		{return to; }
 State* Transition::getNextState()		{return nextState; }
-std::vector<AgentAID> Transition::getExpectedSenders() 	{return expectedSenders; }
-std::vector<AgentAID> Transition::getExpectedRecepients()	{return expectedRecepients; }
+std::vector<AgentID> Transition::getExpectedSenders() 	{return expectedSenders; }
+std::vector<AgentID> Transition::getExpectedRecepients()	{return expectedRecepients; }
 StateMachine* Transition::getMachine()			{return machine;}
 
 

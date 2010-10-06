@@ -110,18 +110,18 @@ int State::consumeMessage(ACLMessage &msg)
     return 1;
 }
 
-void State::tickInvolvedAgent(AgentAID ag)
+void State::tickInvolvedAgent(AgentID ag)
 {
-    std::map<AgentAID,bool>::iterator it;
+    std::map<AgentID,bool>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
     {
         if (it->first == ag) it->second = true;
     }
 }
 
-void State::tickInvolvedAgent(std::vector<AgentAID> agents)
+void State::tickInvolvedAgent(std::vector<AgentID> agents)
 {
-    std::vector<AgentAID>::iterator it;
+    std::vector<AgentID>::iterator it;
     for (it = agents.begin(); it != agents.end(); it++)
     {
         tickInvolvedAgent(*it);
@@ -130,7 +130,7 @@ void State::tickInvolvedAgent(std::vector<AgentAID> agents)
 
 bool State::checkAllAgentsAccountedFor()
 {
-    std::map<AgentAID,bool>::iterator it;
+    std::map<AgentID,bool>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
     {    
         if (it->second == false) return false;
@@ -139,24 +139,24 @@ bool State::checkAllAgentsAccountedFor()
 }
 void State::updateInvolvedAgentsMap(Transition &it)
 {
-    std::vector<AgentAID> temp = it.getExpectedSenders();
-    std::vector<AgentAID>::iterator agit;
+    std::vector<AgentID> temp = it.getExpectedSenders();
+    std::vector<AgentID>::iterator agit;
     for (agit = temp.begin(); agit != temp.end(); agit++)
     {
-        std::map<AgentAID,bool>::iterator found;
+        std::map<AgentID,bool>::iterator found;
         if ( (found = involvedAgents.find((*agit) ) ) == involvedAgents.end() )
         {
-	  std::pair<AgentAID,bool> mypair = std::pair<AgentAID,bool>(*agit,false);
+	  std::pair<AgentID,bool> mypair = std::pair<AgentID,bool>(*agit,false);
 	  involvedAgents.insert(mypair);
         }
     }
     temp = it.getExpectedSenders();
     for (agit = temp.begin(); agit != temp.end(); agit++)
     {
-        std::map<AgentAID,bool>::iterator found;
+        std::map<AgentID,bool>::iterator found;
         if ( (found = involvedAgents.find(*agit)) == involvedAgents.end() )
         {
-	  std::pair<AgentAID,bool> mypair = std::pair<AgentAID,bool>(*agit,false);
+	  std::pair<AgentID,bool> mypair = std::pair<AgentID,bool>(*agit,false);
 	  involvedAgents.insert(mypair);
         }
     }
@@ -194,7 +194,7 @@ bool State::getFinal()
 }
 void State::resetInvolvedAgentsTicks()
 {
-    std::map<AgentAID,bool>::iterator it;
+    std::map<AgentID,bool>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
     {
         it->second = false;
@@ -209,12 +209,12 @@ void State::setAllPrecedingStates(State *st)
     }
 }
 
-ACLMessage* State::searchArchiveBySenderReceiver(AgentAID m1,AgentAID m2)
+ACLMessage* State::searchArchiveBySenderReceiver(AgentID m1,AgentID m2)
 {
     std::vector<ACLMessage>::iterator it;
     for (it = archive.begin(); it != archive.end(); it++)
     {
-        std::vector<AgentAID> recep = it->getAllReceivers();
+        std::vector<AgentID> recep = it->getAllReceivers();
         if ( (it->getSender() == m1) && (find(recep.begin(),recep.end(),m2) != recep.end()) ) return &(*it);
     }
     return NULL;
@@ -239,7 +239,7 @@ bool operator==(const State &a,const std::string &b)
     if (a.getUID().compare(b) ) return false;
     return true;
 }
-bool operator<(const AgentAID &a,const AgentAID &b)
+bool operator<(const AgentID &a,const AgentID &b)
 {
     return true;
 }

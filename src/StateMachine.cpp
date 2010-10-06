@@ -17,7 +17,7 @@ void StateMachine::initializeObjectFields()
     involvedAgents.clear();
     states.clear();
     currentState = NULL;
-    owner = AgentAID();
+    owner = AgentID();
     conversationOver = false;
     active = false;
     cancelMetaP.clear();
@@ -46,7 +46,7 @@ bool StateMachine::setInitialState(std::string _uid)
     return true;
 }
 
-bool StateMachine::setOwner(AgentAID _owner)
+bool StateMachine::setOwner(AgentID _owner)
 {
     if (active) return false;
     owner = _owner;
@@ -89,8 +89,8 @@ void StateMachine::generateDefaultTransitions()
 
 int StateMachine::createAndStartNewCancelMetaProtocol(ACLMessage &msg)
 {
-    std::vector<AgentAID> interlocutors = msg.getAllReceivers();
-    for (std::vector<AgentAID>::iterator it = interlocutors.begin(); it != interlocutors.end(); it++)
+    std::vector<AgentID> interlocutors = msg.getAllReceivers();
+    for (std::vector<AgentID>::iterator it = interlocutors.begin(); it != interlocutors.end(); it++)
     {
         cancelMetaP.push_back(generateCancelMetaProtocol(std::string("with")));
         if (cancelMetaP.back().startMachine(msg)) return 1;
@@ -156,7 +156,7 @@ StateMachine::StateMachine()
 {
     initializeObjectFields();
 }
-StateMachine::StateMachine(AgentAID _owner)
+StateMachine::StateMachine(AgentID _owner)
 {
     initializeObjectFields();
     owner = _owner;
@@ -247,7 +247,7 @@ State* StateMachine::getStateByName(State _name)
     if (it == states.end()) return NULL;
     return (&(*it));
 }
-void StateMachine::removeInterlocutor(AgentAID ag)
+void StateMachine::removeInterlocutor(AgentID ag)
 {
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
@@ -256,14 +256,14 @@ void StateMachine::removeInterlocutor(AgentAID ag)
 	  if (it->check) { involvedAgents.erase(it); break; }
     }
 }
-void StateMachine::removeInterlocutor(std::vector<AgentAID> agents)
+void StateMachine::removeInterlocutor(std::vector<AgentID> agents)
 {
-    std::vector<AgentAID>::iterator it;
+    std::vector<AgentID>::iterator it;
     for (it = agents.begin(); it != agents.end(); it++)
         removeInterlocutor(*it);
 }
 
-bool StateMachine::setRole(Role myrole,AgentAID myagent)
+bool StateMachine::setRole(Role myrole,AgentID myagent)
 {
     std::vector<AgentMapping>::iterator it;
     if (checkIfAgentAssigned(myagent) ) return false;
@@ -279,30 +279,42 @@ bool StateMachine::setRole(Role myrole,AgentAID myagent)
     }
     return false;
 }
-bool StateMachine::setRole(Role myrole, std::vector<AgentAID> agents)
+bool StateMachine::setRole(Role myrole, std::vector<AgentID> agents)
 {
     //if (checkIfRoleSet(myrole) ) return false;
     std::cout<<"**setRole for a set of agents..\n";
-    std::vector<AgentAID>::iterator agbegin = agents.begin();
-    std::vector<AgentAID>::iterator agend = agents.end();
-    std::vector<AgentAID>::iterator agit;
+    std::vector<AgentID>::iterator agbegin = agents.begin();
+    std::vector<AgentID>::iterator agend = agents.end();
+    std::vector<AgentID>::iterator agit;
     /*for (agit = agbegin; agit != agend; agit++)
     {
         std::cout<<"**checking if agent to be set isn't already set\t"<< agit->getName()<<"\t"<< (agents.begin())->getName()<<"\n";
         if (checkIfAgentAssigned(*agit) ) return false;
     }*/
     
-    std::vector<AgentMapping>::iterator it;
+    
+    std::vector<AgentMapping>::iterator aux;
+    bool done = false;
+    while(!done)
+    {
+        std::vector<AgentMapping>::iterator it;
+        done = true;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
         if (!it->role.compare(myrole) )
 	  if (!it->check) 
 	  {
+	      
 	      involvedAgents.erase(it);
+	      done = false;
+	      
 	      std::cout<<"**erased the role placeholder\n";
+	      break;
 	  }
+    }
 	
-	//std::cout<< (agents.begin())->getName()<<"\n";
-    for (agit = agbegin; agit != agend; it++)
+	std::cout<<"before loop\n";
+          std::cout<< (agents.begin())->getName()<<"\n";
+    for (agit = agbegin; agit != agend; agit++)
     {
         AgentMapping element;
         element.role = myrole;
@@ -315,7 +327,7 @@ bool StateMachine::setRole(Role myrole, std::vector<AgentAID> agents)
     return true;
 }
 
-bool StateMachine::checkIfAgentAssigned(AgentAID ag)
+bool StateMachine::checkIfAgentAssigned(AgentID ag)
 {
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
@@ -366,7 +378,7 @@ bool StateMachine::addState(State _state)
     return false;
 }
 
-Role StateMachine::getAgentRole(AgentAID ag)
+Role StateMachine::getAgentRole(AgentID ag)
 {
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)

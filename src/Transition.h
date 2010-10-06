@@ -24,8 +24,8 @@ class Transition
         
         StateMachine *machine;
         State *nextState,*owningState, *precedingState;
-        std::vector<AgentAID> expectedSenders;
-        std::vector<AgentAID> expectedRecepients;
+        std::vector<AgentID> expectedSenders;
+        std::vector<AgentID> expectedRecepients;
         
         friend class StateMachineTest;
         
@@ -53,8 +53,8 @@ class Transition
         std::string getFrom();
         std::string getTo();
         State* getNextState();
-        std::vector<AgentAID> getExpectedSenders();
-        std::vector<AgentAID> getExpectedRecepients();
+        std::vector<AgentID> getExpectedSenders();
+        std::vector<AgentID> getExpectedRecepients();
         StateMachine* getMachine();
 
     private:
@@ -78,8 +78,8 @@ class Transition
         bool validateSender 		(ACLMessage &msg);
         bool validateRecepients 	(ACLMessage &msg);
         
-        //void removeAllRecepientsBut(AgentAID&);
-        void removeAllAgentsBut(AgentAID&,std::vector<AgentAID>&);
+        //void removeAllRecepientsBut(AgentID&);
+        void removeAllAgentsBut(AgentID&,std::vector<AgentID>&);
         
 };
 

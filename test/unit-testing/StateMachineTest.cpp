@@ -33,11 +33,11 @@ void StateMachineTest::setUp()
     std::string addr2 = std::string("addr2");
     std::string addr3 = std::string("addr3");
     
-    a1 = AgentAID(name1);
-    a1.addAdress(addr1);
+    a1 = AgentID(name1);
+    a1.addAddress(addr1);
     
-    a2 = AgentAID(name2);
-    a2.addAdress(addr3);
+    a2 = AgentID(name2);
+    a2.addAddress(addr3);
 }
 
 void StateMachineTest::tearDown()
@@ -159,7 +159,7 @@ void StateMachineTest::RequestProtocolTest()
     
     std::vector<ACLMessage> flow;
     flow.clear();
-    ACLMessage m1 = ACLMessage(ACLMessage::REQUEST);
+    ACLMessage m1 = ACLMessage(REQUEST);
     //m1.setPerformative(string("test performative"));
     m1.setLanguage(string("test language"));
     m1.setContent(string("test content"));
@@ -235,44 +235,44 @@ void StateMachineTest::printMessage( ACLMessage &msg)
     if (!msg.getConversationID().empty()) 
         cout<<"conversation id:\t"<< msg.getConversationID()<<endl;
     cout<<"sender:\n";
-    AgentAID aid = msg.getSender();
-    printAgentAID(aid); 
+    AgentID aid = msg.getSender();
+    printAgentID(aid); 
     if (!(msg.getAllReceivers().empty())) 
 				  { cout<<"receivers:\n"; 
-				    std::vector<AgentAID> vec = msg.getAllReceivers();
-				    printAgentAIDset(vec);}
+				    std::vector<AgentID> vec = msg.getAllReceivers();
+				    printAgentIDset(vec);}
     if (!msg.getAllReplyTo().empty()) 
 			        { cout<<"reply to:\n"; 
-				std::vector<AgentAID> vec = msg.getAllReplyTo();
-				printAgentAIDset(vec);}
+				std::vector<AgentID> vec = msg.getAllReplyTo();
+				printAgentIDset(vec);}
     if (!msg.getUserdefParams().empty()) 
 				 {  vector<UserdefParam> params = msg.getUserdefParams();
 				    printUserdefParamset(params); }
 
 }
 
-void StateMachineTest::printAgentAIDset( vector<AgentAID> &myset)
+void StateMachineTest::printAgentIDset( vector<AgentID> &myset)
 {
     cout<<"\t==================Agent AID set==================\n";
-    vector<AgentAID>::iterator it = myset.begin();
+    vector<AgentID>::iterator it = myset.begin();
     for(it; it != myset.end(); it++)
-        printAgentAID(*it);
+        printAgentID(*it);
 }
-void StateMachineTest::printAgentAID( AgentAID &agent)
+void StateMachineTest::printAgentID( AgentID &agent)
 {
     cout<<"\t==================Agent AID==================\n";
     if (!agent.getName().empty()) cout<<"\t\tname:\t"<< agent.getName()<<endl;
-    if (!(agent.getAdresses().empty()))
+    if (!(agent.getAddresses().empty()))
     {
         cout<<"\t\tadresses:\t\n";
-        vector<string> addr = agent.getAdresses();
+        vector<string> addr = agent.getAddresses();
         vector<string>::iterator it = addr.begin();
         for(it; it != addr.end(); it++)
 	  cout<<"\t\t\t"<< *it<<endl;
     }
     if (!(agent.getResolvers().empty())) {cout<<"\t\tresolvers:\t\n"; 
-				vector<AgentAID> vec = agent.getResolvers();
-				printAgentAIDset(vec);}
+				vector<AgentID> vec = agent.getResolvers();
+				printAgentIDset(vec);}
     if (!(agent.getUserdefParams().empty())) {cout<<"\t\tUser Defined Parameters:\t\n";
 				    vector<UserdefParam> params = agent.getUserdefParams();
 				    printUserdefParamset(params);}

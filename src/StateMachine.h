@@ -19,7 +19,7 @@ class StateMachine
     private:
         std::vector<State> states;
         std::vector<AgentMapping> involvedAgents;
-        AgentAID owner;
+        AgentID owner;
         State *currentState;
         bool active;
         bool conversationOver;
@@ -44,11 +44,11 @@ class StateMachine
         static const std::string INITIATOR;
         
         StateMachine();
-        StateMachine(AgentAID _owner);
+        StateMachine(AgentID _owner);
         ~StateMachine();
         bool setInitialState(State*);
         bool setInitialState(std::string);
-        bool setOwner(AgentAID);
+        bool setOwner(AgentID);
         int startMachine(ACLMessage msg);
         int consumeMessage(ACLMessage msg);
         //int initializeMachineFields(ACLMessage msg);
@@ -63,21 +63,21 @@ class StateMachine
         bool isConversationOver();
         bool isActive();
         void addRole(Role myrole);
-        bool setRole(Role myrole,AgentAID myagent);
-        bool setRole(Role myrole,std::vector<AgentAID> agents);
-        bool checkIfAgentAssigned(AgentAID);
+        bool setRole(Role myrole,AgentID myagent);
+        bool setRole(Role myrole,std::vector<AgentID> agents);
+        bool checkIfAgentAssigned(AgentID);
         bool checkIfRoleExists(Role myrole);
-        Role getAgentRole(AgentAID ag);
+        Role getAgentRole(AgentID ag);
         bool checkIfRoleSet(Role&);
-        //void removeInterlocutor(AgentAID);
-        //void removeInterlocutor(std::vector<AgentAID>);
+        //void removeInterlocutor(AgentID);
+        //void removeInterlocutor(std::vector<AgentID>);
         void updateAllAgentRoles();
         
         
     private:
         void initializeObjectFields();
-        void removeInterlocutor(AgentAID ag);
-        void removeInterlocutor(std::vector<AgentAID> agents);
+        void removeInterlocutor(AgentID ag);
+        void removeInterlocutor(std::vector<AgentID> agents);
         void loadAllTransitionParameters(ACLMessage &msg);
         void UpdateAllAgentRoles();
         int createAndStartNewCancelMetaProtocol(ACLMessage &msg);
