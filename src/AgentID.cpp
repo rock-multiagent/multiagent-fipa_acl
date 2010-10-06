@@ -88,13 +88,13 @@ std::vector<UserdefParam> AgentID::getUserdefParams() const {return params;}
 //int AgentID::getResCompDepth() {return resCompDepth;}
 
 
-bool operator== (const AgentID &a,const  AgentID &b)
+bool operator== (const AgentID &a, const AgentID &b)
 {
    return resDepthEqual(a,b,AgentID::resCompDepth);
     
 }
   
-bool resDepthEqual(const AgentID &a,const AgentID &b, int depth)
+bool resDepthEqual(const AgentID &a, const AgentID &b, int depth)
 {
      //saving the resCompDepth variable for later restoration
     //int depthRestore = AgentID::getResCompDepth();

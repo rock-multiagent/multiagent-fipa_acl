@@ -236,7 +236,7 @@ public:
 /**
 * Overloaded equals operator for ACLMessage
 */
-extern bool operator== (const ACLMessage &a, const ACLMessage &b);
+extern bool operator== (const ACLMessage &a,const ACLMessage &b);
 
 
 }//end of acl namespace

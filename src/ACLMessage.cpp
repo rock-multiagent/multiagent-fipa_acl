@@ -56,34 +56,7 @@ ACLMessage::~ACLMessage()
     params.clear();
     reply_to.clear();
     receivers.clear();
-    /*
-    if (sender) delete sender;
-    if (receivers)
-    {
-    std::vector<AgentID*>::iterator it = receivers->begin();
-    for (it; it!=receivers->end(); it++)
-        delete (*it);
-    receivers->clear();
-    delete receivers;
-    }
     
-    if (reply_to)
-    {
-    std::vector<AgentID*>::iterator it = reply_to->begin();
-    for (it; it != reply_to->end(); it++)
-        delete (*it);
-    reply_to->clear();
-    delete reply_to;
-    }
-    if (params)
-    {
-    std::vector<UserdefParam*>::iterator it2 = params->begin();
-    for (it2; it2 != params->end(); it2++)
-        delete (*it2);
-    params->clear();
-    delete params;
-    }
-    */
 }
 
 ACLMessage::ACLMessage()
