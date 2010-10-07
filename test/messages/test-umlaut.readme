@@ -1,0 +1,5 @@
+the StringLiteral should also be able to wrap any type of bytes, 
+thus:
+Bugfix 7/10/10 
+changing StringLiteral main content from char_ to byte_
+

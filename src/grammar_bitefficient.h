@@ -704,7 +704,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 		// first -- matching is greedy with char_ otherwise
 		stringLiteral = ( char_('"') 
 			       >> * (( char_("\\") >> char_('"') ) 	[  label::_a += "\"" ]
-				  | (char_ - char_('"') ) 		[  label::_a += label::_1 ]
+				  | (byte_ - char_('"') ) 		[  label::_a += label::_1 ]
 			          )
 			       >> char_('"')
 				)					[ phoenix::at_c<2>(label::_val) = label::_a ]
