@@ -154,7 +154,7 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
             if (!(msg.getAllReceivers().empty()))
 		 retstr =retstr + char(0x03) + getBitAIDColl(msg.getAllReceivers(),res_depth); 
             if (!msg.getContent().empty())
-		retstr = retstr + char(0x04) + getBitBinString(msg.getContent(),0); 
+		retstr = retstr + char(0x04) + getByteLengthEncodedString(msg.getContent()); 
             if (!msg.getReplyWith().empty())
 		 retstr = retstr + char(0x05) + getBitBinExpression(msg.getReplyWith(),'s'); 
             if (!msg.getReplyBy1(0).empty())
@@ -255,6 +255,17 @@ std::string ACLMessageOutputParser::getBitAIDColl(std::vector<AgentID> aids, int
             return retstr + getBitEndOfColl();
 }
 
+std::string ACLMessageOutputParser::getByteLengthEncodedString(std::string sword)
+{
+	    // consider codetable here
+	    char digitString[100];
+            int digit = sword.size();	
+	    sprintf(digitString, "%d", digit);
+
+	    return char(0x14)+ ( '#' + std::string(digitString) + '\"' + sword) + char(0x00);
+
+}
+
 std::string ACLMessageOutputParser::getBitBinExpression(std::string sword,char c)
 {
             if (!sword.compare(msg.getContent())) return char(0xff) + getBitBinString(sword,0);
@@ -279,7 +290,8 @@ std::string ACLMessageOutputParser::getBitBinNumber(double n,char base)
 
 std::string ACLMessageOutputParser::getBitBinString(std::string sword)
 {
-            if (!useCodeTables) return char(0x14) + ('\"' + sword + '\"') + char(0x00);
+            //if (!useCodeTables) 
+		return char(0x14) + ('\"' + sword + '\"') + char(0x00);
             // char(0x15) + return getCTIndex(sword);
 }
 

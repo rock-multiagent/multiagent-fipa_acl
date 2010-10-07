@@ -180,6 +180,13 @@
 		\brief implements the binary string production; functionality not complete as code tables are not yet implemented
 	      */
 	      std::string  getBitBinString(std::string sword);
+
+              /**
+              * Retrieve the byte length encoded string for the given word 
+              * \param sword String containing the data to convert
+              */
+              std::string getByteLengthEncodedString(std::string sword);
+
 	      /**
 		\brief implements the binary string production; functionality not complete as code tables are not yet implemented
 		the second argument is an explicit option for codeTables(needed for the getBitBinExpression() )
