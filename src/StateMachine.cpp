@@ -1,4 +1,18 @@
+/*
+big TODO(for me - not relevant right now but for the general case): line 203(behaviour in case a conversation is successfully cancelled);
 
+note for future tweak: make it possible that once a machine has been built, if we try to start it with a message and it fails,
+		   make it possible to be able to attempt to start it again during runtime(the same machine - currently it needs rebuilding)
+
+note for future: the "in reply to" policy needs to be defined somehow (not necessarily important for this stage); we need to define 
+	       in which contexts the "in reply to" field must be filled in in order to correctly validate a message; 
+	       
+	       current policy is: if the field is not filled in then it means it should not be(thus considerred valid)
+	       
+	       another intuitive policy might be(not yet sure whether it stands for the general case): check all the messages 
+	       from preceding state and if there if there is no message TO the current sender with a "in reply to" field filled in, 
+	       then it should not be filled in
+*/
 #include "StateMachine.h"
 #include "State.h"
 #include <iostream>
@@ -172,13 +186,17 @@ StateMachine::~StateMachine()
 int StateMachine::startMachine(ACLMessage msg)
 {
     int x;
+    if (active) return 1;
     active = true;
-    if ((x = consumeMessage(msg)) != 0) return x;
     convid = msg.getConversationID();
     protocol = msg.getProtocol();
     encoding = msg.getEncoding();
     language = msg.getLanguage();
     ontology = msg.getOntology();
+    loadParameters();
+    std::cout<< "^^^^from start to consume method\n";
+    if ((x = consumeMessage(msg)) != 0) return x;
+
     
     return 0;
     
@@ -274,6 +292,7 @@ bool StateMachine::setRole(Role myrole,AgentID myagent)
 	  {
 	      it->agent = myagent;
 	      it->check = true;
+	      std::cout<<"^^^^set the role "<<myrole<<"to agent "<< myagent.getName()<<"^^^^\n";
 	      return true;
 	  }
     }
@@ -306,8 +325,6 @@ bool StateMachine::setRole(Role myrole, std::vector<AgentID> agents)
 	      
 	      involvedAgents.erase(it);
 	      done = false;
-	      
-	      std::cout<<"**erased the role placeholder\n";
 	      break;
 	  }
     }
@@ -319,6 +336,7 @@ bool StateMachine::setRole(Role myrole, std::vector<AgentID> agents)
         AgentMapping element;
         element.role = myrole;
         element.agent = *agit;
+        std::cout<<"^^^^set the role "<<myrole<<"to agent "<< agit->getName()<<"^^^^\n";
         element.check = true;
         std::cout<<"built a new element\n";
         involvedAgents.push_back(element);
@@ -395,6 +413,15 @@ void StateMachine::addRole(Role myrole)
     involvedAgents.push_back(newRole);
     std::cout<<"a new role was added\t"<< involvedAgents.begin()->role<<"\n";
 
+}
+
+void StateMachine::loadParameters()
+{
+    std::vector<State>::iterator sit;
+    for (sit = states.begin(); sit != states.end(); ++sit)
+    {
+        sit->loadParameters();
+    }
 }
 
 
