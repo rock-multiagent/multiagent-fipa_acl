@@ -215,7 +215,13 @@ ACLMessage* State::searchArchiveBySenderReceiver(AgentID m1,AgentID m2)
     for (it = archive.begin(); it != archive.end(); it++)
     {
         std::vector<AgentID> recep = it->getAllReceivers();
-        if ( (it->getSender() == m1) && (find(recep.begin(),recep.end(),m2) != recep.end()) ) return &(*it);
+        if ( !it->getAllReplyTo().empty() )
+        {
+	  std::vector<AgentID> repto = it->getAllReplyTo();
+	  if ( (find(repto.begin(), repto.end(), m2) != repto.end()) && (find(recep.begin(),recep.end(),m1) != recep.end()) )
+	      return &(*it);
+        }
+        if ( (it->getSender() == m2) && (find(recep.begin(),recep.end(),m1) != recep.end()) ) return &(*it);
     }
     return NULL;
 }

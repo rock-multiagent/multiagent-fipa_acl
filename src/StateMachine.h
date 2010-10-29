@@ -82,6 +82,7 @@ class StateMachine
         void UpdateAllAgentRoles();
         int createAndStartNewCancelMetaProtocol(ACLMessage &msg);
         StateMachine generateCancelMetaProtocol(Role);
+        void loadParameters();
         
         
     

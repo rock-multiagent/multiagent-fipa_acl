@@ -56,6 +56,7 @@ void StateMachineTest::RequestProtocolTest()
     State s3 = State ("3");
     State s4 = State ("4");
     State s5 = State ("5");
+    s2.setFinal(false);
     s3.setFinal(true);
     s5.setFinal(true);
     s1.setOwningMachine(&req);
@@ -174,7 +175,7 @@ void StateMachineTest::RequestProtocolTest()
     m1.addReceiver(a2);
     
     flow.push_back(m1);
-    m1.setPerformative(ACLMessage::perfs[ACLMessage::REFUSE]);
+    m1.setPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
     m1.setLanguage(string("test language"));
     m1.setContent(string("test content"));
     m1.setEncoding(string("test encoding"));
@@ -185,27 +186,48 @@ void StateMachineTest::RequestProtocolTest()
     m1.setConversationID(string("test conversationID"));
     m1.setProtocol(string("test protocol"));
     m1.setSender(a2);
+    m1.deleteReceiver(a2);
     m1.addReceiver(a1);
     flow.push_back(m1);
     
-    std::cout<<"flow of messages built..\n";
+    m1.setPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
+    m1.setLanguage(string("test language"));
+    m1.setContent(string("test content"));
+    m1.setEncoding(string("test encoding"));
+    m1.setOntology(string("test ontology"));
+    m1.setReplyWith(string("test reply_with"));
+    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
+    std::string inrepto = std::string();
+    inrepto.clear();
+    m1.setInReplyTo(inrepto);
+    m1.setConversationID(string("test conversationID"));
+    m1.setProtocol(string("test protocol"));
+    m1.setSender(a2);
+    
+    
+    flow.push_back(m1);
+    
+     std::cout<< "############ test in_reply_to " << m1.getInReplyTo()<<"\n";
+     std::cout<< "############ test in_reply_to " << m1.getReplyWith()<<"\n";
+     std::cout<<"flow of messages built..\n";
      std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
     
     std::vector<ACLMessage>::iterator it = flow.begin();
+    std::cout<< it->getPerformative()<<"\n";
     if (req.startMachine(*it)!=0) std::cout<<"failure to start!!!!!!!!!\n";
     else std::cout<<"machine started..\n";
-   
+    it++;
     int i=0;
-    while(it != flow.end() && !req.isConversationOver() && i<10)
+    while(it != flow.end() && !req.isConversationOver())
     {
         int x;
-        if ((x = req.consumeMessage(*it)) != 0 ) std::cout<<"\t\tmessage didn't pass\n";
-        else std::cout<<"\t\t"<<x<<"\n";
+        if ((x = req.consumeMessage(*it)) != 0 ) { std::cout<<"\t\tmessage didn't pass\n"; break; }
+        else std::cout<<"\t\t @@@@message passed@@@@"<<x<<"\n";
         
         //std::cout<<(i++)<<"\n";
-        if ((i++) == 9) std::cout<<"exited because number of steps exceeded max...\n";
         it++;
     }
+    if (req.isConversationOver()) std::cout<< "\t\t@@@@ worked! @@@@\n";
     
     
 }
