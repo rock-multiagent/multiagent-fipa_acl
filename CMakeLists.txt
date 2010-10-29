@@ -25,8 +25,8 @@ set(Boost_LOCALFIRST TRUE)
 set(Boost_ADDITIONAL_VERSION 1.42 1.43)
 find_package(Boost 1.42 REQUIRED)
 
-include_directories(${MessageGenerator_INCLUDE_DIRS})
-link_directories(${MessageGenerator_LIBRARY_DIRS})
+include_directories(${MessageGenerator_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+link_directories(${MessageGenerator_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
