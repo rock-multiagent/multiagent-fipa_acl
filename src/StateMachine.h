@@ -14,15 +14,14 @@ namespace acl {
 
     
     /**
-        \brief: forward declaration of State class to reslve the circular
-dependency between these two classes
+        \brief forward declaration of State class to reslve the circular dependency between these two classes 
     */
    class State;
 
    /**
         \class StateMachine
         \brief The front end class of the library; implements the interaction protocol rules, processes the flow of messages and checks
-	     for compliance with the defined protocol
+	     for compliance with the defined protocol; it is designed for this sole purpose(not a general state machine)
    */
 class StateMachine 
 {
