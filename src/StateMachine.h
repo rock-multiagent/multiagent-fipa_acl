@@ -1,3 +1,12 @@
+/**
+ *
+ * \file StateMachine.h
+ * \author Mircea Cretu Stancu
+ * \brief describes the structure and operation of a state machine
+ * 
+ * \version 1.0
+ */
+
 #ifndef _RIMRES_FIPAACL_CONVMONITOR_STATEMACHINE_H_
 #define _RIMRES_FIPAACL_CONVMONITOR_STATEMACHINE_H_
 
