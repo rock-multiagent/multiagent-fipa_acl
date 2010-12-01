@@ -23,7 +23,7 @@ namespace fipa {
 namespace acl {
     
 
-void ACLMessageOutputParser::setMessage(ACLMessage &a)
+void ACLMessageOutputParser::setMessage(const ACLMessage &a)
 {
 	msg = a;
 }
