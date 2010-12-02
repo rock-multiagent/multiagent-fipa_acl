@@ -172,6 +172,7 @@ public:
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
        */
 
+       int setPerformative(predefinedPerformatives perf);
        /**
 	  \brief the method checks whether the passed performative string is a word or not(according to the fipa spec)
 	  \return 0 if successful 1 otherwise(performative is un-alterred)

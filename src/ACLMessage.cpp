@@ -25,6 +25,7 @@ void ACLMessage::initializeObject()
 {
          receivers.clear();
          reply_to.clear();
+	 performative = ACLMessage::perfs[INFORM];
 	/*
          language = std::string();
          language.clear();
@@ -79,6 +80,12 @@ ACLMessage::ACLMessage(std::string perf)
     if ( (perf.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(perf.c_str()[0]) != -1) )
     performative.clear();
     else performative = perf;
+}
+
+int ACLMessage::setPerformative(predefinedPerformatives perf)
+{
+	performative = ACLMessage::perfs[perf];
+	return 0;
 }
 
 int ACLMessage::setPerformative(const std::string str) 
