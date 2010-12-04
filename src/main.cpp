@@ -12,8 +12,8 @@
 
 #include <message-generator/ACLMessageOutputParser.h>
 
-#include "grammar_bitefficient.h"
-#include "message_printer.h"
+#include <message-parser/grammar_bitefficient.h>
+#include <message-parser/message_printer.h>
 
 std::map<std::string, std::string> options;
 

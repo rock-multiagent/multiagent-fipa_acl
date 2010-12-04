@@ -1,7 +1,7 @@
 #ifndef __FIPAACL_MESSAGEPARSER_MSGPRINTER_H_
 #define __FIPAACL_MESSAGEPARSER_MSGPRINTER_H_
 
-#include "types.h"
+#include <message-parser/types.h>
 
 namespace fipa { namespace acl {
 

@@ -1,5 +1,5 @@
-#ifndef _RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
-#define _RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#ifndef _FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#define _FIPAACL_GRAMMAR_BITEFFICIENT_H_
 /**
  *
  * \file grammar_bitefficient.h
@@ -30,11 +30,11 @@
 
 #include <ctime>
 
-#include "types.h"
+#include <message-parser/types.h>
 
 #ifdef BOOST_SPIRIT_DEBUG
 // include stream operators
-#include "debug.h"
+#include <message-parser/debug.h>
 #endif
 
 namespace fusion = boost::fusion;
@@ -412,7 +412,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 			 >> version [ phoenix::at_c<1>(label::_val) = label::_1 ]
 			;
 		
-		// byte_() does only return an unused_type, so if we want to save the value, we either have to assign it directly
+		// byte_() does only return an unused_type, so if we want to save the value, we have to assign it directly
 		messageId = byte_(0xFA)  [ label::_val = 0xfa ] 
 			  | byte_(0xFB)  [ label::_val = 0xfb ]
                           | byte_(0xFC)  [ label::_val = 0xfc ]
@@ -891,4 +891,4 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 } // end namespace acl
 } // end namespace fipa
 
-#endif // _RIMRES_FIPAACL_GRAMMAR_BITEFFICIENT_H_
+#endif // _FIPAACL_GRAMMAR_BITEFFICIENT_H_

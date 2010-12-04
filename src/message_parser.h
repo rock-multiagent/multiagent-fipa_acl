@@ -7,8 +7,8 @@
  * 
  * \version 1.0
  */
-#ifndef RIMRES_FIPAACL_MESSAGE_PARSER_H_
-#define RIMRES_FIPAACL_MESSAGE_PARSER_H_
+#ifndef FIPAACL_MESSAGE_PARSER_H_
+#define FIPAACL_MESSAGE_PARSER_H_
 
 #include <vector>
 #include <string>
@@ -17,7 +17,7 @@
 #include <message-generator/UserdefParam.h>
 #include <message-generator/AgentID.h>
 
-#include "types.h"
+#include <message-parser/types.h>
 
 /**
 * \brief Foundation of Physical Intelligent Agents
@@ -111,4 +111,4 @@ class MessageParser
 }
 }
 
-#endif // RIMRES_FIPAACL_MESSAGE_PARSER_H_
+#endif // FIPAACL_MESSAGE_PARSER_H_

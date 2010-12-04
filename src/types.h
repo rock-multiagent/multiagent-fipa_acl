@@ -1,5 +1,5 @@
-#ifndef _RIMRES_FIPAACL_TYPES_H_
-#define _RIMRES_FIPAACL_TYPES_H_
+#ifndef _FIPAACL_TYPES_H_
+#define _FIPAACL_TYPES_H_
 
 #include <stdio.h>
 #include <vector>
@@ -11,10 +11,10 @@
 #include <boost/variant/get.hpp>
 #include <boost/bind.hpp>
 
-#include "date_time.h"
-#include "byte_sequence.h"
-#include "agent_id.h"
-#include "parameter.h"
+#include <message-parser/date_time.h>
+#include <message-parser/byte_sequence.h>
+#include <message-parser/agent_id.h>
+#include <message-parser/parameter.h>
 
 namespace fipa
 {
@@ -72,4 +72,4 @@ struct Message
 } // end namespace acl
 } // end namespace fipa
 
-#endif // _RIMRES_FIPAACL_TYPES_H_
+#endif // _FIPAACL_TYPES_H_

@@ -4,7 +4,7 @@
 #include <iosfwd>
 #include <utility>
 
-#include "types.h"
+#include <message-parser/types.h>
 
 template< typename C, typename E>
 std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::Header h)

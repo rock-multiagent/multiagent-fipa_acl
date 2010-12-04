@@ -37,6 +37,6 @@ install(TARGETS ${PROJECT_NAME}
 #add_executable(${TEST_TARGET} test.cpp ${SOURCES})
 #target_link_libraries(${TEST_TARGET} message-generator ${LIBRARIES})
 
-add_executable(testParser main.cpp ${SOURCES})
-target_link_libraries(testParser message-generator ${LIBRARIES})
+add_executable(testParser main.cpp )
+target_link_libraries(testParser message-generator ${LIBRARIES} ${PROJECT_NAME})
 

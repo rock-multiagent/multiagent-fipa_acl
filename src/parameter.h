@@ -1,9 +1,9 @@
 #ifndef __FIPAACL_MESSAGEPARSER_PARAMETER_H_
 #define __FIPAACL_MESSAGEPARSER_PARAMETER_H_
 
-#include "date_time.h"
-#include "byte_sequence.h"
-#include "agent_id.h"
+#include <message-parser/date_time.h>
+#include <message-parser/byte_sequence.h>
+#include <message-parser/agent_id.h>
 
 namespace fipa { namespace acl {
 
