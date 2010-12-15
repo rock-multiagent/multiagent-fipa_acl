@@ -8,6 +8,7 @@
   <logo>http://</logo>
   <depend package="communication/fipa-message-generator" />
   <depend package="boost" />
+  <depend package="rice" />
 <!--  <depend package="libcppunit" /> -->
   <versioncontrol type="git" url="" />
   <export>

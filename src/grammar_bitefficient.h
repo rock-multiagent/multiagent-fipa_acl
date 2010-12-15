@@ -206,6 +206,7 @@ namespace fipa
 		template <typename T, typename U>
 		fipa::acl::Time operator()(T arg0, U arg1) const
 		{
+			return  fipa::acl::Time();
 		}
 
 		fipa::acl::Time operator()(std::string arg, std::string msecs) const

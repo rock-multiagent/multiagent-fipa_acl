@@ -25,7 +25,7 @@ void MessagePrinter::print(const fipa::acl::Message& msg)
 	printf("performative(type):       %s\n", msg.type.c_str());
 	
 	printf("msg-parameters count:     %d\n",(int) msg.parameters.size());
-	for(int i=0; i < msg.parameters.size(); i++)
+	for(uint32_t i=0; i < msg.parameters.size(); i++)
 	{
 		MessageParameter mp = msg.parameters[i];
 		printf("\tparameter #%d:  %s\n",i, mp.name.c_str()); 

@@ -1,0 +1,7 @@
+extdir=@CMAKE_INSTALL_PREFIX@/@RUBY_EXTENSIONS_INSTALL_DIR@
+
+Name: fipa-message
+Description: Fipa message object for manipulation in ruby
+Libs: -L${extdir}
+Version: @PROJECT_VERSION@
+Cflags: -I${extdir}
