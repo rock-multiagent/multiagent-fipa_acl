@@ -1,4 +1,4 @@
-require 'lib/fipa-message/FipaMessage'
+require 'fipa-message'
 require 'test/unit'
 
 

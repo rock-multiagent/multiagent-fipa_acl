@@ -1,4 +1,4 @@
-require 'fipa-message/FipaMessage'
+require 'fipamessage_ruby'
 
 module FipaUtils
 

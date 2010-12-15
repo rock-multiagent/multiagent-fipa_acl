@@ -1,8 +1,9 @@
 INCLUDE(RubyExtensions)
 
+set(Gem_DEBUG TRUE)
 set(Gem_NAME "rice")
 find_package(Gem)
-include_directories(${Gem_INCLUDE_DIRS})
+include_directories(${GEM_INCLUDE_DIRS})
 
 ##### Begin of customization
 set(_pkgconfig_name fipa-message-ruby)
@@ -13,7 +14,7 @@ set(RUBY_SOURCES
 
 message(${RUBY_INCLUDE_PATH})
 
-set(_link_libraries ${PROJECT_NAME})
+set(_link_libraries ${PROJECT_NAME} ${GEM_LIBRARIES})
 
 if(RDOC_EXECUTABLE)
     ADD_CUSTOM_TARGET(ruby_doc rdoc -o ${CMAKE_BINARY_DIR}/doc/html/ruby/ --title "FipaMesssage: a fipa message manipulation library" --main README.txt -U ext lib README.txt
@@ -48,7 +49,7 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_pkgconfig_name}.pc DESTINATION lib/
 # Installation
 INSTALL(DIRECTORY lib/
     DESTINATION ${RUBY_LIBRARY_INSTALL_DIR}
-    FILES_MATCHING PATTERN ".rb"
+    FILES_MATCHING PATTERN "*.rb"
     )
 
 ##### End generic setup

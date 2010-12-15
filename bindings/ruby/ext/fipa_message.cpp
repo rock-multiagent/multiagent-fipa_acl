@@ -248,7 +248,7 @@ class Vector
 * Initialise method in order to 
 */
 extern "C"
-void Init_FipaMessage()
+void Init_fipamessage_ruby()
 {
  rb_cUserDefinedParameters = define_class<fipa::acl::UserdefParam>("FipaUserDefinedParameter")
    .define_constructor(Constructor<fipa::acl::UserdefParam, const std::string&>())

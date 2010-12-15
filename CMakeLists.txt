@@ -14,6 +14,7 @@ include(RPATHHandling)
 add_definitions(-Wall)
 CMAKE_USE_FULL_RPATH("${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/fipa-message-parser")
 
+
 # Include headers within source
 # If you create subdirectories within source include headers with subdirectory, i.e. 
 # #include "subdirectory/myheader.h"
@@ -38,6 +39,7 @@ add_subdirectory(src)
 
 INCLUDE(RubyExtensions)
 IF(RUBY_EXTENSIONS_AVAILABLE)
+    ENABLE_TESTING()
     ADD_SUBDIRECTORY(bindings/ruby)
     ADD_SUBDIRECTORY(test/ruby)
     if (DOXYGEN_FOUND)

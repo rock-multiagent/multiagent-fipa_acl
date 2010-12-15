@@ -21,8 +21,8 @@ std::map<std::string, std::string> options;
 void info(char** argv)
 {
 	printf("usage: %s -b <binary-message-file> -i \n", argv[0]);
-	printf("-b require a binary message file as input");
-	printf("-i interactive mode");
+	printf("-b require a binary message file as input\n");
+	printf("-i interactive mode\n");
 	exit(0);
 }
 
