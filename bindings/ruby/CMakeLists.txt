@@ -1,8 +1,7 @@
 INCLUDE(RubyExtensions)
 
-set(Gem_DEBUG TRUE)
-set(Gem_NAME "rice")
-find_package(Gem)
+#set(Gem_DEBUG TRUE)
+find_package(Gem COMPONENTS rice)
 include_directories(${GEM_INCLUDE_DIRS})
 
 ##### Begin of customization
