@@ -5,6 +5,9 @@
 #include "Transition.h"
 #include "State.h"
 
+#include <tinyxml/tinyxml.h>
+#include <tinyxml/tinystr.h>
+
 #include <vector>
 
 namespace fipa {
@@ -18,12 +21,13 @@ class StateMachineBuilder {
         
     public:
         // attribute/node names used in the spec standard; most general ones such as "state", "transition" are hard-implemented
-        static std::string from;
-        static std::string to;
-        static std::string target;
-        static std::string id;
-        static std::string final;
-        static std::string performative;
+        static const std::string from;
+        static const std::string to;
+        static const std::string target;
+        static const std::string id;
+        static const std::string final;
+        static const std::string performative;
+        static const std::string initial;
     
     public:
         StateMachineBuilder();

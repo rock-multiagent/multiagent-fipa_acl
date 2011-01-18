@@ -4,6 +4,7 @@ set(SOURCES
 	Transition.cpp
 	State.cpp
 	StateMachine.cpp
+	StateMachineBuilder.cpp
 )
 
 ###### Define a binary

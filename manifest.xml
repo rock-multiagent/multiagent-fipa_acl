@@ -7,6 +7,7 @@
   <url>http://</url>
   <logo>http://</logo>
   <depend package="libcppunit" />
+  <depend package="external/tinyxml" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="" />
