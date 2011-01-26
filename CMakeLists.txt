@@ -17,10 +17,14 @@ include_directories(${PROJECT_SOURCE_DIR}/external/include)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
-pkg_check_modules(MessageGenerator "message-generator")
+pkg_check_modules(MessageGenerator REQUIRED "message-generator")
 
 include_directories(${MessageGenerator_INCLUDE_DIRS})
 link_directories(${MessageGenerator_LIBRARY_DIRS})
+
+pkg_check_modules(TinyXML REQUIRED "tinyxml")
+include_directories(${TinyXML_INCLUDE_DIRS})
+link_directories(${TinyXML_LIBRARY_DIRS})
 
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
@@ -47,7 +51,7 @@ link_directories(${MessageGenerator_LIBRARY_DIRS})
 #include_directories(${Boost_INCLUDE_DIRS})
 
 ### Update external libraries that are available
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${TinyXML_LIBRARIES})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
