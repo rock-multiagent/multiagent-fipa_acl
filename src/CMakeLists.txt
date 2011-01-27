@@ -13,7 +13,7 @@ set(SOURCES
 
 ###### Define a library
 # Note: the library and executable names can't be the same
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${EXTERNAL_LIBS})
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 # Link the defined target (either binary or library, see above) to libraries.
 # You must use ${QT_LIBRARIES} if you have enabled Qt support in the root
 # CMakeLists.txt, and ${Boost_LIBRARIES} for boost libraries
