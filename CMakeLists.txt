@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 project(message-parser)
 set(PROJECT_VERSION 1.1)
 set(PROJECT_DESCRIPTION "Library for parsing FIPA Messages")
+set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CommonSetup)
