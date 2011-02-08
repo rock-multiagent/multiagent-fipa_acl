@@ -22,6 +22,13 @@ pkg_check_modules(MessageGenerator "message-generator")
 include_directories(${MessageGenerator_INCLUDE_DIRS})
 link_directories(${MessageGenerator_LIBRARY_DIRS})
 
+include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
+pkg_check_modules(TinyXML "tinyxml")
+#find_package(tinyxml)
+
+include_directories(${TinyXML_INCLUDE_DIRS})
+link_directories(${TinyXML_LIBRARY_DIRS})
+
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
