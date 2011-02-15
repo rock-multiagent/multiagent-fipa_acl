@@ -2,7 +2,7 @@
 #define _RIMRES_FIPAACL_CONVMONITOR_STATEMACHINEBUILDER_H_
 
 #include "StateMachine.h"
-#include "Transition.h"
+//#include "Transition.h"
 #include "State.h"
 
 #include <tinyxml/tinyxml.h>
@@ -11,6 +11,7 @@
 #include <vector>
 
 namespace fipa {
+    
 namespace acl {
     
 class StateMachineBuilder {

@@ -13,6 +13,7 @@
 //#include "StateMachine.h"
 #include "types.h"
 #include <message-generator/ACLMessage.h>
+#include <message-generator/AgentID.h>
 #include <message-generator/types.h>
 #include <algorithm>
 

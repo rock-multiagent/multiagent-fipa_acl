@@ -1,10 +1,20 @@
 #include <iostream>
-#include "dummy.h"
+#include "StateMachineBuilder.h"
+#include "StateMachine.h"
+
+
+using namespace fipa::acl;
 
 int main(int argc, char** argv)
 {
-	DummyProject::DummyClass dummyClass;
-	dummyClass.welcome();
+	StateMachineBuilder builder = StateMachineBuilder();
+	StateMachine request = builder.loadSpecification(std::string("request"));
+	
+	//std::cout<<"random output\n";
 
 	return 0;
 }
+
+
+
+
