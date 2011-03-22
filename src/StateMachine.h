@@ -37,18 +37,23 @@ class StateMachine
     private:
         /** \param states: stl vector of the states built for the implementation of the protocol */
         std::vector<State> states;
+        
         /** \param involvedAgents: record of the generic agent roles involved in the protocol as well as what agents play which role 
 		once they have been assigned their roles
         */
         std::vector<AgentMapping> involvedAgents;
+        
         /** \param owner: AgentID, owner of the state machine; determines the perspective from which the roles are assigned 
 	  NOTE: no symbolic value for "owner not set" case defined yet 
         */
         AgentID owner;
+        
         /** \param currentState: pointer to the current state of the state machine(from the states vector) */
         State *currentState;
+        
         /** \param active: flag variable to indicate whether a conversation has been successfully initiated(i.e: wit a valid message) */
         bool active;
+        
         /** \param conversationOver: flag variable to indicate whether the confersation has reached a final state(= is over) */
         bool conversationOver;
         
@@ -96,6 +101,8 @@ class StateMachine
 	  \param _owner: the intended owner of the state machine
         */
         StateMachine(AgentID _owner);
+        
+        StateMachine(const StateMachine&);
         ~StateMachine();
         
         /** \brief setter method for the initial state of the state machine(takes a pointer as argument) */
@@ -139,11 +146,11 @@ class StateMachine
         /** \brief method to check whether the conversation has reached a final state(= is over)
 	  \return value of conversationOver
         */
-        bool isConversationOver();
+        bool isConversationOver() const;
         /** \brief method to check whether the conversation has been properly started
 	  \return value of active variable
         */
-        bool isActive();
+        bool isActive() const;
         /** \brief method to add a generic role to the involvedAgents field
 	  \param myrole name of the intended role given as string
         */
@@ -182,6 +189,22 @@ class StateMachine
 		each role
         */
         void updateAllAgentRoles();
+        
+        /**
+	  \brief misc method added to easily visualize a built stateMachine;
+        */
+        void print();
+        
+        Language 			getLanguage() const;
+        Ontology 			getOntology() const;
+        Encoding 			getEncoding() const;
+        Protocol 			getProtocol() const;
+        std::vector<StateMachine> 	getCancelMetaP() const;
+        State* 			getCurrentState() const;
+        std::vector<AgentMapping> 	getInvolvedAgents () const;
+        AgentID 			getOwner() const;
+        std::vector<State> 		getStates() const;
+        ConversationID		getConversationID() const;
         
         
     private:

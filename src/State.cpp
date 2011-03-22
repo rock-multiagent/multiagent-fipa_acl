@@ -28,6 +28,26 @@ State::State(std::string _uid)
     involvedAgents.clear();
 }
 
+State::State(const State& target)
+{
+    uid = target.getUID();
+    final = target.getFinal();
+    owningMachine = target.getOwningMachine();
+    involvedAgents = target.getInvolvedAgents();
+    archive = target.getMessageArchive();
+    
+    std::vector<Transition> tempT = target.getTransitions();
+    for (std::vector<Transition>::iterator it = tempT.begin(); it != tempT.end(); it++)
+        addTransition(*it);
+    
+    std::vector<StateMachine> tempSubSM = target.getSubSM();
+    for (std::vector<StateMachine>::iterator it = tempSubSM.begin(); it != tempSubSM.end(); it++)
+        subSM.push_back(*it);
+    
+        
+}
+
+
 State::~State()
 {
     transitions.clear();
@@ -41,10 +61,11 @@ void State::addTransition(Transition &t)
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
         if (unloadedEqual(*it,t) ) return;
-        //std::cout<<"\t\ttransition added to state .."<<uid<<"\n";
+    
     t.setOwningState(this);
-    if (t.getMachine() == NULL);
-        t.setMachine(owningMachine);
+
+    t.setMachine(owningMachine);
+    //std::cout<<"\t\t"<<t.getFrom()<<"\t"<<t.getTo()<<"\t"<<t.getExpectedPerformative()<<"\t"<<t.getNextStateName()<<"\n";
     transitions.push_back(t);
 }
 
@@ -188,7 +209,7 @@ void State::setFinal(bool _final)
 {
     final = _final;
 }
-bool State::getFinal()
+bool State::getFinal() const
 {
     return final;
 }
@@ -250,15 +271,29 @@ bool operator<(const AgentID &a,const AgentID &b)
     return true;
 }
 
-StateMachine* State::getOwningMachine()
+
+void State::setOwningMachine(StateMachine *_machine)	{owningMachine = _machine;}
+
+std::vector<ACLMessage> State::getMessageArchive() const	{return archive;}
+std::vector<Transition> State::getTransitions() 	const	{return transitions;}
+std::map<AgentID,bool> State::getInvolvedAgents() const	{return involvedAgents;}
+std::vector<StateMachine> State::getSubSM() const		{return subSM;}
+StateMachine* State::getOwningMachine() const	 	{return owningMachine;}
+
+void State::print()
 {
-    return owningMachine;
+    std::cout<<"\t*********** State ***********\n";
+    
+    std::cout<<"\tUID: "<<uid<<"\n";
+    std::cout<<"\tfinal: "<<final<<"\n";
+    
+    std::cout<<"\tTransitions:\n";
+    for (std::vector<Transition>::iterator it = transitions.begin(); it != transitions.end(); it ++)
+        it->print();
+    std::cout<<"\t*****************************\n";
 }
 
-void State::setOwningMachine(StateMachine *_machine)
-{
-    owningMachine = _machine;
-}
+
 
 } // end of acl
 } // end of fipa

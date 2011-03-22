@@ -19,6 +19,22 @@ Transition::Transition()
     expectedSenders.clear();
     expectedRecepients.clear();
 }
+
+Transition::Transition(const Transition &t)
+{
+    from = t.getFrom();
+    to = t.getTo();
+    expectedPerf = t.getExpectedPerformative();
+    nextStateName = t.getNextStateName();
+    
+    machine = t.getMachine();
+    owningState = t.getOwningState();
+    precedingState = t.getPrecedingState();
+    nextState = t.getNextState();
+    
+    expectedSenders = t.getExpectedSenders();
+    expectedRecepients = t.getExpectedRecepients();
+}
     
 int Transition::consumeMessage(ACLMessage &msg)
 {
@@ -65,7 +81,15 @@ bool Transition::validateMessage(ACLMessage &msg)
     if (!validatePerformative(msg)){std::cout<<"\t\t\t\t*******1\n"; return false; }
     if (expectedSenders.empty() || expectedRecepients.empty() ) 
     {std::cout<<"agents not set yet..\n"; if (!updateRoles(msg)) 
-        { std::cout<<"updateRoles(msg) returned 0\n"; return false;} std::cout<<"agents set now..\n";}
+        { std::cout<<"updateRoles(msg) returned 0\n"; return false;} std::cout<<"agents set now..\n";
+     
+        for (std::vector<AgentMapping>::iterator invit = machine->involvedAgents.begin(); invit != machine->involvedAgents.end(); invit++)
+    {
+        std::cout<<"role: "<< invit->role<<" "<<((invit->check == true)?"set = " + invit->agent.getName() + "\n":"unset\n");
+    }
+    
+    }
+    
         
     if (!validateSender(msg)) {std::cout<<"\t\t\t\t*******2\n"; return false; }
     if (!validateRecepients(msg)) {std::cout<<"\t\t\t\t*******3\n"; return false; }
@@ -253,6 +277,10 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 bool Transition::validateSender (ACLMessage &msg)
 {
     AgentID agent = msg.getSender();
+    std::cout<<"$$$$$$$$random test: expected senders of transition:\n";
+    for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
+        std::cout<< it->getName()<<"\n";
+        
     std::vector<AgentID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
     if ( found != expectedSenders.end() ) return true;
     return false;
@@ -383,14 +411,44 @@ void Transition::setTo		(std::string _to) 		{ to = _to; }
 void Transition::setOwningState	(State* _state)		{owningState = _state;}
 void Transition::setMachine		(StateMachine* _machine)	{machine = _machine;}
     
-std::string Transition::getExpectedPerformative()	{return expectedPerf; }
-std::string Transition::getNextStateName()	{return nextStateName; }
-std::string Transition::getFrom()		{return from; }
-std::string Transition::getTo()		{return to; }
-State* Transition::getNextState()		{return nextState; }
-std::vector<AgentID> Transition::getExpectedSenders() 	{return expectedSenders; }
-std::vector<AgentID> Transition::getExpectedRecepients()	{return expectedRecepients; }
-StateMachine* Transition::getMachine()			{return machine;}
+std::string 	 Transition::getExpectedPerformative() const	{return expectedPerf; }
+std::string 	 Transition::getNextStateName() const		{return nextStateName; }
+std::string 	 Transition::getFrom() const			{return from; }
+std::string 	 Transition::getTo() const 			{return to; }
+State* 		 Transition::getNextState() const 		{return nextState; }
+std::vector<AgentID> Transition::getExpectedSenders() const 	{return expectedSenders; }
+std::vector<AgentID> Transition::getExpectedRecepients() const	{return expectedRecepients; }
+StateMachine* 	 Transition::getMachine() const		{return machine;}
+State* 		 Transition::getPrecedingState() const		{return precedingState;}
+State* 		 Transition::getOwningState()	const		{return owningState;}
+
+void Transition::print()
+{
+    std::cout<<"\t\t^^^^^^^^^^^ Transition ^^^^^^^^^^^\n";
+    std::cout<<"\t\tfrom: "<<from<<"\n";
+    std::cout<<"\t\tto: "<<to<<"\n";
+    std::cout<<"\t\tnextStateName: "<<nextStateName<<"\n";
+    std::cout<<"\t\texpected performative: "<<expectedPerf<<"\n";
+    
+    std::cout<<"\t\tpreceding state: ";
+    if (precedingState)
+        std::cout<< precedingState->getUID()<<"\n";
+    else std::cout<< "not set\n";
+    
+    std::cout<<"\t\towning state: ";
+    if (owningState)
+        std::cout<< owningState->getUID()<<"\n";
+    else std::cout<< "not set\n";
+    
+    std::cout<<"\t\tnext state: ";
+    if (nextState)
+        std::cout<< nextState->getUID()<<"\n";
+    else std::cout<< "not set\n";
+    
+    std::cout<<"\t\t^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
+    
+    
+}
 
 
 

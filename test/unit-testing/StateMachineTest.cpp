@@ -133,6 +133,7 @@ void StateMachineTest::RequestProtocolTest()
     
     std::cout<<"state machine created..\n";
     
+    
     /*
     std::vector<State>::iterator sit;
     std::vector<Transition>::iterator tit;
@@ -211,6 +212,7 @@ void StateMachineTest::RequestProtocolTest()
      std::cout<< "############ test in_reply_to " << m1.getReplyWith()<<"\n";
      std::cout<<"flow of messages built..\n";
      std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
+     //req.print();
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     std::cout<< it->getPerformative()<<"\n";
@@ -230,6 +232,143 @@ void StateMachineTest::RequestProtocolTest()
     if (req.isConversationOver()) std::cout<< "\t\t@@@@ worked! @@@@\n";
     
     
+}
+
+void StateMachineTest::RequestProtocolTestFromFile()
+{
+    StateMachineBuilder builder = StateMachineBuilder();
+    StateMachine req = builder.loadSpecification(std::string("request"));
+    
+    std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
+    
+    //std::vector<ACLMessage> flow = buildRequestMessageFlow();
+    
+    std::vector<ACLMessage> flow;
+    flow.clear();
+    ACLMessage m1 = ACLMessage(REQUEST);
+    //m1.setPerformative(string("test performative"));
+    m1.setLanguage(string("test language"));
+    m1.setContent(string("test content"));
+    m1.setEncoding(string("test encoding"));
+    m1.setOntology(string("test ontology"));
+    m1.setReplyWith(string("test reply_with"));
+    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
+    m1.setInReplyTo(string("test in_reply_to"));
+    m1.setConversationID(string("test conversationID"));
+    m1.setProtocol(string("test protocol"));
+    m1.setSender(a1);
+    m1.addReceiver(a2);
+    
+    flow.push_back(m1);
+    m1.setPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
+    m1.setLanguage(string("test language"));
+    m1.setContent(string("test content"));
+    m1.setEncoding(string("test encoding"));
+    m1.setOntology(string("test ontology"));
+    m1.setReplyWith(string("test reply_with"));
+    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
+    m1.setInReplyTo(string("test reply_with"));
+    m1.setConversationID(string("test conversationID"));
+    m1.setProtocol(string("test protocol"));
+    m1.setSender(a2);
+    m1.deleteReceiver(a2);
+    m1.addReceiver(a1);
+    flow.push_back(m1);
+    
+    m1.setPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
+    m1.setLanguage(string("test language"));
+    m1.setContent(string("test content"));
+    m1.setEncoding(string("test encoding"));
+    m1.setOntology(string("test ontology"));
+    m1.setReplyWith(string("test reply_with"));
+    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
+    std::string inrepto = std::string();
+    inrepto.clear();
+    m1.setInReplyTo(inrepto);
+    m1.setConversationID(string("test conversationID"));
+    m1.setProtocol(string("test protocol"));
+    m1.setSender(a2);
+    flow.push_back(m1);
+    
+    std::cout<<"flow of messages built..\n";
+    
+    req.print();
+    
+    std::cout<< (++req.getStates().begin())->getTransitions().begin()->getMachine()->isActive() <<"\n";
+    
+    req.setOwner(a1);
+    
+    std::vector<ACLMessage>::iterator it = flow.begin();
+    std::cout<< it->getPerformative()<<"\n";
+    if (req.startMachine(*it)!=0) std::cout<<"failure to start!!!!!!!!!\n";
+    else std::cout<<"machine started..\n";
+    it++;
+    int i=0;
+    while(it != flow.end() && !req.isConversationOver())
+    {
+        int x;
+        if ((x = req.consumeMessage(*it)) != 0 ) { std::cout<<"\t\tmessage didn't pass\n"; break; }
+        else std::cout<<"\t\t @@@@message passed@@@@"<<x<<"\n";
+        
+        //std::cout<<(i++)<<"\n";
+        it++;
+    }
+    if (req.isConversationOver()) std::cout<< "\t\t@@@@ worked! @@@@\n";
+}
+
+
+std::vector<ACLMessage> StateMachineTest::buildRequestMessageFlow()
+{
+    std::vector<ACLMessage> flow;
+    flow.clear();
+    ACLMessage m1 = ACLMessage(REQUEST);
+    //m1.setPerformative(string("test performative"));
+    m1.setLanguage(string("test language"));
+    m1.setContent(string("test content"));
+    m1.setEncoding(string("test encoding"));
+    m1.setOntology(string("test ontology"));
+    m1.setReplyWith(string("test reply_with"));
+    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
+    m1.setInReplyTo(string("test in_reply_to"));
+    m1.setConversationID(string("test conversationID"));
+    m1.setProtocol(string("test protocol"));
+    m1.setSender(a1);
+    m1.addReceiver(a2);
+    
+    flow.push_back(m1);
+    m1.setPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
+    m1.setLanguage(string("test language"));
+    m1.setContent(string("test content"));
+    m1.setEncoding(string("test encoding"));
+    m1.setOntology(string("test ontology"));
+    m1.setReplyWith(string("test reply_with"));
+    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
+    m1.setInReplyTo(string("test reply_with"));
+    m1.setConversationID(string("test conversationID"));
+    m1.setProtocol(string("test protocol"));
+    m1.setSender(a2);
+    m1.deleteReceiver(a2);
+    m1.addReceiver(a1);
+    flow.push_back(m1);
+    
+    m1.setPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
+    m1.setLanguage(string("test language"));
+    m1.setContent(string("test content"));
+    m1.setEncoding(string("test encoding"));
+    m1.setOntology(string("test ontology"));
+    m1.setReplyWith(string("test reply_with"));
+    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
+    std::string inrepto = std::string();
+    inrepto.clear();
+    m1.setInReplyTo(inrepto);
+    m1.setConversationID(string("test conversationID"));
+    m1.setProtocol(string("test protocol"));
+    m1.setSender(a2);
+    flow.push_back(m1);
+    
+    std::cout<<"flow of messages built..\n";
+    
+    return flow;
 }
 
 

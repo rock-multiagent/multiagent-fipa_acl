@@ -176,6 +176,31 @@ StateMachine::StateMachine(AgentID _owner)
     owner = _owner;
     
 }
+
+StateMachine::StateMachine(const StateMachine& target)
+{
+    std::vector<State> tempStates = target.getStates();
+    for (std::vector<State>::iterator it = tempStates.begin(); it != tempStates.end(); it ++)
+        addState(*it);
+    
+    involvedAgents = target.getInvolvedAgents();
+    owner = target.getOwner();
+    
+    currentState = getStateByName(target.getCurrentState()->getUID());
+    
+    active = target.isActive();
+    conversationOver = target.isConversationOver();
+    
+    cancelMetaP = target.getCancelMetaP();
+    
+    ontology = target.getOntology();
+    language = target.getLanguage();
+    encoding = target.getEncoding();
+    protocol = target.getProtocol();
+    convid = target.getConversationID();
+        
+}
+
 StateMachine::~StateMachine()
 {
     states.clear();
@@ -367,11 +392,11 @@ bool StateMachine::checkIfRoleSet(Role &myrole)
     return false;
 }
 
-bool StateMachine::isConversationOver()
+bool StateMachine::isConversationOver() const
 {
     return conversationOver;
 }
-bool StateMachine::isActive()
+bool StateMachine::isActive() const
 {
     return active;
 }
@@ -424,6 +449,44 @@ void StateMachine::loadParameters()
     }
 }
 
+Language 			StateMachine::getLanguage() const		{return language;}
+Ontology 			StateMachine::getOntology() const		{return ontology;}
+Encoding 			StateMachine::getEncoding() const		{return encoding;}
+Protocol 			StateMachine::getProtocol() const		{return protocol;}
+std::vector<StateMachine> 	StateMachine::getCancelMetaP() const		{return cancelMetaP;}
+State* 			StateMachine::getCurrentState() const		{return currentState;}
+std::vector<AgentMapping> 	StateMachine::getInvolvedAgents () const	{return involvedAgents;}
+AgentID 			StateMachine::getOwner() const		{return owner;}
+std::vector<State> 		StateMachine::getStates() const		{return states;}
+ConversationID		StateMachine::getConversationID() const		{return convid;}
+
+void StateMachine::print()
+{
+    std::cout<<"========================"<<" StateMachine "<<"========================\n";
+    std::cout<<"involvedAgents: ";
+    for (std::vector<AgentMapping>::iterator it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+        std::cout<< it->role <<" ";
+    
+    std::cout<<"\ncurrentState: ";
+    if (currentState)
+        std::cout<< currentState->getUID() <<"\n";
+    else
+        std::cout<<"currentState not set\n";
+    
+    std::cout<<"active: "<<active<<"\n";
+    std::cout<<"conversationOver: "<<conversationOver<<"\n";
+    std::cout<<"ontology: "<<ontology<<"\n";
+    std::cout<<"protocol: "<<protocol<<"\n";
+    std::cout<<"language: "<<language<<"\n";
+    std::cout<<"conversation ID: "<<convid<<"\n";
+    std::cout<<"encoding: "<<encoding<<"\n\n";
+    std::cout<<"********** States: **********\n";
+    
+    for (std::vector<State>::iterator it = states.begin(); it != states.end(); it++)
+        it->print();
+    
+    std::cout<<"========================"<<"=============="<<"========================\n";
+}
 
 
 

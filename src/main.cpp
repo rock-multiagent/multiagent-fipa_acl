@@ -9,6 +9,7 @@ int main(int argc, char** argv)
 {
 	StateMachineBuilder builder = StateMachineBuilder();
 	StateMachine request = builder.loadSpecification(std::string("request"));
+	request.print();
 	
 	//std::cout<<"random output\n";
 

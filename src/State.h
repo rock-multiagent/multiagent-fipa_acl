@@ -77,6 +77,9 @@ class State
 	  \param _uid intended id for the state
         */
         State(std::string _uid);
+        
+        State(const State&);
+        
         ~State();
         /**
 	  \brief method that searches through the archived message for the needed message in validation check of the in_reply_to 
@@ -154,7 +157,7 @@ class State
 	  \brief method that returns whether the state is a final state or not
 	  \return true if state is final, false otherwise
         */
-        bool getFinal();
+        bool getFinal() const;
         /**
 	  \brief getter method for the final field of the class
 	  \param _final: bool argument to be set
@@ -171,9 +174,19 @@ class State
         */
         std::string getUID() const;
         /** \brief getter method for the owningMachine field of the class */
-        StateMachine* getOwningMachine();
+        StateMachine* getOwningMachine() const;
         /** \brief setter method for the owningMachine field of the class */
         void setOwningMachine(StateMachine*);
+        
+        std::vector<ACLMessage> getMessageArchive() const;
+        std::vector<Transition> getTransitions() 	const;
+        std::map<AgentID,bool> getInvolvedAgents() const;
+        std::vector<StateMachine> getSubSM() const;
+         /**
+	  \brief misc method added to easily visualize a built stateMachine;
+        */
+        void print();
+        
     private:
         /**
 	  \brief helper method that updates the involvedAgents map of the class based on the agents involved in a transition

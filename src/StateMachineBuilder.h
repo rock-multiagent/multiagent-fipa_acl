@@ -19,6 +19,8 @@ class StateMachineBuilder {
     private:
         std::vector<std::string> roles;
         std::vector<std::string> states;
+        std::string initialState;
+        StateMachine builtMachine;
         
     public:
         // attribute/node names used in the spec standard; most general ones such as "state", "transition" are hard-implemented
@@ -32,12 +34,14 @@ class StateMachineBuilder {
     
     public:
         StateMachineBuilder();
+        StateMachine getFunctionalStateMachine(std::string);
         StateMachine loadSpecification(std::string);
-        StateMachine parseStateMachineNode(TiXmlElement *sm);
+        void localyLoadSpecification(std::string);
+        void parseStateMachineNode(TiXmlElement *sm);
         State parseStateNode(TiXmlElement *st);
-        void addStates(TiXmlElement *st,StateMachine &sm);
+        void addStates(TiXmlElement *st);
         Transition parseTransitionNode(TiXmlElement *trans);
-        void addInvolvedAgentsMap(StateMachine &sm);
+        void addInvolvedAgentsMap();
     
     
 };

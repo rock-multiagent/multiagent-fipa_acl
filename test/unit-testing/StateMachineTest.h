@@ -15,6 +15,7 @@
 #include "../../src/StateMachine.h"
 #include "../../src/State.h"
 #include "../../src/Transition.h"
+#include "../../src/StateMachineBuilder.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ class StateMachineTest : public CPPUNIT_NS::TestFixture
 	
 	
 	CPPUNIT_TEST (RequestProtocolTest);
+	CPPUNIT_TEST (RequestProtocolTestFromFile);
 	
 	
 	CPPUNIT_TEST_SUITE_END ();
@@ -36,7 +38,9 @@ class StateMachineTest : public CPPUNIT_NS::TestFixture
 	protected:
 		
 	    void RequestProtocolTest();
+	    void RequestProtocolTestFromFile();
 	    
+	    std::vector<ACLMessage> buildRequestMessageFlow();
 	    void printMessage( ACLMessage &msg);
 	    void printAgentID( AgentID &agent);
 	    void printAgentIDset( vector<AgentID> &myset);
