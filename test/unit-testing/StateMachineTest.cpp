@@ -212,7 +212,7 @@ void StateMachineTest::RequestProtocolTest()
      std::cout<< "############ test in_reply_to " << m1.getReplyWith()<<"\n";
      std::cout<<"flow of messages built..\n";
      std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
-     //req.print();
+     req.print();
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     std::cout<< it->getPerformative()<<"\n";
@@ -237,7 +237,9 @@ void StateMachineTest::RequestProtocolTest()
 void StateMachineTest::RequestProtocolTestFromFile()
 {
     StateMachineBuilder builder = StateMachineBuilder();
-    StateMachine req = builder.loadSpecification(std::string("request"));
+    StateMachine req = builder.getFunctionalStateMachine(std::string("request"));
+    req.setOwner(a1);
+    std::cout<< "\t owner of machine: " << req.getOwner().getName() <<"\n";
     
     std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
     
@@ -296,7 +298,7 @@ void StateMachineTest::RequestProtocolTestFromFile()
     
     std::cout<< (++req.getStates().begin())->getTransitions().begin()->getMachine()->isActive() <<"\n";
     
-    req.setOwner(a1);
+    
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     std::cout<< it->getPerformative()<<"\n";

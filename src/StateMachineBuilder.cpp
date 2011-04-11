@@ -28,7 +28,7 @@ StateMachine StateMachineBuilder::getFunctionalStateMachine(std::string infile)
     
     builtMachine.generateDefaultStates();
     builtMachine.generateDefaultTransitions();
-    
+        
     return builtMachine;
 }
 

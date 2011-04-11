@@ -219,7 +219,6 @@ int StateMachine::startMachine(ACLMessage msg)
     language = msg.getLanguage();
     ontology = msg.getOntology();
     loadParameters();
-    std::cout<< "^^^^from start to consume method\n";
     if ((x = consumeMessage(msg)) != 0) return x;
 
     
@@ -317,7 +316,7 @@ bool StateMachine::setRole(Role myrole,AgentID myagent)
 	  {
 	      it->agent = myagent;
 	      it->check = true;
-	      std::cout<<"^^^^set the role "<<myrole<<"to agent "<< myagent.getName()<<"^^^^\n";
+	      std::cout<<"\t^^^^set the role "<<myrole<<"to agent "<< myagent.getName()<<"^^^^\n";
 	      return true;
 	  }
     }
@@ -326,7 +325,7 @@ bool StateMachine::setRole(Role myrole,AgentID myagent)
 bool StateMachine::setRole(Role myrole, std::vector<AgentID> agents)
 {
     //if (checkIfRoleSet(myrole) ) return false;
-    std::cout<<"**setRole for a set of agents..\n";
+   
     std::vector<AgentID>::iterator agbegin = agents.begin();
     std::vector<AgentID>::iterator agend = agents.end();
     std::vector<AgentID>::iterator agit;
@@ -341,31 +340,28 @@ bool StateMachine::setRole(Role myrole, std::vector<AgentID> agents)
     bool done = false;
     while(!done)
     {
-        std::vector<AgentMapping>::iterator it;
-        done = true;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+     std::vector<AgentMapping>::iterator it;
+     done = true;
+     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
         if (!it->role.compare(myrole) )
 	  if (!it->check) 
-	  {
-	      
+	  {	      
 	      involvedAgents.erase(it);
 	      done = false;
 	      break;
 	  }
     }
 	
-	std::cout<<"before loop\n";
-          std::cout<< (agents.begin())->getName()<<"\n";
     for (agit = agbegin; agit != agend; agit++)
     {
         AgentMapping element;
         element.role = myrole;
         element.agent = *agit;
-        std::cout<<"^^^^set the role "<<myrole<<"to agent "<< agit->getName()<<"^^^^\n";
+        std::cout<<"\t^^^^set the role "<<myrole<<"to agent "<< agit->getName()<<"^^^^\n";
         element.check = true;
-        std::cout<<"built a new element\n";
+        std::cout<<"\tbuilt a new element\n";
         involvedAgents.push_back(element);
-        std::cout<<"**pushed a new agent\n";
+        std::cout<<"\t**pushed a new agent\n";
     }
     return true;
 }
@@ -415,7 +411,7 @@ bool StateMachine::checkIfRoleExists(Role myrole)
 bool StateMachine::addState(State _state)
 {
     std::string name = _state.getUID();
-    if (_state.getOwningMachine() == NULL)
+    //if (_state.getOwningMachine() == NULL)
         _state.setOwningMachine(this);
     if (find(states.begin(),states.end(),name) == states.end() ) {states.push_back(_state); return true;}
     return false;
@@ -436,7 +432,7 @@ void StateMachine::addRole(Role myrole)
     newRole.role = myrole;
     newRole.check = false;
     involvedAgents.push_back(newRole);
-    std::cout<<"a new role was added\t"<< involvedAgents.begin()->role<<"\n";
+    
 
 }
 
@@ -473,6 +469,7 @@ void StateMachine::print()
     else
         std::cout<<"currentState not set\n";
     
+    std::cout<<"owner: " << owner.getName() <<"\n";
     std::cout<<"active: "<<active<<"\n";
     std::cout<<"conversationOver: "<<conversationOver<<"\n";
     std::cout<<"ontology: "<<ontology<<"\n";

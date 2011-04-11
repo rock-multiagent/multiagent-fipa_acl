@@ -42,15 +42,15 @@ int Transition::consumeMessage(ACLMessage &msg)
     if (validateMessage(msg))
     {
         //if (expectedPerf.compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
-        std::cout<< "#### validated message\n";
+        std::cout<< "\t#### validated message\n";
         performWithoutStateExit(msg);
         //if ( checkAllSendersAccountedFor(msg) && checkAllRecepientsAccountedFor(msg) )
-        std::cout<< "#### done with perform without state exit\n";
+        std::cout<< "\t#### done with perform without state exit\n";
         if (owningState->checkAllAgentsAccountedFor() )
         {
-	  std::cout<< "#### all agents accounted for\n";
+	  std::cout<< "\t#### all agents accounted for\n";
 	  performOnStateExit(msg);
-	  std::cout<< "#### done with perform on state exit\n";
+	  std::cout<< "\t#### done with perform on state exit\n";
         } else 
 	  {
 	      if (nextState->getFinal()) 
@@ -79,18 +79,35 @@ int Transition::consumeMessage(ACLMessage &msg)
 bool Transition::validateMessage(ACLMessage &msg)
 {
     if (!validatePerformative(msg)){std::cout<<"\t\t\t\t*******1\n"; return false; }
+    
     if (expectedSenders.empty() || expectedRecepients.empty() ) 
-    {std::cout<<"agents not set yet..\n"; if (!updateRoles(msg)) 
-        { std::cout<<"updateRoles(msg) returned 0\n"; return false;} std::cout<<"agents set now..\n";
+    {
+        std::cout<<"agents not set yet..\n";
+        if (!updateRoles(msg)) 
+        {
+	  std::cout<<"updateRoles(msg) returned 0\n";
+	  return false;
+        } 
+        std::cout<<"agents set now..\n";
      
         for (std::vector<AgentMapping>::iterator invit = machine->involvedAgents.begin(); invit != machine->involvedAgents.end(); invit++)
-    {
-        std::cout<<"role: "<< invit->role<<" "<<((invit->check == true)?"set = " + invit->agent.getName() + "\n":"unset\n");
-    }
+        {
+	  std::cout<<"role: "<< invit->role<<" "<<((invit->check == true)?"set = " + invit->agent.getName() + "\n":"unset\n");
+        }
     
     }
     
-        
+    std::cout<< "!validate message method! from: ";
+    for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
+        std::cout<< it->getName() << " ";
+    std::cout<<std::endl;
+    
+    std::cout<< "to: ";
+    for (std::vector<AgentID>::iterator it = expectedRecepients.begin(); it != expectedRecepients.end(); it++)
+        std::cout<< it->getName() << " ";
+    std::cout<<std::endl;
+    
+           
     if (!validateSender(msg)) {std::cout<<"\t\t\t\t*******2\n"; return false; }
     if (!validateRecepients(msg)) {std::cout<<"\t\t\t\t*******3\n"; return false; }
     
@@ -130,16 +147,24 @@ void Transition::updateRoles()
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
 	      if (!it->role.compare(from) ) 
-	      { 
-		expectedSenders.push_back(it->agent); 
-		if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedSenders); //it = machine->involvedAgents.end(); 
+	      { 		
+		expectedSenders.push_back(it->agent);
+		std::cout<<"^^^^^^^^^^^^^^comparison^^^^^^^^^^^^^^^\n";
+		std::cout<<"just pushed: "<< it->agent.getName() << " ; owner: " << machine->owner.getName() << "\n";
+		
+		if (it->agent == machine->owner) {  std::cout<<"\t$$$$$random$$$$$ found machine owner\n";
+					      removeAllAgentsBut(machine->owner,expectedSenders); //it = machine->involvedAgents.end();
+					      
+					      std::cout<< "$$$$$random$$$$$from: ";
+					      for (std::vector<AgentID>::iterator it32 = expectedSenders.begin(); it32 != expectedSenders.end(); it32++)
+						std::cout<< it32->getName() << " ";
+					      std::cout<<std::endl;
 					  break;
 					  }
-		else;
-	      }
+		else std::cout<< "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp\n";
+	      }else;
 	  }
-        } else; 
-	  
+        } else;   
     } else ; //TODO: twrow some violation of protocol error
     
         
@@ -155,13 +180,23 @@ void Transition::updateRoles()
 	      if (!it->role.compare(to) ) 
 	      {
 		expectedRecepients.push_back(it->agent);
-		if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); break; }
-		else;
-	      }
+		if (it->agent == machine->owner) 
+		{ 
+		    removeAllAgentsBut(machine->owner,expectedRecepients); break; 
+		} else;
+	      } else;
 	  }
         } else;
-	 
     } else ; //TODO: throw some violation of protocol error
+        
+    std::cout<<"!without message update method!\nfrom: ";
+    for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
+        std::cout<< it1->getName() << " ";
+    std::cout<<"\n";
+    std::cout<<"to: ";
+    for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
+        std::cout<< it2->getName() << " ";
+    std::cout<<"\n";
        
 }
 bool Transition::updateRoles(ACLMessage &msg)
@@ -180,29 +215,44 @@ bool Transition::updateRoles(ACLMessage &msg)
 	      if (!it->role.compare(from) ) 
 	      {
 		expectedSenders.push_back(it->agent);
-		if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedSenders); 
-					      break;
-					      //it = machine->involvedAgents.end(); 
-					   }
-		else;
+		if (it->agent == machine->owner)
+		{ 
+		    removeAllAgentsBut(machine->owner,expectedSenders); 
+		    break;
+		     //it = machine->involvedAgents.end(); 
+		}
+		
 	      }
 	  }
         } else 
 	  {
 	      
-	      if (!machine->setRole(from,msg.getSender())) return false;
+	      if (!machine->setRole(from,msg.getSender()))
+		return false;
 	      machine->updateAllAgentRoles();
+	      std::cout<< "!$!$!$!$ output right after update signal terminated:\n";
+	      std::cout<<"!with!! message update method!\tfrom: ";
+	      for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
+		std::cout<< it1->getName() << " ";
+	      std::cout<<"\n";
+	      std::cout<<"to: ";
+	      for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
+		std::cout<< it2->getName() << " ";
+	      std::cout<<"\n";
+       
+	      
 	      int myc = 0;
 	      std::vector<State>::iterator trcount;
-    for (trcount = (machine->states).begin(); trcount != (machine->states).end(); trcount++)
-    {
-        myc += trcount->transitions.size(); 
-    }
-    std::cout<<"&&&&&&&there are currently "<<myc<<" transitions in the SM\n";
-    std::cout<<"&&&&&&&there are currently "<< machine->states.size() <<" states in the SM\n";
+	      for (trcount = (machine->states).begin(); trcount != (machine->states).end(); trcount++)
+	      {
+		myc += trcount->transitions.size(); 
+	      }
+	      std::cout<<"&&&&&&&there are currently "<<myc<<" transitions in the SM\n";
+	      std::cout<<"&&&&&&&there are currently "<< machine->states.size() <<" states in the SM\n";
 	  }
         
-    } else return false; //TODO: twrow some violation of protocol error
+    } else 
+        return false; //TODO: twrow some violation of protocol error
     
     if (machine->checkIfRoleExists(to) )
     {
@@ -224,12 +274,25 @@ bool Transition::updateRoles(ACLMessage &msg)
 	      //for (std::vector<AgentID>::iterator it = myvec.begin(); it != myvec.end())
 		//machine->setRole(to,*it);
 		
-	      if (!(machine->setRole(to,msg.getAllReceivers())) ) return false;
+	      if (!(machine->setRole(to,msg.getAllReceivers())) ) 
+		return false;
 	      machine->updateAllAgentRoles();
 	      
 	  }
-    } else return false; //TODO: throw some violation of protocol error
-        std::cout<<"!!!exit update transition with message as param%%%%%%%%\n";
+    } else 
+        return false; //TODO: throw some violation of protocol error
+    
+    std::cout<<"!!!exit update transition with message as param%%%%%%%%\n";
+    
+    std::cout<<"from: ";
+    for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
+        std::cout<< it1->getName() << " ";
+    std::cout<<"\n";
+    std::cout<<"to: ";
+    for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
+        std::cout<< it2->getName() << " ";
+    std::cout<<"\n";
+        
     return true;
 }
 void Transition::performWithoutStateExit(ACLMessage &msg)
@@ -277,11 +340,20 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 bool Transition::validateSender (ACLMessage &msg)
 {
     AgentID agent = msg.getSender();
-    std::cout<<"$$$$$$$$random test: expected senders of transition:\n";
+    std::cout<<"$$$$$$$$random test: expected senders of transition: ";
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
-        std::cout<< it->getName()<<"\n";
+        std::cout<< it->getName() <<"\n";
         
     std::vector<AgentID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
+    if (found != expectedSenders.end())
+    std::cout<< "\n\t$$$$$found sender: " << found->getName() <<"\n";
+    else std::cout<< "\n\t$$$$$found sender: " << "NULL" <<"\n";
+    
+    std::cout<<"$$$$$$$$ from the machine:\n";
+    std::vector<AgentMapping>::iterator it31;
+    for (it31 = machine->involvedAgents.begin(); it31 != machine->involvedAgents.end(); it31++)
+        std::cout<< it31->role << ":\t" << it31->agent.getName() << "\n";
+    
     if ( found != expectedSenders.end() ) return true;
     return false;
 }
@@ -383,8 +455,10 @@ bool Transition::validateConvID (ACLMessage &msg)
 
 void Transition::removeAllAgentsBut(AgentID &ag,std::vector<AgentID> &agents)
 {
+    std::cout << "RemoveAllAgentsBut: " << ag.getName() << std::endl;
     agents.clear();
     agents.push_back(ag);
+    std::cout << "RemoveAllAgentsBut: end " << ag.getName() << std::endl;
 }
 
 
