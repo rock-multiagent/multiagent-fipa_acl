@@ -133,25 +133,6 @@ void StateMachineTest::RequestProtocolTest()
     
     std::cout<<"state machine created..\n";
     
-    
-    /*
-    std::vector<State>::iterator sit;
-    std::vector<Transition>::iterator tit;
-    std::vector<State> *st = &req.states;
-    std::vector<Transition> *tr;
-    std::cout<<"\n\n\n";
-    for (sit = st->begin(); sit != st->end(); sit++)
-    {
-        tr = &(*sit).transitions;
-        for (tit = tr->begin(); tit != tr->end(); tit++)
-        {
-	  std::cout<<"-------------------------------------------\n";
-	  std::cout<< tit->from<<"\t"<< tit->to <<"\t"<< tit->expectedPerf <<"\t"<< tit->nextStateName<<"\n";
-	  std::cout<< tit->owningState->uid<<"\n";
-	  std::cout<<"-------------------------------------------\n";
-        }
-    }
-    */
    
     for (invit = req.involvedAgents.begin(); invit != req.involvedAgents.end(); invit++)
     {
@@ -208,11 +189,9 @@ void StateMachineTest::RequestProtocolTest()
     
     flow.push_back(m1);
     
-     std::cout<< "############ test in_reply_to " << m1.getInReplyTo()<<"\n";
-     std::cout<< "############ test in_reply_to " << m1.getReplyWith()<<"\n";
-     std::cout<<"flow of messages built..\n";
-     std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
-     req.print();
+    std::cout<<"flow of messages built..\n";
+    std::cout<<"check if initiator exists returned:\t"<< req.checkIfRoleExists(std::string("initiator"))<< "\n";
+    //req.print();
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     std::cout<< it->getPerformative()<<"\n";
@@ -247,58 +226,10 @@ void StateMachineTest::RequestProtocolTestFromFile()
     
     std::vector<ACLMessage> flow;
     flow.clear();
-    ACLMessage m1 = ACLMessage(REQUEST);
-    //m1.setPerformative(string("test performative"));
-    m1.setLanguage(string("test language"));
-    m1.setContent(string("test content"));
-    m1.setEncoding(string("test encoding"));
-    m1.setOntology(string("test ontology"));
-    m1.setReplyWith(string("test reply_with"));
-    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
-    m1.setInReplyTo(string("test in_reply_to"));
-    m1.setConversationID(string("test conversationID"));
-    m1.setProtocol(string("test protocol"));
-    m1.setSender(a1);
-    m1.addReceiver(a2);
-    
-    flow.push_back(m1);
-    m1.setPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
-    m1.setLanguage(string("test language"));
-    m1.setContent(string("test content"));
-    m1.setEncoding(string("test encoding"));
-    m1.setOntology(string("test ontology"));
-    m1.setReplyWith(string("test reply_with"));
-    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
-    m1.setInReplyTo(string("test reply_with"));
-    m1.setConversationID(string("test conversationID"));
-    m1.setProtocol(string("test protocol"));
-    m1.setSender(a2);
-    m1.deleteReceiver(a2);
-    m1.addReceiver(a1);
-    flow.push_back(m1);
-    
-    m1.setPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
-    m1.setLanguage(string("test language"));
-    m1.setContent(string("test content"));
-    m1.setEncoding(string("test encoding"));
-    m1.setOntology(string("test ontology"));
-    m1.setReplyWith(string("test reply_with"));
-    m1.setReplyBy1(string("2010-12-23T12:00:37:980"));
-    std::string inrepto = std::string();
-    inrepto.clear();
-    m1.setInReplyTo(inrepto);
-    m1.setConversationID(string("test conversationID"));
-    m1.setProtocol(string("test protocol"));
-    m1.setSender(a2);
-    flow.push_back(m1);
+    flow = buildRequestMessageFlow();
     
     std::cout<<"flow of messages built..\n";
-    
     req.print();
-    
-    std::cout<< (++req.getStates().begin())->getTransitions().begin()->getMachine()->isActive() <<"\n";
-    
-    
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     std::cout<< it->getPerformative()<<"\n";
@@ -310,7 +241,7 @@ void StateMachineTest::RequestProtocolTestFromFile()
     {
         int x;
         if ((x = req.consumeMessage(*it)) != 0 ) { std::cout<<"\t\tmessage didn't pass\n"; break; }
-        else std::cout<<"\t\t @@@@message passed@@@@"<<x<<"\n";
+        else std::cout<<"\t\t@@@@ message passed @@@@"<<x<<"\n";
         
         //std::cout<<(i++)<<"\n";
         it++;

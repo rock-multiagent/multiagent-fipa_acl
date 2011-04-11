@@ -88,13 +88,7 @@ bool Transition::validateMessage(ACLMessage &msg)
 	  std::cout<<"updateRoles(msg) returned 0\n";
 	  return false;
         } 
-        std::cout<<"agents set now..\n";
-     
-        for (std::vector<AgentMapping>::iterator invit = machine->involvedAgents.begin(); invit != machine->involvedAgents.end(); invit++)
-        {
-	  std::cout<<"role: "<< invit->role<<" "<<((invit->check == true)?"set = " + invit->agent.getName() + "\n":"unset\n");
-        }
-    
+        std::cout<<"agents set now..\n";   
     }
     
     std::cout<< "!validate message method! from: ";
@@ -149,10 +143,8 @@ void Transition::updateRoles()
 	      if (!it->role.compare(from) ) 
 	      { 		
 		expectedSenders.push_back(it->agent);
-		std::cout<<"^^^^^^^^^^^^^^comparison^^^^^^^^^^^^^^^\n";
-		std::cout<<"just pushed: "<< it->agent.getName() << " ; owner: " << machine->owner.getName() << "\n";
-		
-		if (it->agent == machine->owner) {  std::cout<<"\t$$$$$random$$$$$ found machine owner\n";
+			
+		if (it->agent == machine->owner) {  
 					      removeAllAgentsBut(machine->owner,expectedSenders); //it = machine->involvedAgents.end();
 					      
 					      std::cout<< "$$$$$random$$$$$from: ";
@@ -161,7 +153,7 @@ void Transition::updateRoles()
 					      std::cout<<std::endl;
 					  break;
 					  }
-		else std::cout<< "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp\n";
+		else;
 	      }else;
 	  }
         } else;   
@@ -189,6 +181,7 @@ void Transition::updateRoles()
         } else;
     } else ; //TODO: throw some violation of protocol error
         
+    /*
     std::cout<<"!without message update method!\nfrom: ";
     for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
         std::cout<< it1->getName() << " ";
@@ -197,6 +190,7 @@ void Transition::updateRoles()
     for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
         std::cout<< it2->getName() << " ";
     std::cout<<"\n";
+    */
        
 }
 bool Transition::updateRoles(ACLMessage &msg)
@@ -348,11 +342,6 @@ bool Transition::validateSender (ACLMessage &msg)
     if (found != expectedSenders.end())
     std::cout<< "\n\t$$$$$found sender: " << found->getName() <<"\n";
     else std::cout<< "\n\t$$$$$found sender: " << "NULL" <<"\n";
-    
-    std::cout<<"$$$$$$$$ from the machine:\n";
-    std::vector<AgentMapping>::iterator it31;
-    for (it31 = machine->involvedAgents.begin(); it31 != machine->involvedAgents.end(); it31++)
-        std::cout<< it31->role << ":\t" << it31->agent.getName() << "\n";
     
     if ( found != expectedSenders.end() ) return true;
     return false;

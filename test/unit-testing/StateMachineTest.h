@@ -25,7 +25,7 @@ class StateMachineTest : public CPPUNIT_NS::TestFixture
 	CPPUNIT_TEST_SUITE (StateMachineTest);
 	
 	
-	CPPUNIT_TEST (RequestProtocolTest);
+	//CPPUNIT_TEST (RequestProtocolTest);
 	CPPUNIT_TEST (RequestProtocolTestFromFile);
 	
 	
