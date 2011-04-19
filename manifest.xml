@@ -6,7 +6,6 @@
   <license></license>
   <url>http://www.fipa.org</url>
   <logo>http://</logo>
-  <depend package="communication/fipa-message-generator" />
   <depend package="boost" />
   <depend package="rice" />
 <!--  <depend package="libcppunit" /> -->
