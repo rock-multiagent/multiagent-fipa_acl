@@ -13,11 +13,11 @@
 #include <vector>
 #include <string>
 
-#include <message-generator/ACLMessage.h>
-#include <message-generator/UserdefParam.h>
-#include <message-generator/AgentID.h>
+#include <fipa_acl/message_generator/acl_message.h>
+#include <fipa_acl/message_generator/userdef_param.h>
+#include <fipa_acl/message_generator/agent_id.h>
 
-#include <message-parser/types.h>
+#include <fipa_acl/message_parser/types.h>
 
 /**
 * \brief Foundation of Physical Intelligent Agents

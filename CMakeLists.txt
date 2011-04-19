@@ -3,9 +3,9 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-project(message-parser)
+project(fipa_acl)
 set(PROJECT_VERSION 1.1)
-set(PROJECT_DESCRIPTION "Library for parsing FIPA Messages")
+set(PROJECT_DESCRIPTION "Library for FIPA Agent Communication Language and handling bit-efficient FIPA Messages")
 set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -13,7 +13,7 @@ include(CommonSetup)
 include(RPATHHandling)
 
 add_definitions(-Wall)
-CMAKE_USE_FULL_RPATH("${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/fipa-message-parser")
+CMAKE_USE_FULL_RPATH("${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}")
 
 
 # Include headers within source
@@ -23,17 +23,13 @@ include_directories(${PROJECT_SOURCE_DIR}/external/include)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 ##### End specification of build directory ##############################
-
-include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
-pkg_check_modules(MessageGenerator REQUIRED "message-generator")
-
 set(Boost_LOCALFIRST TRUE)
 set(Boost_ADDITIONAL_VERSION 1.42 1.43)
 find_package(Boost 1.42 REQUIRED)
 set(EXTERNAL_LIBS ${Boost_LIBRARIES} )
 
-include_directories(${MessageGenerator_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-link_directories(${MessageGenerator_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)

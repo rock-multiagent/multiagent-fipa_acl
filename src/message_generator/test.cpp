@@ -12,14 +12,9 @@
 #include <iterator>
 #include <string>
 #include <cstring>
-//#include <conio.h>
-//#include "ACLMessage.h"
-#include "ACLMessageOutputParser.h"
-//#include "UserdefParam.h"
-//#include <message-parser/message_parser.h>
+#include "acl_message_output_parser.h"
 
-
-#include "../../message-parser/src/message_parser.h"
+#include <fipa_acl/message_parser/message_parser.h>
 
 
 

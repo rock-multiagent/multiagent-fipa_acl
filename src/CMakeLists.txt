@@ -16,27 +16,36 @@ SET(module_name ${PROJECT_NAME})
 #    LIBRARY DESTINATION lib
 #)
 set(SOURCES
-	parser/agent_id.cpp
-	parser/message_printer.cpp
-	parser/message_parser.cpp
-	parser/grammar_bitefficient.cpp
+	message_parser/agent_id.cpp
+	message_parser/message_printer.cpp
+	message_parser/message_parser.cpp
+	message_parser/grammar_bitefficient.cpp
+        message_generator/acl_message.cpp
+        message_generator/agent_id.cpp
+        message_generator/userdef_param.cpp
+        message_generator/acl_message_output_parser.cpp
 )
 
 #add_executable(testParser test.cpp ${SOURCES})
 #target_link_libraries(testParser ${LIBRARIES})
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
-target_link_libraries(${PROJECT_NAME} message-generator ${LIBRARIES})
+
 install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
 	)
 	
-#set(TEST_TARGET test_${PROJECT_NAME})
-#add_executable(${TEST_TARGET} test.cpp ${SOURCES})
-#target_link_libraries(${TEST_TARGET} message-generator ${LIBRARIES})
+add_executable(testParser message_parser/main.cpp )
+target_link_libraries(testParser ${LIBRARIES} ${PROJECT_NAME})
 
-add_executable(testParser main.cpp )
-target_link_libraries(testParser message-generator ${LIBRARIES} ${PROJECT_NAME})
+set(GENERATOR fipa_acl-msg_generator)
+add_executable(${GENERATOR} message_generator/generator.cpp)
+target_link_libraries(${GENERATOR} ${LIBRARIES} ${PROJECT_NAME})
+install(TARGETS ${GENERATOR}
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+)
 

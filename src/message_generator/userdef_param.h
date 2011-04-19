@@ -1,6 +1,6 @@
 /**
  *
- * \file UserdefParam.h
+ * \file userdef_param.h
  * \author Mircea Cretu Stancu
  * \brief defines the UserdefParam class
  * 

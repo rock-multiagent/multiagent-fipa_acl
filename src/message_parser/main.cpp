@@ -10,10 +10,10 @@
 #include <vector>
 #include <map>
 
-#include <message-generator/ACLMessageOutputParser.h>
+#include <fipa_acl/message_generator/acl_message_output_parser.h>
 
-#include <message-parser/grammar_bitefficient.h>
-#include <message-parser/message_printer.h>
+#include <fipa_acl/message_parser/grammar_bitefficient.h>
+#include <fipa_acl/message_parser/message_printer.h>
 
 std::map<std::string, std::string> options;
 

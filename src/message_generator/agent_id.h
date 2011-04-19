@@ -1,6 +1,6 @@
 /**
  *
- * \file AgentID.h
+ * \file agent_id.h
  * \author Mircea Cretu Stancu
  * \brief Defines the AgentID class
  * 
@@ -11,9 +11,9 @@
 #ifndef AgentID_H_
 #define AgentID_H_
 
-#include"UserdefParam.h"
-#include<string>
-#include<vector>
+#include <fipa_acl/message_generator/userdef_param.h>
+#include <string>
+#include <vector>
 
 namespace fipa {
 

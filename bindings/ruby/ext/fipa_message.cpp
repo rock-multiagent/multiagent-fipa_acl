@@ -6,10 +6,8 @@
 #include <stdint.h>
 #include <vector>
 #include <iostream>
-#include <message-generator/ACLMessage.h>
-#include <message-generator/ACLMessageOutputParser.h>
-#include <message-generator/AgentID.h>
-#include <message-parser/message_parser.h>
+#include <fipa_acl/message_generator/message_generator.h>
+#include <fipa_acl/message_parser/message_parser.h>
 
 using namespace Rice;
 

@@ -7,7 +7,7 @@
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/variant/apply_visitor.hpp>
 
-#include <message-parser/byte_sequence.h>
+#include <fipa_acl/message_parser/byte_sequence.h>
 
 namespace fipa { namespace acl {
 

@@ -30,11 +30,11 @@
 
 #include <ctime>
 
-#include <message-parser/types.h>
+#include <fipa_acl/message_parser/types.h>
 
 #ifdef BOOST_SPIRIT_DEBUG
 // include stream operators
-#include <message-parser/debug.h>
+#include <fipa_acl/message_parser/debug.h>
 #endif
 
 namespace fusion = boost::fusion;

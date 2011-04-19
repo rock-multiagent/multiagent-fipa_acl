@@ -1,13 +1,13 @@
 /**
  *
- * \file AgentID.cpp
+ * \file agent_id.cpp
  * \author Mircea Cretu Stancu
  * \brief Implements the general AgentID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org).
  * 
  * \version 1.0
  */
-#include "AgentID.h"
-#include "ACLMessage.h"
+#include "agent_id.h"
+#include "acl_message.h"
 #include <iostream>
 #include <algorithm>
 

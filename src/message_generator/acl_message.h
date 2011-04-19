@@ -1,6 +1,6 @@
 /**
  *
- * \file ACLMessage.h
+ * \file acl_message.h
  * \author Mircea Cretu Stancu
  * \brief describes the general data structure of a message in conformity with the fipa specifications. The methods are pretty straight forward getter and setter methods. The set container is used for various colective fields, in order to avoid duplicates
  * 
@@ -11,9 +11,8 @@
 
 #include<vector>
 #include<string>
-#include"AgentID.h"
-#include"UserdefParam.h"
-//#include "ACLMessageOutputParser.h"
+#include <fipa_acl/message_generator/agent_id.h>
+#include <fipa_acl/message_generator/userdef_param.h>
 
 /**
 * \brief Foundation of Physical Intelligent Agents

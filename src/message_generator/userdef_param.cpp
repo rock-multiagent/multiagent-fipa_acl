@@ -1,6 +1,6 @@
 /**
  *
- * \file UserdefParam.cpp
+ * \file userdef_param.cpp
  * \author Mircea Cretu Stancu
  * \brief Implements the general User-defined parameters, which are present throughout the fipa specifications(FIPA at http://www.fipa.org).
  * 
@@ -8,8 +8,8 @@
  *  
  */
 
-#include "UserdefParam.h"
-#include "ACLMessage.h"
+#include "userdef_param.h"
+#include "acl_message.h"
 
 namespace fipa {
 

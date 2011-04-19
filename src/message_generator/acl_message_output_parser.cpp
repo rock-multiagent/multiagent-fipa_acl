@@ -1,6 +1,6 @@
 /**
  *
- * \file ACLMessageOutputParser.cpp
+ * \file acl_message_output_parser.cpp
  * \author Mircea Cretu Stancu
  * \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
  * 
@@ -13,10 +13,11 @@
 #include <string>
 #include <cstring>
 #include <iterator>
-#include "ACLMessageOutputParser.h"
-#include "ACLMessage.h"
-#include "UserdefParam.h"
-#include "AgentID.h"
+#include <stdexcept>
+#include "acl_message_output_parser.h"
+#include "acl_message.h"
+#include "userdef_param.h"
+#include "agent_id.h"
 
 namespace fipa {
 
@@ -131,6 +132,8 @@ std::string ACLMessageOutputParser::getBitBinWord(std::string sword)
 {
 		
 	      if (useCodeTables == 0) return (char(0x10) + sword + char(0x00));
+
+              throw std::runtime_error("ACLMessageOutputParser does not support codetables");
            // return char(0x11) + getCTIndex(sword);
 }
 
@@ -200,7 +203,7 @@ std::string ACLMessageOutputParser::getBitUserdefParams(std::vector<UserdefParam
 {
             std::string retstr = std::string();
             std::vector<UserdefParam>::iterator it = params.begin();
-            for (it; it != params.end(); it++)
+            for (; it != params.end(); it++)
                 retstr = retstr + char(0x04) + bitParseParam(*it);
 
             return retstr;
@@ -234,7 +237,7 @@ std::string ACLMessageOutputParser::getBinURLCol(std::vector<std::string> adrr)
 {
             std::string retstr = std::string();
             std::vector<std::string>::iterator it = adrr.begin();
-            for (it; it != adrr.end(); it++)
+            for (; it != adrr.end(); it++)
                 retstr = retstr + getBitBinWord(*it);
             retstr = retstr + getBitEndOfColl();
             
@@ -250,7 +253,7 @@ std::string ACLMessageOutputParser::getBitAIDColl(std::vector<AgentID> aids, int
 {
             std::string retstr = std::string();
             std::vector<AgentID>::iterator it = aids.begin();
-            for (it; it != aids.end(); it++)
+            for (; it != aids.end(); it++)
                 retstr = retstr + getBitAID(*it, depth);
             return retstr + getBitEndOfColl();
 }
@@ -271,6 +274,8 @@ std::string ACLMessageOutputParser::getBitBinExpression(std::string sword,char c
             if (!sword.compare(msg.getContent())) return char(0xff) + getBitBinString(sword,0);
             if (c == 's') return getBitBinString(sword);
             if (c == 'w') return getBitBinWord(sword);
+
+            throw std::runtime_error("ACLMessageOutputParser: getBitBinExpression called with wrong base character");
 }
 
 std::string ACLMessageOutputParser::getBitBinExpression(double n,char base)
@@ -286,6 +291,8 @@ std::string ACLMessageOutputParser::getBitBinNumber(double n,char base)
             std::string test = ss.str();  
             if(base == 'h') return char(0x13) + getBitDigits(test);
             if(base == 'o' || base == 'd') return char(0x12) + getBitDigits(test);
+
+            throw std::runtime_error("ACLMessageOutputParser: getBitBinNumber called with wrong base character");
 }
 
 std::string ACLMessageOutputParser::getBitBinString(std::string sword)
@@ -299,6 +306,8 @@ std::string ACLMessageOutputParser::getBitBinString(std::string sword,int codeTa
 {
             if (!codeTables) return char(0x14) + ( '\"' + sword + '\"') + char(0x00);
             // char(0x15) + return getCTIndex(sword);
+            throw std::runtime_error("ACLMessageOutputParser does not support codetables");
+
 }
 
 std::string ACLMessageOutputParser::getBitDigits(std::string dig)

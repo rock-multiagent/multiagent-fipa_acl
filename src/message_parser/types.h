@@ -11,10 +11,10 @@
 #include <boost/variant/get.hpp>
 #include <boost/bind.hpp>
 
-#include <message-parser/date_time.h>
-#include <message-parser/byte_sequence.h>
-#include <message-parser/agent_id.h>
-#include <message-parser/parameter.h>
+#include <fipa_acl/message_parser/date_time.h>
+#include <fipa_acl/message_parser/byte_sequence.h>
+#include <fipa_acl/message_parser/agent_id.h>
+#include <fipa_acl/message_parser/parameter.h>
 
 namespace fipa
 {

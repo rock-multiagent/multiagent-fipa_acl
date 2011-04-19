@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include "ACLMessage.h"
+#include "acl_message.h"
 
 namespace fipa {
 

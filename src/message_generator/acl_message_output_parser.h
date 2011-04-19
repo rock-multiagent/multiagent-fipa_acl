@@ -1,6 +1,6 @@
     /**
     *
-    * \file ACLMessageOutputParser.h
+    * \file acl_message_output_parser.h
     * \author Mircea Cretu Stancu
     * \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
     * 
@@ -13,10 +13,10 @@
     #ifndef ACLMessageOutputParser_H_
     #define ACLMessageOutputParser_H_
     #include <string>
-    #include "AgentID.h"
-    #include "UserdefParam.h"
-    #include "ACLMessage.h"
-    #include "Exception.h"
+    #include <fipa_acl/message_generator/agent_id.h>
+    #include <fipa_acl/message_generator/userdef_param.h>
+    #include <fipa_acl/message_generator/acl_message.h>
+    #include <fipa_acl/message_generator/exception.h>
 
     namespace fipa {
 
