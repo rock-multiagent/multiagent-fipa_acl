@@ -16,10 +16,10 @@ SET(module_name ${PROJECT_NAME})
 #    LIBRARY DESTINATION lib
 #)
 set(SOURCES
-	agent_id.cpp
-	message_printer.cpp
-	message_parser.cpp
-	grammar_bitefficient.cpp
+	parser/agent_id.cpp
+	parser/message_printer.cpp
+	parser/message_parser.cpp
+	parser/grammar_bitefficient.cpp
 )
 
 #add_executable(testParser test.cpp ${SOURCES})
