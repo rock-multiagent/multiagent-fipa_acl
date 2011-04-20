@@ -11,7 +11,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <message-generator/ACLMessage.h>
+#include <fipa_acl/bitefficient_message.h>
 #include "../../src/StateMachine.h"
 #include "../../src/State.h"
 #include "../../src/Transition.h"
