@@ -1,5 +1,7 @@
-#ifndef _RIMRES_FIPAACL_MESSAGEGENERATOR_TYPES_
-#define _RIMRES_FIPAACL_MESSAGEGENERATOR_TYPES_
+#ifndef _FIPAACL_MESSAGEGENERATOR_TYPES_
+#define _FIPAACL_MESSAGEGENERATOR_TYPES_
+
+#include <string>
 
 namespace fipa {
 namespace acl {
