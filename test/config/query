@@ -1,0 +1,28 @@
+<scxml version="1.0" initial="1">
+    <state id="1">
+        <transition performative="query-if" from="initiator" to="B" target="2"/>
+        <transition performative="query-ref" from="initiator" to="B" target="3"/>
+    </state>
+    <state id="2">
+        <transition performative="refuse" from="B" to="initiator" target="4"/>
+        <transition performative="agree" from="B" to="initiator" target="5"/>
+    </state>
+    <state id="3" final="no">
+        <transition performative="refuse" from="B" to="initiator" target="4"/>
+        <transition performative="agree" from="B" to="initiator" target="6"/>
+    </state>
+    
+    <state id="4" final="yes">
+    </state>
+    
+    <state id="5" final="no">
+    	<transition performative="inform-if" from="B" to="initiator" target="7"/>
+    	<transition performative="failure" from "B" to="initiator" target="4"/>
+    </state>
+    <state id="6" final="no">
+    	<transition performative="inform-ref" from="B" to="initiator" target="7"/>
+    	<transition performative="failure" from="B" to="initiator" target="4"/>
+    </state>
+    <state id="7" final="yes">
+    </state>
+</scxml>

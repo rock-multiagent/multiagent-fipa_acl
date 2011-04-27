@@ -1,0 +1,18 @@
+<scxml version="1.0" initial="1">
+    <state id="1">
+        <transition performative="request" from="initiator" to="B" target="2"/>
+    </state>
+    <state id="2">
+        <transition performative="refuse" from="B" to="initiator" target="3"/>
+        <transition performative="agree" from="B" to="initiator" target="4"/>
+    </state>
+    <state id="3" final="yes">
+        
+    </state>
+    <state id="4">
+        <transition performative="failure" from="B" to="initiator" target="3"/>
+        <transition performative="inform" from="B" to="initiator" target="5" />
+    </state>
+    <state id="5" final="yes">
+    </state>
+</scxml>

@@ -229,7 +229,7 @@ void StateMachineTest::RequestProtocolTestFromFile()
     flow = buildRequestMessageFlow();
     
     std::cout<<"flow of messages built..\n";
-    req.print();
+    //req.print();
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     std::cout<< it->getPerformative()<<"\n";
