@@ -14,7 +14,7 @@ set(SOURCES
 set(TEST_TARGET builder_test_${PROJECT_NAME})
 #add_executable(${TEST_TARGET} main.cpp)
 add_executable(${TEST_TARGET} main.cpp )
-target_link_libraries(${TEST_TARGET} message-generator ${LIBRARIES} ${PROJECT_NAME})
+target_link_libraries(${TEST_TARGET} fipa_acl ${LIBRARIES} ${PROJECT_NAME})
 
 
 ###### Define a library
@@ -26,7 +26,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 #
 # If you want to use a library defined in this package, just use its name
 #
-target_link_libraries(${PROJECT_NAME} message-generator ${LIBRARIES} ${EXTERNAL_LIBS})
+target_link_libraries(${PROJECT_NAME} fipa_acl ${LIBRARIES} ${EXTERNAL_LIBS})
 
 
 

@@ -17,5 +17,5 @@ set(SOURCES
 
 set(TEST_TARGET unit-test_${PROJECT_NAME})
 add_executable(${TEST_TARGET} ${SOURCES})
-target_link_libraries(${TEST_TARGET} message-generator ${PROJECT_NAME} cppunit ${LIBRARIES})
+target_link_libraries(${TEST_TARGET} fipa_acl ${PROJECT_NAME} cppunit ${LIBRARIES})
 

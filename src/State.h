@@ -10,7 +10,7 @@
 #ifndef _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
 #define _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
 
-#include <message-generator/ACLMessage.h>
+#include <fipa_acl/message_generator/acl_message.h>
 //#include "StateMachine.h"
 #include "Transition.h"
 

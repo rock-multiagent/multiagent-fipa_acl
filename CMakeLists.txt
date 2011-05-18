@@ -17,10 +17,10 @@ include_directories(${PROJECT_SOURCE_DIR}/external/include)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
-pkg_check_modules(MessageGenerator REQUIRED "message-generator")
+pkg_check_modules(FipaAcl REQUIRED "fipa_acl")
 
-include_directories(${MessageGenerator_INCLUDE_DIRS})
-link_directories(${MessageGenerator_LIBRARY_DIRS})
+include_directories(${FipaAcl_INCLUDE_DIRS})
+link_directories(${FipaAcl_LIBRARY_DIRS})
 
 
 #include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)

@@ -12,9 +12,7 @@
 
 //#include "StateMachine.h"
 #include "types.h"
-#include <message-generator/ACLMessage.h>
-#include <message-generator/AgentID.h>
-#include <message-generator/types.h>
+#include <fipa_acl/bitefficient_message.h>
 #include <algorithm>
 
 namespace fipa {

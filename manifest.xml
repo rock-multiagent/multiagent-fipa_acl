@@ -8,6 +8,7 @@
   <logo>http://</logo>
   <depend package="libcppunit" />
   <depend package="external/tinyxml" />
+  <depend package="communication/fipa_acl" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="" />
