@@ -26,27 +26,16 @@ void ACLMessage::initializeObject()
          receivers.clear();
          reply_to.clear();
 	 performative = ACLMessage::perfs[INFORM];
-	/*
          language = std::string();
-         language.clear();
          encoding = std::string();
-         encoding.clear();
          ontology = std::string();
-         ontology.clear();
          protocol = std::string();
-         protocol.clear();
          conversation_id = std::string();
-         conversation_id.clear();
          reply_with = std::string();
-         reply_with.clear();
          in_reply_to = std::string();
-         in_reply_to.clear();
          reply_by = -1;
          reply_by1 = std::string();
-         reply_by1.clear();
          content = std::string();
-         content.clear();
-         */
          
          params.clear();        
          
@@ -73,7 +62,7 @@ ACLMessage::ACLMessage(predefinedPerformatives perf)
 }
 
 
-ACLMessage::ACLMessage(std::string perf) 
+ACLMessage::ACLMessage(const std::string& perf) 
 {
     initializeObject(); 
     
@@ -88,7 +77,7 @@ int ACLMessage::setPerformative(predefinedPerformatives perf)
 	return 0;
 }
 
-int ACLMessage::setPerformative(const std::string str) 
+int ACLMessage::setPerformative(const std::string& str) 
 {
     if ( (str.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(str.c_str()[0]) != -1) )
     return 1;
@@ -97,14 +86,14 @@ int ACLMessage::setPerformative(const std::string str)
 
 std::string ACLMessage::getPerformative() const {return performative; }
 
-void ACLMessage::addReceiver(const AgentID &aid) 
+void ACLMessage::addReceiver(const AgentID& aid) 
 {
     if ( find(receivers.begin(),receivers.end(),aid) == receivers.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
         receivers.insert(receivers.begin(),aid); 
 }
 
-void ACLMessage::deleteReceiver(const AgentID &aid) 
+void ACLMessage::deleteReceiver(const AgentID& aid) 
 {
     std::vector<AgentID>::iterator it;
     if ( (it = find(receivers.begin(),receivers.end(),aid)) != receivers.end() )// prevent entering duplicates
@@ -119,14 +108,14 @@ void ACLMessage::clearReceivers()
 
 std::vector<AgentID> ACLMessage::getAllReceivers() const {return receivers; }
 
-void ACLMessage::addReplyTo(const AgentID &aid) 
+void ACLMessage::addReplyTo(const AgentID& aid) 
 {
     if ( find(reply_to.begin(),reply_to.end(),aid) == reply_to.end() )// prevent entering duplicates
 							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     reply_to.insert(reply_to.begin(),aid); 
 }
 
-void ACLMessage::deleteReplyTo(const AgentID aid) 
+void ACLMessage::deleteReplyTo(const AgentID& aid) 
 {
     std::vector<AgentID>::iterator it;
     if ( (it = find(reply_to.begin(),reply_to.end(),aid)) != reply_to.end() )// prevent entering duplicates
@@ -145,19 +134,19 @@ void ACLMessage::setReplyBy(const long by) {reply_by = by; }
 
 long ACLMessage::getReplyBy() const {return reply_by; }
 
-void ACLMessage::setInReplyTo(const std::string str) {in_reply_to = str; }
+void ACLMessage::setInReplyTo(const std::string& str) {in_reply_to = str; }
 
 std::string ACLMessage::getInReplyTo() const {return in_reply_to; }
 
-void ACLMessage::setReplyWith(const std::string str) {reply_with = str; }
+void ACLMessage::setReplyWith(const std::string& str) {reply_with = str; }
 
 std::string ACLMessage::getReplyWith() const {return reply_with; }
 
-void ACLMessage::setConversationID(const std::string str) {conversation_id = str; }
+void ACLMessage::setConversationID(const std::string& str) {conversation_id = str; }
 
 std::string ACLMessage::getConversationID() const {return conversation_id; }
 
-int ACLMessage::setProtocol(const std::string str) 
+int ACLMessage::setProtocol(const std::string& str) 
 {
     if ( (str.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(str.c_str()[0]) != -1) )
     return 1;
@@ -166,23 +155,23 @@ int ACLMessage::setProtocol(const std::string str)
 
 std::string ACLMessage::getProtocol() const {return protocol; }
 
-void ACLMessage::setOntology(const std::string str) {ontology = str; }
+void ACLMessage::setOntology(const std::string& str) {ontology = str; }
 
 std::string ACLMessage::getOntology() const {return ontology; }
 
-void ACLMessage::setEncoding(const std::string str) {encoding = str; }
+void ACLMessage::setEncoding(const std::string& str) {encoding = str; }
 
 std::string ACLMessage::getEncoding() const {return encoding; }
 
-void ACLMessage::setLanguage(const std::string str) {language = str; }
+void ACLMessage::setLanguage(const std::string& str) {language = str; }
 
 std::string ACLMessage::getLanguage() const {return language; }
 
-void ACLMessage::setContent(const std::string cont) {content = cont; }
+void ACLMessage::setContent(const std::string& cont) {content = cont; }
 
 std::string ACLMessage::getContent() const {return content; }
 
-void ACLMessage::setSender(const AgentID &sender1) 
+void ACLMessage::setSender(const AgentID& sender1) 
 {
     sender = sender1; 
 }
@@ -194,7 +183,7 @@ AgentID ACLMessage::getSender() const
     
 } 
 
-void ACLMessage::addUserdefParam(const UserdefParam &p) 
+void ACLMessage::addUserdefParam(const UserdefParam& p) 
 {
     if (find (params.begin(),params.end(),p) == params.end() )
     params.insert(params.begin(),p);
@@ -202,7 +191,7 @@ void ACLMessage::addUserdefParam(const UserdefParam &p)
 
 std::vector<UserdefParam> ACLMessage:: getUserdefParams() const {return params;}
 
-void ACLMessage::setUserdefParams(const std::vector<UserdefParam> p) 
+void ACLMessage::setUserdefParams(const std::vector<UserdefParam>& p) 
 {
     params.clear();
     params.insert(params.begin(),p.begin(),p.end());
@@ -224,12 +213,12 @@ std::string ACLMessage::getReplyBy1(int formated) const
     
 }
 
-void ACLMessage::_setReplyBy1(const std::string date1)
+void ACLMessage::_setReplyBy1(const std::string& date1)
 {
     reply_by1 = date1;
 }
 
-int ACLMessage::setReplyBy1(const std::string date1) 
+int ACLMessage::setReplyBy1(const std::string& date1) 
 {
     std::string trim,aux;
     trim.clear();
@@ -292,7 +281,7 @@ int ACLMessage::setReplyBy1(const std::string date1)
 }
 
 
-bool operator== (const ACLMessage &a,const ACLMessage &b)
+bool operator== (const ACLMessage& a,const ACLMessage& b)
 {
     //ACLMessage a = ACLMessage(&c); 
     //ACLMessage b = ACLMessage(&d);
@@ -458,7 +447,7 @@ bool operator== (const ACLMessage &a,const ACLMessage &b)
 
 
 
-ACLMessage::ACLMessage(const ACLMessage &mes)
+ACLMessage::ACLMessage(const ACLMessage& mes)
 {
     initializeObject();
     if (!mes.getPerformative().empty()) performative = mes.getPerformative();
@@ -483,7 +472,7 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
         
         std::vector<AgentID> mesrec = mes.getAllReceivers();
         std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (recit; recit != mesrec.end(); recit++)
+        for (; recit != mesrec.end(); recit++)
         {
 	  AgentID temp = AgentID();
 	  temp = (*recit);
@@ -495,7 +484,7 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
         
         std::vector<AgentID> mesrec = mes.getAllReplyTo();
         std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (recit; recit != mesrec.end(); recit++)
+        for (; recit != mesrec.end(); recit++)
         {
 	  AgentID temp = AgentID();
 	  temp = (*recit);
@@ -508,7 +497,7 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
         std::vector<UserdefParam> mesparams = mes.getUserdefParams();
         std::vector<UserdefParam>::iterator paramit = mesparams.begin();
     
-        for (paramit; paramit != mesparams.end(); paramit++)
+        for (; paramit != mesparams.end(); paramit++)
         {
 	  UserdefParam temp2 = UserdefParam();
 	  temp2 = (*paramit);
@@ -520,7 +509,7 @@ ACLMessage::ACLMessage(const ACLMessage &mes)
 
 
 
-ACLMessage& ACLMessage::operator=(const ACLMessage &mes)
+ACLMessage& ACLMessage::operator=(const ACLMessage& mes)
 {
     // checking against message1 = message1 case
     if (this != &mes)

@@ -10,6 +10,7 @@
 #include "acl_message.h"
 #include <iostream>
 #include <algorithm>
+#include <base/logging.h>
 
 namespace fipa {
 
@@ -18,19 +19,19 @@ namespace acl {
     
 int AgentID::resCompDepth = 1;
  
-AgentID::AgentID()
+AgentID::AgentID() : name()
 {
-	name = std::string();
-	name.clear();
 	initializeFields();
 }
 
-AgentID::AgentID(const std::string nam) 
+AgentID::AgentID(const std::string nam) : name(nam)
 {
     initializeFields();
     if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
-    name.clear();
-    else name = nam;
+    {
+        LOG_ERROR("AgentID: name containst invalid characters - defaulting to empty name");
+        name = "";
+    }
 }
 
 void AgentID::initializeFields()

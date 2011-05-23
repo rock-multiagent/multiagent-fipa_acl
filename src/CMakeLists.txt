@@ -30,6 +30,7 @@ set(SOURCES
 #target_link_libraries(testParser ${LIBRARIES})
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
+target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin

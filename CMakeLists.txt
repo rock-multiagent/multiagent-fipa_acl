@@ -22,11 +22,16 @@ CMAKE_USE_FULL_RPATH("${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/${
 include_directories(${PROJECT_SOURCE_DIR}/external/include)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
+include(PkgConfigPackages)
+pkg_check_modules(Base REQUIRED "base-lib")
+include_directories(${Base_INCLUDE_DIRS})
+link_directories(${Base_LIBRARY_DIRS})
+set(LIBRARIES ${LIBRARIES} ${Base_LIBRARIES} )
+
 ##### End specification of build directory ##############################
 set(Boost_LOCALFIRST TRUE)
 set(Boost_ADDITIONAL_VERSION 1.42 1.43)
 find_package(Boost 1.42 REQUIRED)
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} )
 
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})

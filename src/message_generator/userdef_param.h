@@ -55,7 +55,7 @@ class UserdefParam {
 	    /**
 		\brief overloaded copy-constructor
 	    */
-	    UserdefParam(const UserdefParam &copy);
+	    UserdefParam(const UserdefParam& copy);
 	    /**
 		\brief overloaded assignment operator
 	    */
@@ -72,7 +72,7 @@ class UserdefParam {
              * Set the value associated with the userdefined parameter
              * \param val Value of the userdefined parameter
              */
-            void setValue(std::string val);
+            void setValue(const std::string& val);
     
             /**
              * Get the name of the userdefined parameter
@@ -86,13 +86,13 @@ class UserdefParam {
 	        \param name Name to set for the userdefined parameter
 		\return 0 if successful 1 otherwise(name is un-alterred)
 	      */
-	    int setName (std::string name);
+	    int setName (const std::string& name);
 };
 
 /**
 * Overloading equals operator for UserdefParam
 */
-extern bool operator== (const UserdefParam &a,const UserdefParam &b);
+extern bool operator== (const UserdefParam& a,const UserdefParam& b);
 
 
 }//end of acl namespace

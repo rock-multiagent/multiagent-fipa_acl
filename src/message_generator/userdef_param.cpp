@@ -31,13 +31,13 @@ UserdefParam::UserdefParam(const std::string& _name) : name(_name)
 {
 }
 
-UserdefParam::UserdefParam(const UserdefParam &copy)
+UserdefParam::UserdefParam(const UserdefParam& copy)
 {
     name = copy.getName();
     value = copy.getValue();
 }
 
-UserdefParam& UserdefParam::operator=(const UserdefParam &copy)
+UserdefParam& UserdefParam::operator=(const UserdefParam& copy)
 {
     if (this != &copy) {
     name.clear();
@@ -49,11 +49,11 @@ UserdefParam& UserdefParam::operator=(const UserdefParam &copy)
 
 std::string UserdefParam::getValue() const {return value;}
 
-void UserdefParam::setValue(std::string val) {value = val;}
+void UserdefParam::setValue(const std::string& val) {value = val;}
 
 std::string UserdefParam::getName() const {return name;}
 
-int UserdefParam::setName (std::string nam) 
+int UserdefParam::setName (const std::string& nam) 
 {
     if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
     return 1;
@@ -61,7 +61,7 @@ int UserdefParam::setName (std::string nam)
 }
 
 
-bool operator== (const UserdefParam &a,const UserdefParam &b)
+bool operator== (const UserdefParam& a,const UserdefParam& b)
 {
     if (a.getName().compare(b.getName()))
         return false;
