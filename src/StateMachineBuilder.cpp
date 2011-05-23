@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cstring>
+#include <base/logging.h>
 
 namespace fipa {
 namespace acl {
@@ -44,11 +45,12 @@ StateMachine StateMachineBuilder::loadSpecification(std::string infile)
     
     if (!file.LoadFile())
     {
-        std::cout<<"error loading the spec file\n";
+        LOG_ERROR("error loading the spec file")
+        std::cout << "Error loading the spec file: " << infile << std::endl;
         exit(1);
     }
     builtMachine = StateMachine();
-    std::cout<<"@file opened\n";
+    LOG_DEBUG("loadSpecification: file opened: %s", infile.c_str());
     TiXmlElement *sm = file.RootElement();
     parseStateMachineNode(sm);
     
@@ -60,20 +62,23 @@ void StateMachineBuilder::parseStateMachineNode(TiXmlElement *sm)
     const char *value;
     
     value = sm->Attribute(StateMachineBuilder::initial.c_str());
-    std::cout<<"@retrieved value of the \"initial\" parameter\n";
+    LOG_DEBUG("parseStateMachineNode: retrieved value of the \"initial\" parameter");
     if (value)
         initialState = std::string(value);
-    else;
-        //TODO throw some exception here
+    else
+        throw std::runtime_exception("Attribute of initial could not be retrieved");
         
-    std::cout<<"@saved the initial state of the machine\n";
+    LOG_DEBUG("parseStateMachineNode: saved the initial state of the machine");
     
     TiXmlHandle handleSm = TiXmlHandle(sm);
     TiXmlElement* child = handleSm.FirstChild( "state" ).ToElement();
     
     if (child)
-    std::cout<<"@found first state element\n";
-    else std::cout<<"!!!state element is NULL";
+    {
+        LOG_DEBUG("parseStateMachineNode: found first state element");
+    } else {
+        LOG_WARN("pareStateMachineNode: parsestate element is NULL");
+    }
     
     addStates(child);
     builtMachine.setInitialState(initialState);
@@ -84,19 +89,19 @@ void StateMachineBuilder::parseStateMachineNode(TiXmlElement *sm)
 State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 {
     State ret;
-    std::cout<<"\t@parseStateNode method\n";
+    LOG_DEBUG("parseStateNode: called");
     
     const char *value;
     value = st->Attribute(StateMachineBuilder::id.c_str());
     //if (value) ---- should not be necessary to check because it is already checked in the caller function(parseStates())
         ret.setUID(std::string(value));
-        std::cout<<"\t\t#uid set\t"<<value<<"\n";
+        LOG_DEBUG("\t\t#uid set: %s", value);
     //else;
         //TODO: throw some exception here
     
     value = NULL;
     value = st->Attribute(StateMachineBuilder::final.c_str());
-    std::cout<<"\t\t#value field retrieved for final:\n"; //<< value <<"\n";
+    LOG_DEBUG("\t\t#value field retrieved for final: %s", value);
     if (value)
     {
         if (!strcmp(value,"yes"))
@@ -107,7 +112,7 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 	  else;
 	      //TODO throw some exception here
     }
-    std::cout<<"\t\t#set the final variable\n";
+    LOG_DEBUG("\t\t#set the final variable");
         
     ret.setOwningMachine(&builtMachine);
     
@@ -115,17 +120,16 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
     TiXmlElement *trans = handleState.FirstChildElement("transition").ToElement();
     for (trans; trans != NULL; trans = trans->NextSiblingElement("transition") )
     {
-        std::cout<<"\t\t!!!trans for\n";
         Transition t = Transition(parseTransitionNode(trans));
-        std::cout<<"\t\t!!!returned\n";
-        std::cout<<"\t\t&&&set parameter from: "<<t.getFrom()<<"\n";
-        std::cout<<"\t\t&&&set parameter to: "<<t.getTo()<<"\n";
-        std::cout<<"\t\t&&&set parameter next state: "<<t.getNextStateName()<<"\n";
-        std::cout<<"\t\t&&&set parameter performative: "<<t.getExpectedPerformative()<<"\n";
         t.setOwningState(&ret);
         ret.addTransition(t);
-        
-        std::cout<<"\t\t!!!end of one for loop\n";
+
+        LOG_DEBUG("\t\tparseStateNode: transition added: from %s, to %s, next state: %s, performative %s",
+                 t.getFrom().c_str(),
+                 t.getTo().c_str(),
+                 t.getNextStateName().c_str(),
+                 t.getExpectedPerformative().c_str()
+                );
     }
     
     //TODO: implement specification for subprotocols
@@ -133,13 +137,13 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 }
 void StateMachineBuilder::addStates(TiXmlElement *st)
 {
-    std::cout<<"@addStates method\n";
+    LOG_DEBUG("addStates called");
     TiXmlElement *next;
     const char *value = NULL;
     value = st->Attribute(StateMachineBuilder::id.c_str());
     if (value)
     {
-        std::cout<<"\t#retrieved id of the state\n";
+        LOG_DEBUG("\t#retrieved id of the state");
         std::vector<std::string>::iterator it = find(states.begin(), states.end(), std::string(value));
         if ( it == states.end() )
 	  states.push_back(std::string(value));
@@ -162,7 +166,7 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
 {
     Transition ret;
     const char *value = NULL;
-    std::cout<<"\t@parseTransitionNode method\n";
+    LOG_DEBUG("parseTransitionNode called");
     value = trans->Attribute(StateMachineBuilder::from.c_str());
     if ( value )
     {
@@ -193,11 +197,15 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
         std::vector<std::string>::iterator it = find(states.begin(), states.end(), std::string(value));
         if ( it != states.end() )
 	  ret.setNextStateName(std::string(value));
-        else;
-	  //TODO: throw some exception here(no such state in the spec file)
+        else
+        {
+          LOG_ERROR("Transition to an unknown state in the specification file: %s", value);
+          throw std::runtime_error("No such state in the specification file");
+        }
+    } else {
+        LOG_ERROR("Could not retrieve attribute for target state: %s", StateMachineBuilder::target.c_str());
+        throw std::runtime_error("Could not retrieve attribute for target state");
     }
-    else;
-        //TODO: throw some exception here
 
     value = NULL;
     value = trans->Attribute(StateMachineBuilder::performative.c_str());
