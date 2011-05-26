@@ -261,7 +261,7 @@ class StateMachine
          /** \brief method that sends a signal down to transition level so that the latter update their agent fields
 		(such expectedSenders,etc), based on the fields of the stateMachine
         */
-        void UpdateAllAgentRoles();
+        void updateAllAgentRoles();
         /** \brief method that creates a cancel meta protocol and adds it to the cancelMetaP vector, based on a "cancel" message that is
 		received
 	  \param msg ACLMessage; message from which to build the new cancel meta protocol
