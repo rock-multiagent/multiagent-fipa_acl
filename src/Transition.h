@@ -137,14 +137,14 @@ class Transition
         bool updateRoles(ACLMessage&);
         
         /**
-	  \brief method that makes takes the necessary actions when a message has been accepted as valid but before the jump to another
-	  \brief state condition has not yet been checked
+	  \brief method that takes the necessary actions when a message has been accepted as valid but before the jump to another
+	  state condition has been checked
 	  \param msg: the validated message passed as argument
         */
         void performWithoutStateExit(ACLMessage &msg);
         
         /**
-	  \brief method that makes takes the necessary actions when a message has been accepted as valid and the jump to another state
+	  \brief method that takes the necessary actions when a message has been accepted as valid and the jump to another state
 	  \brief condition has been met(i.e: all involvedAgents are ticked in the owning state)
 	  \param msg: the validated message passed as argument
         */
