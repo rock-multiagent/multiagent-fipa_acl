@@ -16,6 +16,7 @@ note for future: the "in reply to" policy needs to be defined somehow (not neces
 #include "StateMachine.h"
 #include "State.h"
 #include <iostream>
+#include <algorithm>
 
 namespace fipa {
 namespace acl {
@@ -29,6 +30,7 @@ void StateMachine::initializeObjectFields()
     
     
     involvedAgents.clear();
+    preImposedRoles.clear();
     states.clear();
     currentState = NULL;
     owner = AgentID();
@@ -269,6 +271,21 @@ void StateMachine::updateAllAgentRoles()
     }
 }
 
+void StateMachine::updateAllAgentRoles(Role myrole, std::vector<AgentID> myagents)
+{
+    std::vector<RoleCorrelation>::iterator it;
+    for(it = preImposedRoles.begin(); it != preImposedRoles.end(); it++)
+    {
+        if (!it->master.compare(myrole) && !it->check)
+        {
+	  setRole(it->resident, myagents);
+	  it->check = true;
+	  break;
+        }
+    }
+    updateAllAgentRoles();
+}
+
 State* StateMachine::getStateByName(std::string _name)
 {
     std::vector<State>::iterator it = find(states.begin(),states.end(),_name);
@@ -325,6 +342,7 @@ bool StateMachine::setRole(Role myrole,AgentID myagent)
 bool StateMachine::setRole(Role myrole, std::vector<AgentID> agents)
 {
     //if (checkIfRoleSet(myrole) ) return false;
+    if (agents.empty()) return true;
    
     std::vector<AgentID>::iterator agbegin = agents.begin();
     std::vector<AgentID>::iterator agend = agents.end();
@@ -377,6 +395,20 @@ bool StateMachine::checkIfAgentAssigned(AgentID ag)
     return false;
 }
 
+std::vector<AgentID> StateMachine::getAgentsAssignedTo(Role myrole)
+{
+    std::vector<AgentMapping>::iterator it;
+    std::vector<AgentID> ret; ret.clear();
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    {
+        if (!it->role.compare(myrole) && it->check)
+        {
+	  ret.push_back(it->agent);
+        }
+    }
+    return ret;
+}
+
 bool StateMachine::checkIfRoleSet(Role &myrole)
 {
     std::vector<AgentMapping>::iterator it;
@@ -423,6 +455,28 @@ Role StateMachine::getAgentRole(AgentID ag)
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
         if ((it->agent == ag) && (it->check == true)) return it->role;
         return std::string("");
+}
+
+void StateMachine::addRoleCorrelation(Role mymaster, Role myresident)
+{    
+    if (!checkIfRoleExists(myresident)) 
+        return;
+    
+    for (std::vector<RoleCorrelation>::iterator it = preImposedRoles.begin(); it != preImposedRoles.end(); it++)
+        if (!it->master.compare(mymaster) && !it->resident.compare(myresident))
+	  return;
+    
+    RoleCorrelation temp;
+    temp.master = mymaster;
+    temp.resident = myresident;
+    temp.check = false;
+    
+    preImposedRoles.push_back(temp);
+}
+
+std::vector<RoleCorrelation> StateMachine::getRoleCorrelation()
+{
+    return preImposedRoles;
 }
 
 void StateMachine::addRole(Role myrole)

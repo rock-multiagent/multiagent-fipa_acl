@@ -43,6 +43,12 @@ class StateMachine
         */
         std::vector<AgentMapping> involvedAgents;
         
+        /**
+	  \param preImposedRoles: roles that need to be correlated to a master StateMachine(i.e: only useful if the current StateMachine
+			      is a sub-protocol to another StateMachine)
+        */
+        std::vector<RoleCorrelation> preImposedRoles;
+        
         /** \param owner: AgentID, owner of the state machine; determines the perspective from which the roles are assigned 
 	  NOTE: no symbolic value for "owner not set" case defined yet 
         */
@@ -182,6 +188,29 @@ class StateMachine
 	  \param: string; role to be checked
 	  \return: true if role is set; false otherwise
         */
+        
+        /**
+	  \brief returns a vector with all the agents(AgentID) assigned to a specific role
+	  \param myrole: Role  that we want to retrieve assigned agents forward
+	  \return std::vector<AgentID> populated with the coresponding AgentIDs(empty if role not set yet)
+	  
+        */
+        std::vector<AgentID> getAgentsAssignedTo(Role myrole);
+        
+        /**
+	  \brief returns the vector of RoleCorrelation which keeps track of roles that need to be synchronized with a master StateMachine
+        */
+        std::vector<RoleCorrelation> getRoleCorrelation();
+        
+        /**
+	  \brief add a new pair of roles that needs to be correlated(between this StateMachine and a master StateMachine);
+		!this method need to be called after involvedAgents field has been populated with all the generic names(roles) of the 
+		involved agents
+	  \param mymaster: role from the master StateMachine
+	  \param myresident: own role(must be registerred in the involvedAgents field)
+        */
+        void addRoleCorrelation(Role mymaster, Role myresident);
+        
         bool checkIfRoleSet(Role&);
         //void removeInterlocutor(AgentID);
         //void removeInterlocutor(std::vector<AgentID>);
@@ -189,6 +218,13 @@ class StateMachine
 		each role
         */
         void updateAllAgentRoles();
+        
+        /**
+	  \brief overload to updateAllAgentRoles() that takes into account roles that need to be correlated with a master StateMachine
+	  \param myrole: role that needs to be correlated to the role of a master StateMachine
+	  \param myagents: vector of agents that are assigned in the master StateMachine to the myrole Role and need to be correlated
+        */
+        void updateAllAgentRoles(Role myrole, std::vector<AgentID> myagents);
         
         /**
 	  \brief misc method added to easily visualize a built stateMachine;

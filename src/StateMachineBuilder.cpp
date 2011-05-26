@@ -24,7 +24,7 @@ StateMachineBuilder::StateMachineBuilder()
 
 StateMachine StateMachineBuilder::getFunctionalStateMachine(std::string infile)
 {
-    localyloadSpecification(infile);
+    localyLoadSpecification(infile);
     
     builtMachine.generateDefaultStates();
     builtMachine.generateDefaultTransitions();

@@ -15,6 +15,12 @@ namespace acl {
         bool check;
     } AgentMapping;
     
+    typedef struct {
+        Role master;
+        Role resident;
+        bool check;
+    } RoleCorrelation;
+    
 
 } // end of acl
 } // end of fipa

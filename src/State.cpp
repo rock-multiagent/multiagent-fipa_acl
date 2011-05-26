@@ -198,6 +198,18 @@ void State::updateAllAgentRoles()
 {
     std::vector<Transition>::iterator it;
     //std::map<AgentMapping>::iterator found;
+    for (std::vector<StateMachine>::iterator smit = subSM.begin(); smit != subSM.end(); smit++)
+    {
+        std::vector<RoleCorrelation> tempRC = smit->getRoleCorrelation();
+        for (std::vector<RoleCorrelation>::iterator rcit = tempRC.begin(); rcit != tempRC.end(); rcit++)
+        {
+	  if(owningMachine->checkIfRoleSet(rcit->master) && !rcit->check)
+	  {
+	      smit->updateAllAgentRoles(rcit->master, owningMachine->getAgentsAssignedTo(rcit->master));
+	  }
+        }
+    }
+    
     for (it = transitions.begin(); it != transitions.end(); it++)
     {    
         it->updateRoles();
