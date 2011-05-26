@@ -1,8 +1,7 @@
 #ifndef _RIMRES_FIPAACL_CONVMONITOR_TYPES_
 #define _RIMRES_FIPAACL_CONVMONITOR_TYPES_
 
-//#include <map>
-#include <message-generator/AgentID.h>
+#include <fipa_acl/bitefficient_message.h>
 
 namespace fipa {
 namespace acl {

@@ -10,6 +10,8 @@ set(PROJECT_DESCRIPTION "Control a fipa agent converstation based on an interact
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CommonSetup)
 
+add_definitions(-DBASE_LOG_NAMESPACE="${PROJECT_NAME}")
+
 # Include headers within source
 # If you create subdirectories within source include headers with subdirectory, i.e. 
 # #include "subdirectory/myheader.h"
@@ -17,21 +19,19 @@ include_directories(${PROJECT_SOURCE_DIR}/external/include)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
-pkg_check_modules(MessageGenerator REQUIRED "message-generator")
 
-include_directories(${MessageGenerator_INCLUDE_DIRS})
-link_directories(${MessageGenerator_LIBRARY_DIRS})
-
-
-#include(FindPkgConfig RESULT_VARIABLE PKG_CONFIG_FOUND)
-#pkg_check_modules(TinyXML "tinyxml")
-#find_package(tinyxml)
-
+pkg_check_modules(FipaAcl REQUIRED "fipa_acl")
+include_directories(${FipaAcl_INCLUDE_DIRS})
+link_directories(${FipaAcl_LIBRARY_DIRS})
 
 pkg_check_modules(TinyXML REQUIRED "tinyxml")
-
 include_directories(${TinyXML_INCLUDE_DIRS})
 link_directories(${TinyXML_LIBRARY_DIRS})
+
+
+pkg_check_modules(Base REQUIRED "base-lib")
+include_directories(${Base_INCLUDE_DIRS})
+link_directories(${Base_LIBRARY_DIRS})
 
 # command line output on, you can also use make VERBOSE=1
 # set(CMAKE_VERBOSE_MAKEFILE on)
@@ -58,7 +58,7 @@ link_directories(${TinyXML_LIBRARY_DIRS})
 #include_directories(${Boost_INCLUDE_DIRS})
 
 ### Update external libraries that are available
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${TinyXML_LIBRARIES})
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${TinyXML_LIBRARIES} ${Base_LIBRARIES} ${FipaAcl_LIBRARIES})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)

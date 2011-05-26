@@ -12,9 +12,7 @@
 
 #include "types.h"
 //#include "State.h"
-#include <message-generator/types.h>
-#include <message-generator/ACLMessage.h>
-
+#include <fipa_acl/bitefficient_message.h>
 #include <vector>
 //#include <multimap>
 
