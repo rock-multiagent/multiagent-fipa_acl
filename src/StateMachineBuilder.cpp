@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cstring>
+#include <stdexcept>
 #include <base/logging.h>
 
 namespace fipa {
@@ -10,11 +11,11 @@ namespace acl {
 
 const std::string StateMachineBuilder::from = 		std::string("from");
 const std::string StateMachineBuilder::to = 		std::string("to");
-const std::string StateMachineBuilder::target = 		std::string("target");
+const std::string StateMachineBuilder::target = 	std::string("target");
 const std::string StateMachineBuilder::id = 		std::string("id");
 const std::string StateMachineBuilder::final = 		std::string("final");
 const std::string StateMachineBuilder::performative = 	std::string("performative");
-const std::string StateMachineBuilder::initial = 		std::string("initial");
+const std::string StateMachineBuilder::initial = 	std::string("initial");
 
 StateMachineBuilder::StateMachineBuilder()
 {
@@ -66,7 +67,7 @@ void StateMachineBuilder::parseStateMachineNode(TiXmlElement *sm)
     if (value)
         initialState = std::string(value);
     else
-        throw std::runtime_exception("Attribute of initial could not be retrieved");
+        throw std::runtime_error("Attribute of initial could not be retrieved");
         
     LOG_DEBUG("parseStateMachineNode: saved the initial state of the machine");
     
@@ -213,8 +214,10 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
     {
         ret.setExpectedPerformative(std::string(value));
     }
-    else;
-        //TODO: throw some exception here
+    else
+    {
+        throw new std::runtime_error("Transition performative does not exist");
+    }
     
     return ret;
 }
