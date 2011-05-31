@@ -42,7 +42,7 @@ Transition::Transition(const Transition &t)
 int Transition::consumeMessage(const ACLMessage &msg)
 {
     LOG_DEBUG("\towningState is:\t\t  %s\n",owningState->getUID() );
-    if (validateMessage(msg))
+    if (validateMessage(msg)).
     {
         //if (expectedPerf.compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
         LOG_DEBUG("\t#### validated message\n");
