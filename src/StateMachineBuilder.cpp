@@ -46,8 +46,7 @@ StateMachine StateMachineBuilder::loadSpecification(std::string infile)
     
     if (!file.LoadFile())
     {
-        LOG_ERROR("error loading the spec file")
-        std::cout << "Error loading the spec file: " << infile << std::endl;
+        LOG_ERROR("error loading the spec file");
         exit(1);
     }
     builtMachine = StateMachine();
@@ -111,7 +110,7 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 	  if (!strcmp(value,"no"))
 	      ret.setFinal(false);
 	  else;
-	      //TODO throw some exception here
+	      throw std::runtime_error("Invalid value for attribute \"final\" of state node");
     }
     LOG_DEBUG("\t\t#set the final variable");
         
@@ -149,10 +148,10 @@ void StateMachineBuilder::addStates(TiXmlElement *st)
         if ( it == states.end() )
 	  states.push_back(std::string(value));
         else;
-	  //TODO: throw some exception here(duplicate state)
+	  throw std::runtime_error("\"id\" field of states should be unique");
     }
     else;
-        //TODO: throw some exception here
+        throw std::runtime_error("State node has no \"id\" attribute");
     
     if ( (next = st->NextSiblingElement("state")) != NULL )
     {

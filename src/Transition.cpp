@@ -2,7 +2,10 @@
 #include "Transition.h"
 #include "State.h"
 #include "StateMachine.h"
+
 #include <iostream>
+#include <stdexcept>
+#include <base/logging.h>
 
 namespace fipa {
 namespace acl {
@@ -38,19 +41,19 @@ Transition::Transition(const Transition &t)
     
 int Transition::consumeMessage(const ACLMessage &msg)
 {
-    std::cout<<"\towningState is:\t\t"<< owningState->getUID() <<"\n";
+    LOG_DEBUG("\towningState is:\t\t  %s\n",owningState->getUID() );
     if (validateMessage(msg))
     {
         //if (expectedPerf.compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
-        std::cout<< "\t#### validated message\n";
+        LOG_DEBUG("\t#### validated message\n");
         performWithoutStateExit(msg);
         //if ( checkAllSendersAccountedFor(msg) && checkAllRecepientsAccountedFor(msg) )
-        std::cout<< "\t#### done with perform without state exit\n";
+        LOG_DEBUG("\t#### done with perform without state exit\n");
         if (owningState->checkAllAgentsAccountedFor() )
         {
-	  std::cout<< "\t#### all agents accounted for\n";
+	  LOG_DEBUG("\t#### all agents accounted for\n");
 	  performOnStateExit(msg);
-	  std::cout<< "\t#### done with perform on state exit\n";
+	  LOG_DEBUG("\t#### done with perform on state exit\n");
         } else 
 	  {
 	      if (nextState->getFinal()) 
@@ -78,42 +81,42 @@ int Transition::consumeMessage(const ACLMessage &msg)
 
 bool Transition::validateMessage(const ACLMessage &msg)
 {
-    if (!validatePerformative(msg)){std::cout<<"\t\t\t\t*******1\n"; return false; }
+    if (!validatePerformative(msg)){LOG_DEBUG("\t\t\t\t*******1\n"); return false; }
     
     if (expectedSenders.empty() || expectedRecepients.empty() ) 
     {
-        std::cout<<"agents not set yet..\n";
+        LOG_DEBUG("agents not set yet..\n");
         if (!updateRoles(msg)) 
         {
-	  std::cout<<"updateRoles(msg) returned 0\n";
+	  LOG_DEBUG("updateRoles(msg) returned 0\n");
 	  return false;
         } 
-        std::cout<<"agents set now..\n";   
+        LOG_DEBUG("agents set now..\n");   
     }
     
-    std::cout<< "!validate message method! from: ";
+    LOG_DEBUG("!validate message method! from: ");
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
-        std::cout<< it->getName() << " ";
-    std::cout<<std::endl;
+        LOG_DEBUG("%s", it->getName());
+    LOG_DEBUG("\n");
     
-    std::cout<< "to: ";
+    LOG_DEBUG("to: ");
     for (std::vector<AgentID>::iterator it = expectedRecepients.begin(); it != expectedRecepients.end(); it++)
-        std::cout<< it->getName() << " ";
-    std::cout<<std::endl;
+        LOG_DEBUG("%s", it->getName() );
+    LOG_DEBUG(("\n");
     
            
-    if (!validateSender(msg)) {std::cout<<"\t\t\t\t*******2\n"; return false; }
-    if (!validateRecepients(msg)) {std::cout<<"\t\t\t\t*******3\n"; return false; }
+    if (!validateSender(msg)) {LOG_DEBUG("\t\t\t\t*******2\n"); return false; }
+    if (!validateRecepients(msg)) {LOG_DEBUG("\t\t\t\t*******3\n"); return false; }
     
-    if (!validateConvID(msg)) {std::cout<<"\t\t\t\t*******4\n"; return false; }
-    if (!validateProtocol(msg)) {std::cout<<"\t\t\t\t*******5\n"; return false; }
-    if (!validateEncoding(msg)) {std::cout<<"\t\t\t\t*******6\n"; return false; }
-    if (!validateLanguage(msg)) {std::cout<<"\t\t\t\t*******7\n"; return false; }
-    std::cout<< "#### passes language test\n";
-    if (!validateOntology(msg)) {std::cout<<"\t\t\t\t*******8\n"; return false; }
-    std::cout<< "#### passes ontology test\n";
-    if (!validateInReplyTo(msg)) {std::cout<<"\t\t\t\t*******9\n"; return false; }
-    std::cout<< "#### passes in reply to test\n";
+    if (!validateConvID(msg)) {LOG_DEBUG("\t\t\t\t*******4\n"); return false; }
+    if (!validateProtocol(msg)) {LOG_DEBUG("\t\t\t\t*******5\n"); return false; }
+    if (!validateEncoding(msg)) {LOG_DEBUG("\t\t\t\t*******6\n"); return false; }
+    if (!validateLanguage(msg)) {LOG_DEBUG("\t\t\t\t*******7\n"); return false; }
+    LOG_DEBUG("#### passes language test\n");
+    if (!validateOntology(msg)) {LOG_DEBUG("\t\t\t\t*******8\n"); return false; }
+    LOG_DEBUG("#### passes ontology test\n");
+    if (!validateInReplyTo(msg)) {LOG_DEBUG("\t\t\t\t*******9\n"); return false; }
+    LOG_DEBUG("#### passes in reply to test\n");
     //if (!validateReplyBy(msg)) return false;
     
     
@@ -146,18 +149,13 @@ void Transition::updateRoles()
 			
 		if (it->agent == machine->owner) {  
 					      removeAllAgentsBut(machine->owner,expectedSenders); //it = machine->involvedAgents.end();
-					      
-					      std::cout<< "$$$$$random$$$$$from: ";
-					      for (std::vector<AgentID>::iterator it32 = expectedSenders.begin(); it32 != expectedSenders.end(); it32++)
-						std::cout<< it32->getName() << " ";
-					      std::cout<<std::endl;
-					  break;
-					  }
+					      break;
+					   }
 		else;
 	      }else;
 	  }
         } else;   
-    } else ; //TODO: twrow some violation of protocol error
+    } else throw std::runtime_error("Trying to use inexistent role name");
     
         
     if (machine->checkIfRoleExists(to) )
@@ -179,17 +177,17 @@ void Transition::updateRoles()
 	      } else;
 	  }
         } else;
-    } else ; //TODO: throw some violation of protocol error
+    } else throw std::runtime_error("Trying to use inexistent role name");
         
     /*
-    std::cout<<"!without message update method!\nfrom: ";
+    LOG_DEBUG("!without message update method!\nfrom: ");
     for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
-        std::cout<< it1->getName() << " ";
-    std::cout<<"\n";
-    std::cout<<"to: ";
+        LOG_DEBUG("%s", it1->getName() );
+    LOG_DEBUG("\n");
+    LOG_DEBUG("to: ");
     for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
-        std::cout<< it2->getName() << " ";
-    std::cout<<"\n";
+        LOG_DEBUG("%s", it2->getName() );
+    LOG_DEBUG("\n");
     */
        
 }
@@ -223,16 +221,17 @@ bool Transition::updateRoles(const ACLMessage &msg)
 	      
 	      if (!machine->setRole(from,msg.getSender()))
 		return false;
+	      /*
 	      machine->updateAllAgentRoles();
-	      std::cout<< "!$!$!$!$ output right after update signal terminated:\n";
-	      std::cout<<"!with!! message update method!\tfrom: ";
+	      LOG_DEBUG("!$!$!$!$ output right after update signal terminated:\n");
+	      LOG_DEBUG("!with!! message update method!\tfrom: ");
 	      for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
-		std::cout<< it1->getName() << " ";
-	      std::cout<<"\n";
-	      std::cout<<"to: ";
+		LOG_DEBUG("%s", it1->getName() );
+	      LOG_DEBUG("\n");
+	      LOG_DEBUG("to: ");
 	      for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
-		std::cout<< it2->getName() << " ";
-	      std::cout<<"\n";
+		LOG_DEBUG("%s", it2->getName() );
+	      LOG_DEBUG("\n");
        
 	      
 	      int myc = 0;
@@ -241,12 +240,13 @@ bool Transition::updateRoles(const ACLMessage &msg)
 	      {
 		myc += trcount->transitions.size(); 
 	      }
-	      std::cout<<"&&&&&&&there are currently "<<myc<<" transitions in the SM\n";
-	      std::cout<<"&&&&&&&there are currently "<< machine->states.size() <<" states in the SM\n";
+	      LOG_DEBUG("&&&&&&&there are currently %d transitions in the SM\n", myc);
+	      LOG_DEBUG("&&&&&&&there are currently states in the SM\n", machine->states.size() );
+	      */
 	  }
         
     } else 
-        return false; //TODO: twrow some violation of protocol error
+        return throw std::runtime_error("Trying to use inexistent role name");
     
     if (machine->checkIfRoleExists(to) )
     {
@@ -274,18 +274,19 @@ bool Transition::updateRoles(const ACLMessage &msg)
 	      
 	  }
     } else 
-        return false; //TODO: throw some violation of protocol error
+        return throw std::runtime_error("Trying to use inexistent role name");
     
-    std::cout<<"!!!exit update transition with message as param%%%%%%%%\n";
-    
-    std::cout<<"from: ";
+    /*
+    LOG_DEBUG("!!!exit update transition with message as param%%%%%%%%\n");
+    LOG_DEBUG("from: ");
     for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
-        std::cout<< it1->getName() << " ";
-    std::cout<<"\n";
-    std::cout<<"to: ";
+        LOG_DEBUG("%s", it1->getName()  );
+    LOG_DEBUG("\n");
+    LOG_DEBUG("to: ");
     for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
-        std::cout<< it2->getName() << " ";
-    std::cout<<"\n";
+        LOG_DEBUG("%s", it2->getName() );
+    LOG_DEBUG("\n");
+    */
         
     return true;
 }
@@ -299,11 +300,11 @@ void Transition::performWithoutStateExit(const ACLMessage &msg)
 
 void Transition::performOnStateExit(const ACLMessage &msg)
 {
-    if (nextState == NULL) std::cout<< "\t# next state is NULL\n";
+    if (nextState == NULL) LOG_DEBUG("\t# next state is NULL\n");
     nextState->setAllPrecedingStates(owningState);
-    std::cout<< "\t# done with setting preceding states\n";
+    LOG_DEBUG("\t# done with setting preceding states\n");
     owningState->resetInvolvedAgentsTicks();
-    std::cout<< "\t# done with reseting involved agents ticks\n";
+    LOG_DEBUG("\t# done with reseting involved agents ticks\n");
     machine->currentState = nextState;
     
 }
@@ -334,43 +335,45 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 bool Transition::validateSender (ACLMessage &msg) const
 {
     AgentID agent = msg.getSender();
-    std::cout<<"$$$$$$$$random test: expected senders of transition: ";
+    /*
+    LOG_DEBUG("$$$$$$$$random test: expected senders of transition: ");
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
-        std::cout<< it->getName() <<"\n";
-        
+        LOG_DEBUG("%s", it->getName() );
+    */    
     std::vector<AgentID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
+    /*
     if (found != expectedSenders.end())
-    std::cout<< "\n\t$$$$$found sender: " << found->getName() <<"\n";
-    else std::cout<< "\n\t$$$$$found sender: " << "NULL" <<"\n";
-    
+    LOG_DEBUG("\n\t$$$$$found sender: %s\n",found->getName() );
+    else LOG_DEBUG("\n\t$$$$$found sender: NULL\n");
+    */
     if ( found != expectedSenders.end() ) return true;
     return false;
 }
 
 bool Transition::validateRecepients (ACLMessage &msg) const
 {
-    std::cout<< "\t#### call to calidate recepients\n";
+    LOG_DEBUG("\t#### call to calidate recepients\n");
     std::vector<AgentID> recepients = msg.getAllReceivers();
     std::vector<AgentID>::iterator it;
     
     /*
-    std::cout<<"^^^^ message from "<< from<<"\t to "<<to<<"^^^^\n";
+    LOG_DEBUG("^^^^ message from %s\t to %s ^^^^\n",from, to);
     std::vector<AgentID>::iterator test = expectedSenders.begin();
     std::vector<AgentID>::iterator test1 = expectedRecepients.begin();
     
-    std::cout<<"\t---expected senders are:\n";
+    LOG_DEBUG("\t---expected senders are:\n");
     for (test; test != expectedSenders.end(); test++)
-    {std::cout << test->getName()<<" "; }
-    std::cout<<"\n\t---expected recepients are:\n";
+    {LOG_DEBUG("%s", test->getName() ); }
+    LOG_DEBUG("\n\t---expected recepients are:\n");
     for (test1; test1 != expectedRecepients.end(); test1++)
-    {std::cout << test1->getName()<<" ";}
-    std::cout<<"\n";
+    {LOG_DEBUG("%s", test1->getName() );}
+    LOG_DEBUG("\n");
     
-    std::cout << "\t###check###: \n";
+    LOG_DEBUG("\t###check###: \n");
     std::vector<AgentMapping>::iterator amp;
     for (amp = machine->involvedAgents.begin(); amp != machine->involvedAgents.end(); ++amp)
     {
-        std::cout << "#\t" << amp->role << "\t" << amp->agent.getName() << " " << amp->check << "#\n";
+        LOG_DEBUG( "#\t %s\t%s %d#\n", amp->role, amp->agent.getName(), amp->check);
     }
     */
     
@@ -378,7 +381,7 @@ bool Transition::validateRecepients (ACLMessage &msg) const
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
         
-        std::cout<< "^^^^ output from the actual check *** "<< expectedRecepients.begin()->getName() <<"\t"<< it->getName() <<"\n\n";
+        LOG_DEBUG("^^^^ output from the actual check *** %s\t%s\n\n",expectedRecepients.begin()->getName(),it->getName() );
         std::vector<AgentID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
         if (found != expectedRecepients.end() ) ;
         else return false;
@@ -396,7 +399,7 @@ bool Transition::validateInReplyTo(ACLMessage &msg) const
     {
         if (precedingState == NULL) return true;
         if ( (fromArchive = precedingState->searchArchiveBySenderReceiver(msg.getSender(),*it)) == NULL ) return false;
-        std::cout<< "\t\t# not second return\n";
+        LOG_DEBUG("\t\t# not second return\n");
         //if ( (fromArchive->getReplyWith().empty() && (!msg.getInReplyTo().empty())) ||
 	//   ((!fromArchive->getReplyWith().empty()) && msg.getInReplyTo().empty()) ) return false;
         if ( fromArchive->getReplyWith().compare(msg.getInReplyTo()) ) return false;
@@ -444,10 +447,10 @@ bool Transition::validateConvID (ACLMessage &msg) const
 
 void Transition::removeAllAgentsBut(const AgentID &ag,std::vector<AgentID> &agents)
 {
-    std::cout << "RemoveAllAgentsBut: " << ag.getName() << std::endl;
+    LOG_DEBUG("RemoveAllAgentsBut: %s\n", ag.getName() );
     agents.clear();
     agents.push_back(ag);
-    std::cout << "RemoveAllAgentsBut: end " << ag.getName() << std::endl;
+    LOG_DEBUG("RemoveAllAgentsBut: end %s\n", ag.getName() );
 }
 
 

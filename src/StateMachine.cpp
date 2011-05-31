@@ -15,8 +15,11 @@ note for future: the "in reply to" policy needs to be defined somehow (not neces
 */
 #include "StateMachine.h"
 #include "State.h"
+
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
+#include <base/logging.h>
 
 namespace fipa {
 namespace acl {
@@ -230,7 +233,7 @@ int StateMachine::startMachine(const ACLMessage& msg)
 
 int StateMachine::consumeMessage(const ACLMessage& msg)
 {
-    std::cout<<"enter consume..\n";
+    LOG_DEBUG("enter consume..\n");
     if (!active) return startMachine(msg);
     int x = 0; // return code received from the current state
     std::vector<StateMachine>::iterator it;
@@ -238,7 +241,7 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
     {
         if (it->isActive() )
         {	  
-	  std::cout<<"meta conversation active..\n";
+	  LOG_DEBUG("meta conversation active..\n");
 	  if (it->consumeMessage(msg) == 0) return 0;
 	  //x= 1;
         }
@@ -249,10 +252,10 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
         else return 1;
     else;
     
-    std::cout<<"sending the message to the current state..\n";
+    LOG_DEBUG("sending the message to the current state..\n");
     if (currentState)
     {
-        std::cout<<"current state not-null..\n";
+        LOG_DEBUG("current state not-null..\n");
         if (currentState->consumeMessage(msg) == 0)   
         {
 	  if (currentState->getFinal() ) { conversationOver = true; active = false; return 0;}
@@ -333,7 +336,7 @@ bool StateMachine::setRole(const Role& myrole,const AgentID& myagent)
 	  {
 	      it->agent = myagent;
 	      it->check = true;
-	      std::cout<<"\t^^^^set the role "<<myrole<<"to agent "<< myagent.getName()<<"^^^^\n";
+	      LOG_DEBUG("\t^^^^set the role %s to agent %s ^^^^\n", myrole, myagent.getName());
 	      return true;
 	  }
     }
@@ -349,7 +352,7 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
     std::vector<AgentID>::iterator agit;
     /*for (agit = agbegin; agit != agend; agit++)
     {
-        std::cout<<"**checking if agent to be set isn't already set\t"<< agit->getName()<<"\t"<< (agents.begin())->getName()<<"\n";
+        LOG_DEBUG("**checking if agent to be set isn't already set\t%s\t%s\n", agit->getName(), (agents.begin())->getName() );
         if (checkIfAgentAssigned(*agit) ) return false;
     }*/
     
@@ -375,11 +378,11 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
         AgentMapping element;
         element.role = myrole;
         element.agent = *agit;
-        std::cout<<"\t^^^^set the role "<<myrole<<"to agent "<< agit->getName()<<"^^^^\n";
+        LOG_DEBUG("\t^^^^set the role %s to agent %s ^^^^\n", myrole, agit->getName() );
         element.check = true;
-        std::cout<<"\tbuilt a new element\n";
+        LOG_DEBUG("\tbuilt a new element\n");
         involvedAgents.push_back(element);
-        std::cout<<"\t**pushed a new agent\n";
+        LOG_DEBUG("\t**pushed a new agent\n");
     }
     return true;
 }

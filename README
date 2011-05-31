@@ -26,3 +26,14 @@ STRUCTURE
    |-- manual/
 	Should contain manual.tex 
 	Manual for the software 	
+
+CURRENT FUNCTIONALITY NOTES:
+What it currently does:
+	- allows building a State Machine manually and/or dynamically from a specification file
+	- checks whether a certain flow of messages is valid with respect to the specified state machine
+	- allows many to many relations
+	- it is designed so that each agent has its perspective of the conversation(done at runtime when roles are mapped to actual AgentIDs)
+
+What it currently does NOT do:
+	- it does not implement/check any time constraints at runtime(in the flow of messages); these are most likely to be implemented on an upper level
+	(i.e: when integrating it onto an "agent" platform)

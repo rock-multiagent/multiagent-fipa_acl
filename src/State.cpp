@@ -3,7 +3,8 @@
 #include "StateMachine.h"
 
 #include <iostream>
-
+#include <stdexcept>
+#include <base/logging.h>
 
 namespace fipa {
 namespace acl {
@@ -65,9 +66,7 @@ void State::addTransition(Transition &t)
         if (unloadedEqual(*it,t) ) {return;}
     
     t.setOwningState(this);
-
     t.setMachine(owningMachine);
-    //std::cout<<"\t\t"<<t.getFrom()<<"\t"<<t.getTo()<<"\t"<<t.getExpectedPerformative()<<"\t"<<t.getNextStateName()<<"\n";
     transitions.push_back(t);
 }
 
@@ -76,10 +75,9 @@ void State::generateDefaultTransitions()
         std::vector<Transition>::iterator trit;
         for (trit = transitions.begin(); trit != transitions.end(); trit++)
         {
-	  // i don't generate a not-understood transition for the not-understood message...
-	  if (!trit->getExpectedPerformative().compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]) ) continue;
-	  
-	  //std::cout<< trit->getExpectedPerformative()<< "..exp perf for the current transition\n";
+	  // we don't generate a not-understood transition for the not-understood message...
+	  if (!trit->getExpectedPerformative().compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]) ) 
+	      continue;
 	  
 	  Transition t = Transition();
 	  t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]);
@@ -87,22 +85,21 @@ void State::generateDefaultTransitions()
 	  t.setTo(trit->getFrom());
 	  
 	  t.setNextStateName(StateMachine::NOT_UNDERSTOOD);
-	  //std::cout<<"check2\n";
-	  //t.setMessageParity(true);
-	  if (!trit->getNextStateName().empty())  {(owningMachine->getStateByName(trit->getNextStateName()))->addTransition(t);}
-	  else addTransition(t);
-	  //std::cout<<"check1\n";
-	  //std::cout<<uid<<"..state generating default trans for\n";
-	  
+	  if (!trit->getNextStateName().empty())  
+	  {
+	      (owningMachine->getStateByName(trit->getNextStateName()))->addTransition(t);
+	  }
+	  else 
+	      addTransition(t);	  
         }
 }
 
 int State::consumeMessage(const ACLMessage &msg)
 {
-    std::cout<<"#state's\t"<<uid<<"\tconsumeMessage call\n";
+    LOG_DEBUG("#state's\t %s \tconsumeMessage call\n", uid);
     if (!subSM.empty())
     {
-        std::cout<<"#checking the sub-state machines..\n";
+        LOG_DEBUG("#checking the sub-state machines..\n");
         bool found_one = false;
         bool stillActiveSubSM = false;
         std::vector<StateMachine>::iterator smit;
@@ -123,11 +120,11 @@ int State::consumeMessage(const ACLMessage &msg)
 	  else return 1;
         else;
     }
-    std::cout<<"#not enterred the subSM if..\n";
+    LOG_DEBUG("#not enterred the subSM if..\n");
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
     {
-        std::cout<<"#sending mesage to a transition of state.. "<<uid<<"\n";
+        LOG_DEBUG("#sending mesage to a transition of state.. %s\n",uid);
         if (it->consumeMessage(msg) == 0) return 0;
     }
     return 1;
