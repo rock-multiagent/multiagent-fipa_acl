@@ -90,19 +90,19 @@ class State
 		returned by this method
 	  \return ACLMessage*; pointer to the found message or NULL if no message meets the requirements
         */
-        ACLMessage* searchArchiveBySenderReceiver(AgentID,AgentID);
+        ACLMessage* searchArchiveBySenderReceiver(const AgentID&, const AgentID&);
         /**
 	  \brief method that adds a message to the state's message archive(message that has been previously validated)
 	  \param msg: the message to be added to archive
         */
-        void addToArchive(ACLMessage &msg);
+        void addToArchive(const ACLMessage &msg);
         /**
 	  \brief prcesses the message received as parameter; sends it to each sub-protocol(subSM) until it is validated by one(if any)
 	  \brief or else to each transition for processing until the message is validated by one of them(if any)
 	  \param msg: current message that is being processed from the flow of messages
 	  \return 0 if successful, one otherwise
         */
-        int consumeMessage(ACLMessage &msg);
+        int consumeMessage(const ACLMessage &msg);
         /**
 	  \brief method that generates implicit generic transitions aplicable to all states, that may or may not be speciffied in the 
 	  \brief configuration file such as not-understood transition(if it is seciffied it is not doubled);
@@ -114,18 +114,18 @@ class State
 	  \brief checks whether all agents supposed to interact through messages at this point of the conversation(i.e: state) have
 	  \brief done so; acts like a constraint for moving out of the state
         */
-        bool checkAllAgentsAccountedFor();
+        bool checkAllAgentsAccountedFor() const;
         //void loadInvolvedAgents();
         /**
 	  \brief marks an agent from the involvedAgents map as accounted for
 	  \param: agent to be ticked
         */
-        void tickInvolvedAgent(AgentID);
+        void tickInvolvedAgent(const AgentID&);
         /**
 	  \brief marks a vector of agents from the involvedAgents map as accounted for
 	  \param: std::vector of agent to be ticked
         */
-        void tickInvolvedAgent(std::vector<AgentID>);
+        void tickInvolvedAgent(const std::vector<AgentID>&);
         /**
 	  \brief method that passes the loadParameters signal downwards to transitions; it is to called after all transitions and 
 	  \brief states have been generated;
@@ -141,6 +141,7 @@ class State
 	  \brief to another state(so that it behaves correctly should it later return to this state)
         */
         void resetInvolvedAgentsTicks();
+        
         /**
 	  \brief method that sets the preceding state field of all transitions of the current state with the state given as argument
 	  \brief it is called by the transition class when a transition takes the state machine from one state to another; it is needed
@@ -148,27 +149,32 @@ class State
 	  \param: state to be set as preceding state for all the transitions of the current state
         */
         void setAllPrecedingStates(State*);
+        
         /**
 	  \brief method that adds a transition to the current state
 	  \param t: transition to be added, passed as reference
         */
         void addTransition(Transition &t);
+        
         /**
 	  \brief method that returns whether the state is a final state or not
 	  \return true if state is final, false otherwise
         */
         bool getFinal() const;
+        
         /**
-	  \brief getter method for the final field of the class
+	  \brief setter method for the final field of the class
 	  \param _final: bool argument to be set
         */
-        void setFinal(bool _final);
+        void setFinal(const bool _final);
+        
         /**
 	  \brief setter method for the uid field of the state NOTE: maybe should be taken out and name only be allowed to be set on
 	  \brief construction, as if we rename the state later on the state machine might crash(surely will actually)
 	  \param: string to set as uid for the state
         */
-        void setUID(std::string);
+        void setUID(const std::string&);
+        
         /**
 	  \brief getter method for the uid field of the class
         */
@@ -182,7 +188,8 @@ class State
         std::vector<Transition> getTransitions() 	const;
         std::map<AgentID,bool> getInvolvedAgents() const;
         std::vector<StateMachine> getSubSM() const;
-         /**
+        
+        /**
 	  \brief misc method added to easily visualize a built stateMachine;
         */
         void print();

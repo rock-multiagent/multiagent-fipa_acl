@@ -36,7 +36,7 @@ Transition::Transition(const Transition &t)
     expectedRecepients = t.getExpectedRecepients();
 }
     
-int Transition::consumeMessage(ACLMessage &msg)
+int Transition::consumeMessage(const ACLMessage &msg)
 {
     std::cout<<"\towningState is:\t\t"<< owningState->getUID() <<"\n";
     if (validateMessage(msg))
@@ -76,7 +76,7 @@ int Transition::consumeMessage(ACLMessage &msg)
     NOTE: 
 */
 
-bool Transition::validateMessage(ACLMessage &msg)
+bool Transition::validateMessage(const ACLMessage &msg)
 {
     if (!validatePerformative(msg)){std::cout<<"\t\t\t\t*******1\n"; return false; }
     
@@ -193,7 +193,7 @@ void Transition::updateRoles()
     */
        
 }
-bool Transition::updateRoles(ACLMessage &msg)
+bool Transition::updateRoles(const ACLMessage &msg)
 {
     if (!expectedSenders.empty() ) expectedSenders.clear();
     if (!expectedRecepients.empty() ) expectedRecepients.clear();
@@ -289,7 +289,7 @@ bool Transition::updateRoles(ACLMessage &msg)
         
     return true;
 }
-void Transition::performWithoutStateExit(ACLMessage &msg)
+void Transition::performWithoutStateExit(const ACLMessage &msg)
 {
     owningState->addToArchive(msg);
     owningState->tickInvolvedAgent(msg.getAllReceivers());
@@ -297,7 +297,7 @@ void Transition::performWithoutStateExit(ACLMessage &msg)
     
 }
 
-void Transition::performOnStateExit(ACLMessage &msg)
+void Transition::performOnStateExit(const ACLMessage &msg)
 {
     if (nextState == NULL) std::cout<< "\t# next state is NULL\n";
     nextState->setAllPrecedingStates(owningState);
@@ -331,7 +331,7 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 }
 */
 
-bool Transition::validateSender (ACLMessage &msg)
+bool Transition::validateSender (ACLMessage &msg) const
 {
     AgentID agent = msg.getSender();
     std::cout<<"$$$$$$$$random test: expected senders of transition: ";
@@ -347,7 +347,7 @@ bool Transition::validateSender (ACLMessage &msg)
     return false;
 }
 
-bool Transition::validateRecepients (ACLMessage &msg)
+bool Transition::validateRecepients (ACLMessage &msg) const
 {
     std::cout<< "\t#### call to calidate recepients\n";
     std::vector<AgentID> recepients = msg.getAllReceivers();
@@ -386,7 +386,7 @@ bool Transition::validateRecepients (ACLMessage &msg)
     return true;
 }
 
-bool Transition::validateInReplyTo(ACLMessage &msg)
+bool Transition::validateInReplyTo(ACLMessage &msg) const
 {
     if (msg.getInReplyTo().empty()) return true;
     ACLMessage *fromArchive;
@@ -394,55 +394,55 @@ bool Transition::validateInReplyTo(ACLMessage &msg)
     std::vector<AgentID>::iterator it;
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
-        if (precedingState == NULL) return true; std::cout<< "\t\t# not first return\n";
+        if (precedingState == NULL) return true;
         if ( (fromArchive = precedingState->searchArchiveBySenderReceiver(msg.getSender(),*it)) == NULL ) return false;
         std::cout<< "\t\t# not second return\n";
         //if ( (fromArchive->getReplyWith().empty() && (!msg.getInReplyTo().empty())) ||
 	//   ((!fromArchive->getReplyWith().empty()) && msg.getInReplyTo().empty()) ) return false;
         if ( fromArchive->getReplyWith().compare(msg.getInReplyTo()) ) return false;
-        std::cout<< "\t\t# not third return\n";
+        
     }
     
     return true;
 }
 
-bool Transition::validatePerformative (ACLMessage &msg)
+bool Transition::validatePerformative (ACLMessage &msg) const
 {
     
     if (expectedPerf.compare(msg.getPerformative()) ) return false;
     return true;
 }
-bool Transition::validateOntology (ACLMessage &msg)
+bool Transition::validateOntology (ACLMessage &msg) const
 {
     if (machine->ontology.empty() ) {machine->ontology = msg.getOntology(); return true;}
     if (machine->ontology.compare(msg.getOntology()) ) return false;
     return true;
 }
-bool Transition::validateEncoding (ACLMessage &msg)
+bool Transition::validateEncoding (ACLMessage &msg) const
 {
     if (machine->encoding.compare(msg.getEncoding()) ) return false;
     return true;
 }
-bool Transition::validateLanguage (ACLMessage &msg)
+bool Transition::validateLanguage (ACLMessage &msg) const
 {
     if (machine->language.empty() ) {machine->language = msg.getLanguage(); return true;}
     if (machine->language.compare(msg.getLanguage()) ) return false;
     return true;
 }
-bool Transition::validateProtocol (ACLMessage &msg)
+bool Transition::validateProtocol (ACLMessage &msg) const
 {
     if (machine->protocol.empty() ) {machine->protocol = msg.getProtocol(); return true;}
     if (machine->protocol.compare(msg.getProtocol()) ) return false;
     return true;
 }
-bool Transition::validateConvID (ACLMessage &msg)
+bool Transition::validateConvID (ACLMessage &msg) const
 {
     if (machine->convid.empty() ) {machine->convid = msg.getConversationID(); return true;}
     if (machine->convid.compare(msg.getConversationID()) ) return false;
     return true;
 }
 
-void Transition::removeAllAgentsBut(AgentID &ag,std::vector<AgentID> &agents)
+void Transition::removeAllAgentsBut(const AgentID &ag,std::vector<AgentID> &agents)
 {
     std::cout << "RemoveAllAgentsBut: " << ag.getName() << std::endl;
     agents.clear();
@@ -467,12 +467,12 @@ void Transition::setPrecedingState(State *st)
     precedingState = st;
 }
 
-void Transition::setExpectedPerformative(std::string _performative) 	{ expectedPerf = _performative; }
-void Transition::setNextStateName	(std::string _state) 	{ nextStateName = _state; }
-void Transition::setFrom		(std::string _from) 	{ from = _from; }
-void Transition::setTo		(std::string _to) 		{ to = _to; }
-void Transition::setOwningState	(State* _state)		{owningState = _state;}
-void Transition::setMachine		(StateMachine* _machine)	{machine = _machine;}
+void Transition::setExpectedPerformative(const std::string& _performative) 	{ expectedPerf = _performative; }
+void Transition::setNextStateName	(const std::string& _state) 		{ nextStateName = _state; }
+void Transition::setFrom		(const std::string& _from) 		{ from = _from; }
+void Transition::setTo		(const std::string& _to) 		{ to = _to; }
+void Transition::setOwningState	(State* _state)			{owningState = _state;}
+void Transition::setMachine		(StateMachine* _machine)		{machine = _machine;}
     
 std::string 	 Transition::getExpectedPerformative() const	{return expectedPerf; }
 std::string 	 Transition::getNextStateName() const		{return nextStateName; }

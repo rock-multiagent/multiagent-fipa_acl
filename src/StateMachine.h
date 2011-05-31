@@ -104,7 +104,7 @@ class StateMachine
         /** \brief constructor that initializes the owner of the machine as well
 	  \param _owner: the intended owner of the state machine
         */
-        StateMachine(AgentID _owner);
+        StateMachine(const AgentID& _owner);
         
         StateMachine(const StateMachine&);
         ~StateMachine();
@@ -112,19 +112,19 @@ class StateMachine
         /** \brief setter method for the initial state of the state machine(takes a pointer as argument) */
         bool setInitialState(State*);
         /** \brief setter method for the initial state of the state machine(takes the name-uid- of the state as parameter)*/
-        bool setInitialState(std::string);
+        bool setInitialState(const std::string);
         /** \brief setter method for the owner of the machine */
-        bool setOwner(AgentID);
+        bool setOwner(const AgentID&);
         /** \brief method to be called with the first message from the message flow as parameter; it initializes fields 
 		and starts the conversation
 	  \return 0 if machine started successfully; != otherwise(currently only 1 as error code - more to be added when needed)
         */
-        int startMachine(ACLMessage msg);
+        int startMachine(const ACLMessage& msg);
         /**
 	  \brief method to be called to process every message of the message flow(except the first one)
 	  \return 0 if successful; 1 otherwise
         */
-        int consumeMessage(ACLMessage msg);
+        int consumeMessage(const ACLMessage& msg);
         //int initializeMachineFields(ACLMessage msg);
         
         
@@ -132,12 +132,12 @@ class StateMachine
 	  \param: name of the state to be searched as a strig
 	  \return: pointer to the coresponding needed state
         */
-        State* getStateByName(std::string);
+        State* getStateByName(const std::string&);
         /** \brief getter method for a state from the states vector
 	  \param: the needed state (as object; by value)
 	  \return: pointer to the coresponding needed state
         */
-        State* getStateByName(State);
+        State* getStateByName(State) const;
         /** \brief method that generates the implicit states(sometimes not mentioned in the IP -- i.e: not-understood state) */
         void generateDefaultStates();
         /** \brief method that generates implicit transitions (sometimes not mentioned int the IP -- i.e: not-understood transitions) */
@@ -146,7 +146,7 @@ class StateMachine
 	  \param: the state intended to be added
 	  \return: true if successful(i.e: unique among the other states); false otherwise
         */
-        bool addState(State);
+        bool addState(const State&);
         /** \brief method to check whether the conversation has reached a final state(= is over)
 	  \return value of conversationOver
         */
@@ -158,30 +158,30 @@ class StateMachine
         /** \brief method to add a generic role to the involvedAgents field
 	  \param myrole name of the intended role given as string
         */
-        void addRole(Role myrole);
+        void addRole(const Role& myrole);
         /** \brief method to assign a generic role to a speciffic agent
 	  \param myrole: string; name of the role intended to be set
 	  \param myagent: AgentID; the intended agent
 	  \return true if successfully added; false otherwise
         */
-        bool setRole(Role myrole,AgentID myagent);
+        bool setRole(const Role& myrole,const AgentID& myagent);
         /** \brief method to assign a generic role to a vector of agents
 	  \param myrole: string; name of the role intended to be set
 	  \param agents: std::vector< AgentID >; the intended vector of agents
 	  \return true if successfully added; false otherwise
         */
-        bool setRole(Role myrole,std::vector<AgentID> agents);
-        bool checkIfAgentAssigned(AgentID);
+        bool setRole(const Role& myrole,const std::vector<AgentID>& agents);
+        bool checkIfAgentAssigned(AgentID&) const;
         /** \brief method to check whether a speciffic role exists in the involvedAgents field
 	  \param myrole: string; the intended to be checked role
 	  \return true if role exists; false otherwise
         */
-        bool checkIfRoleExists(Role myrole);
+        bool checkIfRoleExists(Role& myrole) const;
         /** \brief method to check what role a speciffic agents is assigned to
 	  \param ag: AgentID; agent whose role is to be checked
 	  \return string; the assigned role; empty string if agent is not assigned
         */
-        Role getAgentRole(AgentID ag);
+        Role getAgentRole(AgentID& ag) const;
         /** \brief method to check whether a certain role has an agent assigned to it
 	  \param: string; role to be checked
 	  \return: true if role is set; false otherwise
@@ -193,12 +193,12 @@ class StateMachine
 	  \return std::vector<AgentID> populated with the coresponding AgentIDs(empty if role not set yet)
 	  
         */
-        std::vector<AgentID> getAgentsAssignedTo(Role myrole);
+        std::vector<AgentID> getAgentsAssignedTo(Role& myrole) const;
         
         /**
 	  \brief returns the vector of RoleCorrelation which keeps track of roles that need to be synchronized with a master StateMachine
         */
-        std::vector<RoleCorrelation> getRoleCorrelation();
+        std::vector<RoleCorrelation> getRoleCorrelation() const;
         
         /**
 	  \brief add a new pair of roles that needs to be correlated(between this StateMachine and a master StateMachine);
@@ -207,9 +207,9 @@ class StateMachine
 	  \param mymaster: role from the master StateMachine
 	  \param myresident: own role(must be registerred in the involvedAgents field)
         */
-        void addRoleCorrelation(Role mymaster, Role myresident);
+        void addRoleCorrelation(const Role& mymaster,const Role& myresident);
         
-        bool checkIfRoleSet(Role&);
+        bool checkIfRoleSet(Role&) const;
         //void removeInterlocutor(AgentID);
         //void removeInterlocutor(std::vector<AgentID>);
         /** \brief method that sends an update signal downwards towards transition level, so that the latter update the agents set for
@@ -222,7 +222,7 @@ class StateMachine
 	  \param myrole: role that needs to be correlated to the role of a master StateMachine
 	  \param myagents: vector of agents that are assigned in the master StateMachine to the myrole Role and need to be correlated
         */
-        void updateAllAgentRoles(Role myrole, std::vector<AgentID> myagents);
+        void updateAllAgentRoles(const Role& myrole, const std::vector<AgentID>& myagents);
         
         /**
 	  \brief misc method added to easily visualize a built stateMachine;
@@ -248,12 +248,12 @@ class StateMachine
 		conversation with it
 	  \param ag: AgentID; agent to be removed
         */
-        void removeInterlocutor(AgentID ag);
+        void removeInterlocutor(const AgentID& ag);
         /** \brief method that removes a vector of agents from the involvedAgents field once the owner of the machine has finnished the 
 		conversation with them
 	  \param ag: std::vector< AgentID >; agents to be removed
         */
-        void removeInterlocutor(std::vector<AgentID> agents);
+        void removeInterlocutor(const std::vector<AgentID>& agents);
         /** \brief method that sends a signal down to transition level so that the latter initialize their parametrically defined fields
 		(such as from, to, nextStateName), based on the fields of the stateMachine
         */

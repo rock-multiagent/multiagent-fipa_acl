@@ -17,6 +17,7 @@ State::State()
     subSM.clear();
     archive.clear();
     involvedAgents.clear();
+    owningMachine = NULL;
 }
 State::State(std::string _uid)
 {
@@ -26,6 +27,7 @@ State::State(std::string _uid)
     subSM.clear();
     archive.clear();
     involvedAgents.clear();
+    owningMachine = NULL;
 }
 
 State::State(const State& target)
@@ -95,7 +97,7 @@ void State::generateDefaultTransitions()
         }
 }
 
-int State::consumeMessage(ACLMessage &msg)
+int State::consumeMessage(const ACLMessage &msg)
 {
     std::cout<<"#state's\t"<<uid<<"\tconsumeMessage call\n";
     if (!subSM.empty())
@@ -131,7 +133,7 @@ int State::consumeMessage(ACLMessage &msg)
     return 1;
 }
 
-void State::tickInvolvedAgent(AgentID ag)
+void State::tickInvolvedAgent(const AgentID& ag)
 {
     std::map<AgentID,bool>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
@@ -140,7 +142,7 @@ void State::tickInvolvedAgent(AgentID ag)
     }
 }
 
-void State::tickInvolvedAgent(std::vector<AgentID> agents)
+void State::tickInvolvedAgent(const std::vector<AgentID>& agents)
 {
     std::vector<AgentID>::iterator it;
     for (it = agents.begin(); it != agents.end(); it++)
@@ -149,7 +151,7 @@ void State::tickInvolvedAgent(std::vector<AgentID> agents)
     }
 }
 
-bool State::checkAllAgentsAccountedFor()
+bool State::checkAllAgentsAccountedFor() const
 {
     std::map<AgentID,bool>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
@@ -217,7 +219,7 @@ void State::updateAllAgentRoles()
     }
     
 }
-void State::setFinal(bool _final)
+void State::setFinal(const bool _final)
 {
     final = _final;
 }
@@ -242,7 +244,7 @@ void State::setAllPrecedingStates(State *st)
     }
 }
 
-ACLMessage* State::searchArchiveBySenderReceiver(AgentID m1,AgentID m2)
+ACLMessage* State::searchArchiveBySenderReceiver(const AgentID& m1, const AgentID& m2)
 {
     std::vector<ACLMessage>::iterator it;
     for (it = archive.begin(); it != archive.end(); it++)
@@ -259,7 +261,7 @@ ACLMessage* State::searchArchiveBySenderReceiver(AgentID m1,AgentID m2)
     return NULL;
 }
 
-void State::setUID(std::string _uid)
+void State::setUID(const std::string& _uid)
 {
     uid = _uid;
 }
@@ -268,7 +270,7 @@ std::string State::getUID() const
     return uid;
 }
 
-void State::addToArchive(ACLMessage &msg)
+void State::addToArchive(const ACLMessage &msg)
 {
     archive.push_back(msg);
 }

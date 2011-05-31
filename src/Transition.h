@@ -77,14 +77,14 @@ class Transition
 	  \param msg: message to processed
 	  \return 0 if message is validated 1 otherwise
         */
-        int consumeMessage(ACLMessage &msg);
+        int consumeMessage(const ACLMessage &msg);
         
         /**
 	  \brief method that validates all parameters of a message
 	  \param msg message passed as parameter to be checked
 	  \return true if message is valid false otherwise
         */
-        bool validateMessage(ACLMessage &msg);
+        bool validateMessage(const ACLMessage &msg);
         
         /** \brief method that generates usable parameters from the generic defined ones at build time(i.e: nextStateName) */
         void loadParameters();
@@ -98,10 +98,10 @@ class Transition
         void setPrecedingState(State*);
         
         /** \brief setter methods for various fields of the class */
-        void setExpectedPerformative	(std::string);
-        void setNextStateName		(std::string);
-        void setFrom		(std::string);
-        void setTo			(std::string);
+        void setExpectedPerformative	(const std::string&);
+        void setNextStateName		(const std::string&);
+        void setFrom		(const std::string&);
+        void setTo			(const std::string&);
         void setOwningState		(State*);
         void setMachine		(StateMachine*);
         //void setNextState		(State*);
@@ -134,62 +134,62 @@ class Transition
 	  
 	  \param: ACLMessage to initialize agent roles from
         */
-        bool updateRoles(ACLMessage&);
+        bool updateRoles(const ACLMessage&);
         
         /**
 	  \brief method that takes the necessary actions when a message has been accepted as valid but before the jump to another
 	  state condition has been checked
 	  \param msg: the validated message passed as argument
         */
-        void performWithoutStateExit(ACLMessage &msg);
+        void performWithoutStateExit(const ACLMessage &msg);
         
         /**
 	  \brief method that takes the necessary actions when a message has been accepted as valid and the jump to another state
 	  \brief condition has been met(i.e: all involvedAgents are ticked in the owning state)
 	  \param msg: the validated message passed as argument
         */
-        void performOnStateExit(ACLMessage &msg);
+        void performOnStateExit(const ACLMessage &msg);
         
         /**
 	  \brief checks whether all agents assigned to the expectedSenders vector are present in the message
         */
-        bool checkAllExpectedSendersAccountedFor   (ACLMessage &msg);
+        bool checkAllExpectedSendersAccountedFor   (const ACLMessage &msg);
         
         /** \brief checks whether all agents assigned to the expectedRecepients vector are present in the message */
-        bool checkAllExpectedRecepientsAccountedFor(ACLMessage &msg);
+        bool checkAllExpectedRecepientsAccountedFor(const ACLMessage &msg);
         
         /** \brief checks whether the conversation id parameter is valid(checks from state machine) */
-        bool validateConvID   	(ACLMessage &msg);
+        bool validateConvID   	(const ACLMessage &msg);
         
         /** \brief checks whether the in reply to paramenter of the message is valid(by searching the archive of the preceding state) */
-        bool validateInReplyTo	(ACLMessage &msg);
+        bool validateInReplyTo	(const ACLMessage &msg);
         
         /** \brief checks whether the language parameter of the message is valid(checks from state machine) */
-        bool validateLanguage 	(ACLMessage &msg);
+        bool validateLanguage 	(const ACLMessage &msg);
         
         /** \brief checks whether the ontology parameter of the message is valid(checks from state machine) */
-        bool validateOntology 	(ACLMessage &msg);
+        bool validateOntology 	(const ACLMessage &msg);
         
         /** \brief checks whether the protocol parameter of the message is valid(checks from state machine) */
-        bool validateProtocol 	(ACLMessage &msg);
+        bool validateProtocol 	(const ACLMessage &msg);
         
         /** \brief checks whether the reply by parameter of the message is valid(NOT IMPLEMENTED) */
-        bool validateReplyBy  	(ACLMessage &msg);
+        bool validateReplyBy  	(const ACLMessage &msg);
         
         /** \brief checks whether the encoding parameter of the message is valid(checks from state machine) */
-        bool validateEncoding 	(ACLMessage &msg);
+        bool validateEncoding 	(const ACLMessage &msg);
         
         /** \brief checks whether the performative parameter of the message is valid(checks from local variable) */
-        bool validatePerformative	(ACLMessage &msg);
+        bool validatePerformative	(const ACLMessage &msg);
         
         /** \brief checks whether the sender parameter of the message is valid(checks from expectedSenders vector) */
-        bool validateSender 		(ACLMessage &msg);
+        bool validateSender 		(const ACLMessage &msg);
         
         /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecepients vector) */
-        bool validateRecepients 	(ACLMessage &msg);
+        bool validateRecepients 	(const ACLMessage &msg);
         
         //void removeAllRecepientsBut(AgentID&);
-        void removeAllAgentsBut(AgentID&,std::vector<AgentID>&);
+        void removeAllAgentsBut(const AgentID&,std::vector<AgentID>&);
         
 };
 
