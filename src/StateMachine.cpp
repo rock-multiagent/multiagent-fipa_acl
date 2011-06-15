@@ -305,9 +305,13 @@ State* StateMachine::getStateByName(const std::string& _name)
 State* StateMachine::getStateByName(State _name) const
 {
     std::string searchName = _name.getUID();
-    std::vector<State>::iterator it = find(states.begin(),states.end(),searchName);
-    if (it == states.end()) return NULL;
-    return (&(*it));
+    std::vector<State>::const_iterator it = states.begin();
+    for( it = states.begin(); it != states.end(); it++)
+    {
+        if(it->getUID() == searchName)
+            return const_cast<State*>(&(*it));
+    }
+    return NULL;
 }
 void StateMachine::removeInterlocutor(const AgentID& ag)
 {
@@ -320,7 +324,7 @@ void StateMachine::removeInterlocutor(const AgentID& ag)
 }
 void StateMachine::removeInterlocutor(const std::vector<AgentID>& agents)
 {
-    std::vector<AgentID>::iterator it;
+    std::vector<AgentID>::const_iterator it;
     for (it = agents.begin(); it != agents.end(); it++)
         removeInterlocutor(*it);
 }
@@ -336,7 +340,7 @@ bool StateMachine::setRole(const Role& myrole,const AgentID& myagent)
 	  {
 	      it->agent = myagent;
 	      it->check = true;
-	      LOG_DEBUG("\t^^^^set the role %s to agent %s ^^^^\n", myrole, myagent.getName());
+	      LOG_DEBUG("\t^^^^set the role %s to agent %s ^^^^\n", myrole.c_str(), myagent.getName().c_str());
 	      return true;
 	  }
     }
@@ -347,9 +351,9 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
     //if (checkIfRoleSet(myrole) ) return false;
     if (agents.empty()) return true;
    
-    std::vector<AgentID>::iterator agbegin = agents.begin();
-    std::vector<AgentID>::iterator agend = agents.end();
-    std::vector<AgentID>::iterator agit;
+    std::vector<AgentID>::const_iterator agbegin = agents.begin();
+    std::vector<AgentID>::const_iterator agend = agents.end();
+    std::vector<AgentID>::const_iterator agit;
     /*for (agit = agbegin; agit != agend; agit++)
     {
         LOG_DEBUG("**checking if agent to be set isn't already set\t%s\t%s\n", agit->getName(), (agents.begin())->getName() );
@@ -378,7 +382,7 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
         AgentMapping element;
         element.role = myrole;
         element.agent = *agit;
-        LOG_DEBUG("\t^^^^set the role %s to agent %s ^^^^\n", myrole, agit->getName() );
+        LOG_DEBUG("\t^^^^set the role %s to agent %s ^^^^\n", myrole.c_str(), agit->getName().c_str() );
         element.check = true;
         LOG_DEBUG("\tbuilt a new element\n");
         involvedAgents.push_back(element);
@@ -387,7 +391,7 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
     return true;
 }
 
-bool StateMachine::checkIfAgentAssigned(AgentID& ag) const
+bool StateMachine::checkIfAgentAssigned(const AgentID& ag)
 {
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
@@ -400,9 +404,9 @@ bool StateMachine::checkIfAgentAssigned(AgentID& ag) const
 
 std::vector<AgentID> StateMachine::getAgentsAssignedTo(Role& myrole) const
 {
-    std::vector<AgentMapping>::iterator it;
+    std::vector<AgentMapping>::const_iterator it = involvedAgents.begin();
     std::vector<AgentID> ret; ret.clear();
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for(; it != involvedAgents.end(); it++)
     {
         if (!it->role.compare(myrole) && it->check)
         {
@@ -412,7 +416,7 @@ std::vector<AgentID> StateMachine::getAgentsAssignedTo(Role& myrole) const
     return ret;
 }
 
-bool StateMachine::checkIfRoleSet(Role &myrole) const
+bool StateMachine::checkIfRoleSet(const Role &myrole)
 {
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
@@ -431,7 +435,7 @@ bool StateMachine::isActive() const
 {
     return active;
 }
-bool StateMachine::checkIfRoleExists(Role& myrole) const
+bool StateMachine::checkIfRoleExists(const Role& myrole)
 {
     //std::cout<<"checking for role:\t"<<myrole<<"\n";
    
@@ -443,18 +447,18 @@ bool StateMachine::checkIfRoleExists(Role& myrole) const
     return false;
 }
 
-bool StateMachine::addState(const State& _state)
+bool StateMachine::addState(State& _state)
 {
     std::string name = _state.getUID();
     //if (_state.getOwningMachine() == NULL)
-        _state.setOwningMachine(this);
+    _state.setOwningMachine(this);
     if (find(states.begin(),states.end(),name) == states.end() ) {states.push_back(_state); return true;}
     return false;
 }
 
-Role StateMachine::getAgentRole(AgentID& ag) const
+Role StateMachine::getAgentRole(const AgentID& ag)
 {
-    std::vector<AgentMapping>::iterator it;
+    std::vector<AgentMapping>::const_iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
         if ((it->agent == ag) && (it->check == true)) return it->role;
         return std::string("");

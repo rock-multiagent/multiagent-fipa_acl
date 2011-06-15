@@ -146,7 +146,7 @@ class StateMachine
 	  \param: the state intended to be added
 	  \return: true if successful(i.e: unique among the other states); false otherwise
         */
-        bool addState(const State&);
+        bool addState(State&);
         /** \brief method to check whether the conversation has reached a final state(= is over)
 	  \return value of conversationOver
         */
@@ -171,17 +171,17 @@ class StateMachine
 	  \return true if successfully added; false otherwise
         */
         bool setRole(const Role& myrole,const std::vector<AgentID>& agents);
-        bool checkIfAgentAssigned(AgentID&) const;
+        bool checkIfAgentAssigned(const AgentID&);
         /** \brief method to check whether a speciffic role exists in the involvedAgents field
 	  \param myrole: string; the intended to be checked role
 	  \return true if role exists; false otherwise
         */
-        bool checkIfRoleExists(Role& myrole) const;
+        bool checkIfRoleExists(const Role& myrole);
         /** \brief method to check what role a speciffic agents is assigned to
 	  \param ag: AgentID; agent whose role is to be checked
 	  \return string; the assigned role; empty string if agent is not assigned
         */
-        Role getAgentRole(AgentID& ag) const;
+        Role getAgentRole(const AgentID& ag);
         /** \brief method to check whether a certain role has an agent assigned to it
 	  \param: string; role to be checked
 	  \return: true if role is set; false otherwise
@@ -209,7 +209,7 @@ class StateMachine
         */
         void addRoleCorrelation(const Role& mymaster,const Role& myresident);
         
-        bool checkIfRoleSet(Role&) const;
+        bool checkIfRoleSet(const Role&);
         //void removeInterlocutor(AgentID);
         //void removeInterlocutor(std::vector<AgentID>);
         /** \brief method that sends an update signal downwards towards transition level, so that the latter update the agents set for
@@ -265,7 +265,7 @@ class StateMachine
 	  \param msg ACLMessage; message from which to build the new cancel meta protocol
 	  \return 0 if successful; 1 otherwise
         */
-        int createAndStartNewCancelMetaProtocol(ACLMessage &msg);
+        int createAndStartNewCancelMetaProtocol(const ACLMessage &msg);
         /** \brief helper method for the createAndStartCancelMetaProtocol method;
 	  \param: string; generic role among the ones involved in the conversation with which the cancel protocol is initialized
 	  \return StateMachine; the created cancel meta protocol

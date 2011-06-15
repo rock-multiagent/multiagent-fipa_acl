@@ -96,7 +96,7 @@ void State::generateDefaultTransitions()
 
 int State::consumeMessage(const ACLMessage &msg)
 {
-    LOG_DEBUG("#state's\t %s \tconsumeMessage call\n", uid);
+    LOG_DEBUG("#state's\t %s \tconsumeMessage call\n", uid.c_str());
     if (!subSM.empty())
     {
         LOG_DEBUG("#checking the sub-state machines..\n");
@@ -124,7 +124,7 @@ int State::consumeMessage(const ACLMessage &msg)
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
     {
-        LOG_DEBUG("#sending mesage to a transition of state.. %s\n",uid);
+        LOG_DEBUG("#sending mesage to a transition of state.. %s\n",uid.c_str());
         if (it->consumeMessage(msg) == 0) return 0;
     }
     return 1;
@@ -141,7 +141,7 @@ void State::tickInvolvedAgent(const AgentID& ag)
 
 void State::tickInvolvedAgent(const std::vector<AgentID>& agents)
 {
-    std::vector<AgentID>::iterator it;
+    std::vector<AgentID>::const_iterator it;
     for (it = agents.begin(); it != agents.end(); it++)
     {
         tickInvolvedAgent(*it);
@@ -150,7 +150,7 @@ void State::tickInvolvedAgent(const std::vector<AgentID>& agents)
 
 bool State::checkAllAgentsAccountedFor() const
 {
-    std::map<AgentID,bool>::iterator it;
+    std::map<AgentID,bool>::const_iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
     {    
         if (it->second == false) return false;

@@ -156,10 +156,14 @@ void StateMachineBuilder::addStates(TiXmlElement *st)
     if ( (next = st->NextSiblingElement("state")) != NULL )
     {
         addStates(next);
-        builtMachine.addState(parseStateNode(st));        
+        State state = parseStateNode(st);
+        builtMachine.addState(state);        
     }
     else
-        builtMachine.addState(parseStateNode(st));
+    {
+        State state = parseStateNode(st);
+        builtMachine.addState(state);
+    }
 }
 
 Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)

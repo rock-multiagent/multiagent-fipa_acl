@@ -41,8 +41,8 @@ Transition::Transition(const Transition &t)
     
 int Transition::consumeMessage(const ACLMessage &msg)
 {
-    LOG_DEBUG("\towningState is:\t\t  %s\n",owningState->getUID() );
-    if (validateMessage(msg)).
+    LOG_DEBUG("\towningState is:\t\t  %s\n",owningState->getUID().c_str() );
+    if (validateMessage(msg))
     {
         //if (expectedPerf.compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
         LOG_DEBUG("\t#### validated message\n");
@@ -96,16 +96,16 @@ bool Transition::validateMessage(const ACLMessage &msg)
     
     LOG_DEBUG("!validate message method! from: ");
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
-        LOG_DEBUG("%s", it->getName());
+        LOG_DEBUG("%s", it->getName().c_str());
     LOG_DEBUG("\n");
     
     LOG_DEBUG("to: ");
     for (std::vector<AgentID>::iterator it = expectedRecepients.begin(); it != expectedRecepients.end(); it++)
-        LOG_DEBUG("%s", it->getName() );
-    LOG_DEBUG(("\n");
+        LOG_DEBUG("%s", it->getName().c_str() );
+    LOG_DEBUG("\n");
     
            
-    if (!validateSender(msg)) {LOG_DEBUG("\t\t\t\t*******2\n"); return false; }
+    if (!validateSender(msg)) { LOG_DEBUG("\t\t\t\t*******2\n"); return false; }
     if (!validateRecepients(msg)) {LOG_DEBUG("\t\t\t\t*******3\n"); return false; }
     
     if (!validateConvID(msg)) {LOG_DEBUG("\t\t\t\t*******4\n"); return false; }
@@ -246,7 +246,9 @@ bool Transition::updateRoles(const ACLMessage &msg)
 	  }
         
     } else 
-        return throw std::runtime_error("Trying to use inexistent role name");
+    {
+        throw std::runtime_error("Trying to use inexistent role name");
+    }
     
     if (machine->checkIfRoleExists(to) )
     {
@@ -274,7 +276,9 @@ bool Transition::updateRoles(const ACLMessage &msg)
 	      
 	  }
     } else 
-        return throw std::runtime_error("Trying to use inexistent role name");
+    {
+        throw std::runtime_error("Trying to use inexistent role name");
+    }
     
     /*
     LOG_DEBUG("!!!exit update transition with message as param%%%%%%%%\n");
@@ -332,7 +336,7 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 }
 */
 
-bool Transition::validateSender (ACLMessage &msg) const
+bool Transition::validateSender (const ACLMessage &msg)
 {
     AgentID agent = msg.getSender();
     /*
@@ -350,7 +354,7 @@ bool Transition::validateSender (ACLMessage &msg) const
     return false;
 }
 
-bool Transition::validateRecepients (ACLMessage &msg) const
+bool Transition::validateRecepients (const ACLMessage &msg)
 {
     LOG_DEBUG("\t#### call to calidate recepients\n");
     std::vector<AgentID> recepients = msg.getAllReceivers();
@@ -381,7 +385,7 @@ bool Transition::validateRecepients (ACLMessage &msg) const
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
         
-        LOG_DEBUG("^^^^ output from the actual check *** %s\t%s\n\n",expectedRecepients.begin()->getName(),it->getName() );
+        LOG_DEBUG("^^^^ output from the actual check *** %s\t%s\n\n",expectedRecepients.begin()->getName().c_str(),it->getName().c_str());
         std::vector<AgentID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
         if (found != expectedRecepients.end() ) ;
         else return false;
@@ -389,7 +393,7 @@ bool Transition::validateRecepients (ACLMessage &msg) const
     return true;
 }
 
-bool Transition::validateInReplyTo(ACLMessage &msg) const
+bool Transition::validateInReplyTo(const ACLMessage &msg)
 {
     if (msg.getInReplyTo().empty()) return true;
     ACLMessage *fromArchive;
@@ -409,36 +413,36 @@ bool Transition::validateInReplyTo(ACLMessage &msg) const
     return true;
 }
 
-bool Transition::validatePerformative (ACLMessage &msg) const
+bool Transition::validatePerformative (const ACLMessage &msg)
 {
     
     if (expectedPerf.compare(msg.getPerformative()) ) return false;
     return true;
 }
-bool Transition::validateOntology (ACLMessage &msg) const
+bool Transition::validateOntology (const ACLMessage &msg)
 {
     if (machine->ontology.empty() ) {machine->ontology = msg.getOntology(); return true;}
     if (machine->ontology.compare(msg.getOntology()) ) return false;
     return true;
 }
-bool Transition::validateEncoding (ACLMessage &msg) const
+bool Transition::validateEncoding (const ACLMessage &msg)
 {
     if (machine->encoding.compare(msg.getEncoding()) ) return false;
     return true;
 }
-bool Transition::validateLanguage (ACLMessage &msg) const
+bool Transition::validateLanguage (const ACLMessage &msg)
 {
     if (machine->language.empty() ) {machine->language = msg.getLanguage(); return true;}
     if (machine->language.compare(msg.getLanguage()) ) return false;
     return true;
 }
-bool Transition::validateProtocol (ACLMessage &msg) const
+bool Transition::validateProtocol (const ACLMessage &msg)
 {
     if (machine->protocol.empty() ) {machine->protocol = msg.getProtocol(); return true;}
     if (machine->protocol.compare(msg.getProtocol()) ) return false;
     return true;
 }
-bool Transition::validateConvID (ACLMessage &msg) const
+bool Transition::validateConvID (const ACLMessage &msg)
 {
     if (machine->convid.empty() ) {machine->convid = msg.getConversationID(); return true;}
     if (machine->convid.compare(msg.getConversationID()) ) return false;
@@ -447,10 +451,10 @@ bool Transition::validateConvID (ACLMessage &msg) const
 
 void Transition::removeAllAgentsBut(const AgentID &ag,std::vector<AgentID> &agents)
 {
-    LOG_DEBUG("RemoveAllAgentsBut: %s\n", ag.getName() );
+    LOG_DEBUG("RemoveAllAgentsBut: %s\n", ag.getName().c_str() );
     agents.clear();
     agents.push_back(ag);
-    LOG_DEBUG("RemoveAllAgentsBut: end %s\n", ag.getName() );
+    LOG_DEBUG("RemoveAllAgentsBut: end %s\n", ag.getName().c_str() );
 }
 
 
