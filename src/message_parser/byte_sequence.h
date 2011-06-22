@@ -52,23 +52,22 @@ public:
 	*/
 	std::string operator()(std::vector<unsigned char> vector) const
 	{
-		int length = vector.size();
+		size_t length = vector.size();
 		std::string tmp("HEX(");
 		tmp += encoding;
 		tmp +=")[";
 
 		for(int i = 0; i < length; i++)
 		{
-			char currentChar; 
-			sprintf(&currentChar, "%x", vector[i]);
-			tmp += tmp;
-			if( i%2 == 0 )
-				tmp += " ";
+			char currentChar[6]; 
+			sprintf(currentChar, "%02x", vector[i]);
+			tmp += std::string(currentChar);
+			tmp += " ";
 		}
 
 		tmp += "]";
 
-		return std::string(tmp);
+		return tmp;
 	}
 };
 
