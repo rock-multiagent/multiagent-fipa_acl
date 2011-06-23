@@ -57,7 +57,7 @@ public:
 		tmp += encoding;
 		tmp +=")[";
 
-		for(int i = 0; i < length; i++)
+		for(size_t i = 0; i < length; i++)
 		{
 			char currentChar[6]; 
 			sprintf(currentChar, "%02x", vector[i]);
