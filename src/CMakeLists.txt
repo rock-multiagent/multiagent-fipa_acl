@@ -8,15 +8,6 @@ set(SOURCES
 	#main.cpp
 )
 
-###### Define a binary
-# Note: the library (see below) and executable names can't be the same
-#add_executable(${PROJECT_NAME} main.cpp dummy.cpp ${moc_cpp} ${ui_cpp})
-set(TEST_TARGET builder_test_${PROJECT_NAME})
-#add_executable(${TEST_TARGET} main.cpp)
-add_executable(${TEST_TARGET} main.cpp )
-target_link_libraries(${TEST_TARGET} fipa_acl ${LIBRARIES} ${PROJECT_NAME})
-
-
 ###### Define a library
 # Note: the library and executable names can't be the same
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -26,8 +17,15 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 #
 # If you want to use a library defined in this package, just use its name
 #
-target_link_libraries(${PROJECT_NAME} fipa_acl ${LIBRARIES} ${EXTERNAL_LIBS})
+target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS})
 
+###### Define a binary
+# Note: the library (see below) and executable names can't be the same
+#add_executable(${PROJECT_NAME} main.cpp dummy.cpp ${moc_cpp} ${ui_cpp})
+set(TEST_TARGET builder_test_${PROJECT_NAME})
+#add_executable(${TEST_TARGET} main.cpp)
+add_executable(${TEST_TARGET} main.cpp )
+target_link_libraries(${TEST_TARGET} ${PROJECT_NAME})
 
 
 install(TARGETS ${PROJECT_NAME} 
