@@ -32,18 +32,26 @@ class StateMachine;
 class State 
 {
     private:
-        /** \var uid: {string; represents the unique identifier of a state needed as we sometimes have to access the states by name,
-		   especially in the building phase of the state machine}
+        /** 
+        * \var uid {string; represents the unique identifier of a state needed as we sometimes have to access the states by name,
+	*	   especially in the building phase of the state machine}
         */
         std::string uid;
-        /** \var final: bool; flag to indicate whether the state is a valid final state */
+
+        /**
+        * \var final bool; flag to indicate whether the state is a valid final state
+        */
         bool final;
         
-        /** \var transitions: vector of transitions that belong to the current state */
+        /**
+        * \var transitions: vector of transitions that belong to the current state
+        */
         std::vector<Transition> transitions;
-        /** \var subSM { (= "sub state machine"); implements the subprotocol concept from the fipa speciffication as a state machine
-		    belonging to the state from which the subprotocol starts; a state machine cannot exit a state in a valid 
-		    manner until all the sub-protocols of that state are in a valid final state}
+
+        /** 
+        * \var subSM { (= "sub state machine"); implements the subprotocol concept from the fipa speciffication as a state machine
+	*	    belonging to the state from which the subprotocol starts; a state machine cannot exit a state in a valid 
+	*	    manner until all the sub-protocols of that state are in a valid final state}
         */
         std::vector<StateMachine> subSM;
         /**
@@ -58,7 +66,7 @@ class State
         */
         std::map<AgentID,bool> involvedAgents;
         /**
-	  \var owningMachine: {pointer to the owning state machine of this state; needed mainly for the build phase}
+	  \var owningMachine {pointer to the owning state machine of this state; needed mainly for the build phase}
         */
         StateMachine* owningMachine;
         
@@ -84,9 +92,9 @@ class State
         /**
 	  \brief method that searches through the archived message for the needed message in validation check of the in_reply_to 
 	  \brief field of another message.
-	  \param: first agentID parameter is the sender of the currently checked message, not of the message from archive 
+	  \param first agentID parameter is the sender of the currently checked message, not of the message from archive 
 		returned by this method
-	  \param: second agentID parameter is the receiver of the currently checked message, not of the message from archive
+	  \param second agentID parameter is the receiver of the currently checked message, not of the message from archive
 		returned by this method
 	  \return ACLMessage*; pointer to the found message or NULL if no message meets the requirements
         */
@@ -118,12 +126,12 @@ class State
         //void loadInvolvedAgents();
         /**
 	  \brief marks an agent from the involvedAgents map as accounted for
-	  \param: agent to be ticked
+	  \param agent to be ticked
         */
         void tickInvolvedAgent(const AgentID&);
         /**
 	  \brief marks a vector of agents from the involvedAgents map as accounted for
-	  \param: std::vector of agent to be ticked
+	  \param std::vector of agent to be ticked
         */
         void tickInvolvedAgent(const std::vector<AgentID>&);
         /**
@@ -146,7 +154,7 @@ class State
 	  \brief method that sets the preceding state field of all transitions of the current state with the state given as argument
 	  \brief it is called by the transition class when a transition takes the state machine from one state to another; it is needed
 	  \brief because from the same state diferent transitions can take the state machine to diferent states
-	  \param: state to be set as preceding state for all the transitions of the current state
+	  \param state to be set as preceding state for all the transitions of the current state
         */
         void setAllPrecedingStates(State*);
         
@@ -171,7 +179,7 @@ class State
         /**
 	  \brief setter method for the uid field of the state NOTE: maybe should be taken out and name only be allowed to be set on
 	  \brief construction, as if we rename the state later on the state machine might crash(surely will actually)
-	  \param: string to set as uid for the state
+	  \param string to set as uid for the state
         */
         void setUID(const std::string&);
         

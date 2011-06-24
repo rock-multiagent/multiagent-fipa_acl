@@ -129,12 +129,12 @@ class StateMachine
         
         
         /** \brief getter method for a state from the states vector
-	  \param: name of the state to be searched as a strig
+	  \param name of the state to be searched as a strig
 	  \return: pointer to the coresponding needed state
         */
         State* getStateByName(const std::string&);
         /** \brief getter method for a state from the states vector
-	  \param: the needed state (as object; by value)
+	  \param the needed state (as object; by value)
 	  \return: pointer to the coresponding needed state
         */
         State* getStateByName(State) const;
@@ -143,7 +143,7 @@ class StateMachine
         /** \brief method that generates implicit transitions (sometimes not mentioned int the IP -- i.e: not-understood transitions) */
         void generateDefaultTransitions();
         /** \brief method that adds a state to the states vector of the state machine
-	  \param: the state intended to be added
+	  \param the state intended to be added
 	  \return: true if successful(i.e: unique among the other states); false otherwise
         */
         bool addState(State&);
@@ -183,7 +183,7 @@ class StateMachine
         */
         Role getAgentRole(const AgentID& ag);
         /** \brief method to check whether a certain role has an agent assigned to it
-	  \param: string; role to be checked
+	  \param string; role to be checked
 	  \return: true if role is set; false otherwise
         */
         
@@ -267,7 +267,7 @@ class StateMachine
         */
         int createAndStartNewCancelMetaProtocol(const ACLMessage &msg);
         /** \brief helper method for the createAndStartCancelMetaProtocol method;
-	  \param: string; generic role among the ones involved in the conversation with which the cancel protocol is initialized
+	  \param string; generic role among the ones involved in the conversation with which the cancel protocol is initialized
 	  \return StateMachine; the created cancel meta protocol
         */
         StateMachine generateCancelMetaProtocol(Role);
