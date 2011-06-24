@@ -60,7 +60,7 @@ StateMachine StateMachineBuilder::loadSpecification(const std::string& infile)
     if (!file.LoadFile())
     {
         LOG_ERROR("error loading the spec file: %s. Please use setProtocolResourceDir(const std::string&) to specificy the location of your protocol files", protocolSpec.c_str());
-        exit(1);
+        throw std::runtime_error("Error loading the specification file");
     }
     builtMachine = StateMachine();
     LOG_DEBUG("loadSpecification: file opened: %s", infile.c_str());
