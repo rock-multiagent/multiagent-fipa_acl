@@ -178,18 +178,19 @@ class StateMachine
 	  \return true if role exists; false otherwise
         */
         bool checkIfRoleExists(const Role& myrole);
-        /** \brief method to check what role a speciffic agents is assigned to
-	  \param ag AgentID; agent whose role is to be checked
-	  \return string; the assigned role; empty string if agent is not assigned
+        /** 
+          \brief method to check what role a speciffic agents is assigned to
+	  \param ag agent whose role is to be checked
+	  \return the assigned role; empty string if agent is not assigned
         */
         Role getAgentRole(const AgentID& ag);
 
         /**
           \brief method to check whether a certain role has an agent assigned to it
-	  \param string; role to be checked
+	  \param role role to be checked
 	  \return true if role is set; false otherwise
         */
-        bool checkIfAgentAssigned(const AgentID&);
+        bool checkIfAgentAssigned(const AgentID& role);
         
         /**
 	  \brief returns a vector with all the agents(AgentID) assigned to a specific role

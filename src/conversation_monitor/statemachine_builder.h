@@ -77,8 +77,8 @@ class StateMachineBuilder {
         StateMachine loadSpecification(const std::string& file);
         
         /**
-	   identical to loadSpecification but does not return the state machine(i.e: it just populates the builtMachine param)
-	  \param infile name of the file with the specification
+	   Identical to loadSpecification but does not return the state machine(i.e: it just populates the builtMachine param)
+	  \param file name of the file with the specification
         */
         void localyLoadSpecification(const std::string& file);
         
@@ -90,7 +90,7 @@ class StateMachineBuilder {
         void parseStateMachineNode(TiXmlElement *sm);
         
         /**
-	  \brief method that parses the <state> elemet of the spec. file
+	  \brief method that parses the <state> element of the spec. file
 	  \param st
         */
         State parseStateNode(TiXmlElement *st);
