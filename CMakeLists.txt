@@ -8,11 +8,11 @@ set(PROJECT_VERSION 1.1)
 set(PROJECT_DESCRIPTION "Library for FIPA Agent Communication Language and handling bit-efficient FIPA Messages")
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" $ENV{ROCK_CMAKE_MACROS})
 include(CommonSetup)
 include(RPATHHandling)
 
-add_definitions(-Wall)
+add_definitions(-Wall -DBASE_LOG_NAMESPACE="${PROJECT_NAME}")
 CMAKE_USE_FULL_RPATH("${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}")
 
 
@@ -28,10 +28,15 @@ include_directories(${Base_INCLUDE_DIRS})
 link_directories(${Base_LIBRARY_DIRS})
 set(LIBRARIES ${LIBRARIES} ${Base_LIBRARIES} )
 
+pkg_check_modules(TinyXML REQUIRED "tinyxml")
+include_directories(${TinyXML_INCLUDE_DIRS})
+link_directories(${TinyXML_LIBRARY_DIRS})
+set(LIBRARIES ${LIBRARIES} ${TinyXML_LIBRARIES} )
+
 ##### End specification of build directory ##############################
 set(Boost_LOCALFIRST TRUE)
 set(Boost_ADDITIONAL_VERSION 1.42 1.43)
-find_package(Boost 1.42 REQUIRED)
+find_package(Boost 1.42 REQUIRED filesystem unit_test_framework)
 
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
@@ -51,7 +56,7 @@ ENDIF(RUBY_EXTENSIONS_AVAILABLE)
 
 if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
     message(STATUS "boost/test found ... building test suite")
-    add_subdirectory(test/unit-testing)
+    add_subdirectory(test/unit-testing/conversation_monitor)
 endif(Boost_UNIT_TEST_FRAMEWORK_FOUND)
 
 # command line output on, you can also use make VERBOSE=1
