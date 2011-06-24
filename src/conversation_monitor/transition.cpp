@@ -366,7 +366,7 @@ bool Transition::validateRecepients (const ACLMessage &msg)
     std::vector<AgentID>::iterator test1 = expectedRecepients.begin();
     
     LOG_DEBUG("\t---expected senders are:\n");
-    for (test; test != expectedSenders.end(); test++)
+    for (; test != expectedSenders.end(); test++)
     {LOG_DEBUG("%s", test->getName() ); }
     LOG_DEBUG("\n\t---expected recepients are:\n");
     for (test1; test1 != expectedRecepients.end(); test1++)

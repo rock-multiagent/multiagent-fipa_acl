@@ -193,7 +193,7 @@ std::string ACLMessageOutputParser::getBitUserdefMessageParams()
 	
             std::vector<UserdefParam>::iterator it; 
 	    it = s.begin();
-            for (it; it != s.end(); it++)
+            for (; it != s.end(); it++)
 		retstr = retstr + char(0x00) + bitParseParam(*it);
 
             return retstr;

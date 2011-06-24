@@ -133,7 +133,7 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
     
     TiXmlHandle handleState = TiXmlHandle(st);
     TiXmlElement *trans = handleState.FirstChildElement("transition").ToElement();
-    for (trans; trans != NULL; trans = trans->NextSiblingElement("transition") )
+    for (; trans != NULL; trans = trans->NextSiblingElement("transition") )
     {
         Transition t = Transition(parseTransitionNode(trans));
         t.setOwningState(&ret);
