@@ -95,7 +95,7 @@ class State
 		returned by this method
 	  \return ACLMessage*; pointer to the found message or NULL if no message meets the requirements
         */
-        ACLMessage* searchArchiveBySenderReceiver(const AgentID&, const AgentID&);
+        ACLMessage* searchArchiveBySenderReceiver(const AgentID& first, const AgentID& second);
         /**
 	  \brief method that adds a message to the state's message archive(message that has been previously validated)
 	  \param msg the message to be added to archive

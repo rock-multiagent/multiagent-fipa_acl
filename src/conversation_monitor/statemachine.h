@@ -130,21 +130,24 @@ class StateMachine
 	  \param name of the state to be searched as a strig
 	  \return pointer to the coresponding needed state
         */
-        State* getStateByName(const std::string&);
+        State* getStateByName(const std::string& name);
+
         /** \brief getter method for a state from the states vector
-	  \param the needed state (as object; by value)
+	  \param state the needed state (as object; by value)
 	  \return pointer to the coresponding needed state
         */
-        State* getStateByName(State) const;
+        State* getStateByName(State state) const;
+
         /** \brief method that generates the implicit states(sometimes not mentioned in the IP -- i.e: not-understood state) */
         void generateDefaultStates();
         /** \brief method that generates implicit transitions (sometimes not mentioned int the IP -- i.e: not-understood transitions) */
         void generateDefaultTransitions();
-        /** \brief method that adds a state to the states vector of the state machine
-	  \param the state intended to be added
+        /**
+          \brief method that adds a state to the states vector of the state machine
+	  \param state the state intended to be added
 	  \return true if successful(i.e: unique among the other states); false otherwise
         */
-        bool addState(State&);
+        bool addState(State& state);
         /** \brief method to check whether the conversation has reached a final state(= is over)
 	  \return value of conversationOver
         */
@@ -169,7 +172,7 @@ class StateMachine
 	  \return true if successfully added; false otherwise
         */
         bool setRole(const Role& myrole,const std::vector<AgentID>& agents);
-        bool checkIfAgentAssigned(const AgentID&);
+
         /** \brief method to check whether a speciffic role exists in the involvedAgents field
 	  \param myrole string; the intended to be checked role
 	  \return true if role exists; false otherwise
@@ -180,10 +183,13 @@ class StateMachine
 	  \return string; the assigned role; empty string if agent is not assigned
         */
         Role getAgentRole(const AgentID& ag);
-        /** \brief method to check whether a certain role has an agent assigned to it
+
+        /**
+          \brief method to check whether a certain role has an agent assigned to it
 	  \param string; role to be checked
 	  \return true if role is set; false otherwise
         */
+        bool checkIfAgentAssigned(const AgentID&);
         
         /**
 	  \brief returns a vector with all the agents(AgentID) assigned to a specific role
