@@ -1,0 +1,29 @@
+<scxml version="1.0" initial="1">
+    
+	<state id="1">
+	        <transition performative="proxy" from="initiator" to="B" target="2"/>
+	</state>
+	<state id="2">
+		<transition performative="refuse" from="B" to="initiator" target="3"/>
+		<transition performative="agree" from="B" to="initiator" target="4"/>
+	</state>
+	
+	<state id="3" final="yes">
+	</state>
+	
+	<state id="4">
+		<transition performative="failure" from="B" to="initiator" target="5"/>
+		<transition performative="inform" from="B" to="initiator" target="6"/>
+		<subprotocol master="B" resident="initiator" file="request"/>
+	</state>
+	
+	<state id="5" final="yes">
+	</state>
+	
+	<state id="6" final="yes">
+		<transition performative="inform" from="B" to="initiator" target="6"/>
+		<transition performative="failure" from="B" to="initiator" target="5"/>
+	</state>
+	
+
+</scxml>

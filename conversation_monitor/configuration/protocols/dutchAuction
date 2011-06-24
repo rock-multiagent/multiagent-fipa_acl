@@ -1,0 +1,33 @@
+<scxml version="1.0" initial="1">
+    
+    <state id="1">
+        <transition performative="inform" from="initiator" to="B" target="2"/>
+    </state>
+    
+    <state id="2">
+    	<transition performative="cfp" from="initiator" to="B" target="3"/>
+    </state>
+    
+    <state id="3">
+    	<transition performative="propose" from="B" target="4"/>
+    </state>
+    
+    <state id="4">
+    	<transition performative="refuse-proposal" from="initiator" to="B" target="5"/>
+    	<transition performative="accept-proposal" from="initiator" to="B" target="6"/>
+    </state>
+    
+    <state id="5" final="yes">
+    	<transition performative="cfp" from="initiator" to="B" target="3"/>
+    	<transition performative="inform" from"initiator" to="B" target="7"/>
+    </state>
+    
+    <state id="6">
+    	<transition performative="cfp" from="initiator" to="B" target="3"/>
+    	<transition performative="inform" from"initiator" to="B" target="7"/>
+    </state>
+    
+    <state id="7" final="yes">
+    </state>
+    
+</scxml>
