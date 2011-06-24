@@ -5,6 +5,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <base/logging.h>
+#include <boost/filesystem/operations.hpp>
 
 namespace fipa {
 namespace acl {
@@ -17,6 +18,8 @@ const std::string StateMachineBuilder::final = 		std::string("final");
 const std::string StateMachineBuilder::performative = 	std::string("performative");
 const std::string StateMachineBuilder::initial = 	std::string("initial");
 
+std::string StateMachineBuilder::resourceDir = std::string(".");
+
 StateMachineBuilder::StateMachineBuilder()
 {
     roles.clear();
@@ -24,7 +27,12 @@ StateMachineBuilder::StateMachineBuilder()
     initialState.clear();
 }
 
-StateMachine StateMachineBuilder::getFunctionalStateMachine(std::string infile)
+void StateMachineBuilder::setProtocolResourceDir(const std::string& _resourceDir)
+{
+    resourceDir = boost::filesystem::path(_resourceDir).string();
+}
+
+StateMachine StateMachineBuilder::getFunctionalStateMachine(const std::string& infile)
 {
     localyLoadSpecification(infile);
     
@@ -34,19 +42,24 @@ StateMachine StateMachineBuilder::getFunctionalStateMachine(std::string infile)
     return builtMachine;
 }
 
-void StateMachineBuilder::localyLoadSpecification(std::string infile)
+void StateMachineBuilder::localyLoadSpecification(const std::string& infile)
 {
     ///call the other loadSpecification method and just discard the returned value(i.e: run it only to parameterize builtMachine)
     StateMachine dummy = loadSpecification(infile);
 }
 
-StateMachine StateMachineBuilder::loadSpecification(std::string infile)
+StateMachine StateMachineBuilder::loadSpecification(const std::string& infile)
 {
-    TiXmlDocument file = TiXmlDocument(infile.c_str());
+    boost::filesystem::path protocolDir(resourceDir);
+    boost::filesystem::path infilePath = operator/(protocolDir, infile);
+    
+    std::string protocolSpec = infilePath.string();
+
+    TiXmlDocument file = TiXmlDocument(protocolSpec.c_str());
     
     if (!file.LoadFile())
     {
-        LOG_ERROR("error loading the spec file");
+        LOG_ERROR("error loading the spec file: %s. Please use setProtocolResourceDir(const std::string&) to specificy the location of your protocol files", protocolSpec.c_str());
         exit(1);
     }
     builtMachine = StateMachine();
@@ -108,9 +121,11 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 	  ret.setFinal(true);
         else
 	  if (!strcmp(value,"no"))
+          {
 	      ret.setFinal(false);
-	  else;
+	  } else {
 	      throw std::runtime_error("Invalid value for attribute \"final\" of state node");
+          }
     }
     LOG_DEBUG("\t\t#set the final variable");
         
@@ -146,12 +161,15 @@ void StateMachineBuilder::addStates(TiXmlElement *st)
         LOG_DEBUG("\t#retrieved id of the state");
         std::vector<std::string>::iterator it = find(states.begin(), states.end(), std::string(value));
         if ( it == states.end() )
+        {
 	  states.push_back(std::string(value));
-        else;
+        } else
+        {
 	  throw std::runtime_error("\"id\" field of states should be unique");
-    }
-    else;
+        }
+    } else {
         throw std::runtime_error("State node has no \"id\" attribute");
+    }
     
     if ( (next = st->NextSiblingElement("state")) != NULL )
     {
@@ -179,8 +197,9 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
         if ( it == roles.end())
 	  roles.push_back(std::string(value));
     }
-    else;
-        //TODO: throw some exception here
+    else {
+        throw new std::runtime_error("StateMachineBuilder::parseTransitionsNode 'from' extraction failed");
+    }
         
     value = NULL;
     value = trans->Attribute(StateMachineBuilder::to.c_str());
@@ -191,8 +210,10 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
         if ( it == roles.end())
 	  roles.push_back(std::string(value));
     }
-    else;
-        //TODO: throw some exception here
+    else
+    {
+        throw new std::runtime_error("StateMachineBuilder::parseTransitionsNode 'to' extraction failed");
+    }
     
     value = NULL;
     value = trans->Attribute(StateMachineBuilder::target.c_str());

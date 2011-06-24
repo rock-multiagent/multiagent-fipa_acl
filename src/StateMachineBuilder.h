@@ -41,6 +41,8 @@ class StateMachineBuilder {
         
         /// \param builtMachine: the state machine resulted from the spec. file
         StateMachine builtMachine;
+
+        static std::string resourceDir;
         
     public:
         /// \brief node attribute names used in the spec standard; most general ones such as "state", "transition" are hard-implement
@@ -57,31 +59,36 @@ class StateMachineBuilder {
 	  \brief default constructor; initializes class fields
         */
         StateMachineBuilder();
-        
+
         /**
-	  \brief: after building the state machine from the spec. file calls the methods that do the necessary implicit additional adjustments
-	  \param std::string: name of file with the specification to be parsed
-	  \return: the ready-to use state machine(builtMachine)
+        * Set the resource dir where to search for the protocol definitions
         */
-        StateMachine getFunctionalStateMachine(std::string);
+        static void setProtocolResourceDir(const std::string& resourceDir);
         
         /**
-	  \brief: populates the builtMachine parameter of the class based on the given spec. file
-	  \param std::String: name of the file with the specification
+	   after building the state machine from the spec. file calls the methods that do the necessary implicit additional adjustments
+	  \param file name of file with the specification to be parsed
+	   the ready-to use state machine(builtMachine)
+        */
+        StateMachine getFunctionalStateMachine(const std::string& file);
+        
+        /**
+	   populates the builtMachine parameter of the class based on the given spec. file
+	  \param file name of the file with the specification
 	  \return builtMachine, BUT: raw, without the implicit parameters set(default states; default transitions)
         */
-        StateMachine loadSpecification(std::string);
+        StateMachine loadSpecification(const std::string& file);
         
         /**
-	  \brief: identical to loadSpecification but does not return the state machine(i.e: it just populates the builtMachine param)
-	  \param std::String: name of the file with the specification
+	   identical to loadSpecification but does not return the state machine(i.e: it just populates the builtMachine param)
+	  \param infile name of the file with the specification
         */
-        void localyLoadSpecification(std::string);
+        void localyLoadSpecification(const std::string& file);
         
         /**
-	  \brief: root function in the tree of function calls that populate the builtMachine param; it parses the root element of the file
+	   root function in the tree of function calls that populate the builtMachine param; it parses the root element of the file
 		which should be <scxml>
-	  \param sm: the element describing the stateMachine
+	  \param sm the element describing the stateMachine
         */
         void parseStateMachineNode(TiXmlElement *sm);
         
