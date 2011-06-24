@@ -1,15 +1,16 @@
 <package>
   <description brief="Library for parsing FIPA Messages">
-  FIPA (Foundation for Intelligent Physical Agents) provides a specification for an agent communication language. This is a C++ implementation of a message parser.
+  FIPA (Foundation for Intelligent Physical Agents) provides a specification for an agent communication language. This is a C++ implementation of a message parser and a message generator.
+  Since FIPA also define interaction protocols, i.e. agents can use a well defined sequence of message to talk to each other. This library contains a conversation monitor that uses a state machine to validate message flows to conform to a protocol. Protocols can be defined in statechart xml format. 
   </description>
   <author>Thomas Roehr/thomas.roehr@dfki.de</author>
-  <license></license>
+  <author>Mircea Cretu Stancu/mircea.ctza@yahoo.com<author>
+  <license>LPGL v3 or higher</license>
   <url>http://www.fipa.org</url>
-  <logo>http://</logo>
   <depend package="base/types" />
   <depend package="boost" />
   <depend package="rice" />
-<!--  <depend package="libcppunit" /> -->
+  <depend package="external/tinyxml" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="" />
