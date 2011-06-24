@@ -1,6 +1,6 @@
 /**
  *
- * \file agent_id.h
+ * \file message_generator/agent_id.h
  * \author Mircea Cretu Stancu
  * \brief Defines the AgentID class
  * 

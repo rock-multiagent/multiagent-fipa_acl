@@ -1,6 +1,6 @@
 /**
  *
- * \file test.cpp
+ * \file message_generator/test.cpp
  * \author Mircea Cretu Stancu
  * \brief main program made for the sole purpose of testing the functionality of the acl module - bit efficient encoding
  * 

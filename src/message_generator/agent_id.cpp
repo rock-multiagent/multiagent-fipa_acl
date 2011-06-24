@@ -1,6 +1,5 @@
 /**
- *
- * \file agent_id.cpp
+ * \file message_generator/agent_id.cpp
  * \author Mircea Cretu Stancu
  * \brief Implements the general AgentID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org).
  * 

@@ -98,13 +98,13 @@ class State
         ACLMessage* searchArchiveBySenderReceiver(const AgentID&, const AgentID&);
         /**
 	  \brief method that adds a message to the state's message archive(message that has been previously validated)
-	  \param msg: the message to be added to archive
+	  \param msg the message to be added to archive
         */
         void addToArchive(const ACLMessage &msg);
         /**
 	  \brief prcesses the message received as parameter; sends it to each sub-protocol(subSM) until it is validated by one(if any)
 	  \brief or else to each transition for processing until the message is validated by one of them(if any)
-	  \param msg: current message that is being processed from the flow of messages
+	  \param msg current message that is being processed from the flow of messages
 	  \return 0 if successful, one otherwise
         */
         int consumeMessage(const ACLMessage &msg);
@@ -125,12 +125,12 @@ class State
 	  \brief marks an agent from the involvedAgents map as accounted for
 	  \param agent to be ticked
         */
-        void tickInvolvedAgent(const AgentID&);
+        void tickInvolvedAgent(const AgentID& agent);
         /**
 	  \brief marks a vector of agents from the involvedAgents map as accounted for
-	  \param std::vector of agent to be ticked
+	  \param agents vector of agents to be ticked
         */
-        void tickInvolvedAgent(const std::vector<AgentID>&);
+        void tickInvolvedAgent(const std::vector<AgentID>& agents);
         /**
 	  \brief method that passes the loadParameters signal downwards to transitions; it is to called after all transitions and 
 	  \brief states have been generated;
@@ -153,7 +153,7 @@ class State
 	  \brief because from the same state diferent transitions can take the state machine to diferent states
 	  \param state to be set as preceding state for all the transitions of the current state
         */
-        void setAllPrecedingStates(State*);
+        void setAllPrecedingStates(State* state);
         
         /**
 	  \brief method that adds a transition to the current state
@@ -176,9 +176,9 @@ class State
         /**
 	  \brief setter method for the uid field of the state NOTE: maybe should be taken out and name only be allowed to be set on
 	  \brief construction, as if we rename the state later on the state machine might crash(surely will actually)
-	  \param string to set as uid for the state
+	  \param uid to set as uid for the state
         */
-        void setUID(const std::string&);
+        void setUID(const std::string& uid);
         
         /**
 	  \brief getter method for the uid field of the class

@@ -1,6 +1,6 @@
 /**
  * \author Thomas Roehr@dfki.de
- * \file main.cpp
+ * \file message_parser/main.cpp
  * \brief Message parser for FIPA ACL Messages, based on boost::spirit
  */
 
