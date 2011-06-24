@@ -24,6 +24,10 @@ set(SOURCES
         message_generator/agent_id.cpp
         message_generator/userdef_param.cpp
         message_generator/acl_message_output_parser.cpp
+        conversation_monitor/state.cpp
+        conversation_monitor/statemachine_builder.cpp
+        conversation_monitor/statemachine.cpp
+        conversation_monitor/transition.cpp
 )
 
 #add_executable(testParser test.cpp ${SOURCES})
@@ -49,4 +53,9 @@ install(TARGETS ${GENERATOR}
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
 )
+
+set(MONITOR fipa_acl-conv_monitor-builder_test)
+add_executable(${MONITOR} conversation_monitor/main.cpp)
+target_link_libraries(${MONITOR} ${LIBRARIES} ${PROJECT_NAME})
+# do not install - only for local testing
 

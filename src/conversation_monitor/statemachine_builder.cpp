@@ -1,4 +1,4 @@
-#include "StateMachineBuilder.h"
+#include "statemachine_builder.h"
 
 #include <iostream>
 #include <algorithm>

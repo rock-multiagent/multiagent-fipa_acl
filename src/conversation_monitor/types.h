@@ -1,5 +1,5 @@
-#ifndef _RIMRES_FIPAACL_CONVMONITOR_TYPES_
-#define _RIMRES_FIPAACL_CONVMONITOR_TYPES_
+#ifndef _FIPAACL_CONVMONITOR_TYPES_
+#define _FIPAACL_CONVMONITOR_TYPES_
 
 #include <fipa_acl/bitefficient_message.h>
 

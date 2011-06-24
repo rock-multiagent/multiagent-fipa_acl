@@ -22,7 +22,7 @@ CMAKE_USE_FULL_RPATH("${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/${
 include_directories(${PROJECT_SOURCE_DIR}/external/include)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-include(PkgConfigPackages)
+include(FindPkgConfig)
 pkg_check_modules(Base REQUIRED "base-lib")
 include_directories(${Base_INCLUDE_DIRS})
 link_directories(${Base_LIBRARY_DIRS})
@@ -40,6 +40,7 @@ find_package(Boost 1.42 REQUIRED filesystem unit_test_framework)
 
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
+set(LIBRARIES ${LIBRARIES} ${Boost_LIBRARIES} )
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)

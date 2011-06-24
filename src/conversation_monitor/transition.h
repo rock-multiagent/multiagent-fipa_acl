@@ -1,17 +1,16 @@
 /**
  *
- * \file Transition.h
+ * \file transition.h
  * \author Mircea Cretu Stancu
  * \brief describes the structure and operation of a transition of the state machine
  * 
  * \version 1.0
  */
 
-#ifndef _RIMRES_FIPAACL_CONVMONITOR_TRANSITION_H_
-#define _RIMRES_FIPAACL_CONVMONITOR_TRANSITION_H_
+#ifndef _FIPAACL_CONVMONITOR_TRANSITION_H_
+#define _FIPAACL_CONVMONITOR_TRANSITION_H_
 
-//#include "StateMachine.h"
-#include "types.h"
+#include <fipa_acl/conversation_monitor/types.h>
 #include <fipa_acl/bitefficient_message.h>
 #include <algorithm>
 

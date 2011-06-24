@@ -1,22 +1,19 @@
 /**
  *
- * \file StateMachineBuilder.h
+ * \file statemachine_builder.h
  * \author Mircea Cretu Stancu
  * \brief defines the StateMachineBuilder Class, used to generate a state macine from a spec. file
  * 
  * \version 1.0
  */
 
-#ifndef _RIMRES_FIPAACL_CONVMONITOR_STATEMACHINEBUILDER_H_
-#define _RIMRES_FIPAACL_CONVMONITOR_STATEMACHINEBUILDER_H_
+#ifndef _FIPAACL_CONVMONITOR_STATEMACHINEBUILDER_H_
+#define _FIPAACL_CONVMONITOR_STATEMACHINEBUILDER_H_
 
-#include "StateMachine.h"
-//#include "Transition.h"
-#include "State.h"
-
+#include <fipa_acl/conversation_monitor/statemachine.h>
+#include <fipa_acl/conversation_monitor/state.h>
 #include <tinyxml/tinyxml.h>
 #include <tinyxml/tinystr.h>
-
 #include <vector>
 
 namespace fipa {

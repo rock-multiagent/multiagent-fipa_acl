@@ -1,20 +1,17 @@
 /**
  *
- * \file State.h
+ * \file state.h
  * \author Mircea Cretu Stancu
  * \brief describes the structure and operation of a state, as part of a state machine
  * 
  * \version 1.0
  */
 
-#ifndef _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
-#define _RIMRES_FIPAACL_CONVMONITOR_STATE_H_
+#ifndef _FIPAACL_CONVMONITOR_STATE_H_
+#define _FIPAACL_CONVMONITOR_STATE_H_
 
 #include <fipa_acl/message_generator/acl_message.h>
-//#include "StateMachine.h"
-#include "Transition.h"
-
-
+#include <fipa_acl/conversation_monitor/transition.h>
 #include <map>
 
 namespace fipa {

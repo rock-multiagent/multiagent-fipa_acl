@@ -1,20 +1,18 @@
 /**
  *
- * \file StateMachine.h
+ * \file statemachine.h
  * \author Mircea Cretu Stancu
  * \brief describes the structure and operation of a state machine
  * 
  * \version 1.0
  */
 
-#ifndef _RIMRES_FIPAACL_CONVMONITOR_STATEMACHINE_H_
-#define _RIMRES_FIPAACL_CONVMONITOR_STATEMACHINE_H_
+#ifndef _FIPAACL_CONVMONITOR_STATEMACHINE_H_
+#define _FIPAACL_CONVMONITOR_STATEMACHINE_H_
 
-#include "types.h"
-//#include "State.h"
+#include <fipa_acl/conversation_monitor/types.h>
 #include <fipa_acl/bitefficient_message.h>
 #include <vector>
-//#include <multimap>
 
 namespace fipa {
 namespace acl {

@@ -13,8 +13,8 @@ note for future: the "in reply to" policy needs to be defined somehow (not neces
 	       from preceding state and if there if there is no message TO the current sender with a "in reply to" field filled in, 
 	       then it should not be filled in
 */
-#include "StateMachine.h"
-#include "State.h"
+#include "statemachine.h"
+#include "state.h"
 
 #include <iostream>
 #include <algorithm>

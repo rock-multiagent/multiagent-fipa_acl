@@ -1,7 +1,7 @@
 
-#include "Transition.h"
-#include "State.h"
-#include "StateMachine.h"
+#include "transition.h"
+#include "state.h"
+#include "statemachine.h"
 
 #include <iostream>
 #include <stdexcept>

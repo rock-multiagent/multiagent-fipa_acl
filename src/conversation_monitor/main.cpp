@@ -1,7 +1,5 @@
 #include <iostream>
-#include "StateMachineBuilder.h"
-#include "StateMachine.h"
-
+#include <fipa_acl/conversation_monitor.h>
 
 using namespace fipa::acl;
 

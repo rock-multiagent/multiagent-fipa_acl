@@ -115,7 +115,7 @@ void printAgentIDset( std::vector<AgentID> &myset)
 {
     std::cout<<"\t==================Agent AID set==================\n";
     std::vector<AgentID>::iterator it = myset.begin();
-    for(it; it != myset.end(); it++)
+    for(; it != myset.end(); it++)
         printAgentID(*it);
 }
 void printAgentID( AgentID &agent)
@@ -127,7 +127,7 @@ void printAgentID( AgentID &agent)
         std::cout<<"\t\tadresses:\t\n";
         std::vector<std::string> addr = agent.getAddresses();
         std::vector<std::string>::iterator it = addr.begin();
-        for(it; it != addr.end(); it++)
+        for(; it != addr.end(); it++)
 	  std::cout<<"\t\t\t"<< *it<<std::endl;
     }
     if (!(agent.getResolvers().empty())) {std::cout<<"\t\tresolvers:\t\n"; 
@@ -142,7 +142,7 @@ void printUserdefParamset( std::vector<UserdefParam> &params)
 {
     std::cout<<"\t\t==================User Defined Parameters==================\n";
     std::vector<UserdefParam>::iterator it = params.begin();
-    for(it; it != params.end(); it++)
+    for(; it != params.end(); it++)
     {
         std::cout<<"\t\tparam name:\t"<< (*it).getName()<<std::endl;
         std::cout<<"\t\tparam value:\t"<< (*it).getValue()<<"\n\n";

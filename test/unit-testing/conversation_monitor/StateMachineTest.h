@@ -8,11 +8,8 @@
 
 #include <iostream>
 #include <fipa_acl/bitefficient_message.h>
+#include <fipa_acl/conversation_monitor.h>
 #include "StateMachineTestUtils.h"
-#include "../../src/StateMachine.h"
-#include "../../src/State.h"
-#include "../../src/Transition.h"
-#include "../../src/StateMachineBuilder.h"
 
 BOOST_AUTO_TEST_SUITE(conversation_monitor_suite)
 
@@ -173,7 +170,6 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     BOOST_CHECK_MESSAGE(req.startMachine(*it) == 0, "Start state machine");
 
     it++;
-    int i=0;
     while(it != flow.end() && !req.isConversationOver())
     {
         BOOST_CHECK_MESSAGE(req.consumeMessage(*it) == 0, "Consume message"); 
@@ -216,7 +212,6 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
     BOOST_CHECK_MESSAGE(req.startMachine(*it) == 0, "Start state machine");
 
     it++;
-    int i=0;
     while(it != flow.end() && !req.isConversationOver())
     {
         BOOST_CHECK_MESSAGE(req.consumeMessage(*it) == 0, "Consume message");
