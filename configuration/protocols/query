@@ -17,7 +17,7 @@
     
     <state id="5" final="no">
     	<transition performative="inform-if" from="B" to="initiator" target="7"/>
-    	<transition performative="failure" from "B" to="initiator" target="4"/>
+    	<transition performative="failure" from="B" to="initiator" target="4"/>
     </state>
     <state id="6" final="no">
     	<transition performative="inform-ref" from="B" to="initiator" target="7"/>

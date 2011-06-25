@@ -9,15 +9,13 @@
 	<transition performative="agree" from="B" to="initiator" target="4"/>
 </state>
 
-<state id="3" final="yes">
-</state>
+<state id="3" final="yes"/>
 
 <state id="4" final="yes">
 	<transition performative="inform" from="B" to="initiator" target="4"/>
 	<transition performative="failure" from="B" to="initiator" target="5"/>
-<state>
-
-<state id="5" final="yes">
 </state>
+<state id="5" final="yes" />
 
 </scxml>
+
