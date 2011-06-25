@@ -16,22 +16,31 @@ namespace acl {
     // 
     // check allows to detect whether a role has already
     // been assigned (defaults to false)
-    typedef struct {
+    typedef struct _AgentMapping {
         Role role;
         AgentID agent;
         bool check;
+
+        _AgentMapping() : role(), agent(), check(false)
+        {
+        }
+
     } AgentMapping;
     
     // Specific for subprotocol in order to match
     // roles across different statemachines, i.e.
     // from parent statemachine (master) to the 
     // enclosed one (resident) 
-    typedef struct {
+    typedef struct _RoleCorrelation {
         Role master;
         Role resident;
         // whether or not it has already been assigned
         // in the current statemachine (resident)
         bool check;
+
+        _RoleCorrelation() : master(), resident(), check(false)
+        {
+        }
     } RoleCorrelation;
     
 

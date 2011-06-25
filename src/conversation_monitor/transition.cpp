@@ -126,58 +126,62 @@ bool Transition::validateMessage(const ACLMessage &msg)
 void Transition::loadParameters()
 {
     nextState = machine->getStateByName(nextStateName);
+    LOG_INFO("Load parameters: next state %s", nextState->getUID().c_str());
     updateRoles();
 }
 void Transition::updateRoles()
 {
-    
-   
     expectedSenders.clear();
     expectedRecepients.clear();
+    LOG_INFO("UpdateRoles for stateMachine with owner: %s", machine->getOwner().getName().c_str());
     if (machine->checkIfRoleExists(from) )
     {
-        
         if(machine->checkIfRoleSet(from) )
         {
 	  
 	  std::vector<AgentMapping>::iterator it;
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
-	      if (!it->role.compare(from) ) 
+	      if (it->role == from ) 
 	      { 		
 		expectedSenders.push_back(it->agent);
 			
-		if (it->agent == machine->owner) {  
-					      removeAllAgentsBut(machine->owner,expectedSenders); //it = machine->involvedAgents.end();
-					      break;
-					   }
-		else;
-	      }else;
+		if (it->agent == machine->owner)
+                {  
+		     removeAllAgentsBut(machine->owner, expectedSenders);
+		     break;
+                }
+              }
 	  }
-        } else;   
-    } else throw std::runtime_error("Trying to use inexistent role name");
+        }
+    } else {
+        LOG_ERROR("Trying to use inexistent role name for 'from'");
+        throw std::runtime_error("Trying to use inexistent role name for 'from'");
+    }
     
         
     if (machine->checkIfRoleExists(to) )
     {
-         
         if (machine->checkIfRoleSet(to) )
         {
 	 
 	  std::vector<AgentMapping>::iterator it;
 	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
 	  {
-	      if (!it->role.compare(to) ) 
+	      if (it->role == to ) 
 	      {
 		expectedRecepients.push_back(it->agent);
 		if (it->agent == machine->owner) 
 		{ 
 		    removeAllAgentsBut(machine->owner,expectedRecepients); break; 
-		} else;
-	      } else;
+		} 
+	      } 
 	  }
-        } else;
-    } else throw std::runtime_error("Trying to use inexistent role name");
+        }
+    } else {
+        LOG_ERROR("Trying to use inexistent role name for 'to'");
+        throw std::runtime_error("Trying to use inexistent role name for 'to'");
+    }
         
     /*
     LOG_DEBUG("!without message update method!\nfrom: ");
@@ -247,6 +251,7 @@ bool Transition::updateRoles(const ACLMessage &msg)
         
     } else 
     {
+        LOG_ERROR("Trying to use inexistent role name from");
         throw std::runtime_error("Trying to use inexistent role name");
     }
     
@@ -277,6 +282,7 @@ bool Transition::updateRoles(const ACLMessage &msg)
 	  }
     } else 
     {
+        LOG_ERROR("Trying to use inexistent role name to");
         throw std::runtime_error("Trying to use inexistent role name");
     }
     

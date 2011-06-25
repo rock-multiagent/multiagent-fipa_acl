@@ -99,25 +99,31 @@ class StateMachine
         
         /** \brief emtpy constructor, initializes some fields*/
         StateMachine();
+
         /** \brief constructor that initializes the owner of the machine as well
 	  \param _owner: the intended owner of the state machine
         */
         StateMachine(const AgentID& _owner);
         
         StateMachine(const StateMachine&);
+
         ~StateMachine();
         
         /** \brief setter method for the initial state of the state machine(takes a pointer as argument) */
         bool setInitialState(State*);
+
         /** \brief setter method for the initial state of the state machine(takes the name-uid- of the state as parameter)*/
         bool setInitialState(const std::string);
+
         /** \brief setter method for the owner of the machine */
         bool setOwner(const AgentID&);
+
         /** \brief method to be called with the first message from the message flow as parameter; it initializes fields 
 		and starts the conversation
 	  \return 0 if machine started successfully; != otherwise(currently only 1 as error code - more to be added when needed)
         */
         int startMachine(const ACLMessage& msg);
+
         /**
 	  \brief method to be called to process every message of the message flow(except the first one)
 	  \return 0 if successful; 1 otherwise
@@ -140,32 +146,39 @@ class StateMachine
 
         /** \brief method that generates the implicit states(sometimes not mentioned in the IP -- i.e: not-understood state) */
         void generateDefaultStates();
+
         /** \brief method that generates implicit transitions (sometimes not mentioned int the IP -- i.e: not-understood transitions) */
         void generateDefaultTransitions();
+
         /**
           \brief method that adds a state to the states vector of the state machine
 	  \param state the state intended to be added
 	  \return true if successful(i.e: unique among the other states); false otherwise
         */
         bool addState(State& state);
+
         /** \brief method to check whether the conversation has reached a final state(= is over)
 	  \return value of conversationOver
         */
         bool isConversationOver() const;
+
         /** \brief method to check whether the conversation has been properly started
 	  \return value of active variable
         */
         bool isActive() const;
+
         /** \brief method to add a generic role to the involvedAgents field
 	  \param myrole name of the intended role given as string
         */
         void addRole(const Role& myrole);
+
         /** \brief method to assign a generic role to a speciffic agent
 	  \param myrole string; name of the role intended to be set
 	  \param myagent AgentID; the intended agent
 	  \return true if successfully added; false otherwise
         */
         bool setRole(const Role& myrole,const AgentID& myagent);
+
         /** \brief method to assign a generic role to a vector of agents
 	  \param myrole string; name of the role intended to be set
 	  \param agents std::vector< AgentID >; the intended vector of agents
@@ -178,6 +191,7 @@ class StateMachine
 	  \return true if role exists; false otherwise
         */
         bool checkIfRoleExists(const Role& myrole);
+
         /** 
           \brief method to check what role a speciffic agents is assigned to
 	  \param ag agent whose role is to be checked
@@ -231,6 +245,11 @@ class StateMachine
         void updateAllAgentRoles(const Role& myrole, const std::vector<AgentID>& myagents);
         
         /**
+        * Validate the state machine that all existing transaction and from to field have a target
+        */
+        bool validate();
+        
+        /**
 	  \brief misc method added to easily visualize a built stateMachine;
         */
         void print();
@@ -276,8 +295,7 @@ class StateMachine
 	  \return StateMachine; the created cancel meta protocol
         */
         StateMachine generateCancelMetaProtocol(Role);
-        
-        
+
         
     
 };

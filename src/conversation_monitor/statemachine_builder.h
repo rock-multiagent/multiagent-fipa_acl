@@ -36,8 +36,8 @@ class StateMachineBuilder {
         /// \param initialState: the initial state parameter of the state machine
         std::string initialState;
         
-        /// \param builtMachine: the state machine resulted from the spec. file
-        StateMachine builtMachine;
+        /// \param builtMachine: the state machine resulted from the last spec. file
+        StateMachine* builtMachine;
 
         static std::string resourceDir;
         
@@ -66,21 +66,22 @@ class StateMachineBuilder {
 	   after building the state machine from the spec. file calls the methods that do the necessary implicit additional adjustments
 	  \param file name of file with the specification to be parsed
 	   the ready-to use state machine(builtMachine)
+          \param file
         */
-        StateMachine getFunctionalStateMachine(const std::string& file);
+        StateMachine* getFunctionalStateMachine(const std::string& file);
         
         /**
 	   populates the builtMachine parameter of the class based on the given spec. file
 	  \param file name of the file with the specification
 	  \return builtMachine, BUT: raw, without the implicit parameters set(default states; default transitions)
         */
-        StateMachine loadSpecification(const std::string& file);
+        StateMachine* loadSpecification(const std::string& file);
         
         /**
 	   Identical to loadSpecification but does not return the state machine(i.e: it just populates the builtMachine param)
 	  \param file name of the file with the specification
         */
-        void localyLoadSpecification(const std::string& file);
+        void locallyLoadSpecification(const std::string& file);
         
         /**
 	   root function in the tree of function calls that populate the builtMachine param; it parses the root element of the file
@@ -114,8 +115,6 @@ class StateMachineBuilder {
 	  \brief method that adds the generic names of the involved agents detected in the spec file to the builtMachine field
         */
         void addInvolvedAgentsMap();
-    
-    
 };
 
 

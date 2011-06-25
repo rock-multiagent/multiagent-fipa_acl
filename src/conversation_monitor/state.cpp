@@ -20,6 +20,7 @@ State::State()
     involvedAgents.clear();
     owningMachine = NULL;
 }
+
 State::State(std::string _uid)
 {
     final = false;
@@ -41,7 +42,9 @@ State::State(const State& target)
     
     std::vector<Transition> tempT = target.getTransitions();
     for (std::vector<Transition>::iterator it = tempT.begin(); it != tempT.end(); it++)
+    {
         addTransition(*it);
+    }
     
     std::vector<StateMachine> tempSubSM = target.getSubSM();
     for (std::vector<StateMachine>::iterator it = tempSubSM.begin(); it != tempSubSM.end(); it++)
@@ -63,7 +66,10 @@ void State::addTransition(Transition &t)
 {
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
-        if (unloadedEqual(*it,t) ) {return;}
+    {
+        if (unloadedEqual(*it,t) )
+            return;
+    }
     
     t.setOwningState(this);
     t.setMachine(owningMachine);
@@ -96,35 +102,48 @@ void State::generateDefaultTransitions()
 
 int State::consumeMessage(const ACLMessage &msg)
 {
-    LOG_DEBUG("#state's\t %s \tconsumeMessage call\n", uid.c_str());
+    LOG_DEBUG("#state's %s :consumeMessage call", uid.c_str());
     if (!subSM.empty())
     {
-        LOG_DEBUG("#checking the sub-state machines..\n");
+        LOG_DEBUG("#checking the sub-state machines");
         bool found_one = false;
         bool stillActiveSubSM = false;
         std::vector<StateMachine>::iterator smit;
         for (smit = subSM.begin(); smit != subSM.end(); smit++)
         {
 	  if (smit->isActive() )
-	      if (smit->isConversationOver() ) continue;
-	      else {  stillActiveSubSM = true;
-		    if (smit->consumeMessage(msg) == 0) 
-		    {
-		        found_one = true;
-		    } else; }
-	  else if (smit->startMachine(msg) == 0) found_one = true;
-	       else;
+          {
+	      if (smit->isConversationOver() )
+              {
+                  continue;
+	      } else { 
+                  stillActiveSubSM = true;
+		  if (smit->consumeMessage(msg) == 0) 
+		  {
+		      found_one = true;
+		  } 
+              }
+	  } else if (smit->startMachine(msg) == 0)
+          {
+              found_one = true;
+          }
         }
+
         if (stillActiveSubSM)
-	  if (found_one) return 0;
-	  else return 1;
-        else;
+        {
+	  if (found_one)
+              return 0;
+	  else
+              return 1;
+        }
+    } else {
+        LOG_DEBUG("#No substate statemachine");
     }
-    LOG_DEBUG("#not enterred the subSM if..\n");
+
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
     {
-        LOG_DEBUG("#sending mesage to a transition of state.. %s\n",uid.c_str());
+        LOG_DEBUG("#sending message to a transition of state %s",uid.c_str());
         if (it->consumeMessage(msg) == 0) return 0;
     }
     return 1;
@@ -159,6 +178,7 @@ bool State::checkAllAgentsAccountedFor() const
 }
 void State::updateInvolvedAgentsMap(Transition &it)
 {
+    LOG_INFO("Update involved agents map");
     std::vector<AgentID> temp = it.getExpectedSenders();
     std::vector<AgentID>::iterator agit;
     for (agit = temp.begin(); agit != temp.end(); agit++)
@@ -167,16 +187,7 @@ void State::updateInvolvedAgentsMap(Transition &it)
         if ( (found = involvedAgents.find((*agit) ) ) == involvedAgents.end() )
         {
 	  std::pair<AgentID,bool> mypair = std::pair<AgentID,bool>(*agit,false);
-	  involvedAgents.insert(mypair);
-        }
-    }
-    temp = it.getExpectedSenders();
-    for (agit = temp.begin(); agit != temp.end(); agit++)
-    {
-        std::map<AgentID,bool>::iterator found;
-        if ( (found = involvedAgents.find(*agit)) == involvedAgents.end() )
-        {
-	  std::pair<AgentID,bool> mypair = std::pair<AgentID,bool>(*agit,false);
+          LOG_INFO("Insert agent into involved agents map: %s", agit->getName().c_str());
 	  involvedAgents.insert(mypair);
         }
     }
@@ -190,7 +201,6 @@ void State::loadParameters()
         updateInvolvedAgentsMap(*it);
         
     }
-    
 }
 
 void State::updateAllAgentRoles()

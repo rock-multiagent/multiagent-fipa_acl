@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     AgentID a2 = AgentID(name2);
     a2.addAddress(addr3);
 
-    StateMachine req = StateMachine();
-    req.setOwner(a1);
+    StateMachine* req = new StateMachine();
+    req->setOwner(a1);
     
     State s1 = State("1");
     s1.setFinal(false);
@@ -42,24 +42,24 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     s3.setFinal(true);
     s5.setFinal(true);
 
-    s1.setOwningMachine(&req);
-    s2.setOwningMachine(&req);
-    s3.setOwningMachine(&req);
-    s4.setOwningMachine(&req);
-    s5.setOwningMachine(&req);
+    s1.setOwningMachine(req);
+    s2.setOwningMachine(req);
+    s3.setOwningMachine(req);
+    s4.setOwningMachine(req);
+    s5.setOwningMachine(req);
 
-    BOOST_CHECK_MESSAGE(req.addState(s1), "state 1 added");
-    BOOST_CHECK_MESSAGE(req.addState(s2), "state 2 added");
-    BOOST_CHECK_MESSAGE(req.addState(s3), "state 2 added");
-    BOOST_CHECK_MESSAGE(req.addState(s4), "state 2 added");
-    BOOST_CHECK_MESSAGE(req.addState(s5), "state 2 added");
-    req.generateDefaultStates();
+    BOOST_CHECK_MESSAGE(req->addState(s1), "state 1 added");
+    BOOST_CHECK_MESSAGE(req->addState(s2), "state 2 added");
+    BOOST_CHECK_MESSAGE(req->addState(s3), "state 2 added");
+    BOOST_CHECK_MESSAGE(req->addState(s4), "state 2 added");
+    BOOST_CHECK_MESSAGE(req->addState(s5), "state 2 added");
+    req->generateDefaultStates();
     
-    req.addRole("initiator");
-    req.addRole("B");
+    req->addRole("initiator");
+    req->addRole("B");
     std::vector<AgentMapping>::iterator invit;
     BOOST_CHECK_MESSAGE(1==1,"List of roles currently in the involvedAgents vector:");
-    for (invit = req.getInvolvedAgents().begin(); invit != req.getInvolvedAgents().end(); invit++)
+    for (invit = req->getInvolvedAgents().begin(); invit != req->getInvolvedAgents().end(); invit++)
     {
         std::cout<<"role: "<< invit->role<<((invit->check == true)?" set\n":" unset\n");
     }
@@ -73,41 +73,41 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     t.setNextStateName("2");
     std::cout<<"transition built..\n";
 
-    BOOST_CHECK_MESSAGE(req.getStateByName(std::string("1")) != NULL, "State search by name");
+    BOOST_CHECK_MESSAGE(req->getStateByName(std::string("1")) != NULL, "State search by name");
 
-    req.getStateByName("1")->addTransition(t);
+    req->getStateByName("1")->addTransition(t);
     
     t.setTo("initiator");
     t.setFrom("B");
     t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::REFUSE]);
     t.setNextStateName("3");
     
-    req.getStateByName("2")->addTransition(t);
+    req->getStateByName("2")->addTransition(t);
     
     t.setTo("initiator");
     t.setFrom("B");
     t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
     t.setNextStateName("4");
-    req.getStateByName("2")->addTransition(t);
+    req->getStateByName("2")->addTransition(t);
     
     t.setTo("initiator");
     t.setFrom("B");
     t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::FAILURE]);
     t.setNextStateName("5");
-    req.getStateByName("4")->addTransition(t);
+    req->getStateByName("4")->addTransition(t);
     
     t.setTo("initiator");
     t.setFrom("B");
     t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
     t.setNextStateName("5");
-    req.getStateByName("4")->addTransition(t);
+    req->getStateByName("4")->addTransition(t);
       
-    req.generateDefaultTransitions();
-    req.setInitialState("1");
+    req->generateDefaultTransitions();
+    req->setInitialState("1");
     
     BOOST_CHECK_MESSAGE(1==1,"state machine created");
    
-    for (invit = req.getInvolvedAgents().begin(); invit != req.getInvolvedAgents().end(); invit++)
+    for (invit = req->getInvolvedAgents().begin(); invit != req->getInvolvedAgents().end(); invit++)
     {
         std::cout<<"role: "<< invit->role<<((invit->check == true)?"set\n":"unset\n");
     }
@@ -163,20 +163,18 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     flow.push_back(m1);
     
     std::cout<<"flow of messages built..\n";
-    BOOST_CHECK_MESSAGE(req.checkIfRoleExists(std::string("initiator")),"check if initiator exists");
+    BOOST_CHECK_MESSAGE(req->checkIfRoleExists(std::string("initiator")),"check if initiator exists");
     
     std::vector<ACLMessage>::iterator it = flow.begin();
     std::cout<< it->getPerformative()<<"\n";
-    BOOST_CHECK_MESSAGE(req.startMachine(*it) == 0, "Start state machine");
 
-    it++;
-    while(it != flow.end() && !req.isConversationOver())
+    while(it != flow.end() && !req->isConversationOver())
     {
-        BOOST_CHECK_MESSAGE(req.consumeMessage(*it) == 0, "Consume message"); 
+        BOOST_CHECK_MESSAGE(req->consumeMessage(*it) == 0, "Consume message"); 
         it++;
     }
 
-    BOOST_CHECK_MESSAGE(req.isConversationOver(),"Conversation validated");
+    BOOST_CHECK_MESSAGE(req->isConversationOver(),"Conversation validated");
     
     
 }
@@ -198,26 +196,27 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
     AgentID a2 = AgentID(name2);
     a2.addAddress(addr3);
 
-    StateMachineBuilder builder = StateMachineBuilder();
-    StateMachine req = builder.getFunctionalStateMachine(std::string("request"));
-    req.setOwner(a1);
+    StateMachineBuilder builder;
 
-    BOOST_CHECK(req.getOwner().getName() == name1);
+    StateMachine* req = builder.getFunctionalStateMachine(std::string("request"));
+    req->setOwner(a1);
 
-    BOOST_CHECK(req.checkIfRoleExists(std::string("initiator")));
-    
+    BOOST_CHECK_MESSAGE(req != NULL, "Is Statemachine NULL?");
+    BOOST_CHECK(req->getOwner().getName() == name1);
+
+    BOOST_CHECK(req->checkIfRoleExists(std::string("initiator")));
     std::vector<ACLMessage> flow = buildRequestMessageFlow(a1, a2);
     std::vector<ACLMessage>::iterator it = flow.begin();
 
-    BOOST_CHECK_MESSAGE(req.startMachine(*it) == 0, "Start state machine");
-
-    it++;
-    while(it != flow.end() && !req.isConversationOver())
+    while(it != flow.end() && !req->isConversationOver())
     {
-        BOOST_CHECK_MESSAGE(req.consumeMessage(*it) == 0, "Consume message");
+        BOOST_CHECK_MESSAGE(req->consumeMessage(*it) == 0, "Consume message");
         it++;
     }
-    BOOST_CHECK_MESSAGE(req.isConversationOver(), "Conversation is over");
+    BOOST_CHECK_MESSAGE(req->isConversationOver(), "Conversation is over");
+
+    if(req)
+        delete req;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -32,29 +32,40 @@ void StateMachineBuilder::setProtocolResourceDir(const std::string& _resourceDir
     resourceDir = boost::filesystem::path(_resourceDir).string();
 }
 
-StateMachine StateMachineBuilder::getFunctionalStateMachine(const std::string& infile)
+StateMachine* StateMachineBuilder::getFunctionalStateMachine(const std::string& infile)
 {
-    localyLoadSpecification(infile);
-    
-    builtMachine.generateDefaultStates();
-    builtMachine.generateDefaultTransitions();
-        
+    locallyLoadSpecification(infile);
+    builtMachine->generateDefaultStates();
+    builtMachine->generateDefaultTransitions();
+
+    if(!builtMachine->validate())
+    {
+        LOG_ERROR("Machine validation failed");
+        delete builtMachine;
+        builtMachine = NULL;
+    }
+
     return builtMachine;
 }
 
-void StateMachineBuilder::localyLoadSpecification(const std::string& infile)
+void StateMachineBuilder::locallyLoadSpecification(const std::string& infile)
 {
+    // Cleanup before instantiation of new statemachine
+    roles.clear();
+    states.clear();
+    initialState = "";
+    builtMachine = NULL;
+
     ///call the other loadSpecification method and just discard the returned value(i.e: run it only to parameterize builtMachine)
-    StateMachine dummy = loadSpecification(infile);
+    loadSpecification(infile);
 }
 
-StateMachine StateMachineBuilder::loadSpecification(const std::string& infile)
+StateMachine* StateMachineBuilder::loadSpecification(const std::string& infile)
 {
     boost::filesystem::path protocolDir(resourceDir);
     boost::filesystem::path infilePath = operator/(protocolDir, infile);
     
     std::string protocolSpec = infilePath.string();
-
     TiXmlDocument file = TiXmlDocument(protocolSpec.c_str());
     
     if (!file.LoadFile())
@@ -62,7 +73,8 @@ StateMachine StateMachineBuilder::loadSpecification(const std::string& infile)
         LOG_ERROR("error loading the spec file: %s. Please use setProtocolResourceDir(const std::string&) to specificy the location of your protocol files", protocolSpec.c_str());
         throw std::runtime_error("Error loading the specification file");
     }
-    builtMachine = StateMachine();
+
+    builtMachine = new StateMachine();
     LOG_DEBUG("loadSpecification: file opened: %s", infile.c_str());
     TiXmlElement *sm = file.RootElement();
     parseStateMachineNode(sm);
@@ -75,14 +87,12 @@ void StateMachineBuilder::parseStateMachineNode(TiXmlElement *sm)
     const char *value;
     
     value = sm->Attribute(StateMachineBuilder::initial.c_str());
-    LOG_DEBUG("parseStateMachineNode: retrieved value of the \"initial\" parameter");
+    LOG_DEBUG("parseStateMachineNode: retrieved value of the \"initial\" state: %s", value);
     if (value)
         initialState = std::string(value);
     else
         throw std::runtime_error("Attribute of initial could not be retrieved");
         
-    LOG_DEBUG("parseStateMachineNode: saved the initial state of the machine");
-    
     TiXmlHandle handleSm = TiXmlHandle(sm);
     TiXmlElement* child = handleSm.FirstChild( "state" ).ToElement();
     
@@ -94,52 +104,51 @@ void StateMachineBuilder::parseStateMachineNode(TiXmlElement *sm)
     }
     
     addStates(child);
-    builtMachine.setInitialState(initialState);
+    builtMachine->setInitialState(initialState);
     addInvolvedAgentsMap();
-    
 }
 
 State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 {
     State ret;
-    LOG_DEBUG("parseStateNode: called");
-    
     const char *value;
     value = st->Attribute(StateMachineBuilder::id.c_str());
-    //if (value) ---- should not be necessary to check because it is already checked in the caller function(parseStates())
+    if (value) 
+    {
         ret.setUID(std::string(value));
-        LOG_DEBUG("\t\t#uid set: %s", value);
-    //else;
-        //TODO: throw some exception here
+    } else 
+    {
+        char buffer[512];
+        sprintf(buffer, "Attribute could not be retrieved %s", StateMachineBuilder::id.c_str());
+        throw std::runtime_error(std::string(buffer));
+    }
     
     value = NULL;
     value = st->Attribute(StateMachineBuilder::final.c_str());
-    LOG_DEBUG("\t\t#value field retrieved for final: %s", value);
     if (value)
     {
         if (!strcmp(value,"yes"))
+        {
 	  ret.setFinal(true);
-        else
-	  if (!strcmp(value,"no"))
-          {
-	      ret.setFinal(false);
-	  } else {
-	      throw std::runtime_error("Invalid value for attribute \"final\" of state node");
-          }
+        } else if (!strcmp(value,"no"))
+        {
+	    ret.setFinal(false);
+	} else {
+            char buffer[512];
+            sprintf(buffer, "Invalid value for attribute \"final\" of state node: %s", value);
+	    throw std::runtime_error(std::string(buffer));
+        }
     }
-    LOG_DEBUG("\t\t#set the final variable");
-        
-    ret.setOwningMachine(&builtMachine);
-    
+
     TiXmlHandle handleState = TiXmlHandle(st);
     TiXmlElement *trans = handleState.FirstChildElement("transition").ToElement();
     for (; trans != NULL; trans = trans->NextSiblingElement("transition") )
     {
         Transition t = Transition(parseTransitionNode(trans));
-        t.setOwningState(&ret);
         ret.addTransition(t);
 
-        LOG_DEBUG("\t\tparseStateNode: transition added: from %s, to %s, next state: %s, performative %s",
+        LOG_DEBUG("parseStateNode: state: %s -> transition added: from %s, to %s, next state: %s, performative %s",
+                 ret.getUID().c_str(),
                  t.getFrom().c_str(),
                  t.getTo().c_str(),
                  t.getNextStateName().c_str(),
@@ -152,35 +161,34 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 }
 void StateMachineBuilder::addStates(TiXmlElement *st)
 {
-    LOG_DEBUG("addStates called");
-    TiXmlElement *next;
     const char *value = NULL;
     value = st->Attribute(StateMachineBuilder::id.c_str());
     if (value)
     {
-        LOG_DEBUG("\t#retrieved id of the state");
         std::vector<std::string>::iterator it = find(states.begin(), states.end(), std::string(value));
         if ( it == states.end() )
         {
 	  states.push_back(std::string(value));
         } else
         {
-	  throw std::runtime_error("\"id\" field of states should be unique");
+          char buffer[512];
+          sprintf(buffer, "Multiple state with \"id\" %s. State id should be unique", value);
+	  throw std::runtime_error(std::string(buffer));
         }
     } else {
         throw std::runtime_error("State node has no \"id\" attribute");
     }
-    
-    if ( (next = st->NextSiblingElement("state")) != NULL )
+   
+    // Add current state node 
+    State state = parseStateNode(st);
+    builtMachine->addState(state);        
+
+    // Add all state nodes at the same level 
+    TiXmlElement *next = st;
+    while( (next = next->NextSiblingElement("state")) != NULL )
     {
-        addStates(next);
-        State state = parseStateNode(st);
-        builtMachine.addState(state);        
-    }
-    else
-    {
-        State state = parseStateNode(st);
-        builtMachine.addState(state);
+        State state = parseStateNode(next);
+        builtMachine->addState(state);        
     }
 }
 
@@ -188,17 +196,17 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
 {
     Transition ret;
     const char *value = NULL;
-    LOG_DEBUG("parseTransitionNode called");
     value = trans->Attribute(StateMachineBuilder::from.c_str());
     if ( value )
     {
-        std::vector<std::string>::iterator it = find (roles.begin(), roles.end(), std::string(value));
         ret.setFrom(std::string(value));
+
+        std::vector<std::string>::iterator it = find (roles.begin(), roles.end(), std::string(value));
         if ( it == roles.end())
 	  roles.push_back(std::string(value));
     }
     else {
-        throw new std::runtime_error("StateMachineBuilder::parseTransitionsNode 'from' extraction failed");
+        throw new std::runtime_error("StateMachineBuilder::parseTransitionsNode Transitions is missing 'from' attribute");
     }
         
     value = NULL;
@@ -212,21 +220,14 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
     }
     else
     {
-        throw new std::runtime_error("StateMachineBuilder::parseTransitionsNode 'to' extraction failed");
+        throw new std::runtime_error("StateMachineBuilder::parseTransitionsNode transition is missing 'to' attribute");
     }
     
     value = NULL;
     value = trans->Attribute(StateMachineBuilder::target.c_str());
     if (value)
     {
-        std::vector<std::string>::iterator it = find(states.begin(), states.end(), std::string(value));
-        if ( it != states.end() )
-	  ret.setNextStateName(std::string(value));
-        else
-        {
-          LOG_ERROR("Transition to an unknown state in the specification file: %s", value);
-          throw std::runtime_error("No such state in the specification file");
-        }
+	ret.setNextStateName(std::string(value));
     } else {
         LOG_ERROR("Could not retrieve attribute for target state: %s", StateMachineBuilder::target.c_str());
         throw std::runtime_error("Could not retrieve attribute for target state");
@@ -252,7 +253,7 @@ void StateMachineBuilder::addInvolvedAgentsMap()
     for (it = roles.begin(); it != roles.end(); it++)
     {
         std::string newrole = Role(*it);
-        builtMachine.addRole(newrole);
+        builtMachine->addRole(newrole);
     }
 }
 
