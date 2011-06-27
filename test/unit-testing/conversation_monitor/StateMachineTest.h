@@ -196,27 +196,38 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
     AgentID a2 = AgentID(name2);
     a2.addAddress(addr3);
 
+    StateMachineBuilder::setProtocolResourceDir(".");
     StateMachineBuilder builder;
 
-    StateMachine* req = builder.getFunctionalStateMachine(std::string("request"));
-    req->setOwner(a1);
-
-    BOOST_CHECK_MESSAGE(req != NULL, "Is Statemachine NULL?");
-    BOOST_CHECK(req->getOwner().getName() == name1);
-
-    BOOST_CHECK(req->checkIfRoleExists(std::string("initiator")));
-    std::vector<ACLMessage> flow = buildRequestMessageFlow(a1, a2);
-    std::vector<ACLMessage>::iterator it = flow.begin();
-
-    while(it != flow.end() && !req->isConversationOver())
+    try {
+        StateMachine req = builder.getFunctionalStateMachine(std::string("blabla"));
+        BOOST_FAIL("Instanciating with incorrect protocol does not throw as expected");
+    } catch(const std::runtime_error& e)
     {
-        BOOST_CHECK_MESSAGE(req->consumeMessage(*it) == 0, "Consume message");
-        it++;
+        BOOST_CHECK_MESSAGE(1==1, "Instanciating with incorrect protocol throws");
     }
-    BOOST_CHECK_MESSAGE(req->isConversationOver(), "Conversation is over");
 
-    if(req)
-        delete req;
+    try {
+        StateMachine req = builder.getFunctionalStateMachine(std::string("request"));
+        req.setOwner(a1);
+
+        BOOST_CHECK(req.getOwner().getName() == name1);
+
+        BOOST_CHECK(req.checkIfRoleExists(std::string("initiator")));
+        std::vector<ACLMessage> flow = buildRequestMessageFlow(a1, a2);
+        std::vector<ACLMessage>::iterator it = flow.begin();
+
+        while(it != flow.end() && !req.isConversationOver())
+        {
+            BOOST_CHECK_MESSAGE(req.consumeMessage(*it) == 0, "Consume message");
+            it++;
+        }
+        BOOST_CHECK_MESSAGE(req.isConversationOver(), "Conversation is over");
+    } catch(const std::runtime_error& e)
+    {
+        BOOST_FAIL("Get functional state machine for protocol 'request' failed");
+    }
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

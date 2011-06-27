@@ -22,6 +22,8 @@ namespace acl {
         \brief forward declaration of State class to reslve the circular dependency between these two classes 
     */
    class State;
+   
+   class StateMachineBuilder;
 
    /**
         \class StateMachine
@@ -58,7 +60,12 @@ class StateMachine
         
         /** \param conversationOver flag variable to indicate whether the confersation has reached a final state(= is over) */
         bool conversationOver;
-        
+
+        /**
+        * Flag to define whether the statemachine is valid and thus usable
+        */
+        bool isValidStateMachine;
+
         /**
 	  \param cancelMetaP (i.e.: cancel meta protocol) implements the fipa defined "meta conversation" that should be available on top
 			  of every other interaction protocol; through it, the initiator of a conversation can terminate the 
@@ -87,6 +94,8 @@ class StateMachine
         friend class Transition;
         /// StateMachineTest class declared as friend for testing purposes(NOT for the final version)
         friend class StateMachineTest;
+        
+        friend class StateMachineBuilder;
         
     public:
         /**
@@ -242,9 +251,9 @@ class StateMachine
         void updateAllAgentRoles(const Role& myrole, const std::vector<AgentID>& myagents);
         
         /**
-        * Validate the state machine that all existing transaction and from to field have a target
+        * Check is statemachine is valid, i.e. transitions and states are consistent
         */
-        bool validate();
+        bool isValid();
         
         /**
 	  \brief misc method added to easily visualize a built stateMachine;
@@ -265,7 +274,13 @@ class StateMachine
         AgentID 			getOwner() const;
         std::vector<State> 		getStates() const;
         ConversationID		getConversationID() const;
-        
+
+    protected:
+
+        /**
+        * Validate the state machine that all existing transaction and from to field have a target
+        */
+        void validate();
         
     private:
         /** \brief method called by the constructors that initializes some fields */
@@ -297,8 +312,6 @@ class StateMachine
         */
         StateMachine generateCancelMetaProtocol(Role);
 
-        
-    
 };
 
 

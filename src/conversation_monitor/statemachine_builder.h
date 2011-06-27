@@ -37,9 +37,13 @@ class StateMachineBuilder {
         std::string initialState;
         
         /// \param builtMachine: the state machine resulted from the last spec. file
-        StateMachine* builtMachine;
+        StateMachine builtMachine;
 
         static std::string resourceDir;
+
+        // Marked when the function prepareProtocolFromResourceDir has already been called
+        // Used for lazy initialization in getStateMachine
+        bool preparedResourceDir;
         
     public:
         /// \brief node attribute names used in the spec standard; most general ones such as "state", "transition" are hard-implement
@@ -50,6 +54,8 @@ class StateMachineBuilder {
         static const std::string final;
         static const std::string performative;
         static const std::string initial;
+
+        static std::map<std::string, StateMachine> availableStateMachines;
     
     public:
         /**
@@ -61,6 +67,12 @@ class StateMachineBuilder {
         * Set the resource dir where to search for the protocol definitions
         */
         static void setProtocolResourceDir(const std::string& resourceDir);
+        /**
+        * Instanciates all available machines from the resource directory
+        */
+        void prepareProtocolsFromResourceDir();
+
+        StateMachine getStateMachine(const std::string& protocol);
         
         /**
 	   after building the state machine from the spec. file calls the methods that do the necessary implicit additional adjustments
@@ -68,14 +80,14 @@ class StateMachineBuilder {
 	   the ready-to use state machine(builtMachine)
           \param file
         */
-        StateMachine* getFunctionalStateMachine(const std::string& file);
+        StateMachine getFunctionalStateMachine(const std::string& file);
         
         /**
 	   populates the builtMachine parameter of the class based on the given spec. file
 	  \param file name of the file with the specification
 	  \return builtMachine, BUT: raw, without the implicit parameters set(default states; default transitions)
         */
-        StateMachine* loadSpecification(const std::string& file);
+        StateMachine loadSpecification(const std::string& file);
         
         /**
 	   Identical to loadSpecification but does not return the state machine(i.e: it just populates the builtMachine param)

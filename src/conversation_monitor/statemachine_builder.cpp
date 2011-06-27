@@ -7,6 +7,8 @@
 #include <base/logging.h>
 #include <boost/filesystem/operations.hpp>
 
+namespace fs = boost::filesystem;
+
 namespace fipa {
 namespace acl {
 
@@ -18,9 +20,11 @@ const std::string StateMachineBuilder::final = 		std::string("final");
 const std::string StateMachineBuilder::performative = 	std::string("performative");
 const std::string StateMachineBuilder::initial = 	std::string("initial");
 
-std::string StateMachineBuilder::resourceDir = std::string(".");
+std::string StateMachineBuilder::resourceDir = std::string("");
 
-StateMachineBuilder::StateMachineBuilder()
+std::map<std::string, StateMachine> StateMachineBuilder::availableStateMachines;
+
+StateMachineBuilder::StateMachineBuilder() : builtMachine(), preparedResourceDir(false)
 {
     roles.clear();
     states.clear();
@@ -29,20 +33,72 @@ StateMachineBuilder::StateMachineBuilder()
 
 void StateMachineBuilder::setProtocolResourceDir(const std::string& _resourceDir)
 {
-    resourceDir = boost::filesystem::path(_resourceDir).string();
+
+    fs::path protocolDir = fs::path(_resourceDir);
+    if(fs::is_directory(protocolDir))
+        resourceDir = protocolDir.string();
 }
 
-StateMachine* StateMachineBuilder::getFunctionalStateMachine(const std::string& infile)
+void StateMachineBuilder::prepareProtocolsFromResourceDir()
+{
+    fs::path protocolDir = fs::path(resourceDir);
+    LOG_INFO("Prepare protocols from: %s", protocolDir.string().c_str());
+    if(fs::is_directory(protocolDir))
+    {
+        std::vector<fs::path> files;
+        std::copy(fs::directory_iterator(protocolDir), fs::directory_iterator(), std::back_inserter(files));
+
+        std::vector<fs::path>::iterator it = files.begin();
+        for(;it != files.end(); it++)
+        {
+            if(fs::is_regular_file(*it))
+            {
+                try {
+                    // Extract protocol name
+                    std::string protocolName = it->string();
+                    size_t pos = protocolName.find_last_of("/");
+                    protocolName.erase(0, pos+1);
+                    StateMachine statemachine = getFunctionalStateMachine(protocolName);
+                    LOG_INFO("Register protocol %s", protocolName.c_str());                    
+                    availableStateMachines[protocolName] = statemachine;
+                } catch(const std::runtime_error& e)
+                {
+                    LOG_ERROR("Error getting functional state machine: %s", e.what());
+                }
+            }
+        }
+    }
+
+    preparedResourceDir = true;
+}
+
+StateMachine StateMachineBuilder::getStateMachine(const std::string& protocol)
+{
+        if(!preparedResourceDir)
+            StateMachineBuilder::prepareProtocolsFromResourceDir();
+
+        std::map<std::string, StateMachine>::iterator it = availableStateMachines.find(protocol);
+
+        if(it != availableStateMachines.end())
+        {
+            return it->second;
+        }
+
+        LOG_WARN("StateMachine for protocol %s not found", protocol.c_str());
+        throw std::runtime_error("State machine for requested protocol does not exist");
+}
+
+StateMachine StateMachineBuilder::getFunctionalStateMachine(const std::string& infile)
 {
     locallyLoadSpecification(infile);
-    builtMachine->generateDefaultStates();
-    builtMachine->generateDefaultTransitions();
+    builtMachine.generateDefaultStates();
+    builtMachine.generateDefaultTransitions();
+    builtMachine.validate();
 
-    if(!builtMachine->validate())
+    if(!builtMachine.isValid())
     {
         LOG_ERROR("Machine validation failed");
-        delete builtMachine;
-        builtMachine = NULL;
+        throw std::runtime_error("State machine validation failed");
     }
 
     return builtMachine;
@@ -54,13 +110,12 @@ void StateMachineBuilder::locallyLoadSpecification(const std::string& infile)
     roles.clear();
     states.clear();
     initialState = "";
-    builtMachine = NULL;
 
     ///call the other loadSpecification method and just discard the returned value(i.e: run it only to parameterize builtMachine)
     loadSpecification(infile);
 }
 
-StateMachine* StateMachineBuilder::loadSpecification(const std::string& infile)
+StateMachine StateMachineBuilder::loadSpecification(const std::string& infile)
 {
     boost::filesystem::path protocolDir(resourceDir);
     boost::filesystem::path infilePath = operator/(protocolDir, infile);
@@ -74,7 +129,6 @@ StateMachine* StateMachineBuilder::loadSpecification(const std::string& infile)
         throw std::runtime_error("Error loading the specification file");
     }
 
-    builtMachine = new StateMachine();
     LOG_DEBUG("loadSpecification: file opened: %s", infile.c_str());
     TiXmlElement *sm = file.RootElement();
     parseStateMachineNode(sm);
@@ -104,7 +158,7 @@ void StateMachineBuilder::parseStateMachineNode(TiXmlElement *sm)
     }
     
     addStates(child);
-    builtMachine->setInitialState(initialState);
+    builtMachine.setInitialState(initialState);
     addInvolvedAgentsMap();
 }
 
@@ -181,14 +235,14 @@ void StateMachineBuilder::addStates(TiXmlElement *st)
    
     // Add current state node 
     State state = parseStateNode(st);
-    builtMachine->addState(state);        
+    builtMachine.addState(state);        
 
     // Add all state nodes at the same level 
     TiXmlElement *next = st;
     while( (next = next->NextSiblingElement("state")) != NULL )
     {
         State state = parseStateNode(next);
-        builtMachine->addState(state);        
+        builtMachine.addState(state);        
     }
 }
 
@@ -253,7 +307,7 @@ void StateMachineBuilder::addInvolvedAgentsMap()
     for (it = roles.begin(); it != roles.end(); it++)
     {
         std::string newrole = Role(*it);
-        builtMachine->addRole(newrole);
+        builtMachine.addRole(newrole);
     }
 }
 

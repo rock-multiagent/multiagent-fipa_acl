@@ -30,8 +30,6 @@ const std::string StateMachine::INITIAL = std::string("initial");
 const std::string StateMachine::INITIATOR = std::string("initiator");
 void StateMachine::initializeObjectFields()
 {
-    
-    
     involvedAgents.clear();
     preImposedRoles.clear();
     states.clear();
@@ -39,6 +37,8 @@ void StateMachine::initializeObjectFields()
     owner = AgentID();
     conversationOver = false;
     active = false;
+    
+    isValidStateMachine = false;
     cancelMetaP.clear();
     
     language.clear();
@@ -51,7 +51,6 @@ void StateMachine::initializeObjectFields()
 }
 bool StateMachine::setInitialState(const string& stateid)
 {
-    LOG_ERROR("Set initial state %s", stateid.c_str());
     if (active) return false;
     currentState = stateid;
     return true;
@@ -165,10 +164,11 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
     return temp;
 }
 
-StateMachine::StateMachine()
+StateMachine::StateMachine() 
 {
     initializeObjectFields();
 }
+
 StateMachine::StateMachine(const AgentID& _owner)
 {
     initializeObjectFields();
@@ -176,7 +176,7 @@ StateMachine::StateMachine(const AgentID& _owner)
     
 }
 
-StateMachine::StateMachine(const StateMachine& target)
+StateMachine::StateMachine(const StateMachine& target) 
 {
     std::vector<State> tempStates = target.getStates();
     for (std::vector<State>::iterator it = tempStates.begin(); it != tempStates.end(); it ++)
@@ -197,7 +197,6 @@ StateMachine::StateMachine(const StateMachine& target)
     encoding = target.getEncoding();
     protocol = target.getProtocol();
     convid = target.getConversationID();
-        
 }
 
 StateMachine::~StateMachine()
@@ -549,8 +548,15 @@ void StateMachine::print()
     std::cout<<"========================"<<"=============="<<"========================\n";
 }
 
-bool StateMachine::validate()
+bool StateMachine::isValid()
 {
+    return isValidStateMachine;
+}
+
+void StateMachine::validate()
+{
+    isValidStateMachine = true;
+
     std::vector<State>::iterator it = states.begin();
     std::vector<std::string> stateIds;
 
@@ -582,11 +588,10 @@ bool StateMachine::validate()
         if(availableIt == stateIds.end())
         {
             LOG_ERROR("Protocol definition is invalid. State with id %s is not defined.", requiredIt->c_str());
-            return false;
+            isValidStateMachine = false;
+            break;
         }
     }
-
-    return true;
 }
 
 
