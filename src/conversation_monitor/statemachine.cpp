@@ -35,7 +35,7 @@ void StateMachine::initializeObjectFields()
     involvedAgents.clear();
     preImposedRoles.clear();
     states.clear();
-    currentState = NULL;
+    currentState = "";
     owner = AgentID();
     conversationOver = false;
     active = false;
@@ -49,19 +49,11 @@ void StateMachine::initializeObjectFields()
     
 
 }
-bool StateMachine::setInitialState(State *_state)
+bool StateMachine::setInitialState(const string& stateid)
 {
+    LOG_ERROR("Set initial state %s", stateid.c_str());
     if (active) return false;
-    currentState = _state;
-    return true;
-}
-
-bool StateMachine::setInitialState(const std::string _uid)
-{
-    if (active) return false;
-    State *s = getStateByName(_uid);
-    if (!s) return false;
-    currentState = s;
+    currentState = stateid;
     return true;
 }
 
@@ -76,7 +68,6 @@ bool StateMachine::setOwner(const AgentID& _owner)
 
 void StateMachine::generateDefaultStates()
 {
-    //currentState = NULL;
     /*
     State initial = State(StateMachine::INITIAL);
     initial.setFinal(false);
@@ -132,7 +123,8 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
         State initial = State(StateMachine::INITIAL);
         initial.setFinal(false);
         states.push_back(initial);
-        currentState = &(*find(states.begin(),states.end(),StateMachine::INITIAL));
+        std::vector<State>::iterator sit = states.begin();
+        currentState = StateMachine::INITIAL;
         temp.generateDefaultStates();
         
         State first = State(std::string("1"));
@@ -192,9 +184,9 @@ StateMachine::StateMachine(const StateMachine& target)
     
     involvedAgents = target.getInvolvedAgents();
     owner = target.getOwner();
-    
-    currentState = getStateByName(target.getCurrentState()->getUID());
-    
+        
+    currentState = target.currentState; 
+
     active = target.isActive();
     conversationOver = target.isConversationOver();
     
@@ -237,7 +229,6 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
         startMachine(msg);
     }
 
-    int x = 0; // return code received from the current state
     std::vector<StateMachine>::iterator it;
     for (it = cancelMetaP.begin(); it != cancelMetaP.end(); it++)
     {
@@ -255,12 +246,13 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
     else;
     
     LOG_DEBUG("sending the message to the current state");
-    if (currentState)
+    State* state = getCurrentState();
+    if (state)
     {
-        LOG_DEBUG("current state not-null");
-        if (currentState->consumeMessage(msg) == 0)   
+        if (state->consumeMessage(msg) == 0)   
         {
-	  if (currentState->getFinal() ) { conversationOver = true; active = false; return 0;}
+          state = getCurrentState();
+	  if (state->getFinal() ) { conversationOver = true; active = false; return 0;}
 	  else return 0;
         }
     }else; //TODO: twrow some error here
@@ -513,7 +505,19 @@ Ontology 			StateMachine::getOntology() const		{return ontology;}
 Encoding 			StateMachine::getEncoding() const		{return encoding;}
 Protocol 			StateMachine::getProtocol() const		{return protocol;}
 std::vector<StateMachine> 	StateMachine::getCancelMetaP() const		{return cancelMetaP;}
-State* 			StateMachine::getCurrentState() const		{return currentState;}
+State* StateMachine::getCurrentState()
+{
+    std::vector<State>::iterator sit;
+    sit = states.begin();
+    for(;sit != states.end(); sit++)
+    {
+        if(sit->getUID() == currentState)
+            return &(*sit);
+    }
+    
+    return NULL;
+}
+
 std::vector<AgentMapping> 	StateMachine::getInvolvedAgents () const	{return involvedAgents;}
 AgentID 			StateMachine::getOwner() const		{return owner;}
 std::vector<State> 		StateMachine::getStates() const		{return states;}
@@ -527,10 +531,7 @@ void StateMachine::print()
         std::cout<< it->role <<" ";
     
     std::cout<<"\ncurrentState: ";
-    if (currentState)
-        std::cout<< currentState->getUID() <<"\n";
-    else
-        std::cout<<"currentState not set\n";
+    std::cout<< currentState <<"\n";
     
     std::cout<<"owner: " << owner.getName() <<"\n";
     std::cout<<"active: "<<active<<"\n";

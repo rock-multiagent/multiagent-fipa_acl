@@ -51,7 +51,7 @@ class StateMachine
         AgentID owner;
         
         /** \param currentState pointer to the current state of the state machine(from the states vector) */
-        State *currentState;
+        std::string currentState;
         
         /** \param active flag variable to indicate whether a conversation has been successfully initiated(i.e: wit a valid message) */
         bool active;
@@ -109,11 +109,8 @@ class StateMachine
 
         ~StateMachine();
         
-        /** \brief setter method for the initial state of the state machine(takes a pointer as argument) */
-        bool setInitialState(State*);
-
         /** \brief setter method for the initial state of the state machine(takes the name-uid- of the state as parameter)*/
-        bool setInitialState(const std::string);
+        bool setInitialState(const std::string&);
 
         /** \brief setter method for the owner of the machine */
         bool setOwner(const AgentID&);
@@ -253,13 +250,17 @@ class StateMachine
 	  \brief misc method added to easily visualize a built stateMachine;
         */
         void print();
+
+        /**
+        * Resolve the current state 
+        */
+        State* getCurrentState();
         
         Language 			getLanguage() const;
         Ontology 			getOntology() const;
         Encoding 			getEncoding() const;
         Protocol 			getProtocol() const;
         std::vector<StateMachine> 	getCancelMetaP() const;
-        State* 			getCurrentState() const;
         std::vector<AgentMapping> 	getInvolvedAgents () const;
         AgentID 			getOwner() const;
         std::vector<State> 		getStates() const;

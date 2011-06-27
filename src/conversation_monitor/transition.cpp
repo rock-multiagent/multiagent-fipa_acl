@@ -312,12 +312,11 @@ void Transition::performOnStateExit(const ACLMessage &msg)
 {
     if (nextState == NULL) LOG_DEBUG("\t# next state is NULL\n");
     nextState->setAllPrecedingStates(owningState);
-    LOG_DEBUG("\t# done with setting preceding states\n");
     owningState->resetInvolvedAgentsTicks();
-    LOG_DEBUG("\t# done with reseting involved agents ticks\n");
-    machine->currentState = nextState;
-    
+    machine->currentState = nextState->getUID();
+    LOG_INFO("Set next state %s", nextState->getUID().c_str());
 }
+
 /*
 bool Transition::checkAllSendersAccountedFor(ACLMessage &msg)
 {
