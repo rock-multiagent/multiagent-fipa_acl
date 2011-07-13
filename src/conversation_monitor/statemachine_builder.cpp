@@ -24,16 +24,12 @@ std::string StateMachineBuilder::resourceDir = std::string("");
 
 std::map<std::string, StateMachine> StateMachineBuilder::availableStateMachines;
 
-StateMachineBuilder::StateMachineBuilder() : builtMachine(), preparedResourceDir(false)
+StateMachineBuilder::StateMachineBuilder() : builtMachine(), preparedResourceDir(false), roles(), states(), initialState()
 {
-    roles.clear();
-    states.clear();
-    initialState.clear();
 }
 
 void StateMachineBuilder::setProtocolResourceDir(const std::string& _resourceDir)
 {
-
     fs::path protocolDir = fs::path(_resourceDir);
     if(fs::is_directory(protocolDir))
         resourceDir = protocolDir.string();
@@ -74,18 +70,18 @@ void StateMachineBuilder::prepareProtocolsFromResourceDir()
 
 StateMachine StateMachineBuilder::getStateMachine(const std::string& protocol)
 {
-        if(!preparedResourceDir)
-            StateMachineBuilder::prepareProtocolsFromResourceDir();
+    if(!preparedResourceDir)
+        StateMachineBuilder::prepareProtocolsFromResourceDir();
 
-        std::map<std::string, StateMachine>::iterator it = availableStateMachines.find(protocol);
+    std::map<std::string, StateMachine>::iterator it = availableStateMachines.find(protocol);
 
-        if(it != availableStateMachines.end())
-        {
-            return it->second;
-        }
+    if(it != availableStateMachines.end())
+    {
+        return it->second;
+    }
 
-        LOG_WARN("StateMachine for protocol %s not found", protocol.c_str());
-        throw std::runtime_error("State machine for requested protocol does not exist");
+    LOG_WARN("StateMachine for protocol %s not found", protocol.c_str());
+    throw std::runtime_error("State machine for requested protocol does not exist");
 }
 
 StateMachine StateMachineBuilder::getFunctionalStateMachine(const std::string& infile)
@@ -126,7 +122,7 @@ StateMachine StateMachineBuilder::loadSpecification(const std::string& infile)
     
     if (!file.LoadFile())
     {
-        LOG_ERROR("error loading the spec file: %s. Please use setProtocolResourceDir(const std::string&) to specificy the location of your protocol files", protocolSpec.c_str());
+        LOG_ERROR("error loading the spec file: %s. Please use setProtocolResourceDir(const std::string&) to specify the location of your protocol files", protocolSpec.c_str());
         throw std::runtime_error("Error loading the specification file");
     }
 
@@ -165,12 +161,12 @@ void StateMachineBuilder::parseStateMachineNode(TiXmlElement *sm)
 
 State StateMachineBuilder::parseStateNode(TiXmlElement *st)
 {
-    State ret;
+    State state;
     const char *value;
     value = st->Attribute(StateMachineBuilder::id.c_str());
     if (value) 
     {
-        ret.setUID(std::string(value));
+        state.setUID(std::string(value));
     } else 
     {
         char buffer[512];
@@ -184,10 +180,10 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
     {
         if (!strcmp(value,"yes"))
         {
-	  ret.setFinal(true);
+	  state.setFinal(true);
         } else if (!strcmp(value,"no"))
         {
-	    ret.setFinal(false);
+	    state.setFinal(false);
 	} else {
             char buffer[512];
             sprintf(buffer, "Invalid value for attribute \"final\" of state node: %s", value);
@@ -200,10 +196,10 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
     for (; trans != NULL; trans = trans->NextSiblingElement("transition") )
     {
         Transition t = Transition(parseTransitionNode(trans));
-        ret.addTransition(t);
+        state.addTransition(t);
 
         LOG_DEBUG("parseStateNode: state: %s -> transition added: from %s, to %s, next state: %s, performative %s",
-                 ret.getUID().c_str(),
+                 state.getUID().c_str(),
                  t.getFrom().c_str(),
                  t.getTo().c_str(),
                  t.getNextStateName().c_str(),
@@ -212,7 +208,7 @@ State StateMachineBuilder::parseStateNode(TiXmlElement *st)
     }
     
     //TODO: implement specification for subprotocols
-    return ret;
+    return state;
 }
 void StateMachineBuilder::addStates(TiXmlElement *st)
 {

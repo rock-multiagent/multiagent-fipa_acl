@@ -46,9 +46,8 @@ void StateMachine::initializeObjectFields()
     protocol.clear();
     convid.clear();
     encoding.clear();
-    
-
 }
+
 bool StateMachine::setInitialState(const string& stateid)
 {
     if (active) return false;
@@ -58,21 +57,12 @@ bool StateMachine::setInitialState(const string& stateid)
 
 bool StateMachine::setOwner(const AgentID& _owner)
 {
-    if (active) 
-        return false;
     owner = _owner;
-
     return true;
 }
 
 void StateMachine::generateDefaultStates()
 {
-    /*
-    State initial = State(StateMachine::INITIAL);
-    initial.setFinal(false);
-    states.push_back(initial);
-    currentState = &(*find(states.begin(),states.end(),StateMachine::INITIAL));
-    */
     State notUnderstood = State(StateMachine::NOT_UNDERSTOOD);
     notUnderstood.setFinal(true);
     
@@ -88,15 +78,16 @@ void StateMachine::generateDefaultTransitions()
     std::vector<State>::iterator it;
     for (it = states.begin(); it != states.end(); it++)
     {
-        if (!it->getUID().compare(StateMachine::NOT_UNDERSTOOD)) continue;
         //if (!it->getUid().compare(StateMachine::CONV_CANCELLED)) continue;
         //if (!it->getUid().compare(StateMachine::INITIAL) continue;
-        
-        it->generateDefaultTransitions();        
+        if(it->getFinal())
+            continue;
+
+        LOG_WARN("Default transitions not enabled");
     }
 }
-//&&&&&&&&&&&&&NOTE:remember to treat not understood transitions differently when executing as well as when loading--not so sure i still need to(on exec)&&&&&&&&&&//
-//~~~~&&&&&&&&&&&&&NOTE:remember to check for duplicates when adding a transition to a state&&&&&&&&&&//
+//NOTE:remember to treat not understood transitions differently when executing as well as when loading--not so sure i still need to(on exec)
+//NOTE:remember to check for duplicates when adding a transition to a state
 
 int StateMachine::createAndStartNewCancelMetaProtocol(const ACLMessage &msg)
 {
@@ -178,13 +169,9 @@ StateMachine::StateMachine(const AgentID& _owner)
 
 StateMachine::StateMachine(const StateMachine& target) 
 {
-    std::vector<State> tempStates = target.getStates();
-    for (std::vector<State>::iterator it = tempStates.begin(); it != tempStates.end(); it ++)
-        addState(*it);
-    
-    involvedAgents = target.getInvolvedAgents();
-    owner = target.getOwner();
-        
+    states = target.states;
+    involvedAgents = target.involvedAgents;
+    owner = target.owner;
     currentState = target.currentState; 
 
     active = target.isActive();
@@ -197,6 +184,44 @@ StateMachine::StateMachine(const StateMachine& target)
     encoding = target.getEncoding();
     protocol = target.getProtocol();
     convid = target.getConversationID();
+    isValidStateMachine = target.isValid();
+
+    std::vector<State>::iterator it = states.begin();
+
+    for(; it != states.end(); it++)
+    {
+        it->setOwningMachine(this);
+    }
+}
+
+StateMachine& StateMachine::operator=(const StateMachine& target)
+{
+    if(this != &target)
+    {
+        states = target.states;
+        involvedAgents = target.involvedAgents;
+        owner = target.owner;
+        currentState = target.currentState; 
+
+        active = target.isActive();
+        conversationOver = target.isConversationOver();
+        
+        cancelMetaP = target.getCancelMetaP();
+        
+        ontology = target.getOntology();
+        language = target.getLanguage();
+        encoding = target.getEncoding();
+        protocol = target.getProtocol();
+        convid = target.getConversationID();
+        isValidStateMachine = target.isValid();
+
+        std::vector<State>::iterator it = states.begin();
+        for(; it != states.end(); it++)
+        {
+            it->setOwningMachine(this);
+        }
+    }
+    return *this;
 }
 
 StateMachine::~StateMachine()
@@ -208,7 +233,7 @@ StateMachine::~StateMachine()
 
 int StateMachine::startMachine(const ACLMessage& msg)
 {
-    LOG_DEBUG("Start machine");
+    LOG_DEBUG("Start machine for owner: %s", owner.getName().c_str());
     active = true;
     convid = msg.getConversationID();
     protocol = msg.getProtocol();
@@ -235,26 +260,35 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
         {	  
 	  LOG_DEBUG("meta conversation active");
 	  if (it->consumeMessage(msg) == 0) return 0;
-	  //x= 1;
         }
     }
-    if (!msg.getPerformative().compare(ACLMessage::perfs[ACLMessage::CANCEL]) )
-        if (!getAgentRole(msg.getSender()).compare(StateMachine::INITIATOR) )
-	  return createAndStartNewCancelMetaProtocol(msg);
-        else return 1;
-    else;
+
+    if( msg.getPerformative() == ACLMessage::perfs[ACLMessage::CANCEL] )
+    {
+        if ( getAgentRole(msg.getSender()) == StateMachine::INITIATOR )
+        {
+	    return createAndStartNewCancelMetaProtocol(msg);
+        } else {
+            return 1;
+        }
+    }
     
-    LOG_DEBUG("sending the message to the current state");
     State* state = getCurrentState();
     if (state)
     {
+        LOG_DEBUG("sending the message %s to the current state: %s", msg.getPerformative().c_str(), state->getUID().c_str());
+
         if (state->consumeMessage(msg) == 0)   
         {
           state = getCurrentState();
+          LOG_DEBUG("State after consuming msg %s state: %s", msg.getPerformative().c_str(), state->getUID().c_str());
 	  if (state->getFinal() ) { conversationOver = true; active = false; return 0;}
 	  else return 0;
         }
-    }else; //TODO: twrow some error here
+
+    } else {
+        throw std::runtime_error("Current state is NULL");
+    }
     return 1;
 }
 
@@ -285,14 +319,12 @@ void StateMachine::updateAllAgentRoles(const Role& myrole, const std::vector<Age
 State* StateMachine::getStateByName(const std::string& _name)
 {
     std::vector<State>::iterator it = find(states.begin(),states.end(),_name);
-    if (it == states.end()) return NULL;
-    return (&(*it));
-    
-    /*for (it = states.begin(); it != states.end(); it ++)
+    if (it == states.end()) 
     {
-        if (!it->getUID().compare(_name)) return (&(*it));
+        LOG_WARN("State not found: %s in machine %p of owner: %s", _name.c_str(), this, owner.getName().c_str());
+        return NULL;
     }
-    return NULL;*/
+    return (&(*it));
 }
 
 State* StateMachine::getStateByName(State _name) const
@@ -427,7 +459,6 @@ bool StateMachine::checkIfRoleExists(const Role& myrole)
     std::vector<AgentMapping>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
     {
-       LOG_INFO("Check if role exists: involved agents: %s", it->role.c_str());
        if (it->role == myrole)
            return true;
     }
@@ -438,7 +469,7 @@ bool StateMachine::addState(State& _state)
 {
     std::string name = _state.getUID();
     _state.setOwningMachine(this);
-    if (find(states.begin(),states.end(),name) == states.end() )
+    if ( std::find(states.begin(),states.end(),name) == states.end() )
     {
         states.push_back(_state);
         return true;
@@ -448,7 +479,6 @@ bool StateMachine::addState(State& _state)
 
 Role StateMachine::getAgentRole(const AgentID& ag)
 {
-    LOG_DEBUG("Get AgentRole for %s", ag.getName().c_str());
     std::vector<AgentMapping>::const_iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
     {
@@ -492,9 +522,11 @@ void StateMachine::addRole(const Role& myrole)
 
 void StateMachine::loadParameters()
 {
+    LOG_INFO("StateMachine # of state is: %d", states.size());
     std::vector<State>::iterator sit;
     for (sit = states.begin(); sit != states.end(); ++sit)
     {
+        assert(&(*sit));
         sit->loadParameters();
     }
 }
@@ -548,12 +580,12 @@ void StateMachine::print()
     std::cout<<"========================"<<"=============="<<"========================\n";
 }
 
-bool StateMachine::isValid()
+bool StateMachine::isValid() const
 {
     return isValidStateMachine;
 }
 
-void StateMachine::validate()
+void StateMachine::validate(bool associatedMachine)
 {
     isValidStateMachine = true;
 
@@ -562,6 +594,8 @@ void StateMachine::validate()
 
     for(; it != states.end(); it++)
     {
+        if(associatedMachine) 
+            assert(it->getOwningMachine() == this);
         stateIds.push_back(it->getUID());
     }
 
@@ -572,6 +606,9 @@ void StateMachine::validate()
         std::vector<Transition>::iterator tit = transitions.begin();
         for(; tit != transitions.end(); tit++)
         {
+           if(associatedMachine)
+               assert(tit->getMachine() == this);
+
            std::string to = tit->getTo();
            std::string from = tit->getFrom(); 
         

@@ -10,52 +10,23 @@
 namespace fipa {
 namespace acl {
     
-Transition::Transition()
+Transition::Transition() : from(), to(), expectedPerf(), machine(0), nextState(0), owningState(0), precedingState(0), expectedSenders(), expectedRecepients()
 {
-    from.clear();
-    to.clear();
-    expectedPerf.clear();
-    machine = NULL;
-    owningState = NULL;
-    precedingState = NULL;
-    nextState = NULL;
-    expectedSenders.clear();
     expectedRecepients.clear();
 }
 
-Transition::Transition(const Transition &t)
-{
-    from = t.getFrom();
-    to = t.getTo();
-    expectedPerf = t.getExpectedPerformative();
-    nextStateName = t.getNextStateName();
-    
-    machine = t.getMachine();
-    owningState = t.getOwningState();
-    precedingState = t.getPrecedingState();
-    nextState = t.getNextState();
-    
-    expectedSenders = t.getExpectedSenders();
-    expectedRecepients = t.getExpectedRecepients();
-}
-    
 int Transition::consumeMessage(const ACLMessage &msg)
 {
-    LOG_DEBUG("\towningState is:\t\t  %s\n",owningState->getUID().c_str() );
-    if (validateMessage(msg))
+    LOG_DEBUG("owningState is: %s",owningState->getUID().c_str() );
+    if( validateMessage(msg) )
     {
         //if (expectedPerf.compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
-        LOG_DEBUG("\t#### validated message\n");
         performWithoutStateExit(msg);
         //if ( checkAllSendersAccountedFor(msg) && checkAllRecepientsAccountedFor(msg) )
-        LOG_DEBUG("\t#### done with perform without state exit\n");
         if (owningState->checkAllAgentsAccountedFor() )
         {
-	  LOG_DEBUG("\t#### all agents accounted for\n");
 	  performOnStateExit(msg);
-	  LOG_DEBUG("\t#### done with perform on state exit\n");
-        } else 
-	  {
+        } else {
 	      if (nextState->getFinal()) 
 	      {
 		AgentID a1,a2;
@@ -64,8 +35,10 @@ int Transition::consumeMessage(const ACLMessage &msg)
 		if (a1 == a2 ) machine->removeInterlocutor(msg.getAllReceivers() );
 		else machine->removeInterlocutor(msg.getSender());
 	      }
-	  }
-	  return 0;
+	}
+	return 0;
+    } else {
+        LOG_ERROR("Message validation failed");
     }
     return 1;
 }
@@ -81,59 +54,59 @@ int Transition::consumeMessage(const ACLMessage &msg)
 
 bool Transition::validateMessage(const ACLMessage &msg)
 {
-    if (!validatePerformative(msg)){LOG_DEBUG("\t\t\t\t*******1\n"); return false; }
+    if (!validatePerformative(msg))
+    {
+        LOG_ERROR("Performative validation failed");
+        return false;
+    }
     
     if (expectedSenders.empty() || expectedRecepients.empty() ) 
     {
-        LOG_DEBUG("agents not set yet..\n");
         if (!updateRoles(msg)) 
         {
-	  LOG_DEBUG("updateRoles(msg) returned 0\n");
+	  LOG_ERROR("updateRoles(msg) failed");
 	  return false;
         } 
-        LOG_DEBUG("agents set now..\n");   
     }
     
-    LOG_DEBUG("!validate message method! from: ");
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
-        LOG_DEBUG("%s", it->getName().c_str());
-    LOG_DEBUG("\n");
+        LOG_DEBUG("validate msg from %s", it->getName().c_str());
     
-    LOG_DEBUG("to: ");
     for (std::vector<AgentID>::iterator it = expectedRecepients.begin(); it != expectedRecepients.end(); it++)
-        LOG_DEBUG("%s", it->getName().c_str() );
-    LOG_DEBUG("\n");
-    
+        LOG_DEBUG("validate msg to %s", it->getName().c_str() );
            
-    if (!validateSender(msg)) { LOG_DEBUG("\t\t\t\t*******2\n"); return false; }
-    if (!validateRecepients(msg)) {LOG_DEBUG("\t\t\t\t*******3\n"); return false; }
+    if (!validateSender(msg)) { LOG_ERROR("Sender validation failed"); return false; }
+    if (!validateRecepients(msg)) {LOG_ERROR("Recipient validation failed"); return false; }
     
-    if (!validateConvID(msg)) {LOG_DEBUG("\t\t\t\t*******4\n"); return false; }
-    if (!validateProtocol(msg)) {LOG_DEBUG("\t\t\t\t*******5\n"); return false; }
-    if (!validateEncoding(msg)) {LOG_DEBUG("\t\t\t\t*******6\n"); return false; }
-    if (!validateLanguage(msg)) {LOG_DEBUG("\t\t\t\t*******7\n"); return false; }
-    LOG_DEBUG("#### passes language test\n");
-    if (!validateOntology(msg)) {LOG_DEBUG("\t\t\t\t*******8\n"); return false; }
-    LOG_DEBUG("#### passes ontology test\n");
-    if (!validateInReplyTo(msg)) {LOG_DEBUG("\t\t\t\t*******9\n"); return false; }
-    LOG_DEBUG("#### passes in reply to test\n");
+    if (!validateConvID(msg)) { LOG_ERROR("ConversationID validation failed"); return false; }
+    if (!validateProtocol(msg)) { LOG_ERROR("Protocol validation failed"); return false; }
+    if (!validateEncoding(msg)) { LOG_ERROR("Encoding validation failed"); return false; }
+    if (!validateLanguage(msg)) {LOG_ERROR("Language validation failed"); return false; }
+    if (!validateOntology(msg)) {LOG_ERROR("Ontology validation failed"); return false; }
+    if (!validateInReplyTo(msg)) {LOG_ERROR("InReplyTo validation failed"); return false; }
     //if (!validateReplyBy(msg)) return false;
-    
-    
+
     return true;
      
 }
 void Transition::loadParameters()
 {
+    LOG_INFO("Load parameters from %s to %s nextStateName %s", from.c_str(), to.c_str(), nextStateName.c_str());
+    assert(machine);
     nextState = machine->getStateByName(nextStateName);
-    LOG_INFO("Load parameters: next state %s", nextState->getUID().c_str());
+    if(nextState)
+    {
+        LOG_INFO("Load parameters: next state %s", nextState->getUID().c_str());
+    } else {
+        LOG_WARN("State could not be found: %s", nextStateName.c_str()); 
+    }
     updateRoles();
 }
 void Transition::updateRoles()
 {
     expectedSenders.clear();
     expectedRecepients.clear();
-    LOG_INFO("UpdateRoles for stateMachine with owner: %s", machine->getOwner().getName().c_str());
+    LOG_INFO("UpdateRoles for stateMachine %p with owner: %s", machine, machine->getOwner().getName().c_str());
     if (machine->checkIfRoleExists(from) )
     {
         if(machine->checkIfRoleSet(from) )
@@ -215,7 +188,6 @@ bool Transition::updateRoles(const ACLMessage &msg)
 		{ 
 		    removeAllAgentsBut(machine->owner,expectedSenders); 
 		    break;
-		     //it = machine->involvedAgents.end(); 
 		}
 		
 	      }
@@ -344,122 +316,109 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 bool Transition::validateSender (const ACLMessage &msg)
 {
     AgentID agent = msg.getSender();
-    /*
-    LOG_DEBUG("$$$$$$$$random test: expected senders of transition: ");
+    
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
-        LOG_DEBUG("%s", it->getName() );
-    */    
+        LOG_DEBUG("Expected sender %s", it->getName().c_str() );
+
     std::vector<AgentID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
-    /*
-    if (found != expectedSenders.end())
-    LOG_DEBUG("\n\t$$$$$found sender: %s\n",found->getName() );
-    else LOG_DEBUG("\n\t$$$$$found sender: NULL\n");
-    */
     if ( found != expectedSenders.end() ) return true;
     return false;
 }
 
 bool Transition::validateRecepients (const ACLMessage &msg)
 {
-    LOG_DEBUG("\t#### call to calidate recepients\n");
     std::vector<AgentID> recepients = msg.getAllReceivers();
     std::vector<AgentID>::iterator it;
     
-    /*
-    LOG_DEBUG("^^^^ message from %s\t to %s ^^^^\n",from, to);
-    std::vector<AgentID>::iterator test = expectedSenders.begin();
-    std::vector<AgentID>::iterator test1 = expectedRecepients.begin();
-    
-    LOG_DEBUG("\t---expected senders are:\n");
-    for (; test != expectedSenders.end(); test++)
-    {LOG_DEBUG("%s", test->getName() ); }
-    LOG_DEBUG("\n\t---expected recepients are:\n");
-    for (test1; test1 != expectedRecepients.end(); test1++)
-    {LOG_DEBUG("%s", test1->getName() );}
-    LOG_DEBUG("\n");
-    
-    LOG_DEBUG("\t###check###: \n");
-    std::vector<AgentMapping>::iterator amp;
-    for (amp = machine->involvedAgents.begin(); amp != machine->involvedAgents.end(); ++amp)
-    {
-        LOG_DEBUG( "#\t %s\t%s %d#\n", amp->role, amp->agent.getName(), amp->check);
-    }
-    */
-    
-    
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
-        
-        LOG_DEBUG("^^^^ output from the actual check *** %s\t%s\n\n",expectedRecepients.begin()->getName().c_str(),it->getName().c_str());
         std::vector<AgentID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
-        if (found != expectedRecepients.end() ) ;
-        else return false;
+        if (found == expectedRecepients.end() )
+            return false;
     }
     return true;
 }
 
 bool Transition::validateInReplyTo(const ACLMessage &msg)
 {
-    if (msg.getInReplyTo().empty()) return true;
-    ACLMessage *fromArchive;
+    if (msg.getInReplyTo().empty()  || precedingState == NULL) return true;
+
+    // Checking if we actually have a message that relates to the InReplyTo field
     std::vector<AgentID> recepients = msg.getAllReceivers();
+
     std::vector<AgentID>::iterator it;
+    ACLMessage *fromArchive;
     for (it = recepients.begin(); it != recepients.end(); it++)
     {
-        if (precedingState == NULL) return true;
-        if ( (fromArchive = precedingState->searchArchiveBySenderReceiver(msg.getSender(),*it)) == NULL ) return false;
-        LOG_DEBUG("\t\t# not second return\n");
-        //if ( (fromArchive->getReplyWith().empty() && (!msg.getInReplyTo().empty())) ||
-	//   ((!fromArchive->getReplyWith().empty()) && msg.getInReplyTo().empty()) ) return false;
-        if ( fromArchive->getReplyWith().compare(msg.getInReplyTo()) ) return false;
+        fromArchive = precedingState->searchArchiveBySenderReceiver(msg.getSender(),*it);
+        // InReplyTo agent is not known
+        if (!fromArchive) return false;
+
+        // We actually have a message which trigger this InReplyTo
+        if ( fromArchive->getReplyWith() == msg.getInReplyTo() )
+            return true;
         
     }
-    
-    return true;
+   
+    // No message could be found that triggered this InReplyTo 
+    return false;
 }
 
 bool Transition::validatePerformative (const ACLMessage &msg)
 {
-    
-    if (expectedPerf.compare(msg.getPerformative()) ) return false;
-    return true;
+    if (expectedPerf == msg.getPerformative() ) return true;
+
+    LOG_ERROR("Message performative is %s, expected was %s", msg.getPerformative().c_str(), expectedPerf.c_str());
+    return false;
 }
 bool Transition::validateOntology (const ACLMessage &msg)
 {
     if (machine->ontology.empty() ) {machine->ontology = msg.getOntology(); return true;}
-    if (machine->ontology.compare(msg.getOntology()) ) return false;
-    return true;
+    if (machine->ontology == msg.getOntology() ) return true;
+    return false;
 }
 bool Transition::validateEncoding (const ACLMessage &msg)
 {
-    if (machine->encoding.compare(msg.getEncoding()) ) return false;
-    return true;
+    if (machine->encoding == msg.getEncoding() ) return true;
+    return false;
 }
 bool Transition::validateLanguage (const ACLMessage &msg)
 {
     if (machine->language.empty() ) {machine->language = msg.getLanguage(); return true;}
-    if (machine->language.compare(msg.getLanguage()) ) return false;
-    return true;
+    if (machine->language == msg.getLanguage() ) return true;
+    return false;
 }
 bool Transition::validateProtocol (const ACLMessage &msg)
 {
     if (machine->protocol.empty() ) {machine->protocol = msg.getProtocol(); return true;}
-    if (machine->protocol.compare(msg.getProtocol()) ) return false;
-    return true;
+    if (machine->protocol == msg.getProtocol() ) return true;
+    return false;
 }
 bool Transition::validateConvID (const ACLMessage &msg)
 {
     if (machine->convid.empty() ) {machine->convid = msg.getConversationID(); return true;}
-    if (machine->convid.compare(msg.getConversationID()) ) return false;
-    return true;
+    if (machine->convid == msg.getConversationID()) return true;
+    return false;
 }
 
 void Transition::removeAllAgentsBut(const AgentID &ag,std::vector<AgentID> &agents)
 {
-    LOG_DEBUG("RemoveAllAgentsBut: %s\n", ag.getName().c_str() );
-    agents.clear();
-    agents.push_back(ag);
-    LOG_DEBUG("RemoveAllAgentsBut: end %s\n", ag.getName().c_str() );
+    bool foundAgent = false;
+    std::vector<AgentID>::iterator it = agents.begin();
+    for(; it != agents.end(); it++)
+    {
+        if(ag == *it)
+            foundAgent = true;
+    }
+        
+    if(foundAgent)
+    {
+        agents.clear();
+        agents.push_back(ag);
+    } else {
+        LOG_WARN("An agent that should not be removed from the list, does not even exist in the list");
+        agents.clear();
+    }
 }
 
 
@@ -521,7 +480,6 @@ void Transition::print()
     else std::cout<< "not set\n";
     
     std::cout<<"\t\t^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
-    
     
 }
 

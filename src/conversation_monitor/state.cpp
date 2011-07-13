@@ -10,56 +10,16 @@ namespace fipa {
 namespace acl {
     
 
-State::State()
+State::State() : final(false), uid(), transitions(), subSM(), archive(), involvedAgents(), owningMachine(0)
 {
-    final = false;
-    uid.clear();
-    transitions.clear();
-    subSM.clear();
-    archive.clear();
-    involvedAgents.clear();
-    owningMachine = NULL;
 }
 
-State::State(std::string _uid)
+State::State(const std::string& _uid) : final(false), uid(_uid), transitions(), subSM(), archive(), involvedAgents(), owningMachine(0)
 {
-    final = false;
-    uid.assign(_uid);
-    transitions.clear();
-    subSM.clear();
-    archive.clear();
-    involvedAgents.clear();
-    owningMachine = NULL;
 }
-
-State::State(const State& target)
-{
-    uid = target.getUID();
-    final = target.getFinal();
-    owningMachine = target.getOwningMachine();
-    involvedAgents = target.getInvolvedAgents();
-    archive = target.getMessageArchive();
-    
-    std::vector<Transition> tempT = target.getTransitions();
-    for (std::vector<Transition>::iterator it = tempT.begin(); it != tempT.end(); it++)
-    {
-        addTransition(*it);
-    }
-    
-    std::vector<StateMachine> tempSubSM = target.getSubSM();
-    for (std::vector<StateMachine>::iterator it = tempSubSM.begin(); it != tempSubSM.end(); it++)
-        subSM.push_back(*it);
-    
-        
-}
-
 
 State::~State()
 {
-    transitions.clear();
-    subSM.clear();
-    archive.clear();
-    involvedAgents.clear();
 }
 
 void State::addTransition(Transition &t)
@@ -78,34 +38,33 @@ void State::addTransition(Transition &t)
 
 void State::generateDefaultTransitions()
 {
+        // Not adding any transition for final states
+        if(getFinal())
+            return; 
+
         std::vector<Transition>::iterator trit;
         for (trit = transitions.begin(); trit != transitions.end(); trit++)
         {
-	  // we don't generate a not-understood transition for the not-understood message...
-	  if (!trit->getExpectedPerformative().compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]) ) 
+	  // we don't generate a not-understood transition for not-understood message...
+	  if ( trit->getExpectedPerformative() == ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD] ) 
 	      continue;
 	  
-	  Transition t = Transition();
+	  Transition t; 
 	  t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]);
 	  t.setFrom(trit->getTo());
 	  t.setTo(trit->getFrom());
 	  
 	  t.setNextStateName(StateMachine::NOT_UNDERSTOOD);
-	  if (!trit->getNextStateName().empty())  
-	  {
-	      (owningMachine->getStateByName(trit->getNextStateName()))->addTransition(t);
-	  }
-	  else 
-	      addTransition(t);	  
+	  addTransition(t);	  
         }
 }
 
 int State::consumeMessage(const ACLMessage &msg)
 {
-    LOG_DEBUG("#state's %s :consumeMessage call", uid.c_str());
+    LOG_DEBUG("State::consumeMessage state %s", uid.c_str());
     if (!subSM.empty())
     {
-        LOG_DEBUG("#checking the sub-state machines");
+        LOG_DEBUG("Checking the sub-state machines");
         bool found_one = false;
         bool stillActiveSubSM = false;
         std::vector<StateMachine>::iterator smit;
@@ -136,15 +95,14 @@ int State::consumeMessage(const ACLMessage &msg)
 	  else
               return 1;
         }
-    } else {
-        LOG_DEBUG("#No substate statemachine");
-    }
+    } 
 
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
     {
-        LOG_DEBUG("#sending message to a transition of state %s",uid.c_str());
-        if (it->consumeMessage(msg) == 0) return 0;
+        LOG_DEBUG("Forwarding message in machine %p to transition from state %s to %s", owningMachine, uid.c_str(), it->getNextStateName().c_str());
+        if (it->consumeMessage(msg) == 0) 
+            return 0;
     }
     return 1;
 }
@@ -178,7 +136,6 @@ bool State::checkAllAgentsAccountedFor() const
 }
 void State::updateInvolvedAgentsMap(Transition &it)
 {
-    LOG_INFO("Update involved agents map");
     std::vector<AgentID> temp = it.getExpectedSenders();
     std::vector<AgentID>::iterator agit;
     for (agit = temp.begin(); agit != temp.end(); agit++)
@@ -194,9 +151,11 @@ void State::updateInvolvedAgentsMap(Transition &it)
 }
 void State::loadParameters()
 {
+    LOG_INFO("Load parameters for state: %s", uid.c_str());
     std::vector<Transition>::iterator it;
     for (it = transitions.begin(); it != transitions.end(); it++)
     {
+        assert(&(*it));
         it->loadParameters();
         updateInvolvedAgentsMap(*it);
         
@@ -272,6 +231,7 @@ void State::setUID(const std::string& _uid)
 {
     uid = _uid;
 }
+
 std::string State::getUID() const
 {
     return uid;
@@ -293,7 +253,22 @@ bool operator<(const AgentID &a,const AgentID &b)
 }
 
 
-void State::setOwningMachine(StateMachine *_machine)	{owningMachine = _machine;}
+void State::setOwningMachine(StateMachine *_machine)
+{
+    owningMachine = _machine;
+
+    updateTransitions();
+}
+
+void State::updateTransitions()
+{
+    std::vector<Transition>::iterator it = transitions.begin();
+    for(; it != transitions.end(); it++)
+    {
+        it->setOwningState(this);
+        it->setMachine(owningMachine);
+    }
+}
 
 std::vector<ACLMessage> State::getMessageArchive() const	{return archive;}
 std::vector<Transition> State::getTransitions() 	const	{return transitions;}

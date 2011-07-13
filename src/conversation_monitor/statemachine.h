@@ -18,179 +18,185 @@ namespace fipa {
 namespace acl {
 
     
-    /**
-        \brief forward declaration of State class to reslve the circular dependency between these two classes 
-    */
-   class State;
-   
-   class StateMachineBuilder;
+/**
+* \brief forward declaration of State class to reslve the circular dependency between these two classes 
+*/
+class State;
 
-   /**
-        \class StateMachine
-        \brief The front end class of the library; implements the interaction protocol rules, processes the flow of messages and checks
-	     for compliance with the defined protocol; it is designed for this sole purpose(not a general state machine)
-   */
+class StateMachineBuilder;
+
+/**
+* \class StateMachine
+* \brief The front end class of the library; implements the interaction protocol rules, processes the flow of messages and checks
+* for compliance with the defined protocol; it is designed for this sole purpose(not a general state machine)
+*/
 class StateMachine 
 {
-    private:
-        /** \param states stl vector of the states built for the implementation of the protocol */
-        std::vector<State> states;
-        
-        /** \param involvedAgents record of the generic agent roles involved in the protocol as well as what agents play which role 
-		once they have been assigned their roles
-        */
-        std::vector<AgentMapping> involvedAgents;
-        
-        /**
-	  \param preImposedRoles roles that need to be correlated to a master StateMachine(i.e: only useful if the current StateMachine
-			      is a sub-protocol to another StateMachine)
-        */
-        std::vector<RoleCorrelation> preImposedRoles;
-        
-        /** \param owner AgentID, owner of the state machine; determines the perspective from which the roles are assigned 
-	  NOTE: no symbolic value for "owner not set" case defined yet 
-        */
-        AgentID owner;
-        
-        /** \param currentState pointer to the current state of the state machine(from the states vector) */
-        std::string currentState;
-        
-        /** \param active flag variable to indicate whether a conversation has been successfully initiated(i.e: wit a valid message) */
-        bool active;
-        
-        /** \param conversationOver flag variable to indicate whether the confersation has reached a final state(= is over) */
-        bool conversationOver;
 
-        /**
-        * Flag to define whether the statemachine is valid and thus usable
-        */
-        bool isValidStateMachine;
+private:
 
-        /**
-	  \param cancelMetaP (i.e.: cancel meta protocol) implements the fipa defined "meta conversation" that should be available on top
-			  of every other interaction protocol; through it, the initiator of a conversation can terminate the 
-			  conversation early(yet validly) with any of its interlocutors
-	  NOTE: Not yet completely functional(i.e: need to modify it to remove the interlocutor from the list)
-        */
-        std::vector<StateMachine> cancelMetaP;
-        
-        /** \param ontology global characteristic of the conversation initialized from the first alid, processed message */
-        Ontology ontology;
-        /** \param language global characteristic of the conversation initialized from the first alid, processed message */
-        Language language;
-        /** \param protocol global characteristic of the conversation initialized from the first alid, processed message */
-        Protocol protocol;
-        /** \param convid global characteristic of the conversation initialized from the first alid, processed message */
-        ConversationID convid;
-        /** \param encoding global characteristic of the conversation initialized from the first alid, processed message */
-        Encoding encoding;
-        //ReplyBy replyBy;
-        //ReplyWith replyWith;
-        
-        /**
-	  \class Transition: declared as friend because it accesses the global variables and operates on the state machine
-			 (i.e.: changes current state,etc) often
-        */
-        friend class Transition;
-        /// StateMachineTest class declared as friend for testing purposes(NOT for the final version)
-        friend class StateMachineTest;
-        
-        friend class StateMachineBuilder;
-        
-    public:
-        /**
-	  \brief static names used as constant defaults for state names and role names
-        */
-        static const std::string NOT_UNDERSTOOD;
-        static const std::string CONV_CANCELLED;
-        static const std::string INITIAL;
-        static const std::string INITIATOR;
-        
-        /** \brief emtpy constructor, initializes some fields*/
-        StateMachine();
+    /** \param states stl vector of the states built for the implementation of the protocol */
+    std::vector<State> states;
+    
+    /** \param involvedAgents record of the generic agent roles involved in the protocol as well as what agents play which role 
+    	once they have been assigned their roles
+    */
+    std::vector<AgentMapping> involvedAgents;
+    
+    /**
+      \param preImposedRoles roles that need to be correlated to a master StateMachine(i.e: only useful if the current StateMachine
+     is a sub-protocol to another StateMachine)
+    */
+    std::vector<RoleCorrelation> preImposedRoles;
+    
+    /** \param owner AgentID, owner of the state machine; determines the perspective from which the roles are assigned 
+      NOTE: no symbolic value for "owner not set" case defined yet 
+    */
+    AgentID owner;
+    
+    /** \param currentState pointer to the current state of the state machine(from the states vector) */
+    std::string currentState;
+    
+    /** \param active flag variable to indicate whether a conversation has been successfully initiated(i.e: wit a valid message) */
+    bool active;
+    
+    /** \param conversationOver flag variable to indicate whether the confersation has reached a final state(= is over) */
+    bool conversationOver;
 
-        /** \brief constructor that initializes the owner of the machine as well
-	  \param _owner: the intended owner of the state machine
-        */
-        StateMachine(const AgentID& _owner);
-        
-        StateMachine(const StateMachine&);
+    /**
+    * Flag to define whether the statemachine is valid and thus usable
+    */
+    bool isValidStateMachine;
 
-        ~StateMachine();
-        
-        /** \brief setter method for the initial state of the state machine(takes the name-uid- of the state as parameter)*/
-        bool setInitialState(const std::string&);
+    /**
+      \param cancelMetaP (i.e.: cancel meta protocol) implements the fipa defined "meta conversation" that should be available on top
+    		  of every other interaction protocol; through it, the initiator of a conversation can terminate the 
+    		  conversation early(yet validly) with any of its interlocutors
+      NOTE: Not yet completely functional(i.e: need to modify it to remove the interlocutor from the list)
+    */
+    std::vector<StateMachine> cancelMetaP;
+    
+    /** \param ontology global characteristic of the conversation initialized from the first alid, processed message */
+    Ontology ontology;
+    /** \param language global characteristic of the conversation initialized from the first alid, processed message */
+    Language language;
+    /** \param protocol global characteristic of the conversation initialized from the first alid, processed message */
+    Protocol protocol;
+    /** \param convid global characteristic of the conversation initialized from the first alid, processed message */
+    ConversationID convid;
+    /** \param encoding global characteristic of the conversation initialized from the first alid, processed message */
+    Encoding encoding;
+    //ReplyBy replyBy;
+    //ReplyWith replyWith;
+    
+    /**
+      \class Transition: declared as friend because it accesses the global variables and operates on the state machine (i.e.: changes current state,etc) often
+    */
+    friend class Transition;
+    /// StateMachineTest class declared as friend for testing purposes(NOT for the final version)
+    friend class StateMachineTest;
+    
+    friend class StateMachineBuilder;
+    
+public:
+    /**
+      \brief static names used as constant defaults for state names and role names
+    */
+    static const std::string NOT_UNDERSTOOD;
+    static const std::string CONV_CANCELLED;
+    static const std::string INITIAL;
+    static const std::string INITIATOR;
+    
+    /** \brief emtpy constructor, initializes some fields*/
+    StateMachine();
 
-        /** \brief setter method for the owner of the machine */
-        bool setOwner(const AgentID&);
+    /** \brief constructor that initializes the owner of the machine as well
+      \param _owner: the intended owner of the state machine
+    */
+    StateMachine(const AgentID& _owner);
+    
+    StateMachine(const StateMachine&);
 
-        /** \brief method to be called with the first message from the message flow as parameter; it initializes fields 
-		and starts the conversation
-	  \return 0 if machine started successfully; != otherwise(currently only 1 as error code - more to be added when needed)
-        */
-        int startMachine(const ACLMessage& msg);
+    ~StateMachine();
 
-        /**
-	  \brief method to be called to process every message of the message flow(except the first one)
-	  \return 0 if successful; 1 otherwise
-        */
-        int consumeMessage(const ACLMessage& msg);
-        //int initializeMachineFields(ACLMessage msg);
-        
-        
-        /** \brief getter method for a state from the states vector
-	  \param name of the state to be searched as a strig
-	  \return pointer to the coresponding needed state
-        */
-        State* getStateByName(const std::string& name);
+    /**
+    * Copy assignment
+    */
+    StateMachine& operator=(const StateMachine& target);
+    
+    /** \brief setter method for the initial state of the state machine(takes the name-uid- of the state as parameter)*/
+    bool setInitialState(const std::string&);
 
-        /** \brief getter method for a state from the states vector
-	  \param state the needed state (as object; by value)
-	  \return pointer to the coresponding needed state
-        */
-        State* getStateByName(State state) const;
+    /** \brief setter method for the owner of the machine */
+    bool setOwner(const AgentID&);
 
-        /** \brief method that generates the implicit states(sometimes not mentioned in the IP -- i.e: not-understood state) */
-        void generateDefaultStates();
+    /** \brief method to be called with the first message from the message flow as parameter; it initializes fields 
+    	and starts the conversation
+      \return 0 if machine started successfully; != otherwise(currently only 1 as error code - more to be added when needed)
+    */
+    int startMachine(const ACLMessage& msg);
 
-        /** \brief method that generates implicit transitions (sometimes not mentioned int the IP -- i.e: not-understood transitions) */
-        void generateDefaultTransitions();
+    /**
+      \brief method to be called to process every message of the message flow(except the first one)
+      \return 0 if successful; 1 otherwise
+    */
+    int consumeMessage(const ACLMessage& msg);
+    //int initializeMachineFields(ACLMessage msg);
+    
+    
+    /** \brief getter method for a state from the states vector
+      \param name of the state to be searched as a strig
+      \return pointer to the coresponding needed state
+    */
+    State* getStateByName(const std::string& name);
 
-        /**
-          \brief method that adds a state to the states vector of the state machine
-	  \param state the state intended to be added
-	  \return true if successful(i.e: unique among the other states); false otherwise
-        */
-        bool addState(State& state);
+    /** \brief getter method for a state from the states vector
+      \param state the needed state (as object; by value)
+      \return pointer to the coresponding needed state
+    */
+    State* getStateByName(State state) const;
 
-        /** \brief method to check whether the conversation has reached a final state(= is over)
-	  \return value of conversationOver
-        */
-        bool isConversationOver() const;
+    /** \brief method that generates the implicit states(sometimes not mentioned in the IP -- i.e: not-understood state) */
+    void generateDefaultStates();
 
-        /** \brief method to check whether the conversation has been properly started
-	  \return value of active variable
-        */
-        bool isActive() const;
+    /** \brief method that generates implicit transitions (sometimes not mentioned int the IP -- i.e: not-understood transitions) */
+    void generateDefaultTransitions();
 
-        /** \brief method to add a generic role to the involvedAgents field
-	  \param myrole name of the intended role given as string
-        */
-        void addRole(const Role& myrole);
+    /**
+      \brief method that adds a state to the states vector of the state machine
+      \param state the state intended to be added
+      \return true if successful(i.e: unique among the other states); false otherwise
+    */
+    bool addState(State& state);
 
-        /** \brief method to assign a generic role to a speciffic agent
-	  \param myrole string; name of the role intended to be set
-	  \param myagent AgentID; the intended agent
-	  \return true if successfully added; false otherwise
-        */
-        bool setRole(const Role& myrole,const AgentID& myagent);
+    /** \brief method to check whether the conversation has reached a final state(= is over)
+      \return value of conversationOver
+    */
+    bool isConversationOver() const;
 
-        /** \brief method to assign a generic role to a vector of agents
-	  \param myrole string; name of the role intended to be set
-	  \param agents std::vector< AgentID >; the intended vector of agents
-	  \return true if successfully added; false otherwise
-        */
-        bool setRole(const Role& myrole,const std::vector<AgentID>& agents);
+    /** \brief method to check whether the conversation has been properly started
+      \return value of active variable
+    */
+    bool isActive() const;
+
+    /** \brief method to add a generic role to the involvedAgents field
+      \param myrole name of the intended role given as string
+    */
+    void addRole(const Role& myrole);
+
+    /** \brief method to assign a generic role to a speciffic agent
+      \param myrole string; name of the role intended to be set
+      \param myagent AgentID; the intended agent
+      \return true if successfully added; false otherwise
+    */
+    bool setRole(const Role& myrole,const AgentID& myagent);
+
+    /** \brief method to assign a generic role to a vector of agents
+      \param myrole string; name of the role intended to be set
+      \param agents std::vector< AgentID >; the intended vector of agents
+      \return true if successfully added; false otherwise
+    */
+    bool setRole(const Role& myrole,const std::vector<AgentID>& agents);
 
         /** \brief method to check whether a speciffic role exists in the involvedAgents field
 	  \param myrole string; the intended to be checked role
@@ -253,7 +259,7 @@ class StateMachine
         /**
         * Check is statemachine is valid, i.e. transitions and states are consistent
         */
-        bool isValid();
+        bool isValid() const;
         
         /**
 	  \brief misc method added to easily visualize a built stateMachine;
@@ -275,12 +281,10 @@ class StateMachine
         std::vector<State> 		getStates() const;
         ConversationID		getConversationID() const;
 
-    protected:
-
         /**
         * Validate the state machine that all existing transaction and from to field have a target
         */
-        void validate();
+        void validate(bool associatedMachine = false);
         
     private:
         /** \brief method called by the constructors that initializes some fields */

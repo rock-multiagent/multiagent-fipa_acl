@@ -16,8 +16,10 @@
 
 namespace fipa {
 namespace acl {
+
     /** \brief forward declaration of the StateMachine class needed to solve a circular dependancy */
     class StateMachine;
+
     /** \brief forward declaration of the State class needed to solve a circular dependency */
     class State;
     
@@ -68,8 +70,6 @@ class Transition
 	  \brief empty constructor for the transition class; initializes fields
         */
         Transition();
-        
-        Transition(const Transition&);
         
         /**
 	  \brief checks whether a fed messge is valid and acts accordingly
