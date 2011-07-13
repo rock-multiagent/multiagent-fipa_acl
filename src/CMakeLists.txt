@@ -59,5 +59,10 @@ add_executable(${MONITOR} conversation_monitor/main.cpp)
 target_link_libraries(${MONITOR} ${LIBRARIES} ${PROJECT_NAME})
 # do not install - only for local testing
 
+set(BENCHMARK fipa_acl-benchmark)
+add_executable(${BENCHMARK} benchmark.cpp)
+target_link_libraries(${BENCHMARK} ${LIBRARIES} ${PROJECT_NAME})
+# do not install only for local use
+
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/configuration/protocols DESTINATION configuration/${PROJECT_NAME})
 
