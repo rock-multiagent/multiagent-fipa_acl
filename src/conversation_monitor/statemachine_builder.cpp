@@ -110,6 +110,7 @@ void StateMachineBuilder::locallyLoadSpecification(const std::string& infile)
     roles.clear();
     states.clear();
     initialState = "";
+    builtMachine = StateMachine();
 
     ///call the other loadSpecification method and just discard the returned value(i.e: run it only to parameterize builtMachine)
     loadSpecification(infile);
