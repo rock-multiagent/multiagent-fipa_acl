@@ -25,6 +25,8 @@ Data_Type<fipa::acl::ACLMessage> rb_cFipaMessage;
 Data_Type<fipa::acl::AgentID> rb_cAgentID;
 Data_Type<fipa::acl::UserdefParam> rb_cUserDefinedParameters;
 
+static Module rb_mFIPA;
+
 template<>
 StringVector from_ruby< StringVector >(Object obj)
 {
@@ -186,19 +188,49 @@ Object wrap_fromByteString(Object self, String byteString)
 	fipa::acl::MessageParser parser;
 	if(!parser.parseData(data, *msg))
 	{
-		throw Exception(rb_eRuntimeError, "FipaMessage: data could not be parsed");
+		throw Exception(rb_eRuntimeError, "FIPA::ACLMessage: data could not be parsed");
 	}
 
 	return self;
 }
 
-Object wrap_setPerformative(Object self, String performative)
+Object wrap_setPerformative(Object self, Symbol performative)
 {
 	Data_Object<fipa::acl::ACLMessage> msg(self, rb_cFipaMessage);
 
-	msg->setPerformative(performative.str()); 
+	// Replace underscore with dash to convert symbols to performative label
+	std::string performativeString = performative.str();
+	std::string::iterator it;
+	while(true)
+	{
+	    size_t pos = performativeString.find_first_of("_");
+	    if(pos == std::string::npos)
+		break;
+
+	    performativeString.replace(pos,1,"-");
+	}
+
+	msg->setPerformative(performativeString); 
 
 	return self;
+}
+
+Symbol wrap_getPerformative(Object self)
+{
+	Data_Object<fipa::acl::ACLMessage> msg(self, rb_cFipaMessage);
+	std::string performative = msg->getPerformative();
+
+	std::string::iterator it;
+	while(true)
+	{
+	    size_t pos = performative.find_first_of("-");
+	    if(pos == std::string::npos)
+		break;
+
+	    performative.replace(pos,1,"_");
+	}
+
+	return Symbol(performative);
 }
 
 
@@ -248,55 +280,58 @@ class Vector
 extern "C"
 void Init_fipamessage_ruby()
 {
- rb_cUserDefinedParameters = define_class<fipa::acl::UserdefParam>("FipaUserDefinedParameter")
-   .define_constructor(Constructor<fipa::acl::UserdefParam, const std::string&>())
-   .define_method("getName", &fipa::acl::UserdefParam::getName)
-   .define_method("setName", &fipa::acl::UserdefParam::setName)
-   .define_method("getValue", &fipa::acl::UserdefParam::getValue)
-   .define_method("setValue", &fipa::acl::UserdefParam::setValue);
 
- rb_cAgentID = define_class<fipa::acl::AgentID>("FipaAgentId")
+ // Define module FIPA
+ rb_mFIPA = define_module("FIPA");
+
+ rb_cUserDefinedParameters = define_class_under<fipa::acl::UserdefParam>(rb_mFIPA, "UserDefinedParameter")
+   .define_constructor(Constructor<fipa::acl::UserdefParam, const std::string&>(), Arg("name"))
+   .define_constructor(Constructor<fipa::acl::UserdefParam>())
+   .define_method("getName", &fipa::acl::UserdefParam::getName)
+   .define_method("setName", &fipa::acl::UserdefParam::setName, (Arg("name")) )
+   .define_method("getValue", &fipa::acl::UserdefParam::getValue, (Arg("name") ) )
+   .define_method("setValue", &fipa::acl::UserdefParam::setValue, Arg("value") );
+
+ rb_cAgentID = define_class_under<fipa::acl::AgentID>(rb_mFIPA,"AgentId")
    .define_constructor(Constructor<fipa::acl::AgentID, const std::string&>() )
    .define_method("getName", &fipa::acl::AgentID::getName)
-   .define_method("addAddress", &fipa::acl::AgentID::addAddress)
+   .define_method("addAddress", &fipa::acl::AgentID::addAddress, (Arg("address")))
    .define_method("getAddresses", &wrap_getAddresses)
-   .define_method("addResolver", &fipa::acl::AgentID::addResolver)
+   .define_method("addResolver", &fipa::acl::AgentID::addResolver, (Arg("agentid")))
    .define_method("getResolvers", &wrap_getResolvers)
-   .define_method("deleteResolver", &fipa::acl::AgentID::deleteResolver)
-   .define_method("addUserDefinedParameter", &fipa::acl::AgentID::addUserdefParam)
+   .define_method("deleteResolver", &fipa::acl::AgentID::deleteResolver, (Arg("agentid") ))
+   .define_method("addUserDefinedParameter", &fipa::acl::AgentID::addUserdefParam, (Arg("param")))
    .define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters);
 
- rb_cFipaMessage = define_class<fipa::acl::ACLMessage>("FipaMessage")
+ rb_cFipaMessage = define_class_under<fipa::acl::ACLMessage>(rb_mFIPA, "ACLMessage")
    .define_constructor(Constructor<fipa::acl::ACLMessage>())
    .define_method("setPerformative", &wrap_setPerformative)
-   .define_method("getPerformative", &fipa::acl::ACLMessage::getPerformative)
-   .define_method("addReceiver", &fipa::acl::ACLMessage::addReceiver)
+   .define_method("getPerformative", &wrap_getPerformative)
+   .define_method("addReceiver", &fipa::acl::ACLMessage::addReceiver, Arg("receiver"))
    .define_method("clearReceivers", &fipa::acl::ACLMessage::clearReceivers)
    .define_method("getReceivers", &fipa::acl::ACLMessage::getAllReceivers)
-   .define_method("setProtocol", &fipa::acl::ACLMessage::setProtocol)
+   .define_method("setProtocol", &fipa::acl::ACLMessage::setProtocol, Arg("protocol_name"))
    .define_method("getProtocol", &fipa::acl::ACLMessage::getProtocol)
-   .define_method("setOntology", &fipa::acl::ACLMessage::setOntology)
+   .define_method("setOntology", &fipa::acl::ACLMessage::setOntology, Arg("ontology_name"))
    .define_method("getOntology", &fipa::acl::ACLMessage::getOntology)
-   .define_method("setEncoding", &fipa::acl::ACLMessage::setEncoding)
+   .define_method("setEncoding", &fipa::acl::ACLMessage::setEncoding, Arg("encoding_name"))
    .define_method("getEncoding", &fipa::acl::ACLMessage::getEncoding)
-   .define_method("setLanguage", &fipa::acl::ACLMessage::setLanguage)
+   .define_method("setLanguage", &fipa::acl::ACLMessage::setLanguage, Arg("language_name"))
    .define_method("getLanguage", &fipa::acl::ACLMessage::getLanguage)
-   .define_method("setContent", &fipa::acl::ACLMessage::setContent)
+   .define_method("setContent", &fipa::acl::ACLMessage::setContent, Arg("content_string"))
    .define_method("getContent", &fipa::acl::ACLMessage::getContent)
-   .define_method("setSender", &fipa::acl::ACLMessage::setSender)
-   .define_method("addReplyTo", &fipa::acl::ACLMessage::addReplyTo)
-   .define_method("setInReplyTo", &fipa::acl::ACLMessage::setInReplyTo)
+   .define_method("setSender", &fipa::acl::ACLMessage::setSender, Arg("sender_name"))
+   .define_method("getSender", &fipa::acl::ACLMessage::getSender)
+   .define_method("addReplyTo", &fipa::acl::ACLMessage::addReplyTo, Arg("agent_id"))
+   .define_method("setInReplyTo", &fipa::acl::ACLMessage::setInReplyTo, Arg("reply_to"))
    .define_method("getInReplyTo", &fipa::acl::ACLMessage::getInReplyTo)
-   .define_method("setReplyWith", &fipa::acl::ACLMessage::setReplyWith)
+   .define_method("setReplyWith", &fipa::acl::ACLMessage::setReplyWith, Arg("reply_with"))
    .define_method("getReplyWith", &fipa::acl::ACLMessage::getReplyWith)
-   .define_method("setConversationID", &fipa::acl::ACLMessage::setConversationID)
+   .define_method("setConversationID", &fipa::acl::ACLMessage::setConversationID, Arg("conversation_id"))
    .define_method("getConversationID", &fipa::acl::ACLMessage::getConversationID)
    .define_method("to_byte_array", &wrap_toByteVector)
-   // content = msg.to_byte_array
-   // new_msg.from_byte_string content.pack("C*)
    .define_method("from_byte_string", &wrap_fromByteString)
    //.define_method("setReplyBy", 
-   //.define_method(
    //.define_method("addUserDefinedParameter", &fipa::acl::ACLMessage::addUserdefParam)
    //.define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters)
    ;
