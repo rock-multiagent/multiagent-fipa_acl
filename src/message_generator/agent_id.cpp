@@ -26,7 +26,7 @@ AgentID::AgentID() : name()
 AgentID::AgentID(const std::string nam) : name(nam)
 {
     initializeFields();
-    if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
+    if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
     {
         LOG_ERROR("AgentID: name containst invalid characters - defaulting to empty name");
         name = "";
@@ -44,14 +44,14 @@ std::string AgentID::getName() const {return name;}
 
 int AgentID::setName(const std::string nam) 
 {
-    if ( (nam.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(nam.c_str()[0]) != -1) )
+    if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
     return 1;
     name = nam; return 0;
 }
 
 int AgentID::addAddress(const std::string &adr) 
 {
-    if ( (adr.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(adr.c_str()[0]) != -1) )
+    if ( (adr.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(adr.c_str()[0]) != std::string::npos) )
     return 1;
     addresses.insert(addresses.begin(),adr); return 0;
 }

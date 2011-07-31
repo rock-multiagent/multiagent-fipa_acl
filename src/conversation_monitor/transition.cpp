@@ -20,7 +20,7 @@ int Transition::consumeMessage(const ACLMessage &msg)
     LOG_DEBUG("owningState is: %s",owningState->getUID().c_str() );
     if( validateMessage(msg) )
     {
-        //if (expectedPerf.compare(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
+        //if (expectedPerf.compare(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
         performWithoutStateExit(msg);
         //if ( checkAllSendersAccountedFor(msg) && checkAllRecepientsAccountedFor(msg) )
         if (owningState->checkAllAgentsAccountedFor() )

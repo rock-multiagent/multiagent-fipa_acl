@@ -9,8 +9,9 @@
 #ifndef ACLMessage_H_
 #define ACLMessage_H_
 
-#include<vector>
-#include<string>
+#include <vector>
+#include <map>
+#include <string>
 #include <fipa_acl/message_generator/agent_id.h>
 #include <fipa_acl/message_generator/userdef_param.h>
 
@@ -23,15 +24,6 @@ namespace fipa {
 * \brief Agent Communication Language
 */
 namespace acl {
-
-    /**
-        \enum predefinedPerformatives
-        \brief an enum of all the predefined fipa message performatives so far, presented in the order used in the message and encoding specifications
-    */
-    enum predefinedPerformatives{ ACCEPT_PROPOSAL = 0, AGREE, CANCEL, CALL_FOR_PROPOSAL, CONFIRM, DISCONFIRM, FAILURE, INFORM,
-			    INFORM_IF, INFORM_REF, NOT_UNDERSTOOD, PROPAGATE, PROPOSE, PROXY, QUERY_IF, QUERY_REF, REFUSE,
-			    REJECT_PROPOSAL, REQUEST, REQUEST_WHEN, REQUEST_WHENEVER, SUBSCRIBE
-			  };
 
    /**
     * \param illegalWordChars: string containing illegal characters according to the fipa definition of a word
@@ -66,6 +58,16 @@ namespace acl {
 */
 class ACLMessage {
 
+public:
+    /**
+        \enum Performative
+        \brief an enum of all the predefined fipa message performatives so far, presented in the order used in the message and encoding specifications
+    */
+    enum Performative { ACCEPT_PROPOSAL = 0, AGREE, CANCEL, CALL_FOR_PROPOSAL, CONFIRM, DISCONFIRM, FAILURE, INFORM,
+			    INFORM_IF, INFORM_REF, NOT_UNDERSTOOD, PROPAGATE, PROPOSE, PROXY, QUERY_IF, QUERY_REF, REFUSE,
+			    REJECT_PROPOSAL, REQUEST, REQUEST_WHEN, REQUEST_WHENEVER, SUBSCRIBE, END_PERFORMATIVE
+			  };
+
 private:
         std::string performative;
         /** \param sender: pointer to the agentAID sending the message */
@@ -99,38 +101,9 @@ private:
 
  public:  
 
-	// all predefined FIPA performatives:
-	static const int ACCEPT_PROPOSAL = 0;
-	static const int AGREE = 1;
-	static const int CANCEL = 2;
-	static const int CALL_FOR_PROPOSAL = 3;
-	static const int CONFIRM = 4;
-	static const int DISCONFIRM = 5;
-	static const int FAILURE = 6;
-	static const int INFORM = 7;
-	static const int INFORM_IF = 8;
-	static const int INFORM_REF = 9;
-	static const int NOT_UNDERSTOOD = 10;
-	static const int PROPAGATE = 11;
-	static const int PROPOSE = 12;
-	static const int PROXY = 13;
-	static const int QUERY_IF = 14;
-	static const int QUERY_REF = 15;
-	static const int REFUSE = 16;
-	static const int REJECT_PROPOSAL = 17;
-	static const int REQUEST = 18;
-	static const int REQUEST_WHEN = 19;
-	static const int REQUEST_WHENEVER = 20;
-	static const int SUBSCRIBE = 21;
-
-	/** \param perfs: vector with all predefined message performatives as strings */
-	public: static const std::string perfs[];
-
-     
-public:
-        /**
-	  \brief this method does all allocations needed upon creating an ACLMessage. It is to be called by every constructor implemented 
-        */
+       /**
+         \brief this method does all allocations needed upon creating an ACLMessage. It is to be called by every constructor implemented 
+       */
        void initializeObject();
     
        /** 
@@ -159,7 +132,7 @@ public:
 	  \brief constructor of an ACLMessage with a predefined performative
 	  \param perf a predefined fipa performative(represented by its index in the perfs vector)
        */
-       ACLMessage(predefinedPerformatives perf);
+       ACLMessage(Performative perf);
 
        /**
 	  \brief constructor of an ACLMessage with a custom performative
@@ -169,14 +142,15 @@ public:
               
        /**
 	  \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
+	  \throws runtime_error if performative does not exist
        */
 
-       int setPerformative(predefinedPerformatives perf);
+       void setPerformative(Performative perf);
        /**
 	  \brief the method checks whether the passed performative string is a word or not(according to the fipa spec)
-	  \return 0 if successful 1 otherwise(performative is un-alterred)
+	  \throws runtime_error if performative does not exist or is illegal
        */
-       int setPerformative(const std::string& str);
+       void setPerformative(const std::string& str);
 
        std::string getPerformative() const;
        void addReceiver(const AgentID& aid);
@@ -232,6 +206,8 @@ public:
 
        void _setReplyBy1 (const std::string& date1);
 };
+
+extern std::map<ACLMessage::Performative, std::string> PerformativeTxt;
 
 /**
 * Overloaded equals operator for ACLMessage

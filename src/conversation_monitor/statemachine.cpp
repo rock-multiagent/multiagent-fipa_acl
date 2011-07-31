@@ -126,7 +126,7 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
         temp.addState(second);
         
         Transition t1 = Transition();
-        t1.setExpectedPerformative(ACLMessage::perfs[ACLMessage::CANCEL]);
+        t1.setExpectedPerformative(PerformativeTxt[ACLMessage::CANCEL]);
         t1.setFrom(StateMachine::INITIATOR);
         t1.setTo(with);
         t1.setNextStateName(std::string("1"));
@@ -134,14 +134,14 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
         temp.getStateByName(StateMachine::INITIAL)->addTransition(t1);
         
         Transition t2 = Transition();
-        t2.setExpectedPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
+        t2.setExpectedPerformative(PerformativeTxt[ACLMessage::INFORM]);
         t2.setFrom(with);
         t2.setTo(StateMachine::INITIATOR);
         t2.setNextStateName(std::string("2"));
         //t2.setMessageParity(true);
         temp.getStateByName(std::string("1"))->addTransition(t2);
         
-        t2.setExpectedPerformative(ACLMessage::perfs[ACLMessage::FAILURE]);
+        t2.setExpectedPerformative(PerformativeTxt[ACLMessage::FAILURE]);
         t2.setFrom(with);
         t2.setTo(StateMachine::INITIATOR);
         t2.setNextStateName(std::string("2"));
@@ -263,7 +263,7 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
         }
     }
 
-    if( msg.getPerformative() == ACLMessage::perfs[ACLMessage::CANCEL] )
+    if( msg.getPerformative() == PerformativeTxt[ACLMessage::CANCEL] )
     {
         if ( getAgentRole(msg.getSender()) == StateMachine::INITIATOR )
         {

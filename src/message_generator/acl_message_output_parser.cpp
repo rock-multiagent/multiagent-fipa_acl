@@ -49,7 +49,7 @@ int ACLMessageOutputParser::printParsedMessage(std::string stream)
 	std::string output = getBitMessage();
 	
 
-	for (int i = 0; i < output.length(); i++){
+	for (unsigned int i = 0; i < output.length(); i++){
 		out.put(output[i]);
 	//std::cout<<int(output[i])<<"  ";	
 	}
@@ -109,9 +109,9 @@ std::string ACLMessageOutputParser::getBitMessageType()
 {
 
    // Check if we have one of the predefined performatives
-   for (int i = 0; i < 22; i++)
+   for (int i = (int) ACLMessage::ACCEPT_PROPOSAL; i < (int) ACLMessage::END_PERFORMATIVE; i++)
    {
-	if (!ACLMessage::perfs[i].compare(msg.getPerformative()))
+	if (PerformativeTxt[(ACLMessage::Performative) i] == msg.getPerformative())
        { 				
 	    char a[2]; 
 	    a[0] = char(i+1); 
@@ -323,7 +323,7 @@ std::string ACLMessageOutputParser::getBitBinDateTimeToken(std::string date1)
 std::string ACLMessageOutputParser::getBitBinDate(std::string date1)
 {
             std::string retstr = std::string();
-            int i;
+            unsigned int i;
             for (i = 0; i < date1.length(); i = i + 2)
             {
                 
@@ -337,7 +337,7 @@ std::string ACLMessageOutputParser::getBitBinDate(std::string date1)
 std::string ACLMessageOutputParser::getBitCodedNumber(std::string cn)
 {
             std::string retstr = std::string();
-            int i;
+            unsigned int i;
             char code = char(0x00);
             for(i = 0; i < cn.length(); i++)
             {
@@ -363,7 +363,7 @@ std::string ACLMessageOutputParser::getBitCodedNumber(std::string cn)
 std::string ACLMessageOutputParser::getBitCodedNumberByte(std::string cn)
 {
             std::string retstr = std::string();
-            int i;
+            unsigned int i;
             char code = char(0x00);
             for(i = 0; i < cn.length(); i++)
             {

@@ -109,7 +109,7 @@ int main(int argc, char** argv)
                         recvs.push_back((*it)->getName());
 
 /*
-ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
+ACLMessage* m3 = new ACLMessage(PerformativeTxt[ACLMessage::REQUEST_WHENEVER]);
 
 	
  
@@ -185,7 +185,7 @@ ACLMessage* m3 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER])
 	(*a1).addUserdefParam(p4);
 
    
-//ACLMessage* m4 = new ACLMessage(ACLMessage::perfs[ACLMessage::REQUEST_WHENEVER]);
+//ACLMessage* m4 = new ACLMessage(PerformativeTxt[ACLMessage::REQUEST_WHENEVER]);
 
 (*m3).setProtocol(std::string("myprotocol")); 
 (*m3).setLanguage(std::string("mylang")); 

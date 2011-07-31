@@ -3,29 +3,45 @@
 #include <algorithm>
 #include <string>
 #include "acl_message.h"
+#include <boost/assign/list_of.hpp>
+#include <stdexcept>
 
 namespace fipa {
 
 namespace acl {
 
+std::map<ACLMessage::Performative, std::string> PerformativeTxt = boost::assign::map_list_of
+	(ACLMessage::ACCEPT_PROPOSAL, "accept-proposal")
+	(ACLMessage::AGREE, "agree")
+	(ACLMessage::CANCEL, "cancel")
+	(ACLMessage::CALL_FOR_PROPOSAL, "cfp")
+	(ACLMessage::CONFIRM, "confirm")
+	(ACLMessage::DISCONFIRM, "disconfirm")
+	(ACLMessage::FAILURE, "failure")
+	(ACLMessage::INFORM, "inform")
+	(ACLMessage::INFORM_IF, "inform-if")
+	(ACLMessage::INFORM_REF, "inform-ref")
+	(ACLMessage::NOT_UNDERSTOOD, "not-understood")
+	(ACLMessage::PROPAGATE, "propagate")
+	(ACLMessage::PROPOSE, "propose")
+	(ACLMessage::PROXY, "proxy")
+	(ACLMessage::QUERY_IF, "query-if")
+	(ACLMessage::QUERY_REF, "query-ref")
+	(ACLMessage::REFUSE, "refuse")
+	(ACLMessage::REJECT_PROPOSAL, "reject-proposal")
+	(ACLMessage::REQUEST, "request")
+	(ACLMessage::REQUEST_WHEN, "request-when")
+	(ACLMessage::REQUEST_WHENEVER, "request-whenever")
+	(ACLMessage::SUBSCRIBE, "subscribe");
     
-    
-const std::string ACLMessage::perfs[22] = {"accept-proposal","agree","cancel","cfp","confirm","disconfirm","failure","inform",
-				   "inform-if","inform-ref","not-understood","propagate","propose","proxy","query-if",
-				   "query-ref","refuse","reject-proposal","request","request-when","request-whenever","subscribe"};
-
 const std::string illegalWordChars = std::string("() ") + char(0x00);
 const std::string illegalWordStart = std::string("@#-0123456789"); 
 
-
-
-
-  
 void ACLMessage::initializeObject()
 {
          receivers.clear();
          reply_to.clear();
-	 performative = ACLMessage::perfs[INFORM];
+         performative = PerformativeTxt[INFORM];
          language = std::string();
          encoding = std::string();
          ontology = std::string();
@@ -54,11 +70,11 @@ ACLMessage::ACLMessage()
 	initializeObject();
 }
 
-ACLMessage::ACLMessage(predefinedPerformatives perf)
+ACLMessage::ACLMessage(Performative perf)
 
 {
 	initializeObject();
-	performative = ACLMessage::perfs[perf];
+	performative = PerformativeTxt[perf];
 }
 
 
@@ -66,22 +82,31 @@ ACLMessage::ACLMessage(const std::string& perf)
 {
     initializeObject(); 
     
-    if ( (perf.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(perf.c_str()[0]) != -1) )
+    if ( (perf.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(perf.c_str()[0]) != std::string::npos) )
     performative.clear();
     else performative = perf;
 }
 
-int ACLMessage::setPerformative(predefinedPerformatives perf)
+void ACLMessage::setPerformative(Performative perf)
 {
-	performative = ACLMessage::perfs[perf];
-	return 0;
+    std::map<Performative, std::string>::iterator it;
+    it = PerformativeTxt.find(perf);
+    if(it == PerformativeTxt.end())
+    {
+	throw std::runtime_error("Cannot set performative. Performative unknown");
+    }
+
+    performative = it->second;
 }
 
-int ACLMessage::setPerformative(const std::string& str) 
+void ACLMessage::setPerformative(const std::string& str) 
 {
-    if ( (str.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(str.c_str()[0]) != -1) )
-    return 1;
-    performative = str; return 0;
+    if ( (str.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(str.c_str()[0]) != std::string::npos) )
+    {
+	throw std::runtime_error("Cannot set performative. Performative contains illegal characters");
+    }
+
+    performative = str; 
 }
 
 std::string ACLMessage::getPerformative() const {return performative; }
@@ -148,7 +173,7 @@ std::string ACLMessage::getConversationID() const {return conversation_id; }
 
 int ACLMessage::setProtocol(const std::string& str) 
 {
-    if ( (str.find_first_of(illegalWordChars) != -1) || (illegalWordStart.find_first_of(str.c_str()[0]) != -1) )
+    if ( (str.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(str.c_str()[0]) != std::string::npos) )
     return 1;
     protocol = str; return 0;
 }
@@ -227,43 +252,43 @@ int ACLMessage::setReplyBy1(const std::string& date1)
     else;
     aux.assign(date1.substr(0,4));
     //std::cout<<"\n\n failing string:\t"<<aux<<"\n\n";
-    if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking year
+    if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking year
         else;
     trim.append(aux);
     
     aux.assign(date1.substr(5,2));
-    if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking month
+    if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking month
         else;
     trim.append(aux);
     
     aux.assign(date1.substr(8,2));
-    if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking day
+    if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking day
         else;
     trim.append(aux);
     
     if (date1.size() >= 13)
     {
         aux.assign(date1.substr(11,2));
-        if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking hour
+        if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking hour
 	  else;
         trim.append(aux);
         if (date1.size() >= 16) 
         {
 	  aux = date1.substr(14,2);
-	  if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking minutes
+	  if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking minutes
 	      else;
 	  trim.append(aux);
 	  if (date1.size() >= 19)
 	  {
 	      aux = date1.substr(17,2);
 	      
-	      if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking seconds
+	      if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking seconds
 		else;
 	      trim.append(aux);
 	      if (date1.size() == 23)
 	      {
 		aux = date1.substr(20,3);
-		if (aux.find_first_not_of(std::string("0123456789")) != -1) { return 2;} //checking miliseconds
+		if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking miliseconds
 		    else;
 		trim.append(aux);
 		

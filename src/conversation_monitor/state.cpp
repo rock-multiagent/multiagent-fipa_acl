@@ -46,11 +46,11 @@ void State::generateDefaultTransitions()
         for (trit = transitions.begin(); trit != transitions.end(); trit++)
         {
 	  // we don't generate a not-understood transition for not-understood message...
-	  if ( trit->getExpectedPerformative() == ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD] ) 
+	  if ( trit->getExpectedPerformative() == PerformativeTxt[ACLMessage::NOT_UNDERSTOOD] ) 
 	      continue;
 	  
 	  Transition t; 
-	  t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::NOT_UNDERSTOOD]);
+	  t.setExpectedPerformative(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD]);
 	  t.setFrom(trit->getTo());
 	  t.setTo(trit->getFrom());
 	  

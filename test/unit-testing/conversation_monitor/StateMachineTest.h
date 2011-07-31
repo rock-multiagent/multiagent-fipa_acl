@@ -13,6 +13,19 @@
 
 BOOST_AUTO_TEST_SUITE(conversation_monitor_suite)
 
+
+BOOST_AUTO_TEST_CASE(state_test)
+{
+    using namespace fipa::acl;
+    std::string stateName = "test";
+
+    State test(stateName);
+    State stateCopy(test);
+
+    BOOST_CHECK(test.getUID() == stateCopy.getUID());
+
+}
+
 BOOST_AUTO_TEST_CASE(request_protocol_test)
 {
     using namespace fipa::acl;
@@ -69,7 +82,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     
     t.setFrom("initiator");
     t.setTo("B");
-    t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::REQUEST]);
+    t.setExpectedPerformative(PerformativeTxt[ACLMessage::REQUEST]);
     t.setNextStateName("2");
     std::cout<<"transition built..\n";
 
@@ -79,26 +92,26 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     
     t.setTo("initiator");
     t.setFrom("B");
-    t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::REFUSE]);
+    t.setExpectedPerformative(PerformativeTxt[ACLMessage::REFUSE]);
     t.setNextStateName("3");
     
     req->getStateByName("2")->addTransition(t);
     
     t.setTo("initiator");
     t.setFrom("B");
-    t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
+    t.setExpectedPerformative(PerformativeTxt[ACLMessage::AGREE]);
     t.setNextStateName("4");
     req->getStateByName("2")->addTransition(t);
     
     t.setTo("initiator");
     t.setFrom("B");
-    t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::FAILURE]);
+    t.setExpectedPerformative(PerformativeTxt[ACLMessage::FAILURE]);
     t.setNextStateName("5");
     req->getStateByName("4")->addTransition(t);
     
     t.setTo("initiator");
     t.setFrom("B");
-    t.setExpectedPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
+    t.setExpectedPerformative(PerformativeTxt[ACLMessage::INFORM]);
     t.setNextStateName("5");
     req->getStateByName("4")->addTransition(t);
       
@@ -115,7 +128,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     
     std::vector<ACLMessage> flow;
     flow.clear();
-    ACLMessage m1 = ACLMessage(REQUEST);
+    ACLMessage m1 = ACLMessage(ACLMessage::REQUEST);
     //m1.setPerformative(std::string("test performative"));
     m1.setLanguage(std::string("test language"));
     m1.setContent(std::string("test content"));
@@ -130,7 +143,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     m1.addReceiver(a2);
     
     flow.push_back(m1);
-    m1.setPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
+    m1.setPerformative(PerformativeTxt[ACLMessage::AGREE]);
     m1.setLanguage(std::string("test language"));
     m1.setContent(std::string("test content"));
     m1.setEncoding(std::string("test encoding"));
@@ -145,7 +158,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     m1.addReceiver(a1);
     flow.push_back(m1);
     
-    m1.setPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
+    m1.setPerformative(PerformativeTxt[ACLMessage::INFORM]);
     m1.setLanguage(std::string("test language"));
     m1.setContent(std::string("test content"));
     m1.setEncoding(std::string("test encoding"));

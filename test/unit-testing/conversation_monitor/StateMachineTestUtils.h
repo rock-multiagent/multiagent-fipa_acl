@@ -20,7 +20,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
 {
     std::vector<ACLMessage> flow;
     flow.clear();
-    ACLMessage m1 = ACLMessage(REQUEST);
+    ACLMessage m1 = ACLMessage(ACLMessage::REQUEST);
     //m1.setPerformative(std::string("test performative"));
     m1.setLanguage(std::string("test language"));
     m1.setContent(std::string("test content"));
@@ -35,7 +35,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     m1.addReceiver(receiver);
     
     flow.push_back(m1);
-    m1.setPerformative(ACLMessage::perfs[ACLMessage::AGREE]);
+    m1.setPerformative(ACLMessage::AGREE);
     m1.setLanguage(std::string("test language"));
     m1.setContent(std::string("test content"));
     m1.setEncoding(std::string("test encoding"));
@@ -50,7 +50,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     m1.addReceiver(sender);
     flow.push_back(m1);
     
-    m1.setPerformative(ACLMessage::perfs[ACLMessage::INFORM]);
+    m1.setPerformative(ACLMessage::INFORM);
     m1.setLanguage(std::string("test language"));
     m1.setContent(std::string("test content"));
     m1.setEncoding(std::string("test encoding"));

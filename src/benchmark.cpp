@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     msg.setSender(origin);
     msg.addReceiver(receiver);
     msg.addReplyTo(origin);
-    msg.setPerformative(fipa::acl::ACLMessage::perfs[fipa::acl::ACLMessage::REQUEST]);
+    msg.setPerformative(fipa::acl::ACLMessage::REQUEST);
     msg.setProtocol(std::string("RIMRES"));
     msg.setLanguage(std::string("test language"));
     msg.setEncoding(std::string("test encoding"));
