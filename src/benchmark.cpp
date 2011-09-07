@@ -7,10 +7,10 @@
 int main(int argc, char** argv)
 {
 
-    if(argc == 0)
+    if(argc != 3)
     {
-        printf("usage: %s <content-size-in-byte>\n", argv[1]);
-        printf("output will be: <content-size> <encoded-msg-size> <header-percent> <encoding-time> <decoding-time> <epochs>\n");
+        printf("usage: %s <content-size-in-byte> <epochs>\n", argv[0]);
+        printf("output will be: <content-size in byte> <encoded-msg-size in> <header-percent> <encoding-time in ms/msg> <decoding-time in ms/msg> <epochs>\n");
         exit(0);
     }
 
@@ -41,15 +41,8 @@ int main(int argc, char** argv)
     outputParser.setMessage(msg);
     // 1 MB ~ 10 ms > 200 runs
     // 0 MB ~ 0 ms > 200000
-    int32_t epochs = 1024*100;
-    if(BUFFER_MAX <= 1024*1024)
-    {
-            epochs = 1024*100.0;
-    } else {
-        epochs = 100;
-    }
-    epochs = std::max(epochs,100);
-
+    int32_t epochs = atoi(argv[2]);
+    
     MessageParser inputParser;
 
     time_t start;

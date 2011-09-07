@@ -10,6 +10,11 @@ size=1
 for exp in `seq 0 24`
 do
    size=`echo 2^$exp | bc`
-   echo "${BENCHMARK} ${size} >> ${OUTPUT}"
-   `${BENCHMARK} ${size} >> ${OUTPUT}`
+   if [ "$size" -lt "1000000" ]; then
+       epoch=100000
+   else 
+       epoch=100
+   fi
+   echo "${BENCHMARK} ${size} ${epoch} >> ${OUTPUT}"
+   `${BENCHMARK} ${size} ${epoch} >> ${OUTPUT}`
 done
