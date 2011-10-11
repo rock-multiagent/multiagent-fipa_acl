@@ -39,11 +39,13 @@ UserdefParam::UserdefParam(const UserdefParam& copy)
 
 UserdefParam& UserdefParam::operator=(const UserdefParam& copy)
 {
-    if (this != &copy) {
-    name.clear();
-    value.clear();
-    name = copy.getName();
-    value = copy.getValue(); }
+    if (this != &copy) 
+    {
+        name.clear();
+        value.clear();
+        name = copy.getName();
+        value = copy.getValue();
+    }
     return *this;
 }
 
@@ -56,8 +58,9 @@ std::string UserdefParam::getName() const {return name;}
 int UserdefParam::setName (const std::string& nam) 
 {
     if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
-    return 1;
-    name = nam; return 0;
+        return 1;
+    name = nam;
+    return 0;
 }
 
 
