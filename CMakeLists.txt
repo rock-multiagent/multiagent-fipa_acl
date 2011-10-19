@@ -58,6 +58,7 @@ ENDIF(RUBY_EXTENSIONS_AVAILABLE)
 if (Boost_UNIT_TEST_FRAMEWORK_FOUND)
     message(STATUS "boost/test found ... building test suite")
     add_subdirectory(test/unit-testing/conversation_monitor)
+    add_subdirectory(test/unit-testing/messages)
 endif(Boost_UNIT_TEST_FRAMEWORK_FOUND)
 
 # command line output on, you can also use make VERBOSE=1
