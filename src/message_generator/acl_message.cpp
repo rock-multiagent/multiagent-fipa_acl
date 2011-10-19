@@ -362,13 +362,13 @@ bool operator== (const ACLMessage& a,const ACLMessage& b)
 	      found_one = 1;
 	      
 	  } else {
-	      bit++;
+	     ++bit;
 	  }
         }
 
         if (!found_one) 
 	{
-	    ait++;
+	   ++ait;
 	}
     }
     
@@ -397,10 +397,13 @@ bool operator== (const ACLMessage& a,const ACLMessage& b)
 	      bit = agentsB.end();
 	      found_one = 1;
 	      
-	  } else bit++;
+	  } else {
+              ++bit;
+          }
 	  
         }
-        if (!found_one) ait++;
+        if (!found_one)
+            ++ait;
 	  
     }
     
@@ -476,7 +479,7 @@ ACLMessage::ACLMessage(const ACLMessage& mes)
         
         std::vector<AgentID> mesrec = mes.getAllReceivers();
         std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end(); recit++)
+        for (; recit != mesrec.end();++recit)
         {
 	  AgentID temp;
 	  temp = (*recit);
@@ -488,7 +491,7 @@ ACLMessage::ACLMessage(const ACLMessage& mes)
         
         std::vector<AgentID> mesrec = mes.getAllReplyTo();
         std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end(); recit++)
+        for (; recit != mesrec.end();++recit)
         {
 	  AgentID temp;
 	  temp = (*recit);
@@ -501,7 +504,7 @@ ACLMessage::ACLMessage(const ACLMessage& mes)
         std::vector<UserdefParam> mesparams = mes.getUserdefParams();
         std::vector<UserdefParam>::iterator paramit = mesparams.begin();
     
-        for (; paramit != mesparams.end(); paramit++)
+        for (; paramit != mesparams.end();++paramit)
         {
 	  UserdefParam temp2;
 	  temp2 = (*paramit);
@@ -559,7 +562,7 @@ ACLMessage& ACLMessage::operator=(const ACLMessage& mes)
     {
         std::vector<AgentID> mesrec = mes.getAllReceivers();
         std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end(); recit++)
+        for (; recit != mesrec.end();++recit)
         {
             AgentID temp;
             temp = (*recit);
@@ -571,7 +574,7 @@ ACLMessage& ACLMessage::operator=(const ACLMessage& mes)
     {
         std::vector<AgentID> mesrec = mes.getAllReplyTo();
         std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end(); recit++)
+        for (; recit != mesrec.end();++recit)
         {
             AgentID temp;
             temp = (*recit);
@@ -584,7 +587,7 @@ ACLMessage& ACLMessage::operator=(const ACLMessage& mes)
         std::vector<UserdefParam> mesparams = mes.getUserdefParams();
         std::vector<UserdefParam>::iterator paramit = mesparams.begin();
     
-        for (; paramit != mesparams.end(); paramit++)
+        for (; paramit != mesparams.end();++paramit)
         {
             UserdefParam temp2;
             temp2 = (*paramit);

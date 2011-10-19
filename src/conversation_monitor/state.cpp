@@ -25,7 +25,7 @@ State::~State()
 void State::addTransition(Transition &t)
 {
     std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); it++)
+    for (it = transitions.begin(); it != transitions.end(); ++it)
     {
         if (unloadedEqual(*it,t) )
             return;
@@ -43,7 +43,7 @@ void State::generateDefaultTransitions()
             return; 
 
         std::vector<Transition>::iterator trit;
-        for (trit = transitions.begin(); trit != transitions.end(); trit++)
+        for (trit = transitions.begin(); trit != transitions.end();++trit)
         {
 	  // we don't generate a not-understood transition for not-understood message...
 	  if ( trit->getExpectedPerformative() == PerformativeTxt[ACLMessage::NOT_UNDERSTOOD] ) 
@@ -68,7 +68,7 @@ int State::consumeMessage(const ACLMessage &msg)
         bool found_one = false;
         bool stillActiveSubSM = false;
         std::vector<StateMachine>::iterator smit;
-        for (smit = subSM.begin(); smit != subSM.end(); smit++)
+        for (smit = subSM.begin(); smit != subSM.end();++smit)
         {
 	  if (smit->isActive() )
           {
@@ -98,7 +98,7 @@ int State::consumeMessage(const ACLMessage &msg)
     } 
 
     std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); it++)
+    for (it = transitions.begin(); it != transitions.end(); ++it)
     {
         LOG_DEBUG("Forwarding message in machine %p to transition from state %s to %s", owningMachine, uid.c_str(), it->getNextStateName().c_str());
         if (it->consumeMessage(msg) == 0) 
@@ -110,7 +110,7 @@ int State::consumeMessage(const ACLMessage &msg)
 void State::tickInvolvedAgent(const AgentID& ag)
 {
     std::map<AgentID,bool>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
         if (it->first == ag) it->second = true;
     }
@@ -119,7 +119,7 @@ void State::tickInvolvedAgent(const AgentID& ag)
 void State::tickInvolvedAgent(const std::vector<AgentID>& agents)
 {
     std::vector<AgentID>::const_iterator it;
-    for (it = agents.begin(); it != agents.end(); it++)
+    for (it = agents.begin(); it != agents.end(); ++it)
     {
         tickInvolvedAgent(*it);
     }
@@ -128,7 +128,7 @@ void State::tickInvolvedAgent(const std::vector<AgentID>& agents)
 bool State::checkAllAgentsAccountedFor() const
 {
     std::map<AgentID,bool>::const_iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {    
         if (it->second == false) return false;
     }
@@ -138,7 +138,7 @@ void State::updateInvolvedAgentsMap(Transition &it)
 {
     std::vector<AgentID> temp = it.getExpectedSenders();
     std::vector<AgentID>::iterator agit;
-    for (agit = temp.begin(); agit != temp.end(); agit++)
+    for (agit = temp.begin(); agit != temp.end();++agit)
     {
         std::map<AgentID,bool>::iterator found;
         if ( (found = involvedAgents.find((*agit) ) ) == involvedAgents.end() )
@@ -153,7 +153,7 @@ void State::loadParameters()
 {
     LOG_INFO("Load parameters for state: %s", uid.c_str());
     std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); it++)
+    for (it = transitions.begin(); it != transitions.end(); ++it)
     {
         assert(&(*it));
         it->loadParameters();
@@ -166,10 +166,10 @@ void State::updateAllAgentRoles()
 {
     std::vector<Transition>::iterator it;
     //std::map<AgentMapping>::iterator found;
-    for (std::vector<StateMachine>::iterator smit = subSM.begin(); smit != subSM.end(); smit++)
+    for (std::vector<StateMachine>::iterator smit = subSM.begin(); smit != subSM.end();++smit)
     {
         std::vector<RoleCorrelation> tempRC = smit->getRoleCorrelation();
-        for (std::vector<RoleCorrelation>::iterator rcit = tempRC.begin(); rcit != tempRC.end(); rcit++)
+        for (std::vector<RoleCorrelation>::iterator rcit = tempRC.begin(); rcit != tempRC.end();++rcit)
         {
 	  if(owningMachine->checkIfRoleSet(rcit->master) && !rcit->check)
 	  {
@@ -178,7 +178,7 @@ void State::updateAllAgentRoles()
         }
     }
     
-    for (it = transitions.begin(); it != transitions.end(); it++)
+    for (it = transitions.begin(); it != transitions.end(); ++it)
     {    
         it->updateRoles();
         updateInvolvedAgentsMap(*it);
@@ -196,7 +196,7 @@ bool State::getFinal() const
 void State::resetInvolvedAgentsTicks()
 {
     std::map<AgentID,bool>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
         it->second = false;
     }
@@ -204,7 +204,7 @@ void State::resetInvolvedAgentsTicks()
 void State::setAllPrecedingStates(State *st)
 {
     std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); it++)
+    for (it = transitions.begin(); it != transitions.end(); ++it)
     {
         it->setPrecedingState(st);
     }
@@ -213,7 +213,7 @@ void State::setAllPrecedingStates(State *st)
 ACLMessage* State::searchArchiveBySenderReceiver(const AgentID& m1, const AgentID& m2)
 {
     std::vector<ACLMessage>::iterator it;
-    for (it = archive.begin(); it != archive.end(); it++)
+    for (it = archive.begin(); it != archive.end(); ++it)
     {
         std::vector<AgentID> recep = it->getAllReceivers();
         if ( !it->getAllReplyTo().empty() )
@@ -263,7 +263,7 @@ void State::setOwningMachine(StateMachine *_machine)
 void State::updateTransitions()
 {
     std::vector<Transition>::iterator it = transitions.begin();
-    for(; it != transitions.end(); it++)
+    for(; it != transitions.end(); ++it)
     {
         it->setOwningState(this);
         it->setMachine(owningMachine);

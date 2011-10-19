@@ -45,7 +45,7 @@ void StateMachineBuilder::prepareProtocolsFromResourceDir()
         std::copy(fs::directory_iterator(protocolDir), fs::directory_iterator(), std::back_inserter(files));
 
         std::vector<fs::path>::iterator it = files.begin();
-        for(;it != files.end(); it++)
+        for(;it != files.end(); ++it)
         {
             if(fs::is_regular_file(*it))
             {
@@ -301,7 +301,7 @@ Transition StateMachineBuilder::parseTransitionNode(TiXmlElement *trans)
 void StateMachineBuilder::addInvolvedAgentsMap()
 {
     std::vector<std::string>::iterator it;
-    for (it = roles.begin(); it != roles.end(); it++)
+    for (it = roles.begin(); it != roles.end(); ++it)
     {
         std::string newrole = Role(*it);
         builtMachine.addRole(newrole);

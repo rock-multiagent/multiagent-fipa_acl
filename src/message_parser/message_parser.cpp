@@ -34,7 +34,7 @@ bool MessageParser::parseData(const std::string storage, ACLMessage &msg)
 	/*
 	std::string storage;
 	std::vector<uint_8_t>::iterator it = data.begin();
-	for(it; it != data.end(); it++)
+	for(it; it != data.end(); ++it)
 	    storage.append(*it);
 	*/
         
@@ -69,7 +69,7 @@ void MessageParser::buildParameters(std::vector<MessageParameter> parsedParams, 
     std::vector<MessageParameter>::iterator it = parsedParams.begin();
     UserdefParam _param;
  
-    for (; it != parsedParams.end(); it++)
+    for (; it != parsedParams.end(); ++it)
     {	
     
         if (!buildPredefMessageParameters(*it,msg)) 
@@ -125,7 +125,7 @@ AgentID MessageParser::buildAgentID(AgentIdentifier agent)
     if (!agent.addresses.empty()) 
     {
         std::vector<std::string>::iterator it = agent.addresses.begin();
-        for(; it != agent.addresses.end(); it++)
+        for(; it != agent.addresses.end(); ++it)
 	  retAg.addAddress(*it);
     }
     // building resolvers
@@ -148,7 +148,7 @@ void MessageParser::buildResolvers(AgentID &workAg, AgentIdentifier agent)
     struct AgentIdentifier unbuiltres;
     
     std::vector<fipa::acl::Resolver>::iterator it = agent.resolvers.begin();
-    for (; it != agent.resolvers.end(); it++)
+    for (; it != agent.resolvers.end(); ++it)
     {
         unbuiltres = it->get(); // get function of the boost::recursive_wrapper
         AgentID res = buildAgentID(unbuiltres);
@@ -160,7 +160,7 @@ void MessageParser::buildAgentParameters(AgentID &workAg, AgentIdentifier agent)
 {
     
     std::vector<UserDefinedParameter>::iterator it = agent.parameters.begin();
-    for (; it != agent.parameters.end(); it++)
+    for (; it != agent.parameters.end(); ++it)
     {
         UserdefParam _parameter = buildUserdefParameter(*it);
         workAg.addUserdefParam(_parameter);
@@ -199,7 +199,7 @@ void MessageParser::buildReceiver(MessageParameter param, ACLMessage &msg)
     
     std::vector<AgentIdentifier> unbuiltReceivers = boost::get<std::vector<AgentIdentifier> >(param.data); // boost::get() -> to return a specific type value from a boost::variant
     std::vector<AgentIdentifier>::iterator it = unbuiltReceivers.begin();
-    for (; it!= unbuiltReceivers.end(); it++)
+    for (; it!= unbuiltReceivers.end(); ++it)
     {
         _receiver = buildAgentID(*it);
         msg.addReceiver(_receiver);
@@ -236,7 +236,7 @@ void MessageParser::buildReplyTo(MessageParameter param, ACLMessage &msg)
      _value = boost::get<std::vector<AgentIdentifier> >(param.data);
      
      std::vector<AgentIdentifier>::iterator it = _value.begin();
-     for (; it != _value.end(); it++)
+     for (; it != _value.end(); ++it)
      {
          result = buildAgentID(*it);
          msg.addReplyTo(result);

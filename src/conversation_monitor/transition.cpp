@@ -69,10 +69,10 @@ bool Transition::validateMessage(const ACLMessage &msg)
         } 
     }
     
-    for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
+    for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); ++it)
         LOG_DEBUG("validate msg from %s", it->getName().c_str());
     
-    for (std::vector<AgentID>::iterator it = expectedRecepients.begin(); it != expectedRecepients.end(); it++)
+    for (std::vector<AgentID>::iterator it = expectedRecepients.begin(); it != expectedRecepients.end(); ++it)
         LOG_DEBUG("validate msg to %s", it->getName().c_str() );
            
     if (!validateSender(msg)) { LOG_DEBUG("Sender validation failed"); return false; }
@@ -113,7 +113,7 @@ void Transition::updateRoles()
         {
 	  
 	  std::vector<AgentMapping>::iterator it;
-	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
+	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
 	  {
 	      if (it->role == from ) 
 	      { 		
@@ -139,7 +139,7 @@ void Transition::updateRoles()
         {
 	 
 	  std::vector<AgentMapping>::iterator it;
-	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
+	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
 	  {
 	      if (it->role == to ) 
 	      {
@@ -179,7 +179,7 @@ bool Transition::updateRoles(const ACLMessage &msg)
         {
 	  
 	  std::vector<AgentMapping>::iterator it;
-	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
+	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
 	  {
 	      if (!it->role.compare(from) ) 
 	      {
@@ -232,7 +232,7 @@ bool Transition::updateRoles(const ACLMessage &msg)
         if (machine->checkIfRoleSet(to) )
         {
 	  std::vector<AgentMapping>::iterator it;
-	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); it++)
+	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
 	  {
 	      if (!it->role.compare(to) ) 
 	      {
@@ -317,7 +317,7 @@ bool Transition::validateSender (const ACLMessage &msg)
 {
     AgentID agent = msg.getSender();
     
-    for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); it++)
+    for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); ++it)
         LOG_DEBUG("Expected sender %s", it->getName().c_str() );
 
     std::vector<AgentID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
@@ -330,7 +330,7 @@ bool Transition::validateRecepients (const ACLMessage &msg)
     std::vector<AgentID> recepients = msg.getAllReceivers();
     std::vector<AgentID>::iterator it;
     
-    for (it = recepients.begin(); it != recepients.end(); it++)
+    for (it = recepients.begin(); it != recepients.end(); ++it)
     {
         std::vector<AgentID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
         if (found == expectedRecepients.end() )
@@ -348,7 +348,7 @@ bool Transition::validateInReplyTo(const ACLMessage &msg)
 
     std::vector<AgentID>::iterator it;
     ACLMessage *fromArchive;
-    for (it = recepients.begin(); it != recepients.end(); it++)
+    for (it = recepients.begin(); it != recepients.end(); ++it)
     {
         fromArchive = precedingState->searchArchiveBySenderReceiver(msg.getSender(),*it);
         // InReplyTo agent is not known
@@ -403,7 +403,7 @@ void Transition::removeAllAgentsBut(const AgentID &ag,std::vector<AgentID> &agen
 {
     bool foundAgent = false;
     std::vector<AgentID>::iterator it = agents.begin();
-    for(; it != agents.end(); it++)
+    for(; it != agents.end(); ++it)
     {
         if(ag == *it)
             foundAgent = true;

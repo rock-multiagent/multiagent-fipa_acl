@@ -196,7 +196,7 @@ std::string ACLMessageOutputParser::getBitUserdefMessageParams()
   
     std::vector<UserdefParam>::iterator it; 
     it = s.begin();
-    for (; it != s.end(); it++)
+    for (; it != s.end(); ++it)
         retstr = retstr + char(0x00) + bitParseParam(*it);
 
     return retstr;
@@ -206,7 +206,7 @@ std::string ACLMessageOutputParser::getBitUserdefParams(const std::vector<Userde
 {
     std::string retstr;
     std::vector<UserdefParam>::const_iterator it = params.begin();
-    for (; it != params.end(); it++)
+    for (; it != params.end(); ++it)
         retstr = retstr + char(0x04) + bitParseParam(*it);
 
     return retstr;
@@ -239,7 +239,7 @@ std::string ACLMessageOutputParser::getBinURLCol(const std::vector<std::string>&
 {
     std::string retstr = std::string();
     std::vector<std::string>::const_iterator it = adrr.begin();
-    for (; it != adrr.end(); it++)
+    for (; it != adrr.end(); ++it)
         retstr = retstr + getBitBinWord(*it);
 
     retstr = retstr + getBitEndOfColl();
@@ -253,9 +253,9 @@ std::string ACLMessageOutputParser::getBitResolvers(const std::vector<AgentID>& 
 
 std::string ACLMessageOutputParser::getBitAIDColl(const std::vector<AgentID>& aids, int depth)
 {
-    std::string retstr = std::string();
+    std::string retstr;
     std::vector<AgentID>::const_iterator it = aids.begin();
-    for (; it != aids.end(); it++)
+    for (; it != aids.end(); ++it)
         retstr = retstr + getBitAID(*it, depth);
     return retstr + getBitEndOfColl();
 }

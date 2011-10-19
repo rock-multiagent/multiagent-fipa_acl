@@ -76,7 +76,7 @@ void StateMachine::generateDefaultStates()
 void StateMachine::generateDefaultTransitions()
 {
     std::vector<State>::iterator it;
-    for (it = states.begin(); it != states.end(); it++)
+    for (it = states.begin(); it != states.end(); ++it)
     {
         //if (!it->getUid().compare(StateMachine::CONV_CANCELLED)) continue;
         //if (!it->getUid().compare(StateMachine::INITIAL) continue;
@@ -92,7 +92,7 @@ void StateMachine::generateDefaultTransitions()
 int StateMachine::createAndStartNewCancelMetaProtocol(const ACLMessage &msg)
 {
     std::vector<AgentID> interlocutors = msg.getAllReceivers();
-    for (std::vector<AgentID>::iterator it = interlocutors.begin(); it != interlocutors.end(); it++)
+    for (std::vector<AgentID>::iterator it = interlocutors.begin(); it != interlocutors.end(); ++it)
     {
         cancelMetaP.push_back(generateCancelMetaProtocol(std::string("with")));
         if (cancelMetaP.back().startMachine(msg)) return 1;
@@ -103,7 +103,7 @@ int StateMachine::createAndStartNewCancelMetaProtocol(const ACLMessage &msg)
 StateMachine StateMachine::generateCancelMetaProtocol(Role with)
 {
     //std::vector<AgentMapping>::iterator it;
-    //for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    //for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
    // {
         //if (!it->Role.compare(StateMachine::INITIATOR)) continue;
         StateMachine temp = StateMachine();
@@ -188,7 +188,7 @@ StateMachine::StateMachine(const StateMachine& target)
 
     std::vector<State>::iterator it = states.begin();
 
-    for(; it != states.end(); it++)
+    for(; it != states.end(); ++it)
     {
         it->setOwningMachine(this);
     }
@@ -216,7 +216,7 @@ StateMachine& StateMachine::operator=(const StateMachine& target)
         isValidStateMachine = target.isValid();
 
         std::vector<State>::iterator it = states.begin();
-        for(; it != states.end(); it++)
+        for(; it != states.end(); ++it)
         {
             it->setOwningMachine(this);
         }
@@ -254,7 +254,7 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
     }
 
     std::vector<StateMachine>::iterator it;
-    for (it = cancelMetaP.begin(); it != cancelMetaP.end(); it++)
+    for (it = cancelMetaP.begin(); it != cancelMetaP.end(); ++it)
     {
         if (it->isActive() )
         {	  
@@ -295,7 +295,7 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
 void StateMachine::updateAllAgentRoles()
 {
     std::vector<State>::iterator it;
-    for (it = states.begin(); it != states.end(); it++)
+    for (it = states.begin(); it != states.end(); ++it)
     {
         it->updateAllAgentRoles();
     }
@@ -304,7 +304,7 @@ void StateMachine::updateAllAgentRoles()
 void StateMachine::updateAllAgentRoles(const Role& myrole, const std::vector<AgentID>& myagents)
 {
     std::vector<RoleCorrelation>::iterator it;
-    for(it = preImposedRoles.begin(); it != preImposedRoles.end(); it++)
+    for(it = preImposedRoles.begin(); it != preImposedRoles.end(); ++it)
     {
         if (!it->master.compare(myrole) && !it->check)
         {
@@ -331,7 +331,7 @@ State* StateMachine::getStateByName(State _name) const
 {
     std::string searchName = _name.getUID();
     std::vector<State>::const_iterator it = states.begin();
-    for( it = states.begin(); it != states.end(); it++)
+    for( it = states.begin(); it != states.end(); ++it)
     {
         if(it->getUID() == searchName)
             return const_cast<State*>(&(*it));
@@ -341,7 +341,7 @@ State* StateMachine::getStateByName(State _name) const
 void StateMachine::removeInterlocutor(const AgentID& ag)
 {
     std::vector<AgentMapping>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
         if (it->agent == ag)
 	  if (it->check) { involvedAgents.erase(it); break; }
@@ -350,7 +350,7 @@ void StateMachine::removeInterlocutor(const AgentID& ag)
 void StateMachine::removeInterlocutor(const std::vector<AgentID>& agents)
 {
     std::vector<AgentID>::const_iterator it;
-    for (it = agents.begin(); it != agents.end(); it++)
+    for (it = agents.begin(); it != agents.end(); ++it)
         removeInterlocutor(*it);
 }
 
@@ -358,7 +358,7 @@ bool StateMachine::setRole(const Role& myrole,const AgentID& myagent)
 {
     std::vector<AgentMapping>::iterator it;
     if (checkIfAgentAssigned(myagent) ) return false;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
         if (it->role == myrole && !it->check) 
 	{
@@ -379,7 +379,7 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
     // and replace it by the newly assigned agents
     std::vector<AgentMapping>::iterator it;
     bool found = false;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
        if (it->role == myrole && !it->check)
        {
@@ -397,7 +397,7 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
 
     // Assign role to agents 
     std::vector<AgentID>::const_iterator agit = agents.begin();
-    for (; agit != agents.end(); agit++)
+    for (; agit != agents.end();++agit)
     {
         AgentMapping element;
         element.role = myrole;
@@ -413,7 +413,7 @@ bool StateMachine::setRole(const Role& myrole, const std::vector<AgentID>& agent
 bool StateMachine::checkIfAgentAssigned(const AgentID& ag)
 {
     std::vector<AgentMapping>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
         if (it->agent == ag && it->check == true)
            return true;
@@ -425,7 +425,7 @@ std::vector<AgentID> StateMachine::getAgentsAssignedTo(Role& myrole) const
 {
     std::vector<AgentMapping>::const_iterator it = involvedAgents.begin();
     std::vector<AgentID> ret; 
-    for(; it != involvedAgents.end(); it++)
+    for(; it != involvedAgents.end(); ++it)
     {
         if (it->role == myrole && it->check)
         {
@@ -438,7 +438,7 @@ std::vector<AgentID> StateMachine::getAgentsAssignedTo(Role& myrole) const
 bool StateMachine::checkIfRoleSet(const Role &myrole)
 {
     std::vector<AgentMapping>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
         if (it->role == myrole)
 	  return it->check;
@@ -457,7 +457,7 @@ bool StateMachine::isActive() const
 bool StateMachine::checkIfRoleExists(const Role& myrole)
 {
     std::vector<AgentMapping>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
        if (it->role == myrole)
            return true;
@@ -480,7 +480,7 @@ bool StateMachine::addState(State& _state)
 Role StateMachine::getAgentRole(const AgentID& ag)
 {
     std::vector<AgentMapping>::const_iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
         if ((it->agent == ag) && (it->check == true))
             return it->role;
@@ -493,7 +493,7 @@ void StateMachine::addRoleCorrelation(const Role& mymaster, const Role& myreside
     if (!checkIfRoleExists(myresident)) 
         return;
     
-    for (std::vector<RoleCorrelation>::iterator it = preImposedRoles.begin(); it != preImposedRoles.end(); it++)
+    for (std::vector<RoleCorrelation>::iterator it = preImposedRoles.begin(); it != preImposedRoles.end(); ++it)
         if (it->master == mymaster && it->resident == myresident)
 	  return;
     
@@ -540,7 +540,7 @@ State* StateMachine::getCurrentState()
 {
     std::vector<State>::iterator sit;
     sit = states.begin();
-    for(;sit != states.end(); sit++)
+    for(;sit != states.end();++sit)
     {
         if(sit->getUID() == currentState)
             return &(*sit);
@@ -558,7 +558,7 @@ void StateMachine::print()
 {
     std::cout<<"========================"<<" StateMachine "<<"========================\n";
     std::cout<<"involvedAgents: ";
-    for (std::vector<AgentMapping>::iterator it = involvedAgents.begin(); it != involvedAgents.end(); it++)
+    for (std::vector<AgentMapping>::iterator it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
         std::cout<< it->role <<" ";
     
     std::cout<<"\ncurrentState: ";
@@ -574,7 +574,7 @@ void StateMachine::print()
     std::cout<<"encoding: "<<encoding<<"\n\n";
     std::cout<<"********** States: **********\n";
     
-    for (std::vector<State>::iterator it = states.begin(); it != states.end(); it++)
+    for (std::vector<State>::iterator it = states.begin(); it != states.end(); ++it)
         it->print();
     
     std::cout<<"========================"<<"=============="<<"========================\n";
@@ -592,7 +592,7 @@ void StateMachine::validate(bool associatedMachine)
     std::vector<State>::iterator it = states.begin();
     std::vector<std::string> stateIds;
 
-    for(; it != states.end(); it++)
+    for(; it != states.end(); ++it)
     {
         if(associatedMachine) 
             assert(it->getOwningMachine() == this);
@@ -600,11 +600,11 @@ void StateMachine::validate(bool associatedMachine)
     }
 
     std::vector<std::string> requiredStates;
-    for(it = states.begin(); it != states.end(); it++)
+    for(it = states.begin(); it != states.end(); ++it)
     {
         std::vector<Transition> transitions = it->getTransitions();
         std::vector<Transition>::iterator tit = transitions.begin();
-        for(; tit != transitions.end(); tit++)
+        for(; tit != transitions.end();++tit)
         {
            if(associatedMachine)
                assert(tit->getMachine() == this);
@@ -619,7 +619,7 @@ void StateMachine::validate(bool associatedMachine)
 
     std::vector<std::string>::iterator requiredIt = requiredStates.begin();
     std::vector<std::string>::iterator availableIt;
-    for(; requiredIt != requiredStates.end(); requiredIt++)
+    for(; requiredIt != requiredStates.end(); ++requiredIt)
     {
         availableIt == std::find(stateIds.begin(),  stateIds.end(), *requiredIt);
         if(availableIt == stateIds.end())

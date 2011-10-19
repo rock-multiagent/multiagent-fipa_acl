@@ -50,7 +50,7 @@ void printAgentIDset(set<AgentID*>* myset)
 {
     cout<<"\t==================Agent AID set==================\n";
     set<AgentID*>::iterator it = myset->begin();
-    for(it; it != myset->end(); it++)
+    for(it; it != myset->end(); ++it)
         printAgentID(*it);
 }
 void printAgentID(AgentID *agent)
@@ -61,7 +61,7 @@ void printAgentID(AgentID *agent)
     {
         cout<<"\t\taddresses:\t\n";
         set<string>::iterator it = agent->getAddresses()->begin();
-        for(it; it != agent->getAddresses()->end(); it++)
+        for(it; it != agent->getAddresses()->end(); ++it)
 	  cout<<"\t\t\t"<<*it<<endl;
     }
     if (!agent->getResolvers()->empty()) {cout<<"\t\tresolvers:\t\n"; printAgentIDset(agent->getResolvers());}
@@ -72,7 +72,7 @@ void printUserdefParamset(set<UserdefParam*>* params)
 {
     cout<<"\t\t==================User Defined Parameters==================\n";
     set<UserdefParam*>::iterator it = params->begin();
-    for(it; it != params->end(); it++)
+    for(it; it != params->end(); ++it)
     {
         cout<<"\t\tparam name:\t"<< (*(*it)).getName()<<endl;
         cout<<"\t\tparam value:\t"<< (*(*it)).getValue()<<"\n\n";
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
                 std::set<fipa::acl::AgentID*>::iterator it;
 
                 std::vector<std::string> recvs;
-                for (it = receivers->begin(); it != receivers->end(); it++) 
+                for (it = receivers->begin(); it != receivers->end(); ++it) 
                         recvs.push_back((*it)->getName());
 
 /*
@@ -350,10 +350,10 @@ comp2->addResolver(a100);
 	      bit = agentsB->end();
 	      found_one = 1;
 	      
-	  } else bit++;
+	  } else++bit;
 	  
         }
-        if (!found_one) ait++;
+        if (!found_one)++ait;
 	  
     }
     if (!agentsA->empty())

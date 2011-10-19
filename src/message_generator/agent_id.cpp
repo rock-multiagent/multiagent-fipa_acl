@@ -161,11 +161,11 @@ bool resDepthEqual(const AgentID &a, const AgentID &b, int depth)
                      bit = agentsB.end();
                      found_one = 1;
                 } else {
-	            bit++;
+	           ++bit;
                 }
             }
             if (!found_one)
-                ait++;
+               ++ait;
         }
     
         if (!agentsA.empty())
@@ -232,7 +232,7 @@ AgentID::AgentID(const AgentID &aid)
     {
         std::vector<std::string> aidAdr = aid.getAddresses();
         std::vector<std::string>::iterator otherSit = aidAdr.begin();
-        for (; otherSit != aidAdr.end(); otherSit++)
+        for (; otherSit != aidAdr.end();++otherSit)
         {
           std::string mystring = std::string(*otherSit);
           addresses.insert(addresses.begin(),mystring);
@@ -243,7 +243,7 @@ AgentID::AgentID(const AgentID &aid)
         
         std::vector<AgentID> aidres = aid.getResolvers();
         std::vector<AgentID>::iterator aidit= aidres.begin();
-        for (; aidit != aidres.end(); aidit++)
+        for (; aidit != aidres.end();++aidit)
         {
 	  AgentID temp = AgentID();
 	  temp = (*aidit);
@@ -255,7 +255,7 @@ AgentID::AgentID(const AgentID &aid)
         std::vector<UserdefParam> aidparams = aid.getUserdefParams();
         std::vector<UserdefParam>::iterator paramit = aidparams.begin();
                
-        for (; paramit != aidparams.end(); paramit++)
+        for (; paramit != aidparams.end();++paramit)
         {
 	  UserdefParam temp2 = UserdefParam();
 	  temp2 = (*paramit);
@@ -290,7 +290,7 @@ AgentID& AgentID::operator=(const AgentID &aid)
         {
             std::vector<std::string> aidAdr = aid.getAddresses();
             std::vector<std::string>::iterator otherSit = aidAdr.begin();
-            for (; otherSit != aidAdr.end(); otherSit++)
+            for (; otherSit != aidAdr.end();++otherSit)
             {
                 std::string mystring = std::string(*otherSit);
                 addresses.insert(addresses.begin(),mystring);
@@ -302,7 +302,7 @@ AgentID& AgentID::operator=(const AgentID &aid)
 	  
             std::vector<AgentID> aidres = aid.getResolvers();
             std::vector<AgentID>::iterator aidit= aidres.begin();
-            for (; aidit != aidres.end(); aidit++)
+            for (; aidit != aidres.end();++aidit)
             {
                 AgentID temp;
                 temp = (*aidit);
@@ -315,7 +315,7 @@ AgentID& AgentID::operator=(const AgentID &aid)
             std::vector<UserdefParam> aidparams = aid.getUserdefParams();
             std::vector<UserdefParam>::iterator paramit = aidparams.begin();
            
-            for (; paramit != aidparams.end(); paramit++)
+            for (; paramit != aidparams.end();++paramit)
             {
                 UserdefParam temp2;
                 temp2 = (*paramit);
