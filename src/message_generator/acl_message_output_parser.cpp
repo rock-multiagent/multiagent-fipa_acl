@@ -137,9 +137,9 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
     if ( !sender.empty()) 
         retstr = retstr + char(0x02) + getBitAID(sender, res_depth); 
 
-    std::vector<AgentID> receivers;
+    std::vector<AgentID> receivers = msg.getAllReceivers();
     if (!receivers.empty())
-        retstr =retstr + char(0x03) + getBitAIDColl(receivers,res_depth); 
+        retstr = retstr + char(0x03) + getBitAIDColl(receivers,res_depth); 
 
     std::string content = msg.getContent();
     if (!content.empty())
