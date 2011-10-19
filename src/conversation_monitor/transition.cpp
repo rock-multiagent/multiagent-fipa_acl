@@ -56,7 +56,7 @@ bool Transition::validateMessage(const ACLMessage &msg)
 {
     if (!validatePerformative(msg))
     {
-        LOG_ERROR("Performative validation failed");
+        LOG_DEBUG("Performative validation failed");
         return false;
     }
     
@@ -64,7 +64,7 @@ bool Transition::validateMessage(const ACLMessage &msg)
     {
         if (!updateRoles(msg)) 
         {
-	  LOG_ERROR("updateRoles(msg) failed");
+	  LOG_DEBUG("updateRoles(msg) failed");
 	  return false;
         } 
     }
@@ -75,15 +75,15 @@ bool Transition::validateMessage(const ACLMessage &msg)
     for (std::vector<AgentID>::iterator it = expectedRecepients.begin(); it != expectedRecepients.end(); it++)
         LOG_DEBUG("validate msg to %s", it->getName().c_str() );
            
-    if (!validateSender(msg)) { LOG_ERROR("Sender validation failed"); return false; }
-    if (!validateRecepients(msg)) {LOG_ERROR("Recipient validation failed"); return false; }
+    if (!validateSender(msg)) { LOG_DEBUG("Sender validation failed"); return false; }
+    if (!validateRecepients(msg)) {LOG_DEBUG("Recipient validation failed"); return false; }
     
-    if (!validateConvID(msg)) { LOG_ERROR("ConversationID validation failed"); return false; }
-    if (!validateProtocol(msg)) { LOG_ERROR("Protocol validation failed"); return false; }
-    if (!validateEncoding(msg)) { LOG_ERROR("Encoding validation failed"); return false; }
-    if (!validateLanguage(msg)) {LOG_ERROR("Language validation failed"); return false; }
-    if (!validateOntology(msg)) {LOG_ERROR("Ontology validation failed"); return false; }
-    if (!validateInReplyTo(msg)) {LOG_ERROR("InReplyTo validation failed"); return false; }
+    if (!validateConvID(msg)) { LOG_DEBUG("ConversationID validation failed"); return false; }
+    if (!validateProtocol(msg)) { LOG_DEBUG("Protocol validation failed"); return false; }
+    if (!validateEncoding(msg)) { LOG_DEBUG("Encoding validation failed"); return false; }
+    if (!validateLanguage(msg)) {LOG_DEBUG("Language validation failed"); return false; }
+    if (!validateOntology(msg)) {LOG_DEBUG("Ontology validation failed"); return false; }
+    if (!validateInReplyTo(msg)) {LOG_DEBUG("InReplyTo validation failed"); return false; }
     //if (!validateReplyBy(msg)) return false;
 
     return true;
@@ -367,8 +367,6 @@ bool Transition::validateInReplyTo(const ACLMessage &msg)
 bool Transition::validatePerformative (const ACLMessage &msg)
 {
     if (expectedPerf == msg.getPerformative() ) return true;
-
-    LOG_ERROR("Message performative is %s, expected was %s", msg.getPerformative().c_str(), expectedPerf.c_str());
     return false;
 }
 bool Transition::validateOntology (const ACLMessage &msg)
