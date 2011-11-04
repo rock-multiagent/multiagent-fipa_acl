@@ -4,7 +4,7 @@
   Since FIPA also define interaction protocols, i.e. agents can use a well defined sequence of message to talk to each other. This library contains a conversation monitor that uses a state machine to validate message flows to conform to a protocol. Protocols can be defined in statechart xml format. 
   </description>
   <author>Thomas Roehr/thomas.roehr@dfki.de</author>
-  <author>Mircea Cretu Stancu/mircea.ctza@yahoo.com<author>
+  <author>Mircea Cretu Stancu/mircea.ctza@yahoo.com</author>
   <license>LPGL v3 or higher</license>
   <url>http://www.fipa.org</url>
   <depend package="base/types" />
