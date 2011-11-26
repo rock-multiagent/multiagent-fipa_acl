@@ -83,7 +83,7 @@ void StateMachine::generateDefaultTransitions()
         if(it->getFinal())
             continue;
 
-        LOG_WARN("Default transitions not enabled");
+#warning "Default transitions not enabled"
     }
 }
 //NOTE:remember to treat not understood transitions differently when executing as well as when loading--not so sure i still need to(on exec)

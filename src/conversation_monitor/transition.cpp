@@ -38,7 +38,7 @@ int Transition::consumeMessage(const ACLMessage &msg)
 	}
 	return 0;
     } else {
-        LOG_ERROR("Message validation failed");
+        LOG_DEBUG("Message validation failed: message does not apply to transition");
     }
     return 1;
 }
@@ -56,7 +56,7 @@ bool Transition::validateMessage(const ACLMessage &msg)
 {
     if (!validatePerformative(msg))
     {
-        LOG_DEBUG("Performative validation failed");
+        LOG_DEBUG("Performative validation failed: was %s", msg.getPerformative().c_str());
         return false;
     }
     
