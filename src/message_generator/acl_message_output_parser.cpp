@@ -61,7 +61,23 @@ int ACLMessageOutputParser::printParsedMessage(const std::string& stream)
 
 std::string ACLMessageOutputParser::getBitMessage()
 {
-	std::string mes = getBitHeader() + getBitMessageType() +getBitMessageParameters() + getBitEndOfColl();
+	std::string mes = getBitHeader() + getBitMessageType() + getBitMessageParameters();
+
+        // Since content can be of arbitrary sicne add content here
+        // to avoid copying around large content object
+        std::string* content = msg.getContentPtr();
+        if (!content->empty())
+        {
+            char digitString[100];
+            int digit = content->size();	
+            snprintf(digitString,100, "%c%c#%d%c", 0x04,0x14,digit,'\"');
+
+            mes += digitString;
+            mes += *content;
+            mes += char(0x00);
+        }
+
+        mes += getBitEndOfColl();
 	return mes;
 }
 
@@ -141,9 +157,7 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
     if (!receivers.empty())
         retstr = retstr + char(0x03) + getBitAIDColl(receivers,res_depth); 
 
-    std::string content = msg.getContent();
-    if (!content.empty())
-        retstr = retstr + char(0x04) + getByteLengthEncodedString(content); 
+    /** Content added at higher level to minimize copies of large content objects **/
 
     std::string replyWith = msg.getReplyWith();	
     if (!replyWith.empty())
@@ -262,13 +276,11 @@ std::string ACLMessageOutputParser::getBitAIDColl(const std::vector<AgentID>& ai
 
 std::string ACLMessageOutputParser::getByteLengthEncodedString(const std::string& sword)
 {
-    // consider codetable here
     char digitString[100];
     int digit = sword.size();	
-    sprintf(digitString, "%d", digit);
+    snprintf(digitString,100, "%c#%d%c",0x14,digit,'\"');
 
-    return char(0x14)+ ( '#' + std::string(digitString) + '\"' + sword) + char(0x00);
-
+    return digitString + sword + char(0x00);
 }
 
 std::string ACLMessageOutputParser::getBitBinExpression(const std::string& sword,char c)

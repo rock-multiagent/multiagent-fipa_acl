@@ -58,6 +58,8 @@ namespace acl {
 */
 class ACLMessage {
 
+    friend class ACLMessageOutputParser;
+
 public:
     /**
         \enum Performative
@@ -98,6 +100,13 @@ private:
     std::vector<UserdefParam> params;
     /** \param content: string representing the content of the message */
     std::string content;
+
+protected:
+
+    /**
+     * Get reference to content object in order to avoid unnecessary content copies
+     */
+    std::string* getContentPtr();
 
 public:  
 

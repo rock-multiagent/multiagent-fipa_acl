@@ -193,6 +193,8 @@ std::string ACLMessage::getLanguage() const {return language; }
 
 void ACLMessage::setContent(const std::string& cont) {content = cont; }
 
+std::string* ACLMessage::getContentPtr() { return &content; }
+
 std::string ACLMessage::getContent() const {return content; }
 
 void ACLMessage::setSender(const AgentID& sender1) 

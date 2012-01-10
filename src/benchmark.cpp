@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     char buffer[BUFFER_MAX+1];
     memset(buffer, 1, BUFFER_MAX);
     buffer[BUFFER_MAX] = '\0';
-    msg.setContent(std::string(buffer));
+    msg.setContent(buffer);
 
     outputParser.setMessage(msg);
     // 1 MB ~ 10 ms > 200 runs
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
         struct timeval start, stop, diff;
         gettimeofday(&start, 0);
         for(int i = 0; i < epochs; i++)
-            encodedMsg = outputParser.getBitMessage();
+           encodedMsg = outputParser.getBitMessage();
         gettimeofday(&stop, 0);
 	
         timeval_subtract(&diff, &stop, &start);
@@ -100,18 +100,9 @@ int main(int argc, char** argv)
         encodingMsPerMsg = timePerMsgInMs;
     }
 
-
     {
         ACLMessage msg;
-        //printf("Encoded message size: %d\n", encodedMsg.size());
         encodedMsgSize = encodedMsg.size();
-        /*
-        for(size_t i = 0; i < encodedMsg.size(); i++)
-        {
-            printf("%02x ", encodedMsg.data()[i]);
-        }
-        printf("\n");
-        */
         struct timeval start, stop, diff;
         gettimeofday(&start, 0);
         for(int i = 0; i < epochs; i++)
@@ -129,7 +120,7 @@ int main(int argc, char** argv)
         decodingMsPerMsg = timePerMsgInMs;
     }
 
-    double overheadInPercent = (encodedMsg.size() - BUFFER_MAX)/(1.0*encodedMsg.size());
+    double overheadInPercent = (encodedMsgSize - BUFFER_MAX)/(1.0*encodedMsgSize);
 
     printf("%d %d %.6f %.6f %.6f %d\n", BUFFER_MAX, (int) encodedMsg.size(), overheadInPercent, encodingMsPerMsg, decodingMsPerMsg, epochs);
 
