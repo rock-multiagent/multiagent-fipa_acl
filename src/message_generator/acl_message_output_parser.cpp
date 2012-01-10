@@ -43,7 +43,7 @@ ACLMessageOutputParser::ACLMessageOutputParser()
 
 int ACLMessageOutputParser::printParsedMessage(const std::string& stream)
 {
-     std::ofstream out(stream.c_str(), std::ios_base::binary);
+    std::ofstream out(stream.c_str(), std::ios_base::binary);
 	if (!out)
 		return 0;
 	
@@ -54,8 +54,6 @@ int ACLMessageOutputParser::printParsedMessage(const std::string& stream)
 
 	out.close();
 	return 1;
-     
-     
 }
 
 
@@ -112,7 +110,7 @@ char ACLMessageOutputParser::getBitMessageVersion()
 std::string ACLMessageOutputParser::getBitMessageType()
 {
     // Check if we have one of the predefined performatives
-    for (int i = (int) ACLMessage::ACCEPT_PROPOSAL; i < (int) ACLMessage::END_PERFORMATIVE; i++)
+    for (int i = (int) ACLMessage::ACCEPT_PROPOSAL; i < (int) ACLMessage::END_PERFORMATIVE; ++i)
     {
         if (PerformativeTxt[(ACLMessage::Performative) i] == msg.getPerformative())
         { 				
@@ -132,16 +130,20 @@ std::string ACLMessageOutputParser::getBitMessageType()
 
 std::string ACLMessageOutputParser::getBitBinWord(const std::string& sword)
 {
-    if (useCodeTables == 0) return (char(0x10) + sword + char(0x00));
-       throw std::runtime_error("ACLMessageOutputParser does not support codetables");
-       // return char(0x11) + getCTIndex(sword);
+    if (useCodeTables == 0)
+    {
+        return (char(0x10) + sword + char(0x00));
+    }
+
+    throw std::runtime_error("ACLMessageOutputParser does not support codetables");
 }
 
 std::string ACLMessageOutputParser::getBitMessageParameters()
 {
-	         
 	return (getBitPredefMessageParams() + getBitUserdefMessageParams());
 }
+
+
 
 std::string ACLMessageOutputParser::getBitPredefMessageParams()
 {
@@ -251,7 +253,7 @@ std::string ACLMessageOutputParser::getBitAID(const AgentID& aid, int depth)
 
 std::string ACLMessageOutputParser::getBinURLCol(const std::vector<std::string>& adrr)
 {
-    std::string retstr = std::string();
+    std::string retstr; 
     std::vector<std::string>::const_iterator it = adrr.begin();
     for (; it != adrr.end(); ++it)
         retstr = retstr + getBitBinWord(*it);

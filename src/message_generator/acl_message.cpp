@@ -4,6 +4,7 @@
 #include <string>
 #include "acl_message.h"
 #include <boost/assign/list_of.hpp>
+#include <boost/date_time.hpp>
 #include <stdexcept>
 
 namespace fipa {
@@ -39,28 +40,12 @@ const std::string illegalWordStart = std::string("@#-0123456789");
 
 void ACLMessage::initializeObject()
 {
-    receivers.clear();
-    reply_to.clear();
     performative = PerformativeTxt[INFORM];
-    language = std::string();
-    encoding = std::string();
-    ontology = std::string();
-    protocol = std::string();
-    conversation_id = std::string();
-    reply_with = std::string();
-    in_reply_to = std::string();
     reply_by = -1;
-    reply_by1 = std::string();
-    content = std::string();
-    
-    params.clear();        
 }
 
 ACLMessage::~ACLMessage()
 {
-    params.clear();
-    reply_to.clear();
-    receivers.clear();
 }
 
 ACLMessage::ACLMessage()
@@ -80,8 +65,13 @@ ACLMessage::ACLMessage(const std::string& perf)
     initializeObject(); 
     
     if ( (perf.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(perf.c_str()[0]) != std::string::npos) )
-        performative.clear();
-    else performative = perf;
+    {
+        char buffer[512];
+        snprintf(buffer, 512,"Illegal characters in given performative: %s", perf.c_str());
+	throw std::runtime_error(buffer);
+    } else {
+        performative = perf;
+    }
 }
 
 void ACLMessage::setPerformative(Performative perf)
@@ -100,7 +90,10 @@ void ACLMessage::setPerformative(const std::string& str)
 {
     if ( (str.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(str.c_str()[0]) != std::string::npos) )
     {
-	throw std::runtime_error("Cannot set performative. Performative contains illegal characters");
+
+        char buffer[512];
+        snprintf(buffer, 512,"Illegal characters in given performative: %s", str.c_str());
+	throw std::runtime_error(buffer);
     }
 
     performative = str; 
@@ -110,16 +103,18 @@ std::string ACLMessage::getPerformative() const {return performative; }
 
 void ACLMessage::addReceiver(const AgentID& aid) 
 {
-    if ( find(receivers.begin(),receivers.end(),aid) == receivers.end() )// prevent entering duplicates
-							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    // prevent entering duplicates
+    // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    if ( find(receivers.begin(),receivers.end(),aid) == receivers.end() )
         receivers.insert(receivers.begin(),aid); 
 }
 
 void ACLMessage::deleteReceiver(const AgentID& aid) 
 {
+    // prevent entering duplicates
+    // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     std::vector<AgentID>::iterator it;
-    if ( (it = find(receivers.begin(),receivers.end(),aid)) != receivers.end() )// prevent entering duplicates
-							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    if ( (it = find(receivers.begin(),receivers.end(),aid)) != receivers.end() )
         receivers.erase(it);
 }
 
@@ -132,16 +127,18 @@ std::vector<AgentID> ACLMessage::getAllReceivers() const {return receivers; }
 
 void ACLMessage::addReplyTo(const AgentID& aid) 
 {
-    if ( find(reply_to.begin(),reply_to.end(),aid) == reply_to.end() )// prevent entering duplicates
-							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    // prevent entering duplicates
+    // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    if ( find(reply_to.begin(),reply_to.end(),aid) == reply_to.end() )
         reply_to.insert(reply_to.begin(),aid); 
 }
 
 void ACLMessage::deleteReplyTo(const AgentID& aid) 
 {
+    // prevent entering duplicates
+    // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
     std::vector<AgentID>::iterator it;
-    if ( (it = find(reply_to.begin(),reply_to.end(),aid)) != reply_to.end() )// prevent entering duplicates
-							// NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
+    if ( (it = find(reply_to.begin(),reply_to.end(),aid)) != reply_to.end() )
         reply_to.erase(it);
 }
 
@@ -168,13 +165,16 @@ void ACLMessage::setConversationID(const std::string& str) {conversation_id = st
 
 std::string ACLMessage::getConversationID() const {return conversation_id; }
 
-int ACLMessage::setProtocol(const std::string& str) 
+void ACLMessage::setProtocol(const std::string& str) 
 {
     if ( (str.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(str.c_str()[0]) != std::string::npos) )
-        return 1;
+    {
+        char buffer[512];
+        snprintf(buffer, 512, "Protocol name contains illegal characters: %s", str.c_str());
+        throw std::runtime_error(buffer);
+    }
 
     protocol = str; 
-    return 0;
 }
 
 std::string ACLMessage::getProtocol() const {return protocol; }
@@ -191,7 +191,7 @@ void ACLMessage::setLanguage(const std::string& str) {language = str; }
 
 std::string ACLMessage::getLanguage() const {return language; }
 
-void ACLMessage::setContent(const std::string& cont) {content = cont; }
+void ACLMessage::setContent(const std::string& cont) { content = cont; }
 
 std::string* ACLMessage::getContentPtr() { return &content; }
 
@@ -215,7 +215,7 @@ void ACLMessage::addUserdefParam(const UserdefParam& p)
     params.insert(params.begin(),p);
 }
 
-std::vector<UserdefParam> ACLMessage:: getUserdefParams() const {return params;}
+std::vector<UserdefParam> ACLMessage::getUserdefParams() const {return params;}
 
 void ACLMessage::setUserdefParams(const std::vector<UserdefParam>& p) 
 {
@@ -244,74 +244,50 @@ void ACLMessage::_setReplyBy1(const std::string& date1)
     reply_by1 = date1;
 }
 
-int ACLMessage::setReplyBy1(const std::string& date1) 
+void ACLMessage::setReplyBy1(const std::string& date1) 
 {
-    std::string trim,aux;
-    
-    if ((date1.size() < 10) || (date1.size() > 23)) {return 1;}
-    aux.assign(date1.substr(0,4));
+    std::string millisecs = "000";
+    std::string date;
 
-    if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking year
-    trim.append(aux);
-    
-    aux.assign(date1.substr(5,2));
-    if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking month
-    trim.append(aux);
-    
-    aux.assign(date1.substr(8,2));
-    if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking day
-    trim.append(aux);
-    
-    if (date1.size() >= 13)
+    if(date1.size() == 23)
     {
-        aux.assign(date1.substr(11,2));
-        if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking hour
-        trim.append(aux);
+        // separate milliseconds
+        millisecs = date1.substr(20,3);
 
-        if (date1.size() >= 16) 
-        {
-	  aux = date1.substr(14,2);
-	  if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking minutes
-	  trim.append(aux);
-
-	  if (date1.size() >= 19)
-	  {
-	      aux = date1.substr(17,2);
-	      
-	      if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking seconds
-	      trim.append(aux);
-
-	      if (date1.size() == 23)
-	      {
-		aux = date1.substr(20,3);
-		if (aux.find_first_not_of(std::string("0123456789")) != std::string::npos) { return 2;} //checking miliseconds
-		trim.append(aux);
-		
-	      } else {
-                  trim.append(std::string("000"));
-              } // if (date1.size() == 23)
-	      
-	  } else {
-              trim.append(std::string("00000"));
-	  } // date1.size() == 19
-	  
-        } else {
-	    trim.append(std::string("0000000"));
-	} // date1.size >= 16
+        // Store date without milliseconds
+        date = date1.substr(0,19);
+        
+        if ( millisecs.find_first_not_of(std::string("0123456789")) != std::string::npos)
+            throw std::runtime_error("Invalid date format. Milliseconds are not numbers");
     } else {
-	trim.append(std::string("000000000")); //fill the rest in with default if not specified
-    } // date1.size >= 13
-    
-    reply_by1 = trim;
-    return 0;
+        date = date1;
+    }
+
+    // Input format should be "%Y-%m-%dT%H:%M:%S"
+    // Strip ':' and '-' to allow from_iso_string to work
+    boost::erase_all(date,":");
+    boost::erase_all(date,"-");
+
+    // check if we can parse the following format "%Y%m%dT%H%M%S"
+    try {
+        using namespace boost::posix_time;
+        ptime posixTime(from_iso_string(date));
+    } catch(...)
+    {
+        char buffer[512];
+        snprintf(buffer,512, "Invalid posix date format: %s", date.c_str());
+        throw std::runtime_error(buffer);
+    }
+
+    boost::erase_all(date,"T");
+
+    // Add milliseconds (if not provided)
+    reply_by1 = date + millisecs;
 }
 
 
-bool operator== (const ACLMessage& a,const ACLMessage& b)
+bool operator==(const ACLMessage& a,const ACLMessage& b)
 {
-    //ACLMessage a = ACLMessage(&c); 
-    //ACLMessage b = ACLMessage(&d);
-       
     if (a.getPerformative().compare(b.getPerformative()))
         return false;
     if (a.getContent().compare(b.getContent()))
@@ -330,14 +306,8 @@ bool operator== (const ACLMessage& a,const ACLMessage& b)
         return false;
     if (a.getInReplyTo().compare(b.getInReplyTo()))
         return false;
-    //if (a.getReplyBy1().compare(b.getReplyBy1()))
-        //return false;
-        
-    /// comapring the reply_by1 parameters without the milisecons, as they are not yet supported by the parser    
-    std::string repa, repb;
-    if (repa.substr(0,repa.size()-3).compare(repb.substr(0,repb.size()-3)) )
+    if (a.getReplyBy1().compare(b.getReplyBy1()))
         return false;
-    
     if (!(a.getSender() == b.getSender()) )
         return false;
     
@@ -374,10 +344,7 @@ bool operator== (const ACLMessage& a,const ACLMessage& b)
 	}
     }
     
-    if (!agentsA.empty())
-        return false;
-
-    if (!agentsB.empty())
+    if (!agentsA.empty() || !agentsB.empty())
         return false;
     
     //checking if reply_to sets of the message are  the same
@@ -452,68 +419,24 @@ bool operator== (const ACLMessage& a,const ACLMessage& b)
     return true;
 }
 
-
-
-
-
 ACLMessage::ACLMessage(const ACLMessage& mes)
 {
     initializeObject();
-    if (!mes.getPerformative().empty()) performative = mes.getPerformative();
-    if (!mes.getLanguage().empty()) language = mes.getLanguage();
-    if (!mes.getEncoding().empty()) encoding = mes.getEncoding();
-    if (!mes.getOntology().empty()) ontology = mes.getOntology();
-    if (!mes.getProtocol().empty()) protocol = mes.getProtocol();
-    if (!mes.getConversationID().empty()) conversation_id = mes.getConversationID();
-    if (!mes.getReplyWith().empty()) reply_with = mes.getReplyWith();
-    if (!mes.getInReplyTo().empty()) in_reply_to = mes.getInReplyTo();
-    if (!mes.getReplyBy1().empty()) reply_by1 = mes.getReplyBy1();
-    if (!mes.getContent().empty()) content = mes.getContent();
-    
-    
-    AgentID temp;
-    temp = mes.getSender();
-    sender = temp;
-	      
-	 
-    if (!mes.getAllReceivers().empty()) 
-    {
-        
-        std::vector<AgentID> mesrec = mes.getAllReceivers();
-        std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end();++recit)
-        {
-	  AgentID temp;
-	  temp = (*recit);
-	  receivers.insert(receivers.begin(),temp);
-        }
-    }
-    if (!mes.getAllReplyTo().empty()) 
-    {
-        
-        std::vector<AgentID> mesrec = mes.getAllReplyTo();
-        std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end();++recit)
-        {
-	  AgentID temp;
-	  temp = (*recit);
-	  reply_to.insert(reply_to.begin(),temp);
-        }
-    }
-    
-    if (!mes.getUserdefParams().empty())
-    {
-        std::vector<UserdefParam> mesparams = mes.getUserdefParams();
-        std::vector<UserdefParam>::iterator paramit = mesparams.begin();
-    
-        for (; paramit != mesparams.end();++paramit)
-        {
-	  UserdefParam temp2;
-	  temp2 = (*paramit);
-	  params.insert(params.begin(),temp2);
-        }
-    }  
-        
+    performative = mes.getPerformative();
+    language = mes.getLanguage();
+    encoding = mes.getEncoding();
+    ontology = mes.getOntology();
+    protocol = mes.getProtocol();
+    conversation_id = mes.getConversationID();
+    reply_with = mes.getReplyWith();
+    in_reply_to = mes.getInReplyTo();
+    reply_by1 = mes.getReplyBy1();
+    content = mes.getContent();
+    sender = mes.getSender();
+
+    receivers.insert(receivers.begin(), mes.receivers.begin(), mes.receivers.end());
+    reply_to.insert(reply_to.begin(), mes.reply_to.begin(), mes.reply_to.end());
+    params.insert(params.begin(), mes.params.begin(), mes.params.end());
 }
 
 
@@ -543,59 +466,21 @@ ACLMessage& ACLMessage::operator=(const ACLMessage& mes)
        
      //building the copied message
     initializeObject();	
-    if (!mes.getPerformative().empty()) performative = mes.getPerformative();
-    if (!mes.getLanguage().empty()) language = mes.getLanguage();
-    if (!mes.getEncoding().empty()) encoding = mes.getEncoding();
-    if (!mes.getOntology().empty()) ontology = mes.getOntology();
-    if (!mes.getProtocol().empty()) protocol = mes.getProtocol();
-    if (!mes.getConversationID().empty()) conversation_id = mes.getConversationID();
-    if (!mes.getReplyWith().empty()) reply_with = mes.getReplyWith();
-    if (!mes.getInReplyTo().empty()) in_reply_to = mes.getInReplyTo();
-    if (!mes.getReplyBy1().empty()) reply_by1 = mes.getReplyBy1();
-    if (!mes.getContent().empty()) content = mes.getContent();
-        
-       
-    AgentID temp; 
-    temp = mes.getSender();
-    sender = temp;
-	      
+    performative = mes.getPerformative();
+    language = mes.getLanguage();
+    encoding = mes.getEncoding();
+    ontology = mes.getOntology();
+    protocol = mes.getProtocol();
+    conversation_id = mes.getConversationID();
+    reply_with = mes.getReplyWith();
+    in_reply_to = mes.getInReplyTo();
+    reply_by1 = mes.getReplyBy1();
+    content = mes.getContent();
+    sender = mes.getSender();
 	  
-    if (!mes.getAllReceivers().empty()) 
-    {
-        std::vector<AgentID> mesrec = mes.getAllReceivers();
-        std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end();++recit)
-        {
-            AgentID temp;
-            temp = (*recit);
-            receivers.insert(receivers.begin(),temp);
-        }
-    }
-
-    if (!mes.getAllReplyTo().empty()) 
-    {
-        std::vector<AgentID> mesrec = mes.getAllReplyTo();
-        std::vector<AgentID>::iterator recit= mesrec.begin();
-        for (; recit != mesrec.end();++recit)
-        {
-            AgentID temp;
-            temp = (*recit);
-            reply_to.insert(reply_to.begin(),temp);
-        }
-    }
-        
-    if (!mes.getUserdefParams().empty())
-    {
-        std::vector<UserdefParam> mesparams = mes.getUserdefParams();
-        std::vector<UserdefParam>::iterator paramit = mesparams.begin();
-    
-        for (; paramit != mesparams.end();++paramit)
-        {
-            UserdefParam temp2;
-            temp2 = (*paramit);
-            params.insert(params.begin(),temp2);
-        }
-    }  
+    receivers.insert(receivers.begin(), mes.receivers.begin(), mes.receivers.end());
+    reply_to.insert(reply_to.begin(), mes.reply_to.begin(), mes.reply_to.end());
+    params.insert(params.begin(), mes.params.begin(), mes.params.end());
     
     return *this;
 }

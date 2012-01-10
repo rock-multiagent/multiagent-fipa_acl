@@ -181,9 +181,9 @@ public:
 
      /**
        \brief the method checks whether the passed protocol string is a word or not(according to the fipa spec)
-       \return 0 if successful 1 otherwise(protocol is un-alterred)
+       \throws runtime_error when protocol name contains illegal characters
     */
-    int setProtocol(const std::string& str);
+    void setProtocol(const std::string& str);
     std::string getProtocol() const;
     void setOntology(const std::string& str);
     std::string getOntology() const;
@@ -192,6 +192,8 @@ public:
     void setLanguage(const std::string& str);
     std::string getLanguage() const;
     void setContent(const std::string& cont);
+
+
     std::string getContent() const;
     void setSender(const AgentID& sender1);
     AgentID getSender() const;
@@ -200,17 +202,19 @@ public:
     void setUserdefParams(const std::vector<UserdefParam>& p);
 
     /**
+     * Allow to retrieve the ReplyBy time either formatted or unformatted. 
+     * Unformatted: YYYYmmddHHMMSSsss
+     * Formatted: YYYY-mm-ddTHH:MM:SS:sss
        \param formatted option to get the parameter as it is stored or formated. default is formatted,call with 0 to get unformatted
     */
     std::string getReplyBy1(int formatted = 0) const;
 
     /**
-       \brief the method checks whether the passed date string is formatted correctly or not;
-       example of correctly formated date: "2010-12-23T23:12:45:100" -- any separatators can be used instead of "-:T"
-       the minimum required is the date; if the following values are not speciffied they are default-ed to 0
-       \return 0 if successful 1 if length is bad 2 if wrong format
+     *  \brief the method checks whether the passed date string is formatted correctly or not;
+     *  example of correctly formated dates are: "2010-12-23T23:12:45:100" or "2010-12-23T23:12:45" 
+     *  \throws if format of date string is wrong
     */
-    int setReplyBy1(const std::string& date1);
+    void setReplyBy1(const std::string& date1);
 
     void _setReplyBy1 (const std::string& date1);
 };
