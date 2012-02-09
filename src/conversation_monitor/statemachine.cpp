@@ -48,7 +48,7 @@ void StateMachine::initializeObjectFields()
     encoding.clear();
 }
 
-bool StateMachine::setInitialState(const string& stateid)
+bool StateMachine::setInitialState(const std::string& stateid)
 {
     if (active) return false;
     currentState = stateid;
