@@ -18,11 +18,11 @@ typedef boost::recursive_wrapper<AgentIdentifier> Resolver;
 // To avoid dealing with circular dependecies we use a 'similar' definition to ParameterValue 
 typedef boost::variant<std::string, fipa::acl::Resolver, std::vector<fipa::acl::Resolver>, fipa::acl::ByteSequence, fipa::acl::ByteString > UserDefinedParameterValue;
 
-typedef struct
+struct UserDefinedParameter
 {
 	std::string name;
 	fipa::acl::UserDefinedParameterValue data;
-} UserDefinedParameter;
+};
 
 /**
 * \brief Definition for AgentIdentifier

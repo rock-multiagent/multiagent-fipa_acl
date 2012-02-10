@@ -29,7 +29,7 @@ namespace acl
 // Embedd only types into the BOOST_FUSION_ADAPT_STRUCT
 // So perform all definitions here
 //
-typedef struct
+struct Header
 {
 	char id;
 	char version;
@@ -41,9 +41,9 @@ typedef struct
                 return std::string(tmp);
         }
 
-} Header;
+};
 
-typedef struct
+struct MessageParameter
 {
 	std::string name;
 	fipa::acl::ParameterValue data;
@@ -55,7 +55,7 @@ typedef struct
                 return tmp;
         }
 
-} MessageParameter;
+};
 
 // Define the final message structure here
 struct Message

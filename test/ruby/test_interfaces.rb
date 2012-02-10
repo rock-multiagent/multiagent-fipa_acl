@@ -1,14 +1,16 @@
 require 'fipa-message'
 require 'test/unit'
 
+include FIPA
 
 class FipaMessageTest < Test::Unit::TestCase
 
 	def test_UserdefinedParameter
 		name = "user-def-param"
 		value = "user-def-value"
-		param = FipaUserDefinedParameter.new(name)
-		param.setValue(value)
+		param = UserDefinedParameter.new 
+                param.setName name
+		param.setValue value
 
 		assert_equal(name, param.getName)	
 		assert_equal(value, param.getValue)
@@ -23,16 +25,16 @@ class FipaMessageTest < Test::Unit::TestCase
 
 		resolvers = []
 		10.times do |count|
-			resolver = FipaAgentId.new("resolver-#{count}")
+			resolver = AgentId.new("resolver-#{count}")
 			# add an inner resolver
-			iResolver = FipaAgentId.new("inner-resolver-#{count}")
+			iResolver = AgentId.new("inner-resolver-#{count}")
 			resolver.addResolver(iResolver)
 
 			resolvers[count] = resolver
 		end
 
 		# This is the single object to start with
-		aid = FipaAgentId.new(name)
+		aid = AgentId.new(name)
 		addresses.each do |address|
 			aid.addAddress(address)
 		end
@@ -63,12 +65,12 @@ class FipaMessageTest < Test::Unit::TestCase
 	end
 
 	def test_FipaMessage
-		performative = "inform"
-		msg = FipaMessage.new
+		performative = :inform
+		msg = ACLMessage.new
 		msg.setPerformative(performative)
 
 		10.times do |count|
-			agent = FipaAgentId.new("receiver-#{count}")
+			agent = AgentId.new("receiver-#{count}")
 			msg.addReceiver(agent)
 		end
 	
@@ -85,16 +87,16 @@ class FipaMessageTest < Test::Unit::TestCase
 	end
 
 	def test_InterfaceCalls
- 		msg = FipaMessage.new
-		msg.setPerformative ""
+ 		msg = ACLMessage.new
+		msg.setPerformative :request
  		msg.getPerformative
 		msg.setContent ""
 		msg.getContent
 	end
 
 	def test_ByteVector
-		msg = FipaMessage.new
-		msg.setPerformative "inform"
+		msg = ACLMessage.new
+		msg.setPerformative :inform
 		msg.setContent ""
 		content = msg.to_byte_array
 		p content

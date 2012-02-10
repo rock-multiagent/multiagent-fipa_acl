@@ -24,7 +24,9 @@ std::string StateMachineBuilder::resourceDir = std::string("");
 
 std::map<std::string, StateMachine> StateMachineBuilder::availableStateMachines;
 
-StateMachineBuilder::StateMachineBuilder() : builtMachine(), preparedResourceDir(false), roles(), states(), initialState()
+StateMachineBuilder::StateMachineBuilder() 
+    : builtMachine()
+    , preparedResourceDir(false)
 {
 }
 
