@@ -20,6 +20,12 @@ bool usage(int argc, char** argv)
 {
     int option;
 
+    if(argc <= 1)
+    {
+            printf("usage: %s -p <performative> -c <content>\n", argv[0]);
+            exit(0);
+    }
+
     while( (option = getopt(argc, argv, "hp:c:")) != -1 )
     {
         switch(option)
