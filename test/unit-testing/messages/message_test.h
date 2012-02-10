@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(message_test)
     msg.setEncoding(std::string("test encoding"));
     msg.setOntology(std::string("test ontology"));
     msg.setReplyWith(std::string("test reply_with"));
-    msg.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
+    msg.setReplyBy1(std::string("2010-12-23T12:00:37.00"));
     msg.setConversationID(std::string("test conversationID"));
     msg.setContent("test content");
 
@@ -36,8 +36,7 @@ BOOST_AUTO_TEST_CASE(message_test)
     MessageParser inputParser;
     ACLMessage outputMsg;
 
-    bool success = inputParser.parseData(encodedMsg, outputMsg);
-    BOOST_CHECK_MESSAGE(success, "Parsing of encoded message succeeded");
+    BOOST_ASSERT( inputParser.parseData(encodedMsg, outputMsg) );
 
     BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[REQUEST]);
     BOOST_ASSERT(outputMsg.getSender() == msg.getSender());

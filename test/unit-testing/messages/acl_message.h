@@ -43,10 +43,10 @@ void setupTest()
     m1.setEncoding(string("test encoding"));
     m1.setOntology(string("test ontology"));
     m1.setReplyWith(string("test reply_with"));
-    m1.setReplyBy1(string("test reply_by1"));
+    m1.setReplyBy1(string("2011-09-17T00:00:30"));
     m1.setInReplyTo(string("test in_reply_to"));
     m1.setConversationID(string("test conversationID"));
-    m1.setProtocol(string("test protocol"));
+    m1.setProtocol(string("test-protocol"));
     
     m2.setPerformative(ACLMessage::REQUEST);
     m2.setLanguage(string("test language"));
@@ -54,10 +54,10 @@ void setupTest()
     m2.setEncoding(string("test encoding"));
     m2.setOntology(string("test ontology"));
     m2.setReplyWith(string("test reply_with"));
-    m2.setReplyBy1(string("test reply_by1"));
+    m2.setReplyBy1(string("2011-09-17T00:00:30"));
     m2.setInReplyTo(string("test in_reply_to"));
     m2.setConversationID(string("test conversationID"));
-    m2.setProtocol(string("test protocol"));
+    m2.setProtocol(string("test-protocol"));
     
     a1.setName(string("agent1"));
     a1.addAddress(addr1);
