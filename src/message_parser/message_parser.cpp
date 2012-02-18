@@ -292,7 +292,7 @@ void MessageParser::buildContent(MessageParameter param,ACLMessage &msg)
      std::string _content = std::string();
 
      temp = boost::get<ByteSequence>(param.data);
-     _content = temp.toString();
+     _content = temp.toRawDataString();
      
      msg.setContent(_content);
 }

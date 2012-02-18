@@ -27,7 +27,7 @@
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/foreach.hpp>
-
+#include <arpa/inet.h>
 #include <ctime>
 
 #include <fipa_acl/message_parser/types.h>
@@ -299,6 +299,44 @@ namespace fipa
 	};
 
 	extern phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;
+
+
+	struct convertToNativeShortImpl
+	{
+		template <typename T>
+		struct result
+		{
+			typedef uint16_t type;
+		};
+
+		// for std::vector<char>
+		template <typename T>
+		uint16_t operator()(T arg) const
+		{
+			return ntohs(arg);
+		}
+	};
+
+	extern phoenix::function<convertToNativeShortImpl> lazy_ntohs;
+
+	struct convertToNativeLongImpl
+	{
+		template <typename T>
+		struct result
+		{
+			typedef uint32_t type;
+		};
+
+		// for std::vector<char>
+		template <typename T>
+		uint32_t operator()(T arg) const
+		{
+			return ntohl(arg); 
+		}
+	};
+
+	extern phoenix::function<convertToNativeLongImpl> lazy_ntohl;
+
         
 	/** Convert types to strings */
 	struct convertToStringImpl
@@ -320,7 +358,7 @@ namespace fipa
 		{
 			// TODO: (optional) perform some encoding stuff here
 			// using arg.encoding
-			return arg.toString();
+			return arg.toRawDataString();
 		}
 
 
@@ -655,9 +693,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 		byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToCharVector(label::_1) ]
 			;
 		
-		len8 = byte_;
-		len16 = short_;
-		len32 = long_;
+		len8 = byte_ ;
+		len16 = short_ [ label::_val = lazy_ntohs(label::_1) ];
+		len32 = long_ [ label::_val = lazy_ntohl(label::_1) ];
 	
 		year = ( codedNumber  	[ label::_val = label::_1] )
 		       >> ( codedNumber [ label::_val += label::_1 ])

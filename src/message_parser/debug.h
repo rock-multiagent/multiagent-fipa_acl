@@ -75,7 +75,7 @@ std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::a
 template< typename C, typename E>
 std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::ByteSequence& b)
 {
-                return out << "Bytesequence<" << b.toString() << ">";
+                return out << "Bytesequence<" << b.toPrettyString() << ">";
 }
 
 template< typename C, typename E>

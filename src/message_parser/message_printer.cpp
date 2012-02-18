@@ -53,7 +53,7 @@ void MessagePrinter::print(const fipa::acl::Message& msg)
 			fipa::acl::ByteSequence bs = boost::get<fipa::acl::ByteSequence>(mp.data);
 			printf("encoding: %s\n", bs.encoding.c_str());
 
-			std::string printBytes = bs.toString();
+			std::string printBytes = bs.toPrettyString();
 			printf("content: %s\n", printBytes.c_str());
 		} else if(mp.name == "reply-with")
 		{

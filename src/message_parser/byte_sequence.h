@@ -46,7 +46,7 @@ public:
 	
 	/**
 	* Build a string from a raw byte sequence, i.e. the following output format will be used, 
-        * embedding encoding information
+        * embedding encoding information (dword)
         *  HEX(dword)[0a af 02 10 ... 01]
 	* \param vector One of the types for the variant that this printer is implemented for
 	*/
@@ -71,6 +71,36 @@ public:
 	}
 };
 
+
+/**
+* \class ByteStringRawPrinter
+* \brief Printer using the visitor pattern for the ByteString type
+*/
+class ByteStringRawPrinter : public boost::static_visitor<std::string>
+{
+public:
+	/**
+	* Build a string for the given type
+	* \param s One of the types for the variant that this printer is implemented for
+	*/
+	std::string operator()(std::string s) const
+	{
+		return s;
+	}
+	
+	/**
+	* Build a string from a raw byte sequence, i.e. the following output format will be used, 
+        * embedding encoding information (dword)
+        *  HEX(dword)[0a af 02 10 ... 01]
+	* \param vector One of the types for the variant that this printer is implemented for
+	*/
+	std::string operator()(std::vector<unsigned char> vector) const
+	{
+            std::string rawData(vector.begin(), vector.end());
+            return rawData;
+        }
+};
+
 /**
  * \class ByteSequence 
  * \brief Representation of a byte sequence. We also embed information about the encoding
@@ -88,11 +118,19 @@ struct ByteSequence
          * This will be a defined format: see ByteStringPrinter for that
 	 * \return A string containing the byte sequence
          */
-	std::string toString()
+	std::string toPrettyString()
 	{
 		std::string tmp;
 		// Since bytes is a variant we apply the visitor pattern here
 		tmp += boost::apply_visitor( ByteStringPrinter(encoding), bytes);
+		return tmp;
+	}
+
+	std::string toRawDataString()
+	{
+		std::string tmp;
+		// Since bytes is a variant we apply the visitor pattern here
+		tmp += boost::apply_visitor( ByteStringRawPrinter(), bytes);
 		return tmp;
 	}
 };

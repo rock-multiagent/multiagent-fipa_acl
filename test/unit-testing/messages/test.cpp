@@ -1,5 +1,7 @@
-#define BOOST_TEST_MODULE conversation_monitor
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+#define BOOST_TEST_MODULE "conversation_monitor"
+#define BOOST_AUTO_TEST_MAIN
+#include <boost/test/auto_unit_test.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "message_test.h"
-#include "acl_message.h"

@@ -1,10 +1,4 @@
-/** \file: ACLMessageTest.cpp
- *
- * \author: Mircea Cretu Stancu
- *
- * version: 1.0
- */
- 
+#include <boost/test/auto_unit_test.hpp> 
  
 #include <iostream>
 #include <fstream>

@@ -19,6 +19,8 @@
 #include "userdef_param.h"
 #include "agent_id.h"
 #include <base/logging.h>
+#include <arpa/inet.h>
+#include <limits>
 
 namespace fipa {
 
@@ -59,6 +61,7 @@ int ACLMessageOutputParser::printParsedMessage(const std::string& stream)
 
 std::string ACLMessageOutputParser::getBitMessage()
 {
+
 	std::string mes = getBitHeader() + getBitMessageType() + getBitMessageParameters();
 
         // Since content can be of arbitrary sicne add content here
@@ -66,13 +69,39 @@ std::string ACLMessageOutputParser::getBitMessage()
         std::string* content = msg.getContentPtr();
         if (!content->empty())
         {
-            char digitString[100];
-            int digit = content->size();	
-            snprintf(digitString,100, "%c%c#%d%c", 0x04,0x14,digit,'\"');
+            uint32_t digit = content->size();	
+            mes += 0x04;
 
-            mes += digitString;
-            mes += *content;
-            mes += char(0x00);
+            // Check if there is binary content to be set
+            // add choose encoding based on the respective content size
+            if(strlen(content->c_str()) != digit)
+            {
+                if(digit <= std::numeric_limits<uint8_t>::max())
+                {
+                    uint8_t dataSize = digit;
+                    mes += 0x16;
+                    mes.append(reinterpret_cast<const char*>(&dataSize), sizeof(uint8_t));
+                    mes += *content;
+                } else if (digit <= std::numeric_limits<uint16_t>::max())
+                {
+                    uint16_t dataSize = digit;
+                    dataSize = htons(dataSize);
+                    mes += 0x17;
+                    mes.append(reinterpret_cast<const char*>(&dataSize),sizeof(uint16_t));
+                    mes += *content;
+                } else {
+                    digit = htonl(digit);
+                    mes += 0x19;
+                    mes.append(reinterpret_cast<const char*>(&digit),sizeof(uint32_t));
+                    mes += *content;
+                }
+            } else { // use string with null terminated (more efficient)
+                char digitString[100];
+                snprintf(digitString,100, "%c#%d%c",0x14,digit,'\"');
+                mes += digitString;
+                mes += *content;
+                mes += char(0x00);
+            }
         }
 
         mes += getBitEndOfColl();
