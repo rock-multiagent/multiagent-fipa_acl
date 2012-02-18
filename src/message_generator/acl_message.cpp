@@ -224,9 +224,9 @@ void ACLMessage::setUserdefParams(const std::vector<UserdefParam>& p)
 }
 
 
-std::string ACLMessage::getReplyBy1(int formated) const
+std::string ACLMessage::getReplyBy1(bool formatted) const
 {
-    if (formated == 0)
+    if (!formatted)
         return reply_by1;
 
     if (reply_by1.size() < 17)

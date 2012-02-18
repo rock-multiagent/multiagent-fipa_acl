@@ -101,6 +101,13 @@ private:
     /** \param content: string representing the content of the message */
     std::string content;
 
+
+    /**
+     * Set reply by using the provided string
+     * No verification applies
+     */
+    void _setReplyBy1 (const std::string& date1);
+
 protected:
 
     /**
@@ -194,20 +201,50 @@ public:
     void setContent(const std::string& cont);
 
 
+    /**
+     * Get content as string
+     * If the content is binary use string's data() function to access the underlying array
+     * \return content data
+     */
     std::string getContent() const;
-    void setSender(const AgentID& sender1);
+
+    /**
+     * Set the sender of this message
+     * \param sender Sender's AgentID
+     */
+    void setSender(const AgentID& sender);
+
+    /**
+     * Get the senders AgentID
+     * \return AgentID of the sender 
+     */
     AgentID getSender() const;
+
+    /**
+     * Add a userdefined parameter
+     * \param p userdefined parameter
+     */
     void addUserdefParam(const UserdefParam& p);
+
+    /**
+     * Retrieve any userdefined parameters this message contains
+     * \return List of userdefined parameters
+     */
     std::vector<UserdefParam> getUserdefParams() const;
+
+    /**
+     * Set the list of userdefined parameter of this message
+     * Overwrites an already existing parameter list
+     */
     void setUserdefParams(const std::vector<UserdefParam>& p);
 
     /**
      * Allow to retrieve the ReplyBy time either formatted or unformatted. 
      * Unformatted: YYYYmmddHHMMSSsss
      * Formatted: YYYY-mm-ddTHH:MM:SS:sss
-       \param formatted option to get the parameter as it is stored or formated. default is formatted,call with 0 to get unformatted
+       \param formatted option to get the parameter as it is stored or formated. default is formatted,call with false to get unformatted
     */
-    std::string getReplyBy1(int formatted = 0) const;
+    std::string getReplyBy1(bool formatted = false) const;
 
     /**
      *  \brief the method checks whether the passed date string is formatted correctly or not;
@@ -216,7 +253,6 @@ public:
     */
     void setReplyBy1(const std::string& date1);
 
-    void _setReplyBy1 (const std::string& date1);
 };
 
 extern std::map<ACLMessage::Performative, std::string> PerformativeTxt;
