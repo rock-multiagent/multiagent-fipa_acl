@@ -200,6 +200,13 @@ public:
     std::string getLanguage() const;
     void setContent(const std::string& cont);
 
+   
+    /**
+     * Check whether the content has to be treated as binary or not. This is done by simply checking on the 
+     * existance of a \0 (0x00) in the data. 
+     * \returns bool if the data contains at least one 0x00 markers within
+     */
+    bool hasBinaryContent() const;
 
     /**
      * Get content as string

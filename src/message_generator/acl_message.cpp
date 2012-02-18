@@ -195,6 +195,12 @@ void ACLMessage::setContent(const std::string& cont) { content = cont; }
 
 std::string* ACLMessage::getContentPtr() { return &content; }
 
+bool ACLMessage::hasBinaryContent() const 
+{
+    // Check on the existance of 0x00 in the content
+    return ( strlen(content.c_str()) != content.size() );
+}
+
 std::string ACLMessage::getContent() const {return content; }
 
 void ACLMessage::setSender(const AgentID& sender1) 
