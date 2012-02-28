@@ -419,8 +419,6 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 		using encoding::digit;
 		using encoding::alpha;
 		using qi::byte_;
-		using qi::short_;
-		using qi::long_;
 		
 		// To avoid namespace clashes with boost::bind
 		namespace label = qi::labels;
@@ -684,7 +682,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 		// Index is a pointer to code table entry and its size (in bits) depends on the code table size. 
 		// If the code table size is 256 entries, the size of the index is one byte;
 		//  otherwise its size is two bytes (represented in network byte order).
-		index = byte_ | short_;
+		index = byte_ | (qi::word [ label::_val = lazy_ntohs(label::_val)]) ;
 
 		// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
 		// TODO: check value and reset
@@ -694,8 +692,10 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 			;
 		
 		len8 = byte_ ;
-		len16 = short_ [ label::_val = lazy_ntohs(label::_1) ];
-		len32 = long_ [ label::_val = lazy_ntohl(label::_1) ];
+                // boost::uint_least16_t
+		len16 = qi::word [ label::_val = lazy_ntohs(label::_1) ];
+                // boost::uint_least32_t
+		len32 = qi::dword [ label::_val = lazy_ntohl(label::_1) ];
 	
 		year = ( codedNumber  	[ label::_val = label::_1] )
 		       >> ( codedNumber [ label::_val += label::_1 ])
@@ -809,6 +809,9 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(binDate);
         BOOST_SPIRIT_DEBUG_NODE(binDateTimeToken);
         BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
+        BOOST_SPIRIT_DEBUG_NODE(len8);
+        BOOST_SPIRIT_DEBUG_NODE(len16);
+        BOOST_SPIRIT_DEBUG_NODE(len32);
 	#endif
 		
 	}
@@ -885,7 +888,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	//qi::symbols<char, qi::rule<Iterator> > exprKeyword;
 
 	qi::rule<Iterator, std::vector<unsigned char>(boost::uint32_t) > byteSeq;
-	qi::rule<Iterator, unsigned short() > index;
+	qi::rule<Iterator, uint_least16_t() > index;
 	qi::rule<Iterator, boost::uint_least8_t() > len8;
 	qi::rule<Iterator, boost::uint_least16_t() > len16;
 	qi::rule<Iterator, boost::uint_least32_t() > len32;

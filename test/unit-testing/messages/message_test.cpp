@@ -87,37 +87,36 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
 
     BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len8 size field" );
     std::string content_out = outputMsg.getContent();
-    for(int i = 0; i < content_out.size(); ++i)
+    for(size_t i = 0; i < content_out.size(); ++i)
     {
         BOOST_CHECK_MESSAGE(1==1, "" << content_out.data()[i]);
     }
 
-
-    BOOST_REQUIRE_MESSAGE(outputMsg.getContent().size() == content_size, "Check content size output" << outputMsg.getContent().size() << " vs. " << content_size);
+    BOOST_REQUIRE_MESSAGE(outputMsg.getContent().size() == content_size, "Check content size output " << outputMsg.getContent().size() << " vs. " << content_size);
 
     // Testing binary content with len16 as size descriptor
     uint32_t size = std::numeric_limits<uint8_t>::max() + 10;
     {
-        char buffer[size];
-        memset(buffer,'\0',size);
-        msg.setContent(content);
+        std::string msgContent(size, '\0');
+        msg.setContent(msgContent);
 
         content_size = msg.getContent().size();
-        BOOST_ASSERT(content_size == size);
+        BOOST_REQUIRE_MESSAGE(content_size == size, "Content size " << content_size << " vs. size " << size);
 
         outputParser.setMessage(msg);
         encodedMsg = outputParser.getBitMessage();
 
-        BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len16 size field");
-        BOOST_REQUIRE_MESSAGE(outputMsg.getContent().size() != size, "Check content size of output for len16");
+        BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len16 size field: size " << content_size);
+        uint32_t outputMsgSize = outputMsg.getContent().size();
+        BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len16: " << size << " expected - contained: " << outputMsgSize);
     }
 
     {
         // Testing binary content with len32 as size descriptor
         size = std::numeric_limits<uint16_t>::max() + 10;
-        char buffer[size];
-        memset(buffer,'\0',size);
-        msg.setContent(content);
+
+        std::string msgContent(size, '\0');
+        msg.setContent(msgContent);
 
         content_size = msg.getContent().size();
         BOOST_ASSERT(content_size == size);
@@ -126,7 +125,9 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
         encodedMsg = outputParser.getBitMessage();
 
         BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len32 size field");
-        BOOST_REQUIRE_MESSAGE(outputMsg.getContent().size() != size, "Check content size of output for len32");
+
+        uint32_t outputMsgSize = outputMsg.getContent().size();
+        BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len32: " << size << " expected - contained: " << outputMsgSize);
     }
 }
 

@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 project(fipa_acl)
-set(PROJECT_VERSION 1.1)
+set(PROJECT_VERSION 1.2)
 set(PROJECT_DESCRIPTION "Library for FIPA Agent Communication Language and handling bit-efficient FIPA Messages")
 set(CMAKE_BUILD_TYPE Release)
 
