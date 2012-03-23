@@ -1,7 +1,3 @@
-find_package(Boost REQUIRED filesystem unit_test_framework)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
-
 set(SOURCES
     message_parser/agent_id.cpp
     message_parser/message_printer.cpp
