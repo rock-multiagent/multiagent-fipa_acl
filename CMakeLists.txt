@@ -15,19 +15,3 @@ rock_standard_layout()
 
 add_subdirectory(bindings/ruby)
 
-#INCLUDE(RubyExtensions)
-#IF(RUBY_EXTENSIONS_AVAILABLE)
-#    ENABLE_TESTING()
-#    ADD_SUBDIRECTORY(bindings/ruby)
-#    ADD_SUBDIRECTORY(test/ruby)
-#    if (DOXYGEN_FOUND)
-#      ADD_DEPENDENCIES(doc ruby_doc)
-#    endif (DOXYGEN_FOUND)
-#ENDIF(RUBY_EXTENSIONS_AVAILABLE)
-#
-
-# command line output on, you can also use make VERBOSE=1
-# set(CMAKE_VERBOSE_MAKEFILE on)
-
-
-
