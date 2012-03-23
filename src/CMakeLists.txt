@@ -1,68 +1,77 @@
-#SET(main_cpp main.cpp)
-# Set 
-SET(module_name ${PROJECT_NAME})
-## Note: the library and executable names can't be the same
-##add_library(${PROJECT_NAME} SHARED dummy.cpp ${EXTERNAL_LIBS} ${moc_cpp} ${ui_cpp})
-## Link the defined target (either binary or library, see above) to libraries.
-## You must use ${QT_LIBRARIES} if you have enabled Qt support in the root
-## CMakeLists.txt, and ${Boost_LIBRARIES} for boost libraries
-##
-## If you want to use a library defined in this package, just use its name
-##
-##target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS})
+find_package(Boost REQUIRED filesystem unit_test_framework)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
-#install(TARGETS ${PROJECT_NAME} 
-#    RUNTIME DESTINATION bin
-#    LIBRARY DESTINATION lib
-#)
 set(SOURCES
-	message_parser/agent_id.cpp
-	message_parser/message_printer.cpp
-	message_parser/message_parser.cpp
-	message_parser/grammar_bitefficient.cpp
-        message_generator/acl_message.cpp
-        message_generator/agent_id.cpp
-        message_generator/userdef_param.cpp
-        message_generator/acl_message_output_parser.cpp
-        conversation_monitor/state.cpp
-        conversation_monitor/statemachine_builder.cpp
-        conversation_monitor/statemachine.cpp
-        conversation_monitor/transition.cpp
+    message_parser/agent_id.cpp
+    message_parser/message_printer.cpp
+    message_parser/message_parser.cpp
+    message_parser/grammar_bitefficient.cpp
+    message_generator/acl_message.cpp
+    message_generator/agent_id.cpp
+    message_generator/userdef_param.cpp
+    message_generator/acl_message_output_parser.cpp
+    conversation_monitor/state.cpp
+    conversation_monitor/statemachine_builder.cpp
+    conversation_monitor/statemachine.cpp
+    conversation_monitor/transition.cpp
 )
 
-#add_executable(testParser test.cpp ${SOURCES})
-#target_link_libraries(testParser ${LIBRARIES})
+set(HEADERS
+    message_parser/grammar_bitefficient.h
+    message_parser/date_time.h
+    message_parser/debug.h
+    message_parser/byte_sequence.h
+    message_parser/types.h
+    message_parser/agent_id.h
+    message_parser/parameter.h
+    message_parser/grammar_bitefficient_test.h
+    message_parser/message_parser.h
+    message_parser/message_printer.h
+    message_generator/exception.h
+    message_generator/userdef_param.h
+    message_generator/acl_message_output_parser.h
+    message_generator/types.h
+    message_generator/agent_id.h
+    message_generator/acl_message.h
+    message_generator/message_generator.h
+    bitefficient_message.h
+    conversation_monitor/state.h
+    conversation_monitor/types.h
+    conversation_monitor/transition.h
+    conversation_monitor/statemachine_builder.h
+    conversation_monitor/statemachine.h
+    conversation_monitor.h
+)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
-target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
-install(TARGETS ${PROJECT_NAME}
-	RUNTIME DESTINATION bin
-	ARCHIVE DESTINATION lib
-	LIBRARY DESTINATION lib
-	)
+rock_library(${PROJECT_NAME} 
+        SOURCES ${SOURCES}
+        HEADERS ${HEADERS}
+        DEPS_PKGCONFIG base-lib tinyxml
+        )
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 	
-add_executable(testParser message_parser/main.cpp )
-target_link_libraries(testParser ${LIBRARIES} ${PROJECT_NAME})
+rock_executable(testParser 
+    SOURCES message_parser/main.cpp
+    DEPS ${PROJECT_NAME}
+    NOINSTALL)
 
-set(GENERATOR fipa_acl-msg_generator)
-add_executable(${GENERATOR} message_generator/generator.cpp)
-target_link_libraries(${GENERATOR} ${LIBRARIES} ${PROJECT_NAME})
-install(TARGETS ${GENERATOR}
-	RUNTIME DESTINATION bin
-	ARCHIVE DESTINATION lib
-	LIBRARY DESTINATION lib
-)
+rock_executable(fipa_acl-msg_generator
+        SOURCES message_generator/generator.cpp
+        DEPS ${PROJECT_NAME}
+        )
 
-set(MONITOR fipa_acl-conv_monitor-builder_test)
-add_executable(${MONITOR} conversation_monitor/main.cpp)
-target_link_libraries(${MONITOR} ${LIBRARIES} ${PROJECT_NAME})
+rock_executable(fipa_acl-conv_monitor-builder_test
+        SOURCES conversation_monitor/main.cpp
+        DEPS ${PROJECT_NAME}
+        )
+
 # do not install - only for local testing
+rock_executable(fipa_acl-benchmark
+        SOURCES benchmark.cpp
+        DEPS ${PROJECT_NAME}
+        NOINSTALL)
 
-set(BENCHMARK fipa_acl-benchmark)
-add_executable(${BENCHMARK} benchmark.cpp)
-target_link_libraries(${BENCHMARK} ${LIBRARIES} ${PROJECT_NAME})
-# do not install only for local use
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/configuration/protocols DESTINATION configuration/${PROJECT_NAME})
-
+    #install(DIRECTORY ${PROJECT_SOURCE_DIR}/configuration/protocols DESTINATION configuration/${PROJECT_NAME})
+    #
