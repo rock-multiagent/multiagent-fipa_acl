@@ -39,7 +39,7 @@ public:
 	* Build a string for the given type
 	* \param s One of the types for the variant that this printer is implemented for
 	*/
-	std::string operator()(std::string s) const
+	std::string operator()(const std::string& s) const
 	{
 		return s;
 	}
@@ -50,7 +50,7 @@ public:
         *  HEX(dword)[0a af 02 10 ... 01]
 	* \param vector One of the types for the variant that this printer is implemented for
 	*/
-	std::string operator()(std::vector<unsigned char> vector) const
+	std::string operator()(const std::vector<unsigned char>& vector) const
 	{
 		size_t length = vector.size();
 		std::string tmp("HEX(");
@@ -78,13 +78,27 @@ public:
 */
 class ByteStringRawPrinter : public boost::static_visitor<std::string>
 {
+        std::string* output;
 public:
+        /**
+         * Allow to pass down receiver string (for performance reasons
+         */
+        ByteStringRawPrinter(std::string* _output) : output(_output) {}
+
+        /**
+         * Default constructor
+         */
+        ByteStringRawPrinter() : output(0) {}
+
 	/**
 	* Build a string for the given type
 	* \param s One of the types for the variant that this printer is implemented for
 	*/
-	std::string operator()(std::string s) const
+	std::string operator()(const std::string& s) const
 	{
+                if(output)
+                    *output = s;
+
 		return s;
 	}
 	
@@ -94,10 +108,16 @@ public:
         *  HEX(dword)[0a af 02 10 ... 01]
 	* \param vector One of the types for the variant that this printer is implemented for
 	*/
-	std::string operator()(std::vector<unsigned char> vector) const
+	std::string operator()(const std::vector<unsigned char>& vector) const
 	{
-            std::string rawData(vector.begin(), vector.end());
-            return rawData;
+            if(output)
+            {
+                output->assign(vector.begin(), vector.end());
+                return *output;
+            } else {
+                std::string rawData(vector.begin(), vector.end());
+                return rawData;
+            }
         }
 };
 
@@ -132,6 +152,18 @@ struct ByteSequence
 		// Since bytes is a variant we apply the visitor pattern here
 		tmp += boost::apply_visitor( ByteStringRawPrinter(), bytes);
 		return tmp;
+	}
+
+
+        /**
+         * Allow to assign output directly using a pointer
+         * to the receiver string to avoid copying of large
+         * contents
+         */
+	void toRawDataString(std::string* output)
+	{
+		// Since bytes is a variant we apply the visitor pattern here
+		boost::apply_visitor( ByteStringRawPrinter(output), bytes);
 	}
 };
 
