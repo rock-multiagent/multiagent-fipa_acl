@@ -6,14 +6,16 @@ validate()
   FILENAME=$1
   ERROR=
   OUTPUT=`${TESTBINARY} -b $FILENAME`
-  ERROR=`echo $OUTPUT | grep -i failed`
-
-#  echo $OUTPUT
+  if [ $? -ne 0 ]; then
+      ERROR="EXCEPTION"
+  else
+      ERROR=`echo $OUTPUT | egrep -i "failed|error"`
+  fi
 
   if [ "$ERROR" != "" ]; then 
-	echo "$FILENAME \t\t [ERROR]"
+	echo "${FILENAME} [ERROR]"
   else 
-	echo "$FILENAME \t\t [OK]"
+	echo "${FILENAME}  [OK]"
   fi
 }
 
@@ -29,7 +31,7 @@ do
 done
 
 echo ""
-echo "Negative tests"
+echo "Negative tests -> should return ERROR"
 for file in `ls negative-test-messages/*`
 do
     validate $file
