@@ -1,5 +1,5 @@
 #!/bin/sh
-TESTBINARY=../../build/bin/testParser 
+TESTBINARY=../../build/src/testParser 
 
 validate()
 {
