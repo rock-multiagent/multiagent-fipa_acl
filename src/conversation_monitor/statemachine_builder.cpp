@@ -34,7 +34,10 @@ void StateMachineBuilder::setProtocolResourceDir(const std::string& _resourceDir
 {
     fs::path protocolDir = fs::path(_resourceDir);
     if(fs::is_directory(protocolDir))
+    {
         resourceDir = protocolDir.string();
+    }
+    LOG_INFO("Set protocol resource dir to: '%s' -- from '%s'", resourceDir.c_str(), _resourceDir.c_str());
 }
 
 void StateMachineBuilder::prepareProtocolsFromResourceDir()

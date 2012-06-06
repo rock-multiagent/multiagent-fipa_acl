@@ -17,7 +17,7 @@ Transition::Transition() : from(), to(), expectedPerf(), machine(0), nextState(0
 
 int Transition::consumeMessage(const ACLMessage &msg)
 {
-    LOG_DEBUG("owningState is: %s",owningState->getUID().c_str() );
+    LOG_DEBUG("OwningState is: %s",owningState->getUID().c_str() );
     if( validateMessage(msg) )
     {
         //if (expectedPerf.compare(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
@@ -54,9 +54,10 @@ int Transition::consumeMessage(const ACLMessage &msg)
 
 bool Transition::validateMessage(const ACLMessage &msg)
 {
+    LOG_DEBUG("Validate for: from: '%s' to: '%s' performative: '%s' --- was performative: '%s'",  from.c_str(), to.c_str(), expectedPerf.c_str(), msg.getPerformative().c_str());
+
     if (!validatePerformative(msg))
     {
-        LOG_DEBUG("Performative validation failed: was %s", msg.getPerformative().c_str());
         return false;
     }
     
@@ -86,6 +87,7 @@ bool Transition::validateMessage(const ACLMessage &msg)
     if (!validateInReplyTo(msg)) {LOG_DEBUG("InReplyTo validation failed"); return false; }
     //if (!validateReplyBy(msg)) return false;
 
+    LOG_DEBUG("Validate succeeded for: from: '%s' to: '%s' performative: '%s' --- was performative: '%s'",  from.c_str(), to.c_str(), expectedPerf.c_str(), msg.getPerformative().c_str());
     return true;
      
 }
@@ -316,13 +318,18 @@ bool Transition::checkAllRecepientsAccountedFor(ACLMessage &msg)
 bool Transition::validateSender (const ACLMessage &msg)
 {
     AgentID agent = msg.getSender();
-    
+    bool isExpectedSender = false;
+    std::string expectedSendersList;
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); ++it)
-        LOG_DEBUG("Expected sender %s", it->getName().c_str() );
-
-    std::vector<AgentID>::iterator found = find(expectedSenders.begin(),expectedSenders.end(),agent);
-    if ( found != expectedSenders.end() ) return true;
-    return false;
+    {
+        expectedSendersList += it->getName() + ",";
+        if (*it == agent)
+        {
+            isExpectedSender = true;
+        }
+    }
+    LOG_DEBUG("Sender of message is: '%s', while expected are: '%s'. Returning %d.", agent.getName().c_str(), expectedSendersList.c_str(), isExpectedSender);
+    return isExpectedSender;
 }
 
 bool Transition::validateRecepients (const ACLMessage &msg)

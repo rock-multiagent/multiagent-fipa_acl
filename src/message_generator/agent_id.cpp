@@ -18,17 +18,19 @@ namespace acl {
     
 int AgentID::resCompDepth = 1;
  
-AgentID::AgentID() : name()
+AgentID::AgentID() 
+    : name()
 {
     initializeFields();
 }
 
-AgentID::AgentID(const std::string nam) : name(nam)
+AgentID::AgentID(const std::string& nam) 
+    : name(nam)
 {
     initializeFields();
     if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
     {
-        LOG_ERROR("AgentID: name containst invalid characters - defaulting to empty name");
+        LOG_ERROR("AgentID: name contains invalid characters - defaulting to empty name");
         name = "";
     }
 }
