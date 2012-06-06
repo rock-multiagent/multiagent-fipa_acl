@@ -17,6 +17,7 @@ phoenix::function<convertToNumberTokenImpl> convertToNumberToken;
 phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;
 phoenix::function<convertToStringImpl> convertToString;
 phoenix::function<convertToCharVectorImpl> convertToCharVector;
-
+phoenix::function<convertToNativeShortImpl> lazy_ntohs;
+phoenix::function<convertToNativeLongImpl> lazy_ntohl;
 
 }
