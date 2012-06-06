@@ -44,7 +44,7 @@ void AgentID::initializeFields()
 
 std::string AgentID::getName() const {return name;}
 
-int AgentID::setName(const std::string nam) 
+int AgentID::setName(const std::string& nam) 
 {
     if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
     return 1;

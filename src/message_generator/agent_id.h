@@ -84,7 +84,7 @@ public:
     * \brief Construct an AgentID by name
     * \param name
     */
-    AgentID(const std::string name);
+    AgentID(const std::string& name);
     
     /* NOTE: setter and getter methods are all the functionality needed so far */
     
@@ -99,7 +99,7 @@ public:
     \param name Name
     \return 0 if successful 1 otherwise(name is un-alterred)
     */
-    int setName(const std::string name);
+    int setName(const std::string& name);
     
     /**
     \brief the method checks whether the passed address string is a word or not(according to the fipa spec)
