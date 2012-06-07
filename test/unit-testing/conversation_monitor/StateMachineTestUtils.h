@@ -30,7 +30,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     m1.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
     m1.setInReplyTo(std::string("test in_reply_to"));
     m1.setConversationID(std::string("test conversationID"));
-    m1.setProtocol(std::string("test protocol"));
+    m1.setProtocol(std::string("testprotocol"));
     m1.setSender(sender);
     m1.addReceiver(receiver);
     
@@ -44,7 +44,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     m1.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
     m1.setInReplyTo(std::string("test reply_with"));
     m1.setConversationID(std::string("test conversationID"));
-    m1.setProtocol(std::string("test protocol"));
+    m1.setProtocol(std::string("testprotocol"));
     m1.setSender(receiver);
     m1.deleteReceiver(receiver);
     m1.addReceiver(sender);
@@ -61,7 +61,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     inrepto.clear();
     m1.setInReplyTo(inrepto);
     m1.setConversationID(std::string("test conversationID"));
-    m1.setProtocol(std::string("test protocol"));
+    m1.setProtocol(std::string("testprotocol"));
     m1.setSender(receiver);
     flow.push_back(m1);
     

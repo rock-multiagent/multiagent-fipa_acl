@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     m1.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
     m1.setInReplyTo(std::string("test in_reply_to"));
     m1.setConversationID(std::string("test conversationID"));
-    m1.setProtocol(std::string("test protocol"));
+    m1.setProtocol(std::string("testprotocol"));
     m1.setSender(a1);
     m1.addReceiver(a2);
     
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     m1.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
     m1.setInReplyTo(std::string("test reply_with"));
     m1.setConversationID(std::string("test conversationID"));
-    m1.setProtocol(std::string("test protocol"));
+    m1.setProtocol(std::string("testprotocol"));
     m1.setSender(a2);
     m1.deleteReceiver(a2);
     m1.addReceiver(a1);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
     inrepto.clear();
     m1.setInReplyTo(inrepto);
     m1.setConversationID(std::string("test conversationID"));
-    m1.setProtocol(std::string("test protocol"));
+    m1.setProtocol(std::string("testprotocol"));
     m1.setSender(a2);
     
     
@@ -209,11 +209,16 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
     AgentID a2 = AgentID(name2);
     a2.addAddress(addr3);
 
-    StateMachineBuilder::setProtocolResourceDir(".");
+    char* installDir = getenv("ROCK_INSTALL_DIR");
+    BOOST_CHECK_MESSAGE(installDir, "Install first using 'amake' then start this test");
+    std::string resourceDir(installDir);
+    resourceDir += "/configuration/fipa_acl/protocols/";
+
+    StateMachineBuilder::setProtocolResourceDir(resourceDir);
     StateMachineBuilder builder;
 
     try {
-        StateMachine req = builder.getFunctionalStateMachine(std::string("blabla"));
+        StateMachine req = builder.getStateMachine("blabla");
         BOOST_FAIL("Instanciating with incorrect protocol does not throw as expected");
     } catch(const std::runtime_error& e)
     {
@@ -221,12 +226,12 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
     }
 
     try {
-        StateMachine req = builder.getFunctionalStateMachine(std::string("request"));
+        StateMachine req = builder.getStateMachine("request");
         req.setOwner(a1);
 
         BOOST_CHECK(req.getOwner().getName() == name1);
 
-        BOOST_CHECK(req.checkIfRoleExists(std::string("initiator")));
+        BOOST_CHECK(req.checkIfRoleExists("initiator"));
         std::vector<ACLMessage> flow = buildRequestMessageFlow(a1, a2);
         std::vector<ACLMessage>::iterator it = flow.begin();
 
@@ -238,7 +243,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
         BOOST_CHECK_MESSAGE(req.isConversationOver(), "Conversation is over");
     } catch(const std::runtime_error& e)
     {
-        BOOST_FAIL("Get functional state machine for protocol 'request' failed");
+        BOOST_FAIL("Get functional state machine for protocol 'request' failed: " << e.what());
     }
 
 }
