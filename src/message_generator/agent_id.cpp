@@ -47,8 +47,12 @@ std::string AgentID::getName() const {return name;}
 int AgentID::setName(const std::string& nam) 
 {
     if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
-    return 1;
-    name = nam; return 0;
+    {
+        return 1;
+    } else {
+        name = nam;
+    }
+    return 0;
 }
 
 int AgentID::addAddress(const std::string &adr) 
@@ -224,118 +228,9 @@ AgentID::~AgentID()
 {
 }
 
-
-AgentID::AgentID(const AgentID &aid)
-{
-    initializeFields();
-    
-    name = aid.getName();
-    if (!aid.getAddresses().empty())
-    {
-        std::vector<std::string> aidAdr = aid.getAddresses();
-        std::vector<std::string>::iterator otherSit = aidAdr.begin();
-        for (; otherSit != aidAdr.end();++otherSit)
-        {
-          std::string mystring = std::string(*otherSit);
-          addresses.insert(addresses.begin(),mystring);
-        }
-    }
-    if (!aid.getResolvers().empty())
-    {
-        
-        std::vector<AgentID> aidres = aid.getResolvers();
-        std::vector<AgentID>::iterator aidit= aidres.begin();
-        for (; aidit != aidres.end();++aidit)
-        {
-	  AgentID temp = AgentID();
-	  temp = (*aidit);
-	  resolvers.insert(resolvers.begin(),temp);
-        }
-    }
-    if (!aid.getUserdefParams().empty())
-    { 
-        std::vector<UserdefParam> aidparams = aid.getUserdefParams();
-        std::vector<UserdefParam>::iterator paramit = aidparams.begin();
-               
-        for (; paramit != aidparams.end();++paramit)
-        {
-	  UserdefParam temp2 = UserdefParam();
-	  temp2 = (*paramit);
-	  params.insert(params.begin(),temp2);
-        }
-    }
-}
-
-
-AgentID& AgentID::operator=(const AgentID &aid)
-{
-    
-    // checking against agent1 = agent1 case
-    if (this != &aid)
-    {
-        
-        // freeing previously filled in values for addresses, userdefined parmameters and resolvers
-        if (!params.empty())
-            params.clear();
-        
-        if (!addresses.empty()) 
-            addresses.clear();
-        
-        if (!resolvers.empty())
-            resolvers.clear();
-
-        // now fill with the values from the reference object 
-        initializeFields();
-    
-        name = aid.getName();
-        if (!aid.getAddresses().empty())
-        {
-            std::vector<std::string> aidAdr = aid.getAddresses();
-            std::vector<std::string>::iterator otherSit = aidAdr.begin();
-            for (; otherSit != aidAdr.end();++otherSit)
-            {
-                std::string mystring = std::string(*otherSit);
-                addresses.insert(addresses.begin(),mystring);
-            }
-        }
-
-        if (!aid.getResolvers().empty())
-        {	  
-	  
-            std::vector<AgentID> aidres = aid.getResolvers();
-            std::vector<AgentID>::iterator aidit= aidres.begin();
-            for (; aidit != aidres.end();++aidit)
-            {
-                AgentID temp;
-                temp = (*aidit);
-                resolvers.insert(resolvers.begin(),temp);
-            }	
-        }
-
-        if (!aid.getUserdefParams().empty())
-        {
-            std::vector<UserdefParam> aidparams = aid.getUserdefParams();
-            std::vector<UserdefParam>::iterator paramit = aidparams.begin();
-           
-            for (; paramit != aidparams.end();++paramit)
-            {
-                UserdefParam temp2;
-                temp2 = (*paramit);
-                params.insert(params.begin(),temp2);
-            }
-        }
-    }
-    
-    return *this;
-    
-}
-
 bool AgentID::empty()
 {
-	if(name == "")
-		return true;
-
-	return false;
+    return name.empty();
 }
 
 }//end of acl namespace

@@ -71,16 +71,6 @@ public:
     AgentID();
     
     /**
-    * \brief overloaded copy constructor; provides deep-copies for all member fields
-    */
-    AgentID(const AgentID &a);
-    
-    /**
-    * \brief overloaded assignment operator; provides deep-copies for all member fields
-    */
-    AgentID& operator=(const AgentID &a);
-    
-    /**
     * \brief Construct an AgentID by name
     * \param name
     */
