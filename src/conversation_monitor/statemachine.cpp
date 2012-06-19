@@ -28,25 +28,6 @@ const std::string StateMachine::NOT_UNDERSTOOD = std::string("not-understood");
 const std::string StateMachine::CONV_CANCELLED = std::string("conv-cancelled");
 const std::string StateMachine::INITIAL = std::string("initial");
 const std::string StateMachine::INITIATOR = std::string("initiator");
-void StateMachine::initializeObjectFields()
-{
-    involvedAgents.clear();
-    preImposedRoles.clear();
-    states.clear();
-    currentState = "";
-    owner = AgentID();
-    conversationOver = false;
-    active = false;
-    
-    isValidStateMachine = false;
-    cancelMetaP.clear();
-    
-    language.clear();
-    ontology.clear();
-    protocol.clear();
-    convid.clear();
-    encoding.clear();
-}
 
 bool StateMachine::setInitialState(const std::string& stateid)
 {
@@ -80,7 +61,7 @@ void StateMachine::generateDefaultTransitions()
     {
         //if (!it->getUid().compare(StateMachine::CONV_CANCELLED)) continue;
         //if (!it->getUid().compare(StateMachine::INITIAL) continue;
-        if(it->getFinal())
+        if(it->isFinal())
             continue;
 
 #warning "Default transitions not enabled"
@@ -89,15 +70,15 @@ void StateMachine::generateDefaultTransitions()
 //NOTE:remember to treat not understood transitions differently when executing as well as when loading--not so sure i still need to(on exec)
 //NOTE:remember to check for duplicates when adding a transition to a state
 
-int StateMachine::createAndStartNewCancelMetaProtocol(const ACLMessage &msg)
+bool StateMachine::createAndStartNewCancelMetaProtocol(const ACLMessage &msg)
 {
     std::vector<AgentID> interlocutors = msg.getAllReceivers();
     for (std::vector<AgentID>::iterator it = interlocutors.begin(); it != interlocutors.end(); ++it)
     {
         cancelMetaP.push_back(generateCancelMetaProtocol(std::string("with")));
-        if (cancelMetaP.back().startMachine(msg)) return 1;
+        return cancelMetaP.back().consumeMessage(msg);
     }
-    return 0;
+    return false;
 }
 
 StateMachine StateMachine::generateCancelMetaProtocol(Role with)
@@ -156,15 +137,18 @@ StateMachine StateMachine::generateCancelMetaProtocol(Role with)
 }
 
 StateMachine::StateMachine() 
+    : active(false)
+    , conversationOver(false)
+    , isValidStateMachine(false)
 {
-    initializeObjectFields();
 }
 
 StateMachine::StateMachine(const AgentID& _owner)
+    : active(false)
+    , conversationOver(false)
+    , isValidStateMachine(false)
 {
-    initializeObjectFields();
     owner = _owner;
-    
 }
 
 StateMachine::StateMachine(const StateMachine& target) 
@@ -231,7 +215,7 @@ StateMachine::~StateMachine()
     cancelMetaP.clear();
 }
 
-int StateMachine::startMachine(const ACLMessage& msg)
+void StateMachine::startMachine(const ACLMessage& msg)
 {
     LOG_DEBUG("Start machine for owner: %s", owner.getName().c_str());
     active = true;
@@ -241,11 +225,9 @@ int StateMachine::startMachine(const ACLMessage& msg)
     language = msg.getLanguage();
     ontology = msg.getOntology();
     loadParameters();
-    
-    return 0;
 }
 
-int StateMachine::consumeMessage(const ACLMessage& msg)
+bool StateMachine::consumeMessage(const ACLMessage& msg)
 {
     LOG_DEBUG("Enter consume");
     if(!active)
@@ -258,8 +240,11 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
     {
         if (it->isActive() )
         {	  
-	  LOG_DEBUG("meta conversation active");
-	  if (it->consumeMessage(msg) == 0) return 0;
+	    LOG_DEBUG("meta conversation active");
+	    if (it->consumeMessage(msg))
+            { 
+                return true;
+            }    
         }
     }
 
@@ -269,27 +254,27 @@ int StateMachine::consumeMessage(const ACLMessage& msg)
         {
 	    return createAndStartNewCancelMetaProtocol(msg);
         } else {
-            return 1;
+            return false;
         }
     }
     
     State* state = getCurrentState();
-    if (state)
-    {
-        LOG_DEBUG("sending the message %s to the current state: %s", msg.getPerformative().c_str(), state->getUID().c_str());
+    assert(state);
+    LOG_DEBUG("sending the message %s to the current state: %s", msg.getPerformative().c_str(), state->getUID().c_str());
 
-        if (state->consumeMessage(msg) == 0)   
-        {
+    if(state->consumeMessage(msg))   
+    {
           state = getCurrentState();
           LOG_DEBUG("State after consuming msg %s state: %s", msg.getPerformative().c_str(), state->getUID().c_str());
-	  if (state->getFinal() ) { conversationOver = true; active = false; return 0;}
-	  else return 0;
-        }
-
+          if (state->isFinal() ) 
+          { 
+              conversationOver = true; 
+              active = false; 
+          }
+          return true;
     } else {
-        throw std::runtime_error("Current state is NULL");
+        return false;
     }
-    return 1;
 }
 
 void StateMachine::updateAllAgentRoles()

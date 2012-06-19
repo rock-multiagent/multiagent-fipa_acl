@@ -74,9 +74,9 @@ class Transition
         /**
 	  \brief checks whether a fed messge is valid and acts accordingly
 	  \param msg: message to processed
-	  \return 0 if message is validated 1 otherwise
+	  \return true if message is validated, false otherwise
         */
-        int consumeMessage(const ACLMessage &msg);
+        bool consumeMessage(const ACLMessage &msg);
         
         /**
 	  \brief method that validates all parameters of a message

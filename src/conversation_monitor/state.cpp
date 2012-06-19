@@ -10,11 +10,25 @@ namespace fipa {
 namespace acl {
     
 
-State::State() : final(false), uid(), transitions(), subSM(), archive(), involvedAgents(), owningMachine(0)
+State::State() 
+    : uid()
+    , final(false)
+    , transitions()
+    , subSM()
+    , archive()
+    , involvedAgents()
+    , owningMachine(0)
 {
 }
 
-State::State(const std::string& _uid) : final(false), uid(_uid), transitions(), subSM(), archive(), involvedAgents(), owningMachine(0)
+State::State(const std::string& _uid) 
+    : uid(_uid)
+    , final(false)
+    , transitions()
+    , subSM()
+    , archive()
+    , involvedAgents()
+    , owningMachine(0)
 {
 }
 
@@ -39,7 +53,7 @@ void State::addTransition(Transition &t)
 void State::generateDefaultTransitions()
 {
         // Not adding any transition for final states
-        if(getFinal())
+        if(isFinal())
             return; 
 
         std::vector<Transition>::iterator trit;
@@ -77,23 +91,27 @@ int State::consumeMessage(const ACLMessage &msg)
                   continue;
 	      } else { 
                   stillActiveSubSM = true;
-		  if (smit->consumeMessage(msg) == 0) 
+		  if (smit->consumeMessage(msg)) 
 		  {
 		      found_one = true;
 		  } 
               }
-	  } else if (smit->startMachine(msg) == 0)
-          {
-              found_one = true;
+	  } else {
+              smit->startMachine(msg);
+              if(smit->consumeMessage(msg))
+              {
+                  stillActiveSubSM = true;
+                  found_one = true;
+              }
           }
         }
 
         if (stillActiveSubSM)
         {
 	  if (found_one)
-              return 0;
+              return true;
 	  else
-              return 1;
+              return false;
         }
     } 
 
@@ -101,10 +119,10 @@ int State::consumeMessage(const ACLMessage &msg)
     for (it = transitions.begin(); it != transitions.end(); ++it)
     {
         LOG_DEBUG("Forwarding message in machine %p to transition from state %s to %s", owningMachine, uid.c_str(), it->getNextStateName().c_str());
-        if (it->consumeMessage(msg) == 0) 
-            return 0;
+        if (it->consumeMessage(msg)) 
+            return true;
     }
-    return 1;
+    return false;
 }
 
 void State::tickInvolvedAgent(const AgentID& ag)
@@ -189,7 +207,7 @@ void State::setFinal(const bool _final)
 {
     final = _final;
 }
-bool State::getFinal() const
+bool State::isFinal() const
 {
     return final;
 }

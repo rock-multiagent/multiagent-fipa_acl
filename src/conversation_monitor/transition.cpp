@@ -10,37 +10,48 @@
 namespace fipa {
 namespace acl {
     
-Transition::Transition() : from(), to(), expectedPerf(), machine(0), nextState(0), owningState(0), precedingState(0), expectedSenders(), expectedRecepients()
+Transition::Transition() 
+    : from()
+    , to()
+    , expectedPerf()
+    , machine(0)
+    , nextState(0)
+    , owningState(0)
+    , precedingState(0)
+    , expectedSenders()
+    , expectedRecepients()
 {
-    expectedRecepients.clear();
 }
 
-int Transition::consumeMessage(const ACLMessage &msg)
+bool Transition::consumeMessage(const ACLMessage &msg)
 {
     LOG_DEBUG("OwningState is: %s",owningState->getUID().c_str() );
     if( validateMessage(msg) )
     {
-        //if (expectedPerf.compare(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD])) return processNotUnderstood(msg);
         performWithoutStateExit(msg);
-        //if ( checkAllSendersAccountedFor(msg) && checkAllRecepientsAccountedFor(msg) )
+
         if (owningState->checkAllAgentsAccountedFor() )
         {
-	  performOnStateExit(msg);
+	    performOnStateExit(msg);
         } else {
-	      if (nextState->getFinal()) 
-	      {
+	    if (nextState->isFinal()) 
+	    {
 		AgentID a1,a2;
 		a1 = machine->owner;
 		a2 = msg.getSender();
-		if (a1 == a2 ) machine->removeInterlocutor(msg.getAllReceivers() );
-		else machine->removeInterlocutor(msg.getSender());
-	      }
+		if (a1 == a2 )
+                {
+                    machine->removeInterlocutor(msg.getAllReceivers() );
+                } else {
+                    machine->removeInterlocutor(msg.getSender());
+                }
+	    }
 	}
-	return 0;
+	return true;
     } else {
         LOG_DEBUG("Message validation failed: message does not apply to transition");
     }
-    return 1;
+    return false;
 }
 
 //&&& move out of a state only if all agents accounted for or ???no-one left to talk to???
@@ -176,52 +187,25 @@ bool Transition::updateRoles(const ACLMessage &msg)
     if (!expectedRecepients.empty() ) expectedRecepients.clear();
     if (machine->checkIfRoleExists(from) )
     {
-       
         if(machine->checkIfRoleSet(from) )
         {
-	  
-	  std::vector<AgentMapping>::iterator it;
-	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
-	  {
-	      if (!it->role.compare(from) ) 
-	      {
-		expectedSenders.push_back(it->agent);
-		if (it->agent == machine->owner)
-		{ 
-		    removeAllAgentsBut(machine->owner,expectedSenders); 
-		    break;
-		}
-		
-	      }
-	  }
-        } else 
-	  {
-	      
-	      if (!machine->setRole(from,msg.getSender()))
-		return false;
-	      /*
-	      machine->updateAllAgentRoles();
-	      LOG_DEBUG("!$!$!$!$ output right after update signal terminated:\n");
-	      LOG_DEBUG("!with!! message update method!\tfrom: ");
-	      for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
-		LOG_DEBUG("%s", it1->getName() );
-	      LOG_DEBUG("\n");
-	      LOG_DEBUG("to: ");
-	      for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
-		LOG_DEBUG("%s", it2->getName() );
-	      LOG_DEBUG("\n");
-       
-	      
-	      int myc = 0;
-	      std::vector<State>::iterator trcount;
-	      for (trcount = (machine->states).begin(); trcount != (machine->states).end(); trcount++)
-	      {
-		myc += trcount->transitions.size(); 
-	      }
-	      LOG_DEBUG("&&&&&&&there are currently %d transitions in the SM\n", myc);
-	      LOG_DEBUG("&&&&&&&there are currently states in the SM\n", machine->states.size() );
-	      */
-	  }
+	    std::vector<AgentMapping>::iterator it;
+	    for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
+	    {
+	        if (!it->role.compare(from) ) 
+	        {
+	            expectedSenders.push_back(it->agent);
+	            if (it->agent == machine->owner)
+	            { 
+	                removeAllAgentsBut(machine->owner,expectedSenders); 
+	                break;
+	            }
+	        }
+	    }
+        } else if (!machine->setRole(from,msg.getSender()))
+        {
+            return false;
+        }
         
     } else 
     {
@@ -233,45 +217,37 @@ bool Transition::updateRoles(const ACLMessage &msg)
     {
         if (machine->checkIfRoleSet(to) )
         {
-	  std::vector<AgentMapping>::iterator it;
-	  for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
-	  {
-	      if (!it->role.compare(to) ) 
-	      {
-		expectedRecepients.push_back(it->agent);
-		if (it->agent == machine->owner) { removeAllAgentsBut(machine->owner,expectedRecepients); break; }
-		else;
-	      }
-	  }
+	    std::vector<AgentMapping>::iterator it;
+	    for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
+	    {
+	        if (!it->role.compare(to) ) 
+	        {
+	            expectedRecepients.push_back(it->agent);
+	            if (it->agent == machine->owner) 
+                    { 
+                        removeAllAgentsBut(machine->owner,expectedRecepients); 
+                        break; 
+                    }
+	        }
+	    }
         } else
-	  {
-	      //std::vector<AgentID> myvec = msg.getAllReceivers();
-	      //for (std::vector<AgentID>::iterator it = myvec.begin(); it != myvec.end())
-		//machine->setRole(to,*it);
-		
-	      if (!(machine->setRole(to,msg.getAllReceivers())) ) 
-		return false;
-	      machine->updateAllAgentRoles();
-	      
-	  }
+        {
+      	      //std::vector<AgentID> myvec = msg.getAllReceivers();
+      	      //for (std::vector<AgentID>::iterator it = myvec.begin(); it != myvec.end())
+      		//machine->setRole(to,*it);
+      		
+      	      if (!(machine->setRole(to,msg.getAllReceivers())) ) 
+              {
+                  return false;
+              }
+      	      machine->updateAllAgentRoles();
+        }
     } else 
     {
         LOG_ERROR("Trying to use inexistent role name to");
         throw std::runtime_error("Trying to use inexistent role name");
     }
     
-    /*
-    LOG_DEBUG("!!!exit update transition with message as param%%%%%%%%\n");
-    LOG_DEBUG("from: ");
-    for (std::vector<AgentID>::iterator it1 = expectedSenders.begin(); it1 != expectedSenders.end(); it1++)
-        LOG_DEBUG("%s", it1->getName()  );
-    LOG_DEBUG("\n");
-    LOG_DEBUG("to: ");
-    for (std::vector<AgentID>::iterator it2 = expectedRecepients.begin(); it2 != expectedRecepients.end(); it2++)
-        LOG_DEBUG("%s", it2->getName() );
-    LOG_DEBUG("\n");
-    */
-        
     return true;
 }
 void Transition::performWithoutStateExit(const ACLMessage &msg)

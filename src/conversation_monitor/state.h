@@ -188,7 +188,7 @@ public:
       \brief method that returns whether the state is a final state or not
       \return true if state is final, false otherwise
     */
-    bool getFinal() const;
+    bool isFinal() const;
     
     /**
       \brief setter method for the final field of the class

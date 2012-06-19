@@ -130,17 +130,15 @@ public:
     /** \brief setter method for the owner of the machine */
     bool setOwner(const AgentID&);
 
-    /** \brief method to be called with the first message from the message flow as parameter; it initializes fields 
-    	and starts the conversation
-      \return 0 if machine started successfully; != otherwise(currently only 1 as error code - more to be added when needed)
+    /** \brief method to be called with the first message from the message flow as parameter; it initializes fields and starts the conversation
     */
-    int startMachine(const ACLMessage& msg);
+    void startMachine(const ACLMessage& msg);
 
     /**
       \brief method to be called to process every message of the message flow(except the first one)
       \return 0 if successful; 1 otherwise
     */
-    int consumeMessage(const ACLMessage& msg);
+    bool consumeMessage(const ACLMessage& msg);
     //int initializeMachineFields(ACLMessage msg);
     
     
@@ -287,8 +285,6 @@ public:
         void validate(bool associatedMachine = false);
         
     private:
-        /** \brief method called by the constructors that initializes some fields */
-        void initializeObjectFields();
         /** \brief method that removes an agent from the involvedAgents field once the owner of the machine has finnished the 
 		conversation with it
 	  \param ag AgentID; agent to be removed
@@ -307,9 +303,9 @@ public:
         /** \brief method that creates a cancel meta protocol and adds it to the cancelMetaP vector, based on a "cancel" message that is
 		received
 	  \param msg ACLMessage; message from which to build the new cancel meta protocol
-	  \return 0 if successful; 1 otherwise
+	  \return true if successful; false otherwise
         */
-        int createAndStartNewCancelMetaProtocol(const ACLMessage &msg);
+        bool createAndStartNewCancelMetaProtocol(const ACLMessage &msg);
         /** \brief helper method for the createAndStartCancelMetaProtocol method;
 	  \param string; generic role among the ones involved in the conversation with which the cancel protocol is initialized
 	  \return StateMachine; the created cancel meta protocol

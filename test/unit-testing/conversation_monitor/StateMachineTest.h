@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test)
 
     while(it != flow.end() && !req->isConversationOver())
     {
-        BOOST_CHECK_MESSAGE(req->consumeMessage(*it) == 0, "Consume message"); 
+        BOOST_CHECK_MESSAGE(req->consumeMessage(*it), "Consume message"); 
         it++;
     }
 
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
 
         while(it != flow.end() && !req.isConversationOver())
         {
-            BOOST_CHECK_MESSAGE(req.consumeMessage(*it) == 0, "Consume message");
+            BOOST_CHECK_MESSAGE(req.consumeMessage(*it), "Consume message");
             it++;
         }
         BOOST_CHECK_MESSAGE(req.isConversationOver(), "Conversation is over");
