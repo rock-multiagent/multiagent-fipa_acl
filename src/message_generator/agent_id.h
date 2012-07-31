@@ -149,12 +149,6 @@ public:
     * \return True, if empty, False otherwise
     */
     bool empty();
-
-private:
-    /**
-    \brief method to be called by all constructors, that initializes the fields of the object
-    */
-    void initializeFields();
 };
 
 
