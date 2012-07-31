@@ -25,6 +25,10 @@ namespace fipa {
 */
 namespace acl {
 
+   typedef std::string ConversationID;
+   typedef std::string Protocol; 
+   typedef std::string ContentLanguage;
+
    /**
     * \param illegalWordChars: string containing illegal characters according to the fipa definition of a word
     */
