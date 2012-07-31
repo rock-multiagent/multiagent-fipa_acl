@@ -19,6 +19,13 @@ namespace fipa {
 
 namespace acl {
 
+class AgentID;
+
+// TODO: Recursive container, i.e. container with incomplete type are not supported by 
+// standard containers (though it will work for gcc) 
+// switch to using boost::container in future
+typedef std::vector<AgentID> AgentIDList;
+
 /*
       \brief overloaded equality operator for AgentID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
       
@@ -41,16 +48,16 @@ The fields are not based on the Architecture specification and utilities, but ra
 so they have the name, values and functionality needed to implement this specification(they happen to coincide almost completely though)
 */
 private:
-    /** \param name: name of the agent*/
+    /** name of the agent*/
     std::string name;
 
-    /** \param addresses: pointer to a set of strings representing the addresses of the agent*/
+    /** set of strings representing the addresses of the agent*/
     std::vector<std::string> addresses;
 
-    /** \param resolvers: pointer to a set of AgentIDs(also pointers) representing the resolvers of the current agent */
-    std::vector<AgentID> resolvers;
+    /** set of AgentIDs representing the resolvers of the current agent */
+    AgentIDList resolvers;
 
-    /** \param params: pointer to a set of UserdefParams(also pointers) representing the parameters of an agent id */
+    /** set of UserdefParams representing the parameters of an agent id */
     std::vector<UserdefParam> params;
 
 
