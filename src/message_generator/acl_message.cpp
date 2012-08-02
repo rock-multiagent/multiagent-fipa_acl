@@ -123,7 +123,7 @@ void ACLMessage::clearReceivers()
     receivers.clear();
 }
 
-std::vector<AgentID> ACLMessage::getAllReceivers() const {return receivers; }
+AgentIDList ACLMessage::getAllReceivers() const {return receivers; }
 
 void ACLMessage::addReplyTo(const AgentID& aid) 
 {
@@ -147,7 +147,7 @@ void ACLMessage::clearReplyTo()
     reply_to.clear(); 
 }
 
-std::vector<AgentID> ACLMessage::getAllReplyTo() const {return reply_to; }
+AgentIDList ACLMessage::getAllReplyTo() const {return reply_to; }
 
 void ACLMessage::setReplyBy(const long by) {reply_by = by; }
 
@@ -318,10 +318,10 @@ bool operator==(const ACLMessage& a,const ACLMessage& b)
         return false;
     
     // checking if receivers sets of the message are the same
-    std::vector<AgentID> agentsA = a.getAllReceivers();
-    std::vector<AgentID> agentsB = b.getAllReceivers();
-    std::vector<AgentID>::iterator ait = agentsA.begin();
-    std::vector<AgentID>::iterator bit = agentsB.begin();
+    AgentIDList agentsA = a.getAllReceivers();
+    AgentIDList agentsB = b.getAllReceivers();
+    AgentIDList::iterator ait = agentsA.begin();
+    AgentIDList::iterator bit = agentsB.begin();
     
     int found_one = 0; // flag variable to control flow through inner loops
 

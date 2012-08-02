@@ -176,11 +176,11 @@ public:
     void addReceiver(const AgentID& aid);
     void deleteReceiver(const AgentID& aid);
     void clearReceivers();
-    std::vector<AgentID> getAllReceivers() const;
+    AgentIDList getAllReceivers() const;
     void addReplyTo(const AgentID& aid);
     void deleteReplyTo(const AgentID& aid);
     void clearReplyTo();
-    std::vector<AgentID> getAllReplyTo() const;
+    AgentIDList getAllReplyTo() const;
     void setReplyBy(long by);
     long getReplyBy() const;
     void setInReplyTo(const std::string& str);
