@@ -38,6 +38,7 @@ set(HEADERS
     conversation_monitor/statemachine_builder.h
     conversation_monitor/statemachine.h
     conversation_monitor.h
+    fipa_acl.h
 )
 
 
