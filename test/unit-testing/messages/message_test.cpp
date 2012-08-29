@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(message_test)
 
     BOOST_ASSERT( inputParser.parseData(encodedMsg, outputMsg) );
 
-    BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[REQUEST]);
+    BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[fipa::acl::ACLMessage::REQUEST]);
     BOOST_ASSERT(outputMsg.getSender() == msg.getSender());
 
 
