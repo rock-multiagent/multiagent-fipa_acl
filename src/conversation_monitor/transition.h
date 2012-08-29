@@ -113,6 +113,10 @@ class Transition
         State* 		getNextState() const;
         std::vector<AgentID> 	getExpectedSenders() const;
         std::vector<AgentID> 	getExpectedRecepients() const;
+
+        void setExpectedSenders(const std::vector<AgentID>& sender);
+        void setExpectedRecepients(const std::vector<AgentID>& recipient);
+
         StateMachine* 	getMachine() const;
         State* 		getPrecedingState() const;
         State*		getOwningState() const;
@@ -121,6 +125,36 @@ class Transition
 	  \brief misc method added to easily visualize a built stateMachine;
         */
         void print();
+
+        /** \brief checks whether the conversation id parameter is valid(checks from state machine) */
+        bool validateConvID   	(const ACLMessage &msg);
+        
+        /** \brief checks whether the in reply to paramenter of the message is valid(by searching the archive of the preceding state) */
+        bool validateInReplyTo	(const ACLMessage &msg);
+        
+        /** \brief checks whether the language parameter of the message is valid(checks from state machine) */
+        bool validateLanguage 	(const ACLMessage &msg);
+        
+        /** \brief checks whether the ontology parameter of the message is valid(checks from state machine) */
+        bool validateOntology 	(const ACLMessage &msg);
+        
+        /** \brief checks whether the protocol parameter of the message is valid(checks from state machine) */
+        bool validateProtocol 	(const ACLMessage &msg);
+        
+        /** \brief checks whether the reply by parameter of the message is valid(NOT IMPLEMENTED) */
+        bool validateReplyBy  	(const ACLMessage &msg);
+        
+        /** \brief checks whether the encoding parameter of the message is valid(checks from state machine) */
+        bool validateEncoding 	(const ACLMessage &msg);
+        
+        /** \brief checks whether the performative parameter of the message is valid(checks from local variable) */
+        bool validatePerformative	(const ACLMessage &msg);
+        
+        /** \brief checks whether the sender parameter of the message is valid(checks from expectedSenders vector) */
+        bool validateSender 		(const ACLMessage &msg);
+        
+        /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecepients vector) */
+        bool validateRecepients 	(const ACLMessage &msg);
 
     private:
         /** \brief helper method to initialize the fields of the class; is to be called by all constructors */
@@ -156,36 +190,6 @@ class Transition
         
         /** \brief checks whether all agents assigned to the expectedRecepients vector are present in the message */
         bool checkAllExpectedRecepientsAccountedFor(const ACLMessage &msg);
-        
-        /** \brief checks whether the conversation id parameter is valid(checks from state machine) */
-        bool validateConvID   	(const ACLMessage &msg);
-        
-        /** \brief checks whether the in reply to paramenter of the message is valid(by searching the archive of the preceding state) */
-        bool validateInReplyTo	(const ACLMessage &msg);
-        
-        /** \brief checks whether the language parameter of the message is valid(checks from state machine) */
-        bool validateLanguage 	(const ACLMessage &msg);
-        
-        /** \brief checks whether the ontology parameter of the message is valid(checks from state machine) */
-        bool validateOntology 	(const ACLMessage &msg);
-        
-        /** \brief checks whether the protocol parameter of the message is valid(checks from state machine) */
-        bool validateProtocol 	(const ACLMessage &msg);
-        
-        /** \brief checks whether the reply by parameter of the message is valid(NOT IMPLEMENTED) */
-        bool validateReplyBy  	(const ACLMessage &msg);
-        
-        /** \brief checks whether the encoding parameter of the message is valid(checks from state machine) */
-        bool validateEncoding 	(const ACLMessage &msg);
-        
-        /** \brief checks whether the performative parameter of the message is valid(checks from local variable) */
-        bool validatePerformative	(const ACLMessage &msg);
-        
-        /** \brief checks whether the sender parameter of the message is valid(checks from expectedSenders vector) */
-        bool validateSender 		(const ACLMessage &msg);
-        
-        /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecepients vector) */
-        bool validateRecepients 	(const ACLMessage &msg);
         
         //void removeAllRecepientsBut(AgentID&);
         void removeAllAgentsBut(const AgentID&,std::vector<AgentID>&);

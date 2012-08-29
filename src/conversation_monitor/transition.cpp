@@ -6,6 +6,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <base/logging.h>
+#include <boost/regex.hpp>
+
+#define PATTERN_MARKER "regex:"
 
 namespace fipa {
 namespace acl {
@@ -49,7 +52,7 @@ bool Transition::consumeMessage(const ACLMessage &msg)
 	}
 	return true;
     } else {
-        LOG_DEBUG("Message validation failed: message does not apply to transition");
+        LOG_DEBUG("Message validation failed: message does not apply to transition from '%s' to '%s'", owningState->getUID().c_str(), nextState->getUID().c_str());
     }
     return false;
 }
@@ -119,8 +122,26 @@ void Transition::updateRoles()
 {
     expectedSenders.clear();
     expectedRecepients.clear();
+    assert(machine);
     LOG_INFO("UpdateRoles for stateMachine %p with owner: %s", machine, machine->getOwner().getName().c_str());
-    if (machine->checkIfRoleExists(from) )
+    boost::regex pattern(std::string(PATTERN_MARKER) + ".*" );
+    if(regex_match(from, pattern))
+    {
+        // Check if we use a pattern 
+        size_t pattern_length = strlen(PATTERN_MARKER);
+	std::vector<AgentMapping>::iterator it;
+	for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
+	{
+            std::string pattern = from.substr(pattern_length);
+
+            // Avoid duplicates
+            if(std::find(expectedSenders.begin(), expectedSenders.end(), pattern) == expectedSenders.end())
+            {
+                LOG_INFO("ExpectedSenders: adding 'from' pattern: '%s'", pattern.c_str());
+	        expectedSenders.push_back(pattern);
+            }
+	}
+    } else if (machine->checkIfRoleExists(from) )
     {
         if(machine->checkIfRoleSet(from) )
         {
@@ -146,7 +167,22 @@ void Transition::updateRoles()
     }
     
         
-    if (machine->checkIfRoleExists(to) )
+    if(regex_match(to, pattern))
+    {
+        // Check if we use a pattern 
+        size_t pattern_length = strlen(PATTERN_MARKER);
+	std::vector<AgentMapping>::iterator it;
+	for (it = machine->involvedAgents.begin(); it != machine->involvedAgents.end(); ++it)
+	{
+            std::string pattern = to.substr(pattern_length);
+            // Avoid duplicates
+            if(std::find(expectedRecepients.begin(), expectedRecepients.end(), pattern) == expectedRecepients.end())
+            {
+                LOG_INFO("ExpectedRecipients: adding 'to' pattern: '%s'", pattern.c_str());
+	        expectedRecepients.push_back(pattern);
+	    }
+        }
+    } else if (machine->checkIfRoleExists(to) )
     {
         if (machine->checkIfRoleSet(to) )
         {
@@ -260,7 +296,7 @@ void Transition::performWithoutStateExit(const ACLMessage &msg)
 
 void Transition::performOnStateExit(const ACLMessage &msg)
 {
-    if (nextState == NULL) LOG_DEBUG("\t# next state is NULL\n");
+    assert(nextState);
     nextState->setAllPrecedingStates(owningState);
     owningState->resetInvolvedAgentsTicks();
     machine->currentState = nextState->getUID();
@@ -299,25 +335,39 @@ bool Transition::validateSender (const ACLMessage &msg)
     for (std::vector<AgentID>::iterator it = expectedSenders.begin(); it != expectedSenders.end(); ++it)
     {
         expectedSendersList += it->getName() + ",";
-        if (*it == agent)
+        boost::regex regex(it->getName());
+        if (regex_match(agent.getName(), regex))
         {
             isExpectedSender = true;
         }
     }
-    LOG_DEBUG("Sender of message is: '%s', while expected are: '%s'. Returning %d.", agent.getName().c_str(), expectedSendersList.c_str(), isExpectedSender);
+    LOG_DEBUG("Sender of message is: '%s', while expected are: '%s'. Returning %d. -- msg content: '%s'", agent.getName().c_str(), expectedSendersList.c_str(), isExpectedSender, msg.getContent().c_str());
     return isExpectedSender;
 }
 
 bool Transition::validateRecepients (const ACLMessage &msg)
 {
-    std::vector<AgentID> recepients = msg.getAllReceivers();
+    std::vector<AgentID> recipients = msg.getAllReceivers();
     std::vector<AgentID>::iterator it;
-    
-    for (it = recepients.begin(); it != recepients.end(); ++it)
+
+    LOG_DEBUG("Validate for '%d' recipients - expected '%d'", recipients.size(), expectedRecepients.size());
+    for (it = recipients.begin(); it != recipients.end(); ++it)
     {
-        std::vector<AgentID>::iterator found = find(expectedRecepients.begin(), expectedRecepients.end(),*it);
-        if (found == expectedRecepients.end() )
+        bool expected = false;
+        std::vector<AgentID>::const_iterator eit = expectedRecepients.begin();
+        for(; eit != expectedRecepients.end(); ++eit)
+        {
+            LOG_DEBUG("Recipient '%s' - expected '%s':", it->getName().c_str(), eit->getName().c_str());
+            boost::regex regex(eit->getName());
+            if(regex_match(it->getName(), regex))
+            {
+                expected = true;
+            }
+        }
+        if(!expected)
+        {
             return false;
+        }
     }
     return true;
 }
@@ -397,7 +447,7 @@ void Transition::removeAllAgentsBut(const AgentID &ag,std::vector<AgentID> &agen
         agents.clear();
         agents.push_back(ag);
     } else {
-        LOG_WARN("An agent that should not be removed from the list, does not even exist in the list");
+        LOG_WARN("An agent '%s' that should not be removed from the list, does not even exist in the list", ag.getName().c_str());
         agents.clear();
     }
 }
@@ -433,6 +483,9 @@ std::string 	 Transition::getTo() const 			{return to; }
 State* 		 Transition::getNextState() const 		{return nextState; }
 std::vector<AgentID> Transition::getExpectedSenders() const 	{return expectedSenders; }
 std::vector<AgentID> Transition::getExpectedRecepients() const	{return expectedRecepients; }
+void Transition::setExpectedSenders(const std::vector<AgentID>& senders) { expectedSenders = senders; }
+void Transition::setExpectedRecepients(const std::vector<AgentID>& recepients) { expectedRecepients = recepients; }
+
 StateMachine* 	 Transition::getMachine() const		{return machine;}
 State* 		 Transition::getPrecedingState() const		{return precedingState;}
 State* 		 Transition::getOwningState()	const		{return owningState;}
