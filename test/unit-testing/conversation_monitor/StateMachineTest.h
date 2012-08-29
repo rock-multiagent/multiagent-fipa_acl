@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(request_protocol_test_from_file)
     a2.addAddress(addr3);
 
     char* installDir = getenv("ROCK_INSTALL_DIR");
-    BOOST_CHECK_MESSAGE(installDir, "Install first using 'amake' then start this test");
+    BOOST_CHECK_MESSAGE(installDir, "Install first using 'amake' and source 'env.sh' -- then start this test");
     std::string resourceDir(installDir);
     resourceDir += "/configuration/fipa_acl/protocols/";
 
