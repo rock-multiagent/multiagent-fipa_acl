@@ -22,6 +22,16 @@ namespace acl {
 class StateMachine;
 class Transition;
 
+class MessageArchive
+{
+public:
+    const ACLMessage getCorrespondingInitiatorMessage(const ACLMessage& msg) const
+    {
+        return ACLMessage();
+    }
+
+};
+
 /**
  * Definition of a StateId
  */
@@ -33,6 +43,8 @@ typedef std::string StateId;
 */
 class State 
 {
+    friend class Transition;
+
 private:
     /** 
     * The identifier of the state
@@ -67,23 +79,24 @@ private:
      */
     RoleMapping mRoleMapping;
 
-    /**
-     * Retrieve previous message of the initator, that triggers the emission on this message
-     * \return last message the initiator sent
-     */
-    const ACLMessage& getLastInitiatorMessage() const;
-
 protected:
 
     /**
      * Internal states
      */
+    const static StateId UNDEFINED_ID;
     const static StateId NOT_UNDERSTOOD;
 
-    const static StateId UNDEFINED_ID;
+
+    /**
+      \brief setter method for the final field of the class
+      When changing the final state flag make sure you either remove existing transitions or create
+      the default transition if needed
+      \param final Change status of state  
+    */
+    void setFinal(bool final) { mIsFinal = final; }
 
 public:
-
     /**
     * \brief empty constructor initializes default fields
     */
@@ -101,12 +114,12 @@ public:
     void addTransition(Transition &t);
    
     /**
-    *  \brief prcesses the message received as parameter; sends it to each sub-protocol(subSM) until it is validated by one(if any)
-    *  or else to each transition for processing until the message is validated by one of them(if any)
+    *  \brief Check whether the received message triggers any of the known transitions
     *  \param msg current message that is being processed from the flow of messages
-    *  \return 0 if successful, 1 otherwise
+    *  \param archive The message archive allows to extract the corresponding initiating message, thus is required to verify settings like encoding and in_reply_to parameters
+    *  \return true if successful, false otherwise
     */
-    int consumeMessage(const ACLMessage &msg);
+    bool consumeMessage(const ACLMessage &msg, const MessageArchive& archive);
 
     /**
     *  \brief method that generates implicit generic transitions applicable to all states, that may or may not be speciffied in the 
@@ -122,11 +135,6 @@ public:
     */
     bool isFinal() const { return mIsFinal; }
     
-    /**
-      \brief setter method for the final field of the class
-      \param _final: bool argument to be set
-    */
-    void setFinal(bool final) { mIsFinal = final; }
     
     /**
       \brief setter method for the uid field of the state NOTE: maybe should be taken out and name only be allowed to be set on
@@ -151,6 +159,12 @@ public:
      * \return list of embedded statemachines
      */
     std::vector<StateMachine> getEmbeddedStatemachines() const;
+};
+
+class FinalState : public State
+{
+public:
+    FinalState(const StateId& id);
 };
 
 class UndefinedState : public State

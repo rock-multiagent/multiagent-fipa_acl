@@ -27,6 +27,8 @@ namespace validation {
  */
 class Transition 
 {
+    friend class State;
+
     private:
         /** the role of the agent expected to be the sender of a message for this transition */
         Role mSenderRole;
@@ -42,6 +44,13 @@ class Transition
         
         // state that this transition ends in
         StateId mTargetState;
+
+    protected:
+
+        /**
+         * Default transition generation
+         */
+        static Transition not_understood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState);
 
     public:
 
@@ -128,6 +137,7 @@ class Transition
         /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecipients vector) */
         bool validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping);
 };
+
     
 } // end of acl
 } // end of fipa

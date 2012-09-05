@@ -25,16 +25,6 @@ State::State(const StateId& uid)
 {
 }
 
-//const State State::undefined()
-//{
-//    if(!mUndefinedState)
-//    {
-//        mUndefinedState = boost::shared_ptr<State>(new State(State::UNDEFINED_ID));
-//    }
-//
-//    return *mUndefinedState;
-//}
-
 void State::addTransition(Transition& t)
 {
     t.setSourceState(mId);
@@ -45,7 +35,9 @@ void State::generateDefaultTransitions()
 {
         // Not adding any transition for final states
         if(isFinal())
+        {
             return; 
+        }
 
         std::vector<Transition>::iterator it = mTransitions.begin();
         for (; it != mTransitions.end();++it)
@@ -55,29 +47,26 @@ void State::generateDefaultTransitions()
             {
 	        continue;
             }
-	 
-            // Add a NOT_UNDERSTOOD transition 
-	    Transition t; 
-	    t.setPerformative(ACLMessage::NOT_UNDERSTOOD);
-	    t.setSenderRole(it->getReceiverRole());
-	    t.setReceiverRole(it->getSenderRole());
-	   
-            t.setSourceState(mId); 
-	    t.setTargetState(State::NOT_UNDERSTOOD);
-	    addTransition(t);	  
+            Transition defaultTransition = Transition::not_understood(it->getSenderRole(), it->getReceiverRole(), mId);
+            addTransition(defaultTransition);
         }
 }
 
-int State::consumeMessage(const ACLMessage &msg)
+bool State::consumeMessage(const ACLMessage &msg, const MessageArchive& archive)
 {
-    LOG_DEBUG("State::consumeMessage state %s", mId.c_str());
-
-    // TODO: embedded statemachine
+    // TODO: consider embedded statemachines
+    //if(!mEmbeddedStateMachines.empty())
+    //{
+    //    // iterator and try to consume message
+    //    //
+    //    // when using state, make sure all embedded State machines are in final state 
+    //    // before leaving the current state
+    //}
 
     std::vector<Transition>::iterator it = mTransitions.begin();
     for (; it != mTransitions.end(); ++it)
     {
-        const ACLMessage& initiatingMsg = getLastInitiatorMessage();
+        const ACLMessage& initiatingMsg = archive.getCorrespondingInitiatorMessage(msg);
         if (it->triggers(msg, initiatingMsg, mRoleMapping)) 
             return true;
     }
@@ -89,9 +78,10 @@ std::vector<StateMachine> State::getEmbeddedStatemachines() const
     return mEmbeddedStateMachines;
 }
 
-const ACLMessage& State::getLastInitiatorMessage() const 
+FinalState::FinalState(const StateId& id)
+    : State(id)
 {
-    throw std::runtime_error("NOT IMPLEMETED YET");
+    setFinal(true);
 }
 
 UndefinedState::UndefinedState() 

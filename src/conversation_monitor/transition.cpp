@@ -146,5 +146,10 @@ bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& rol
     return true;
 }
 
+Transition Transition::not_understood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState)
+{
+    return Transition(senderRole, receiverRole, ACLMessage::NOT_UNDERSTOOD, sourceState, State::NOT_UNDERSTOOD);
+}
+
 } // end of acl
 } // end of fipa

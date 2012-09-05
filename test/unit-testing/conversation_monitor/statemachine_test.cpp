@@ -64,7 +64,33 @@ BOOST_AUTO_TEST_CASE(transition_test)
     // sender and receiver are taken from the roleMapping, i.e. sender receiver field is ignored from the 
     // validator message
     BOOST_REQUIRE( t.validateMessage(inputMsg, validatorMsg, roleMapping) );
+}
 
+BOOST_AUTO_TEST_CASE(state_test)
+{
+    using namespace fipa::acl;
+    
+    StateId stateId = "test-state";
+    StateId otherStateId = "other-state";
+    State state(stateId);
+
+    BOOST_REQUIRE(state.getId() == stateId);
+
+    state.setId(otherStateId);
+    BOOST_REQUIRE(state.getId() == otherStateId);
+
+    BOOST_REQUIRE(!state.isFinal());
+
+    // Test for default transitions
+    std::vector<Transition> transitions = state.getTransitions();
+    BOOST_REQUIRE(!transitions.empty());
+
+    // Verify final state
+    FinalState finalState(stateId);
+    BOOST_REQUIRE(finalState.isFinal());
+
+    transitions = finalState.getTransitions();
+    BOOST_REQUIRE(transitions.empty());
 }
 BOOST_AUTO_TEST_SUITE_END()
 
