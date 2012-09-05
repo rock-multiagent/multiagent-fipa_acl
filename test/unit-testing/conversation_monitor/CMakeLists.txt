@@ -1,4 +1,7 @@
-add_definitions(-DBOOST_TEST_DYN_LINK)
-rock_executable(unit-test_conversation_monitor test.cpp
+set(SOURCES test.cpp
+        statemachine_test.cpp
+)
+
+rock_executable(unit-test_conversation_monitor ${SOURCES}
     DEPS ${PROJECT_NAME}
     NOINSTALL)

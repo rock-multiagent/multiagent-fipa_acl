@@ -12,8 +12,8 @@
 *  - for the actual places where the full functionality has not been implemented see the function comments in the .cpp file
 */
 
-#ifndef ACLMessageOutputParser_H_
-#define ACLMessageOutputParser_H_
+#ifndef FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
+#define FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
 #include <string>
 #include <fipa_acl/message_generator/agent_id.h>
 #include <fipa_acl/message_generator/userdef_param.h>

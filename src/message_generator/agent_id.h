@@ -8,8 +8,8 @@
 *  - has very basic features, only what was needed for the ACLMessage class
 *  - may need to be expanded/derived from depending on future needs
 */
-#ifndef AgentID_H_
-#define AgentID_H_
+#ifndef FIPA_ACL_AGENTID_H
+#define FIPA_ACL_AGENTID_H
 
 #include <fipa_acl/message_generator/userdef_param.h>
 #include <string>
@@ -48,9 +48,6 @@ The fields are not based on the Architecture specification and utilities, but ra
 so they have the name, values and functionality needed to implement this specification(they happen to coincide almost completely though)
 */
 private:
-    /** name of the agent*/
-    std::string name;
-
     /** set of strings representing the addresses of the agent*/
     std::vector<std::string> addresses;
 
@@ -60,7 +57,12 @@ private:
     /** set of UserdefParams representing the parameters of an agent id */
     std::vector<UserdefParam> params;
 
+protected:
+    /** name of the agent*/
+    std::string name;
 
+    /** name representing an undefined agent */
+    static const std::string undefinedAgentName;
 
 public:
 
@@ -69,8 +71,11 @@ public:
     very not thread safe; worked around it, only relevance it has now is that of an implicit value for the comparison, saved as a static variable
     */
     static int resCompDepth;
-    
-    ~AgentID();
+
+    /**
+     * Retrieve an undefined agent instance
+     */
+    static const AgentID undefined();
     
     /**
     * \brief Default constructor
@@ -150,6 +155,16 @@ public:
     */
     bool empty();
 };
+
+/**
+ * Null Object for AgentID class
+ */
+class UndefinedAgentID : public AgentID
+{
+public:
+    UndefinedAgentID();
+};
+
 
 
 /**

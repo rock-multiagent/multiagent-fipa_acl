@@ -12,14 +12,14 @@
 #include <base/logging.h>
 
 namespace fipa {
-
 namespace acl {
-
     
 int AgentID::resCompDepth = 1;
+
+const std::string AgentID::undefinedAgentName = "__undefined__";
  
 AgentID::AgentID() 
-    : name()
+    : name(AgentID::undefinedAgentName)
 {
 }
 
@@ -213,15 +213,15 @@ bool resDepthEqual(const AgentID &a, const AgentID &b, int depth)
     return false;
 }
 
-
-
-AgentID::~AgentID()
-{
-}
-
 bool AgentID::empty()
 {
     return name.empty();
+}
+
+UndefinedAgentID::UndefinedAgentID()
+    : AgentID()
+{
+    name = AgentID::undefinedAgentName;
 }
 
 }//end of acl namespace

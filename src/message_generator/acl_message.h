@@ -6,8 +6,8 @@
  * 
  * \version 1.0
  */
-#ifndef ACLMessage_H_
-#define ACLMessage_H_
+#ifndef FIPA_ACL_ACLMESSAGE_H
+#define FIPA_ACL_ACLMESSAGE_H
 
 #include <vector>
 #include <map>

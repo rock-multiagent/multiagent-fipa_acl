@@ -7,9 +7,10 @@ set(SOURCES
     message_generator/agent_id.cpp
     message_generator/userdef_param.cpp
     message_generator/acl_message_output_parser.cpp
+    conversation_monitor/role.cpp
     conversation_monitor/state.cpp
-    conversation_monitor/statemachine_builder.cpp
-    conversation_monitor/statemachine.cpp
+    #conversation_monitor/statemachine_builder.cpp
+    #conversation_monitor/statemachine.cpp
     conversation_monitor/transition.cpp
 )
 
@@ -32,12 +33,13 @@ set(HEADERS
     message_generator/acl_message.h
     message_generator/message_generator.h
     bitefficient_message.h
+    conversation_monitor/role.h
     conversation_monitor/state.h
-    conversation_monitor/types.h
+    #conversation_monitor/types.h
     conversation_monitor/transition.h
-    conversation_monitor/statemachine_builder.h
-    conversation_monitor/statemachine.h
-    conversation_monitor.h
+    #conversation_monitor/statemachine_builder.h
+    #conversation_monitor/statemachine.h
+    #conversation_monitor.h
     fipa_acl.h
 )
 

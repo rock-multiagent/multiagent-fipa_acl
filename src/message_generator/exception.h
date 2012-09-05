@@ -1,5 +1,5 @@
-#ifndef _MSG_GENERATOR_EXCEPTION_H_
-#define _MSG_GENERATOR_EXCEPTION_H_
+#ifndef FIPA_ACL_MSG_GENERATOR_EXCEPTION_H
+#define FIPA_ACL_MSG_GENERATOR_EXCEPTION_H
 
 #include <stdexcept>
 #include <string>

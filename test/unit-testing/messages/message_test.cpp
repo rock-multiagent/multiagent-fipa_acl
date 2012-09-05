@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(message_test)
     msg.setSender(origin);
     msg.addReceiver(receiver);
     msg.addReplyTo(origin);
-    msg.setPerformative(fipa::acl::ACLMessage::REQUEST);
+    msg.setPerformative(ACLMessage::REQUEST);
     msg.setProtocol(std::string("RIMRES"));
     msg.setLanguage(std::string("test language"));
     msg.setEncoding(std::string("test encoding"));
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(message_test)
 
     BOOST_ASSERT( inputParser.parseData(encodedMsg, outputMsg) );
 
-    BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[REQUEST]);
+    BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[ACLMessage::REQUEST]);
     BOOST_ASSERT(outputMsg.getSender() == msg.getSender());
 
 

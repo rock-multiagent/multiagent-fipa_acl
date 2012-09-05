@@ -8,8 +8,8 @@
  *  - may need to be expanded/derived from depending on future needs
  */
 
-#ifndef UserdefMessageParam_H_
-#define UserdefMessageParam_H_
+#ifndef FIPA_ACL_USERDEF_MESSAGEPARAM_H
+#define FIPA_ACL_USERDEF_MESSAGEPARAM_H
 
 #include <string>
 
