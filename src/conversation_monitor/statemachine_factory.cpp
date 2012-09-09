@@ -28,7 +28,7 @@ void StateMachineFactory::setProtocolResourceDir(const std::string& resourceDir)
 void StateMachineFactory::prepareProtocolsFromResourceDir()
 {
     fs::path protocolDir = fs::path(msResourceDir);
-    LOG_INFO("Prepare protocols from: %s", protocolDir.string().c_str());
+    LOG_INFO("Prepare protocols from: '%s'", protocolDir.string().c_str());
     if(fs::is_directory(protocolDir))
     {
         std::vector<fs::path> files;
@@ -39,19 +39,19 @@ void StateMachineFactory::prepareProtocolsFromResourceDir()
         {
             if(fs::is_regular_file(*it))
             {
-                try {
-                    // Extract protocol name
-                    std::string protocolName = it->string();
-                    size_t pos = protocolName.find_last_of("/");
-                    protocolName.erase(0, pos+1);
+                // Extract protocol name
+                std::string protocolName = it->string();
+                size_t pos = protocolName.find_last_of("/");
+                protocolName.erase(0, pos+1);
 
+                try {
                     // Loading the state machine from the given spec
                     StateMachine statemachine = msStateMachineReader.loadSpecification(it->string()); 
                     LOG_INFO("Register protocol %s", protocolName.c_str());                    
                     msStateMachines[protocolName] = statemachine;
                 } catch(const std::runtime_error& e)
                 {
-                    LOG_ERROR("Error getting functional state machine: %s", e.what());
+                    LOG_ERROR("Error loading specification for: '%s' - %s", protocolName.c_str(), e.what());
                 }
             }
         }
@@ -74,7 +74,7 @@ StateMachine StateMachineFactory::getStateMachine(const std::string& protocol)
         return it->second;
     }
 
-    LOG_WARN("StateMachine for protocol %s not found", protocol.c_str());
+    LOG_WARN("StateMachine for protocol '%s' not found", protocol.c_str());
     throw std::runtime_error("State machine for requested protocol does not exist");
 }
 
