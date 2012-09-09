@@ -173,6 +173,12 @@ public:
      * \return list of embedded statemachines
      */
     std::vector<StateMachine> getEmbeddedStatemachines() const;
+
+    /**
+     * Convert state to string representation
+     */
+    std::string toString() const;
+
 };
 
 class FinalState : public State

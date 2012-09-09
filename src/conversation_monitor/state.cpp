@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <base/logging.h>
+#include <sstream>
 
 namespace fipa {
 namespace acl {
@@ -122,6 +123,18 @@ StateId State::transitionTarget(const ACLMessage &msg, const MessageArchive& arc
 std::vector<StateMachine> State::getEmbeddedStatemachines() const
 { 
     return mEmbeddedStateMachines;
+}
+
+std::string State::toString() const
+{
+    std::stringstream state;
+    state << "state id: '" << mId << "', final: '" << mIsFinal << "'\n";
+    std::vector<Transition>::const_iterator it = mTransitions.begin();
+    for(; it != mTransitions.end(); ++it)
+    {
+        state << "\t" << it->toString() << "\n";
+    }
+    return state.str();
 }
 
 FinalState::FinalState(const StateId& id)
