@@ -146,6 +146,14 @@ std::string Transition::toString() const
 bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping)
 {
     AgentIDList actualReceivers = msg.getAllReceivers();
+    if(actualReceivers.empty())
+    {
+        std::string errorMsg = "No receivers set for this message: conversation id: " + msg.getConversationID() + " sender: " + msg.getSender().getName();
+        LOG_ERROR("%s",errorMsg.c_str());
+        throw std::runtime_error(errorMsg);
+    }
+
+    // Test whether the actual receivers are expected -- according to the current role to agent mapping
     AgentIDList::const_iterator ait = actualReceivers.begin(); 
 
     for(; ait != actualReceivers.end(); ++ait)
