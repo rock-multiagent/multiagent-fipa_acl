@@ -194,9 +194,12 @@ std::string ACLMessageOutputParser::getBitPredefMessageParams()
     if (!replyWith.empty())
         retstr = retstr + char(0x05) + getBitBinExpression(replyWith,'s'); 
 
-    std::string replyBy = msg.getReplyBy1(0);
-    if (!replyBy.empty())
+    if (!mMessage.getReplyBy().isNull())
+    {
+        // Get the formatted string YYYYmmddHHMMSSsss
+        std::string replyBy = mMessage.getReplyByString(false);
         retstr = retstr + char(0x06) + getBitBinDateTimeToken(replyBy); 
+    }
             
     std::string inReplyTo = msg.getInReplyTo();
     if (!inReplyTo.empty())

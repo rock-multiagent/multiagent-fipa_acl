@@ -85,7 +85,7 @@ class MessageParser
 
 		void buildReplyWith(MessageParameter param, ACLMessage &msg);
 
-		void buildReplyBy1(MessageParameter param, ACLMessage &msg);
+		void buildReplyBy(MessageParameter param, ACLMessage &msg);
 
 		void buildInReplyTo(MessageParameter param, ACLMessage &msg);
 
