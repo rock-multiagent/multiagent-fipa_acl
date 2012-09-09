@@ -26,16 +26,16 @@ class StateMachineFactory
         static std::map<std::string, StateMachine> msStateMachines;
 
         /**
-        * Set the resource dir where to search for the protocol definitions
-        */
-        static void setProtocolResourceDir(const std::string& resourceDir);
-
-        /**
         * Instanciates all available machines from the resource directory
         */
         static void prepareProtocolsFromResourceDir();
 
 public: 
+        /**
+        * Set the resource dir where to search for the protocol definitions
+        */
+        static void setProtocolResourceDir(const std::string& resourceDir);
+
         /**
          * Create a statemachine for a given protocol
          * \throws runtime_error if statem machine 
