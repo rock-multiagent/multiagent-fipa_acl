@@ -128,6 +128,11 @@ class Transition
          */
         std::string toString() const;
 
+        /**
+         * Equals operator
+         */
+        bool operator==(const Transition& t) const;
+
     private:
         
         /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecipients vector) */

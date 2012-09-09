@@ -159,6 +159,28 @@ bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& rol
     return true;
 }
 
+bool Transition::operator==(const Transition& other) const
+{
+    if(mSourceStateId != other.mSourceStateId)
+    {
+        return false;
+    } else if (mTargetStateId != other.mTargetStateId)
+    {
+        return false;
+    } else if (mSenderRole != other.mSenderRole)
+    {
+        return false;
+    } else if (mReceiverRole != other.mReceiverRole)
+    {
+        return false;
+    } else if (mPerformative != other.mPerformative)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 Transition Transition::not_understood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState)
 // FIPA include definitions of some default protocol elements
 // This library considers not-understood and cancel interaction-protocol as
