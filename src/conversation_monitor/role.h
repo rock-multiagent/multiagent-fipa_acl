@@ -37,9 +37,9 @@ public:
     Role(const RoleId& id);
 
     /**
-     * Retrieve undefined Role
+     * Copy constructor
      */
-    static const Role undefined();
+    Role(const Role&);
 
     /**
      * Role self
@@ -62,9 +62,20 @@ public:
         return mId < other.mId;
     }
 
+    bool operator!=(const Role& other) const
+    {
+        return !(mId == other.mId);
+    }
+
     bool operator==(const Role& other) const
     {
         return mId == other.mId;
+    }
+
+    Role& operator=(const Role& other)
+    {
+        mId = other.mId;
+        return *this;
     }
 };
 

@@ -20,6 +20,10 @@ Role::Role(const RoleId& id)
 {
 }
 
+Role::Role(const Role& other)
+{
+    mId = other.mId;
+}
 
 UndefinedRole::UndefinedRole()
     : Role(Role::UNDEFINED_ID)
