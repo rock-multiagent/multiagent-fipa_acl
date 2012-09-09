@@ -49,25 +49,32 @@ private:
      @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentID's
      * see speciffication for details 
      */
-    ACLMessage msg;
-    int useCodeTables;
-    int updateCodeTables;
-    std::string version;
-    int res_depth;
+    ACLMessage mMessage;
+    bool mUseCodeTables;
+    bool mUpdateCodeTables;
+    std::string mVersion;
+    int mResolverDepth;
     
 public:
     ACLMessageOutputParser();
     /**
         \brief setter and getter methods for the parameters of the encoder
     */
-    void setUseCodeTables(int x);
-    int getUseCodeTables();
-    void setUpdateCodeTables(int x);
-    int getUpdateCodeTables();
-    void setResolverDepth(int res);
-    int getResolverDepth();
-    void setVersion(const std::string&);
-    std::string getVersion();
+    void setUseCodeTables(bool x) { mUseCodeTables = x; }
+
+    bool getUseCodeTables() { return mUseCodeTables; }
+
+    void setUpdateCodeTables(bool x) { mUpdateCodeTables = x; }
+
+    bool getUpdateCodeTables() { return mUpdateCodeTables; }
+
+    void setResolverDepth(int depth) { mResolverDepth = depth; }
+
+    int getResolverDepth() { return mResolverDepth; }
+
+    void setVersion(const std::string& version) { mVersion = version; }
+
+    std::string getVersion() { return mVersion; }
     /**
         \brief not a deep-copy assignment of msg but this should not be a problem as fields are not modified in the encoding process
     */
@@ -198,11 +205,6 @@ private:
     std::string getBitBinNumber(double n,char base);
     
     /**
-    \brief implements the binary string production; functionality not complete as code tables are not yet implemented
-    */
-    std::string getBitBinString(const std::string& sword);
-    
-    /**
     * Retrieve the byte length encoded string for the given word 
     * \param sword String containing the data to convert
     */
@@ -212,7 +214,7 @@ private:
     \brief implements the binary string production; functionality not complete as code tables are not yet implemented
     the second argument is an explicit option for codeTables(needed for the getBitBinExpression() )
     */
-    std::string getBitBinString(const std::string& sword,int codeTables);
+    std::string getBitBinString(const std::string& sword);
     
     std::string getBitDigits(const std::string& dig);
     
