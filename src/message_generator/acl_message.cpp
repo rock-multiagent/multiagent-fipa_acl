@@ -38,41 +38,84 @@ std::map<ACLMessage::Performative, std::string> PerformativeTxt = boost::assign:
 const std::string illegalWordChars = std::string("() ") + char(0x00);
 const std::string illegalWordStart = std::string("@#-0123456789"); 
 
-void ACLMessage::initializeObject()
+ACLMessage::Performative ACLMessage::performativeFromString(const std::string& performative)
 {
-    performative = PerformativeTxt[INFORM];
-    reply_by = -1;
-}
-
-ACLMessage::~ACLMessage()
-{
+    std::map<ACLMessage::Performative, std::string>::const_iterator it = PerformativeTxt.begin();
+    for(; it != PerformativeTxt.end(); ++it)
+    {
+        if(it->second == performative)
+        {
+            return it->first;
+        }
+    }
+    std::string msg = "String '" + performative + "' does not match any existing performative definition";
+    throw std::runtime_error(msg);
 }
 
 ACLMessage::ACLMessage()
 {
-    initializeObject();
+    mPerformative = PerformativeTxt[INFORM];
 }
 
-ACLMessage::ACLMessage(Performative perf)
+ACLMessage::ACLMessage(Performative performative)
 {
-    initializeObject();
-    performative = PerformativeTxt[perf];
+    mPerformative = PerformativeTxt[performative];
 }
-
 
 ACLMessage::ACLMessage(const std::string& perf) 
 {
-    initializeObject(); 
-    
     if ( (perf.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(perf.c_str()[0]) != std::string::npos) )
     {
         char buffer[512];
         snprintf(buffer, 512,"Illegal characters in given performative: %s", perf.c_str());
 	throw std::runtime_error(buffer);
     } else {
-        performative = perf;
+        mPerformative = perf;
     }
 }
+
+//ACLMessage& ACLMessage::operator=(const ACLMessage& mes)
+//{
+//    // checking against message1 = message1 case
+//    if (this == &mes)
+//       return *this;
+//
+//    //freeing any previously filled in values for the userdefined parameters, reply_to, receivers and sender fields
+//    if (!mParameters.empty())
+//    {
+//       mParameters.clear();
+//    }
+//   
+//    if (!mReplyTo.empty())
+//    {
+//        mReplyTo.clear();
+//    }
+//    
+//    if (!mReceivers.empty())
+//    {
+//       mReceivers.clear();
+//    }
+//       
+//     //building the copied message
+//    mPerformative = mes.mPerformative;
+//    mLanguage = mes.mLanguage;
+//    mEncoding = mes.mEncoding;
+//    mOntology = mes.mOntology;
+//    mProtocol = mes.mProtocol;
+//    mConversationId = mes.mConversationId;
+//    mReplyWith = mes.mReplyWith;
+//    mInReplyTo = mes.mInReplyTo;
+//    mReplyBy1 = mes.mReplyBy1;
+//    mContent = mes.mContent;
+//    mSender = mes.mSender;
+//         
+//    mReceivers.insert(mReceivers.begin(), mes.mReceivers.begin(), mes.mReceivers.end());
+//    mReplyTo.insert(mReplyTo.begin(), mes.mReplyTo.begin(), mes.mReplyTo.end());
+//    mParameters.insert(mParameters.begin(), mes.mParameters.begin(), mes.mParameters.end());
+//    
+//    return *this;
+//}
+
 
 void ACLMessage::setPerformative(Performative perf)
 {
@@ -83,7 +126,7 @@ void ACLMessage::setPerformative(Performative perf)
 	throw std::runtime_error("Cannot set performative. Performative unknown");
     }
 
-    performative = it->second;
+    mPerformative = it->second;
 }
 
 void ACLMessage::setPerformative(const std::string& str) 
@@ -96,74 +139,60 @@ void ACLMessage::setPerformative(const std::string& str)
 	throw std::runtime_error(buffer);
     }
 
-    performative = str; 
+    mPerformative = str; 
 }
-
-std::string ACLMessage::getPerformative() const {return performative; }
 
 void ACLMessage::addReceiver(const AgentID& aid) 
 {
     // prevent entering duplicates
     // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
-    if ( find(receivers.begin(),receivers.end(),aid) == receivers.end() )
-        receivers.insert(receivers.begin(),aid); 
+    if ( find(mReceivers.begin(), mReceivers.end(),aid) == mReceivers.end() )
+    {
+        mReceivers.insert(mReceivers.begin(),aid); 
+    }
 }
 
 void ACLMessage::deleteReceiver(const AgentID& aid) 
 {
     // prevent entering duplicates
     // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
-    std::vector<AgentID>::iterator it;
-    if ( (it = find(receivers.begin(),receivers.end(),aid)) != receivers.end() )
-        receivers.erase(it);
+    std::vector<AgentID>::iterator it = find(mReceivers.begin(), mReceivers.end(),aid);
+    if ( it != mReceivers.end())
+    {
+        mReceivers.erase(it);
+    }
 }
 
 void ACLMessage::clearReceivers() 
 {
-    receivers.clear();
+    mReceivers.clear();
 }
-
-AgentIDList ACLMessage::getAllReceivers() const {return receivers; }
 
 void ACLMessage::addReplyTo(const AgentID& aid) 
 {
     // prevent entering duplicates
     // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
-    if ( find(reply_to.begin(),reply_to.end(),aid) == reply_to.end() )
-        reply_to.insert(reply_to.begin(),aid); 
+    if ( find(mReplyTo.begin(), mReplyTo.end(),aid) == mReplyTo.end() )
+    {
+        mReplyTo.insert(mReplyTo.begin(),aid); 
+    }
 }
 
 void ACLMessage::deleteReplyTo(const AgentID& aid) 
 {
     // prevent entering duplicates
     // NOTE: this function searches for and uses the overloaded == op not the resDepthEq()
-    std::vector<AgentID>::iterator it;
-    if ( (it = find(reply_to.begin(),reply_to.end(),aid)) != reply_to.end() )
-        reply_to.erase(it);
+    std::vector<AgentID>::iterator it = find(mReplyTo.begin(), mReplyTo.end(),aid);
+    if (it != mReplyTo.end() )
+    {
+        mReplyTo.erase(it);
+    }
 }
 
 void ACLMessage::clearReplyTo()
 {
-    reply_to.clear(); 
+    mReplyTo.clear(); 
 }
-
-AgentIDList ACLMessage::getAllReplyTo() const {return reply_to; }
-
-void ACLMessage::setReplyBy(const long by) {reply_by = by; }
-
-long ACLMessage::getReplyBy() const {return reply_by; }
-
-void ACLMessage::setInReplyTo(const std::string& str) {in_reply_to = str; }
-
-std::string ACLMessage::getInReplyTo() const {return in_reply_to; }
-
-void ACLMessage::setReplyWith(const std::string& str) {reply_with = str; }
-
-std::string ACLMessage::getReplyWith() const {return reply_with; }
-
-void ACLMessage::setConversationID(const std::string& str) {conversation_id = str; }
-
-std::string ACLMessage::getConversationID() const {return conversation_id; }
 
 void ACLMessage::setProtocol(const std::string& str) 
 {
@@ -174,152 +203,74 @@ void ACLMessage::setProtocol(const std::string& str)
         throw std::runtime_error(buffer);
     }
 
-    protocol = str; 
+    mProtocol = str; 
 }
 
-std::string ACLMessage::getProtocol() const {return protocol; }
-
-void ACLMessage::setOntology(const std::string& str) {ontology = str; }
-
-std::string ACLMessage::getOntology() const {return ontology; }
-
-void ACLMessage::setEncoding(const std::string& str) {encoding = str; }
-
-std::string ACLMessage::getEncoding() const {return encoding; }
-
-void ACLMessage::setLanguage(const std::string& str) {language = str; }
-
-std::string ACLMessage::getLanguage() const {return language; }
-
-void ACLMessage::setContent(const std::string& cont) { content = cont; }
-
-std::string* ACLMessage::getContentPtr() { return &content; }
+std::string* ACLMessage::getContentPtr() { return &mContent; }
 
 bool ACLMessage::hasBinaryContent() const 
 {
     // Check on the existance of 0x00 in the content
-    return ( strlen(content.c_str()) != content.size() );
+    return ( strlen(mContent.c_str()) != mContent.size() );
 }
-
-std::string ACLMessage::getContent() const {return content; }
-
-void ACLMessage::setSender(const AgentID& sender1) 
-{
-    sender = sender1; 
-}
-
-
-AgentID ACLMessage::getSender() const 
-{
-    return sender; 
-    
-} 
 
 void ACLMessage::addUserdefParam(const UserdefParam& p) 
 {
-    if (find (params.begin(),params.end(),p) == params.end() )
-    params.insert(params.begin(),p);
+    if (find (mParameters.begin(),mParameters.end(),p) == mParameters.end() )
+    {
+        mParameters.insert(mParameters.begin(),p);
+    }
 }
-
-std::vector<UserdefParam> ACLMessage::getUserdefParams() const {return params;}
 
 void ACLMessage::setUserdefParams(const std::vector<UserdefParam>& p) 
 {
-    params.clear();
-    params.insert(params.begin(),p.begin(),p.end());
+    mParameters.clear();
+    mParameters.insert(mParameters.begin(),p.begin(),p.end());
 }
 
 
-std::string ACLMessage::getReplyBy1(bool formatted) const
+std::string ACLMessage::getReplyByString(bool formatted) const
 {
+    std::string time = mReplyBy.toString(base::Time::Milliseconds);
+
     if (!formatted)
-        return reply_by1;
-
-    if (reply_by1.size() < 17)
-        return reply_by1;
-
-    std::string trim;
-    trim += reply_by1.substr(0,4) + '-' + reply_by1.substr(4,2) + '-' + reply_by1.substr(6,2) + 'T' +
-	  reply_by1.substr(8,2) + ':' + reply_by1.substr(10,2) + ':' + reply_by1.substr(12,2) + ':' + reply_by1.substr(14,3);	
-    
-    return trim;
-}
-
-void ACLMessage::_setReplyBy1(const std::string& date1)
-{
-    reply_by1 = date1;
-}
-
-void ACLMessage::setReplyBy1(const std::string& date1) 
-{
-    std::string millisecs = "000";
-    std::string date;
-
-    if(date1.size() == 23)
     {
-        // separate milliseconds
-        millisecs = date1.substr(20,3);
-
-        // Store date without milliseconds
-        date = date1.substr(0,19);
-        
-        if ( millisecs.find_first_not_of(std::string("0123456789")) != std::string::npos)
-            throw std::runtime_error("Invalid date format. Milliseconds are not numbers");
-    } else {
-        date = date1;
-    }
-
-    // Input format should be "%Y-%m-%dT%H:%M:%S"
-    // Strip ':' and '-' to allow from_iso_string to work
-    boost::erase_all(date,":");
-    boost::erase_all(date,"-");
-
-    // check if we can parse the following format "%Y%m%dT%H%M%S"
-    try {
-        using namespace boost::posix_time;
-        ptime posixTime(from_iso_string(date));
-    } catch(...)
-    {
-        char buffer[512];
-        snprintf(buffer,512, "Invalid posix date format: %s", date.c_str());
-        throw std::runtime_error(buffer);
-    }
-
-    boost::erase_all(date,"T");
-
-    // Add milliseconds (if not provided)
-    reply_by1 = date + millisecs;
+        // Input format should be "%Y%m%d-%H:%M:%S"
+        // Strip ':' and '-' to allow from_iso_string to work
+        boost::erase_all(time,":");
+        boost::erase_all(time,"-");
+    } 
+    return time;
 }
 
-
-bool operator==(const ACLMessage& a,const ACLMessage& b)
+bool ACLMessage::operator==(const ACLMessage& other) const
 {
-    if (a.getPerformative().compare(b.getPerformative()))
+    if (getPerformative().compare(other.getPerformative()))
         return false;
-    if (a.getContent().compare(b.getContent()))
+    if (getContent().compare(other.getContent()))
         return false;
-    if (a.getLanguage().compare(b.getLanguage()))
+    if (getLanguage().compare(other.getLanguage()))
         return false;
-    if (a.getEncoding().compare(b.getEncoding()))
+    if (getEncoding().compare(other.getEncoding()))
         return false;
-    if (a.getOntology().compare(b.getOntology()))
+    if (getOntology().compare(other.getOntology()))
         return false;
-    if (a.getProtocol().compare(b.getProtocol()))
+    if (getProtocol().compare(other.getProtocol()))
         return false;
-    if (a.getConversationID().compare(b.getConversationID()))
+    if (getConversationID().compare(other.getConversationID()))
         return false;
-    if (a.getReplyWith().compare(b.getReplyWith()))
+    if (getReplyWith().compare(other.getReplyWith()))
         return false;
-    if (a.getInReplyTo().compare(b.getInReplyTo()))
+    if (getInReplyTo().compare(other.getInReplyTo()))
         return false;
-    if (a.getReplyBy1().compare(b.getReplyBy1()))
+    if (getReplyBy() == other.getReplyBy())
         return false;
-    if (!(a.getSender() == b.getSender()) )
+    if (!(getSender() == other.getSender()) )
         return false;
     
     // checking if receivers sets of the message are the same
-    AgentIDList agentsA = a.getAllReceivers();
-    AgentIDList agentsB = b.getAllReceivers();
+    AgentIDList agentsA = getAllReceivers();
+    AgentIDList agentsB = other.getAllReceivers();
     AgentIDList::iterator ait = agentsA.begin();
     AgentIDList::iterator bit = agentsB.begin();
     
@@ -331,7 +282,7 @@ bool operator==(const ACLMessage& a,const ACLMessage& b)
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( resDepthEqual((*ait),(*bit),AgentID::resCompDepth)) 
+	  if ( AgentID::compareEqual((*ait),(*bit),AgentID::msResolverComparisonDepth)) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -354,8 +305,8 @@ bool operator==(const ACLMessage& a,const ACLMessage& b)
         return false;
     
     //checking if reply_to sets of the message are  the same
-    agentsA = a.getAllReplyTo();
-    agentsB = b.getAllReplyTo();
+    agentsA = getAllReplyTo();
+    agentsB = other.getAllReplyTo();
     ait = agentsA.begin();
     bit = agentsB.begin();
     while (ait != agentsA.end())
@@ -364,7 +315,7 @@ bool operator==(const ACLMessage& a,const ACLMessage& b)
         bit = agentsB.begin();
         while (bit != agentsB.end())
         {
-	  if ( resDepthEqual((*ait),(*bit),AgentID::resCompDepth)) 
+	  if ( AgentID::compareEqual((*ait),(*bit),AgentID::msResolverComparisonDepth)) 
 	  {
 	      agentsA.erase(ait);
 	      ait = agentsA.begin();
@@ -388,8 +339,8 @@ bool operator==(const ACLMessage& a,const ACLMessage& b)
     { return false; }
     
     
-    std::vector<UserdefParam> paramsA = a.getUserdefParams();
-    std::vector<UserdefParam> paramsB = b.getUserdefParams();
+    std::vector<UserdefParam> paramsA = getUserdefParams();
+    std::vector<UserdefParam> paramsB = other.getUserdefParams();
     std::vector<UserdefParam>::iterator pita = paramsA.begin();
     std::vector<UserdefParam>::iterator pitb = paramsB.begin();
     
@@ -424,73 +375,6 @@ bool operator==(const ACLMessage& a,const ACLMessage& b)
    
     return true;
 }
-
-ACLMessage::ACLMessage(const ACLMessage& mes)
-{
-    initializeObject();
-    performative = mes.getPerformative();
-    language = mes.getLanguage();
-    encoding = mes.getEncoding();
-    ontology = mes.getOntology();
-    protocol = mes.getProtocol();
-    conversation_id = mes.getConversationID();
-    reply_with = mes.getReplyWith();
-    in_reply_to = mes.getInReplyTo();
-    reply_by1 = mes.getReplyBy1();
-    content = mes.getContent();
-    sender = mes.getSender();
-
-    receivers.insert(receivers.begin(), mes.receivers.begin(), mes.receivers.end());
-    reply_to.insert(reply_to.begin(), mes.reply_to.begin(), mes.reply_to.end());
-    params.insert(params.begin(), mes.params.begin(), mes.params.end());
-}
-
-
-
-ACLMessage& ACLMessage::operator=(const ACLMessage& mes)
-{
-    // checking against message1 = message1 case
-    if (this == &mes)
-	return *this;
-
-    //freeing any previously filled in values for the userdefined parameters, reply_to, receivers and sender fields
-    
-    if (!params.empty())
-    {
-       params.clear();
-    }
-   
-    if (!reply_to.empty())
-    {
-        reply_to.clear();
-    }
-    
-    if (!receivers.empty())
-    {
-       receivers.clear();
-    }
-       
-     //building the copied message
-    initializeObject();	
-    performative = mes.getPerformative();
-    language = mes.getLanguage();
-    encoding = mes.getEncoding();
-    ontology = mes.getOntology();
-    protocol = mes.getProtocol();
-    conversation_id = mes.getConversationID();
-    reply_with = mes.getReplyWith();
-    in_reply_to = mes.getInReplyTo();
-    reply_by1 = mes.getReplyBy1();
-    content = mes.getContent();
-    sender = mes.getSender();
-	  
-    receivers.insert(receivers.begin(), mes.receivers.begin(), mes.receivers.end());
-    reply_to.insert(reply_to.begin(), mes.reply_to.begin(), mes.reply_to.end());
-    params.insert(params.begin(), mes.params.begin(), mes.params.end());
-    
-    return *this;
-}
-
 
 }//end of acl namespace
 

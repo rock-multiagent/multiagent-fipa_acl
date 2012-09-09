@@ -14,6 +14,7 @@
 #include <string>
 #include <fipa_acl/message_generator/agent_id.h>
 #include <fipa_acl/message_generator/userdef_param.h>
+#include <base/time.h>
 
 /**
 * \brief Foundation of Physical Intelligent Agents
@@ -39,14 +40,6 @@ namespace acl {
     */
    const extern std::string illegalWordStart;
     
-    /*
-        \brief overloaded equality operator for ACLMessage; the signature of the function was intentionally changed from the normal operator== ( type&, const type&)
-
-        The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
-        in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
-    */
-    //extern bool operator== ( ACLMessage &a,  ACLMessage &b);
-        
 /**
     \class ACLMessage
     \brief This class provides a representation of a message conforming to the FIPA specification SC00061
@@ -75,42 +68,33 @@ public:
 			  };
 
 private:
-    std::string performative;
-    /** \param sender: pointer to the agentAID sending the message */
-    AgentID sender;
-    /** \param receivers: pointer to a set of agentAIDs representing the intended receivers of the message; set was chosen for uniquness of  elements*/
-    std::vector<AgentID> receivers;
-    /** \param reply_to: pointer to a set of agentAIDs representing where a reply to this message should be deliverred */
-    std::vector<AgentID> reply_to;
-    /** \param language: string representing the language used */
-    std::string language;
-    /** \param encoding: string representing the encoding (encoding of the content; not related to message encoding) */
-    std::string encoding;
-    /** \param ontology: string representing the ontology used for communication */
-    std::string ontology;
-    /** \param protocol: string representing the protocol that the message is to handled by */
-    std::string protocol;
-    /** \param conversation_id: string representing the id of the conversation is part of */
-    std::string conversation_id;
-    /** \param reply_with: string that is to be used by "someone" replying to this message */
-    std::string reply_with;
-    /** \param in_reply_to: string representing what other message this message is a reply to */
-    std::string in_reply_to;
-    /** \param reply_by: long representing the time interval that this message should be answered by; added for fipa compliance, not the parameter used for in this purpose for the implementation so far*/
-    long reply_by;
-    /** \param reply_by1: string version of the reply_by parameter; added for ease of use and implementation of the encoding methods*/
-    std::string reply_by1;
-    /** \param params: pointer to a set of user defined parameters(also pointers); set container was used for uniqueness of elements*/
-    std::vector<UserdefParam> params;
-    /** \param content: string representing the content of the message */
-    std::string content;
-
-
-    /**
-     * Set reply by using the provided string
-     * No verification applies
-     */
-    void _setReplyBy1 (const std::string& date1);
+    std::string mPerformative;
+    /** pointer to the agentAID sending the message */
+    AgentID mSender;
+    /** pointer to a set of agentAIDs representing the intended receivers of the message; set was chosen for uniquness of  elements*/
+    std::vector<AgentID> mReceivers;
+    /** pointer to a set of agentAIDs representing where a reply to this message should be deliverred */
+    std::vector<AgentID> mReplyTo;
+    /** string representing the language used */
+    std::string mLanguage;
+    /** string representing the encoding (encoding of the content; not related to message encoding) */
+    std::string mEncoding;
+    /** string representing the ontology used for communication */
+    std::string mOntology;
+    /** string representing the protocol that the message is to handled by */
+    std::string mProtocol;
+    /** string representing the id of the conversation is part of */
+    std::string mConversationId;
+    /** string that is to be used by "someone" replying to this message */
+    std::string mReplyWith;
+    /** string representing what other message this message is a reply to */
+    std::string mInReplyTo;
+    /** added for ease of use and implementation of the encoding methods*/
+    base::Time mReplyBy;
+    /** pointer to a set of user defined parameters(also pointers); set container was used for uniqueness of elements*/
+    std::vector<UserdefParam> mParameters;
+    /** string representing the content of the message */
+    std::string mContent;
 
 protected:
 
@@ -122,88 +106,162 @@ protected:
 public:  
 
     /**
-      \brief this method does all allocations needed upon creating an ACLMessage. It is to be called by every constructor implemented 
-    */
-    void initializeObject();
-    
-    /** 
-     * \brief Default deconstructor
-     */
-    ~ACLMessage();
-
-    /**
      * \brief Default constructor
      */
     ACLMessage();
     
     /**
-       \brief copy constructor; provides deep-copy of all fields
-       \param message ACLMessage to construct from
-    */
-    ACLMessage(const ACLMessage &message);
-
-    /**
-       \brief overloaded assignment operator; provides deep-copy for all fields
-       \param message Message to compare with
-    */
-    ACLMessage& operator=(const ACLMessage &message);
-
-    /**
        \brief constructor of an ACLMessage with a predefined performative
        \param perf a predefined fipa performative(represented by its index in the perfs vector)
     */
-    ACLMessage(Performative perf);
+    ACLMessage(Performative performative);
 
     /**
        \brief constructor of an ACLMessage with a custom performative
        \param perf string representing the custom performative(but it can just as well be one of the pre-defined ones)
     */
     ACLMessage(const std::string& perf);
-           
+
     /**
-       \brief setter and getter methods for all the fields; for fields implemented using containers have an "add" method so that we can populate them sequentially
+     The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
+        in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
+    */
+    bool operator==(const ACLMessage& other) const;
+
+    /**
+       \brief Set performative
        \throws runtime_error if performative does not exist
     */
-
     void setPerformative(Performative perf);
+
     /**
        \brief the method checks whether the passed performative string is a word or not(according to the fipa spec)
        \throws runtime_error if performative does not exist or is illegal
     */
     void setPerformative(const std::string& str);
 
-    std::string getPerformative() const;
+    /**
+     * Get Performative
+     * \return performative
+     */
+    std::string getPerformative() const { return mPerformative; }
+
+    /**
+     * Add an agent id to the list of receivers
+     */
     void addReceiver(const AgentID& aid);
+
+    /**
+     * Delete an agent id from the list of receivers
+     */
     void deleteReceiver(const AgentID& aid);
+
+    /**
+     * Clear list of receivers
+     */
     void clearReceivers();
-    AgentIDList getAllReceivers() const;
+
+    /**
+     * Retrieve list of all receivers
+     */
+    AgentIDList getAllReceivers() const { return mReceivers; }
+
+    /**
+     * Add agent id to reply to list
+     */
     void addReplyTo(const AgentID& aid);
+    
+    /**
+     * Delete an agent id from the reply to list
+     */
     void deleteReplyTo(const AgentID& aid);
+
+    /**
+     * Clear reply to list
+     */
     void clearReplyTo();
-    AgentIDList getAllReplyTo() const;
-    void setReplyBy(long by);
-    long getReplyBy() const;
-    void setInReplyTo(const std::string& str);
-    std::string getInReplyTo() const;
-    void setReplyWith(const std::string& str);
-    std::string getReplyWith() const;
-    void setConversationID(const std::string& str);
-    std::string getConversationID() const;
+    
+    /**
+     * Get reply to list
+     * \return reply to list
+     */
+    AgentIDList getAllReplyTo() const { return mReplyTo; }
+
+    /**
+     * Set reply to
+     */
+    void setInReplyTo(const std::string& str) { mInReplyTo = str; }
+
+    /**
+     * Get in reply to parameter
+     */
+    std::string getInReplyTo() const { return mInReplyTo; }
+
+    /**
+     * Set in reply with parameter
+     */
+    void setReplyWith(const std::string& str) { mReplyWith = str; }
+
+    /**
+     * Get reply with parameter
+     */
+    std::string getReplyWith() const { return mReplyWith; }
+
+    /**
+     * Set conversation id
+     */
+    void setConversationID(const std::string& str) { mConversationId = str; }
+
+    /**
+     * Get conversation id
+     */
+    std::string getConversationID() const { return mConversationId; }
 
      /**
        \brief the method checks whether the passed protocol string is a word or not(according to the fipa spec)
        \throws runtime_error when protocol name contains illegal characters
     */
     void setProtocol(const std::string& str);
-    std::string getProtocol() const;
-    void setOntology(const std::string& str);
-    std::string getOntology() const;
-    void setEncoding(const std::string& str);
-    std::string getEncoding() const;
-    void setLanguage(const std::string& str);
-    std::string getLanguage() const;
-    void setContent(const std::string& cont);
 
+    /**
+     * Get protocol
+     */
+    std::string getProtocol() const { return mProtocol; }
+
+    /**
+     * Set ontology parameter
+     */
+    void setOntology(const std::string& str) { mOntology = str; }
+
+    /**
+     * Get ontology parameter
+     */
+    std::string getOntology() const { return mOntology; }
+
+    /**
+     * Set encoding
+     */
+    void setEncoding(const std::string& str) { mEncoding = str; }
+
+    /**
+     * Get encoding
+     */
+    std::string getEncoding() const { return mEncoding; }
+
+    /**
+     * Set language
+     */
+    void setLanguage(const std::string& str) { mLanguage = str; }
+
+    /**
+     * Get language
+     */
+    std::string getLanguage() const { return mLanguage; }
+
+    /**
+     * Set content 
+     */
+    void setContent(const std::string& content) { mContent = content; }
    
     /**
      * Check whether the content has to be treated as binary or not. This is done by simply checking on the 
@@ -217,19 +275,19 @@ public:
      * If the content is binary use string's data() function to access the underlying array
      * \return content data
      */
-    std::string getContent() const;
+    std::string getContent() const { return mContent; }
 
     /**
      * Set the sender of this message
      * \param sender Sender's AgentID
      */
-    void setSender(const AgentID& sender);
+    void setSender(const AgentID& sender) { mSender = sender; }
 
     /**
      * Get the senders AgentID
      * \return AgentID of the sender 
      */
-    AgentID getSender() const;
+    AgentID getSender() const { return mSender; }
 
     /**
      * Add a userdefined parameter
@@ -241,7 +299,7 @@ public:
      * Retrieve any userdefined parameters this message contains
      * \return List of userdefined parameters
      */
-    std::vector<UserdefParam> getUserdefParams() const;
+    std::vector<UserdefParam> getUserdefParams() const { return mParameters;  }
 
     /**
      * Set the list of userdefined parameter of this message
@@ -252,27 +310,31 @@ public:
     /**
      * Allow to retrieve the ReplyBy time either formatted or unformatted. 
      * Unformatted: YYYYmmddHHMMSSsss
-     * Formatted: YYYY-mm-ddTHH:MM:SS:sss
+     * Formatted: default time format YYYYmmdd-HH:MM:SS:sss
        \param formatted option to get the parameter as it is stored or formated. default is formatted,call with false to get unformatted
     */
-    std::string getReplyBy1(bool formatted = false) const;
+    std::string getReplyByString(bool formatted) const;
 
     /**
-     *  \brief the method checks whether the passed date string is formatted correctly or not;
-     *  example of correctly formated dates are: "2010-12-23T23:12:45:100" or "2010-12-23T23:12:45" 
-     *  \throws if format of date string is wrong
-    */
-    void setReplyBy1(const std::string& date1);
+     * Return reply by as time object
+     */
+    base::Time getReplyBy() const { return mReplyBy; }
+
+    /**
+     * Set reply by as time object
+     * \param time Time 
+     */
+    void setReplyBy(const base::Time& time) { mReplyBy = time; }
+
+    /**
+     * Get Performative from string
+     * \throws std::runtime_error when string is not a known representation of a performative
+     */
+    static Performative performativeFromString(const std::string& performative);
 
 };
 
 extern std::map<ACLMessage::Performative, std::string> PerformativeTxt;
-
-/**
-* Overloaded equals operator for ACLMessage
-*/
-extern bool operator== (const ACLMessage& a,const ACLMessage& b);
-
 
 }//end of acl namespace
 
