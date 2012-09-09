@@ -99,10 +99,19 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
     {
         // TODO: better use the directly corresponding one
         // but this should be ok for now
-        const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
-        if (it->triggers(msg, initiatingMsg, roleMapping)) 
+        if(!archive.hasMessages())
         {
-            return *it;
+            // Initiating message, i.e. validation should only apply to performative
+            if (it->getPerformative() == ACLMessage::performativeFromString(msg.getPerformative()) )
+            {
+                return *it;
+            }
+        } else {
+            const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
+            if (it->triggers(msg, initiatingMsg, roleMapping)) 
+            {
+                return *it;
+            }
         }
     }
 

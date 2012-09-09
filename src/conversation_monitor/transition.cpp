@@ -47,9 +47,11 @@ bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& valida
         return true;
     }
 
+    // Test performative against transition performative
+    // not the validator message one
     if (validation::PERFORMATIVE & flags)
     {
-        if( msg.getPerformative() != validatorMsg.getPerformative())
+        if( ACLMessage::performativeFromString(msg.getPerformative()) != mPerformative)
         {
             LOG_DEBUG("Performative validation failed"); 
             return false;

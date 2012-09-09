@@ -16,6 +16,7 @@ public:
 
     /**
      * Get the last message that corresponds to the initiator
+     * \throw std::runtime_error if no message is available
      */
     const ACLMessage& getInitiatingMessage() const;
 
@@ -23,6 +24,11 @@ public:
      * Add a message to the archive
      */
     void addMessage(const ACLMessage& msg);
+
+    /**
+     * Test whether archive contains messages
+     */
+    bool hasMessages() const { return !mMessages.empty(); }
 };
 
 } // end namespace acl
