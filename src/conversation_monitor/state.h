@@ -115,12 +115,11 @@ public:
     Transition addTransition(const Transition& t);
    
     /**
-    *  \brief Check whether the received message triggers any of the known transitions
-    *  \param msg current message that is being processed from the flow of messages
-    *  \param archive The message archive allows to extract the corresponding initiating message, thus is required to verify settings like encoding and in_reply_to parameters
-    *  \return true if successful, false otherwise
+    *  \brief Check whether the received message triggers a transition
+    *  \return target of the transition 
+    *  \throws runtime_error if the msg is invalid in the current state
     */
-    bool consumeMessage(const ACLMessage &msg, const MessageArchive& archive);
+    StateId transitionTarget(const ACLMessage &msg, const MessageArchive& archive);
 
     /**
     *  \brief method that generates implicit generic transitions applicable to all states, that may or may not be speciffied in the 

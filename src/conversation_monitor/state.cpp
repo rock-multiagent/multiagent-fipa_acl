@@ -61,25 +61,38 @@ void State::generateDefaultTransitions()
         }
 }
 
-bool State::consumeMessage(const ACLMessage &msg, const MessageArchive& archive)
+StateId State::transitionTarget(const ACLMessage &msg, const MessageArchive& archive)
 {
     // TODO: consider embedded statemachines
-    //if(!mEmbeddedStateMachines.empty())
-    //{
-    //    // iterator and try to consume message
-    //    //
-    //    // when using state, make sure all embedded State machines are in final state 
-    //    // before leaving the current state
-    //}
+    if(!mEmbeddedStateMachines.empty())
+    {
+        // iterator and try to consume message
+        std::vector<StateMachine>::iterator it = mEmbeddedStateMachines.begin();
+        for(; it != mEmbeddedStateMachines.end(); ++it)
+        {
+            if(it->consumeMessage(msg))
+            {
+                break;
+            }
+        }
+
+        //
+        // when using state, make sure all embedded State machines are in final state 
+        // before leaving the current state
+    }
 
     std::vector<Transition>::iterator it = mTransitions.begin();
     for (; it != mTransitions.end(); ++it)
     {
         const ACLMessage& initiatingMsg = archive.getCorrespondingInitiatorMessage(msg);
         if (it->triggers(msg, initiatingMsg, mRoleMapping)) 
-            return true;
+        {
+            return it->getTargetStateId();
+        }
     }
-    return false;
+
+    throw std::runtime_error("Message does not match to state");
+
 }
 
 std::vector<StateMachine> State::getEmbeddedStatemachines() const
