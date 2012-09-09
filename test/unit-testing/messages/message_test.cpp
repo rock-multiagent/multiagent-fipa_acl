@@ -13,6 +13,12 @@ BOOST_AUTO_TEST_CASE(message_test)
     AgentID origin("proxy");
     AgentID receiver("crex_0_CREXCORE");
 
+    AgentID resolver0("resolver0");
+    AgentID resolver1("resolver1");
+
+    receiver.addResolver(resolver0);
+    receiver.addResolver(resolver1);
+
     msg.setSender(origin);
     msg.addReceiver(receiver);
     msg.addReplyTo(origin);
@@ -22,7 +28,9 @@ BOOST_AUTO_TEST_CASE(message_test)
     msg.setEncoding(std::string("test encoding"));
     msg.setOntology(std::string("test ontology"));
     msg.setReplyWith(std::string("test reply_with"));
-    msg.setReplyBy1(std::string("2010-12-23T12:00:37.00"));
+    base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
+    msg.setReplyBy(time);
+    BOOST_CHECK_MESSAGE(true, "Setting time " << time.toString());
     msg.setConversationID(std::string("test conversationID"));
     msg.setContent("test content");
 
@@ -44,6 +52,7 @@ BOOST_AUTO_TEST_CASE(message_test)
     BOOST_ASSERT(outputMsg.getAllReceivers() == msg.getAllReceivers());
     agents = outputMsg.getAllReceivers();
     BOOST_ASSERT(agents.size() == 1);
+    BOOST_ASSERT(agents[0].getResolvers().size() == 2);
 
     std::vector<AgentID>::iterator it = agents.begin();
     for(; it != agents.end(); ++it)
@@ -56,7 +65,7 @@ BOOST_AUTO_TEST_CASE(message_test)
     BOOST_ASSERT(outputMsg.getEncoding() == msg.getEncoding());
     BOOST_ASSERT(outputMsg.getOntology() == msg.getOntology());
     BOOST_ASSERT(outputMsg.getReplyWith() == msg.getReplyWith());
-    BOOST_ASSERT(outputMsg.getReplyBy() == msg.getReplyBy());
+    BOOST_REQUIRE_MESSAGE(outputMsg.getReplyBy() == msg.getReplyBy(), "output: " << outputMsg.getReplyBy().toString() << " vs. msg " << msg.getReplyBy().toString());
     BOOST_ASSERT(outputMsg.getConversationID() == msg.getConversationID());
     BOOST_ASSERT(outputMsg.getContent() == msg.getContent());
 }

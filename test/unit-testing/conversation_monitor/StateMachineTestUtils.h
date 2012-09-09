@@ -27,7 +27,8 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     m1.setEncoding(std::string("test encoding"));
     m1.setOntology(std::string("test ontology"));
     m1.setReplyWith(std::string("test reply_with"));
-    m1.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
+    base::Time time = base::Time::fromString("20101223-12:00:37:980", base::Time::Milliseconds);
+    m1.setReplyBy(time);
     m1.setInReplyTo(std::string("test in_reply_to"));
     m1.setConversationID(std::string("test conversationID"));
     m1.setProtocol(std::string("testprotocol"));
@@ -41,7 +42,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     m1.setEncoding(std::string("test encoding"));
     m1.setOntology(std::string("test ontology"));
     m1.setReplyWith(std::string("test reply_with"));
-    m1.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
+    m1.setReplyBy(time);
     m1.setInReplyTo(std::string("test reply_with"));
     m1.setConversationID(std::string("test conversationID"));
     m1.setProtocol(std::string("testprotocol"));
@@ -56,7 +57,7 @@ std::vector<ACLMessage> buildRequestMessageFlow(AgentID sender, AgentID receiver
     m1.setEncoding(std::string("test encoding"));
     m1.setOntology(std::string("test ontology"));
     m1.setReplyWith(std::string("test reply_with"));
-    m1.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
+    m1.setReplyBy(time);
     std::string inrepto = std::string();
     inrepto.clear();
     m1.setInReplyTo(inrepto);
@@ -80,8 +81,8 @@ void printMessage( ACLMessage &msg)
         std::cout<<"content:\t"<< msg.getContent()<<std::endl; 
     if (!msg.getReplyWith().empty()) 
         std::cout<<"reply with:\t"<< msg.getReplyWith()<<std::endl;
-    //if (!msg.getReplyBy1().empty()) 
-        std::cout<<"reply by1:\t"<< msg.getReplyBy1(1)<<std::endl;
+    if (!msg.getReplyBy().isNull()) 
+        std::cout<<"reply by:\t"<< msg.getReplyByString(true)<<std::endl;
     if (!msg.getInReplyTo().empty()) 
         std::cout<<"in reply to:\t"<< msg.getInReplyTo()<<std::endl;
     if (!msg.getLanguage().empty()) 
