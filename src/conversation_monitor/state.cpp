@@ -25,10 +25,19 @@ State::State(const StateId& uid)
 {
 }
 
-void State::addTransition(Transition& t)
+Transition State::addTransition(const Transition& t)
 {
-    t.setSourceState(mId);
-    mTransitions.push_back(t);
+    std::vector<Transition>::const_iterator it;
+    it = std::find(mTransitions.begin(), mTransitions.end(), t);
+    if( it == mTransitions.end())
+    {
+        Transition transition = t;
+        transition.setSourceState(mId);
+        mTransitions.push_back(transition);
+        return transition;
+    } else {
+        return *it;
+    }
 }
 
 void State::generateDefaultTransitions()

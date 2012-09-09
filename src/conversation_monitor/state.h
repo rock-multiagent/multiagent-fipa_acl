@@ -110,8 +110,9 @@ public:
 
     /**
      * Add a state transition
+     * \return Transition with update source state field
      */
-    void addTransition(Transition &t);
+    Transition addTransition(const Transition& t);
    
     /**
     *  \brief Check whether the received message triggers any of the known transitions
