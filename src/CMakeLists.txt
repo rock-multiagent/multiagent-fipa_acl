@@ -8,6 +8,7 @@ set(SOURCES
     message_generator/agent_id.cpp
     message_generator/userdef_param.cpp
     message_generator/acl_message_output_parser.cpp
+    conversation_monitor/message_archive.cpp
     conversation_monitor/role.cpp
     conversation_monitor/state.cpp
     conversation_monitor/statemachine_factory.cpp
@@ -35,6 +36,7 @@ set(HEADERS
     message_generator/acl_message.h
     message_generator/message_generator.h
     bitefficient_message.h
+    conversation_monitor/message_archive.h
     conversation_monitor/role.h
     conversation_monitor/state.h
     conversation_monitor/statemachine_factory.h
