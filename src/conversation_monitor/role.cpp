@@ -20,6 +20,7 @@ Role::Role(const RoleId& id)
 {
 }
 
+
 UndefinedRole::UndefinedRole()
     : Role(Role::UNDEFINED_ID)
 {}
@@ -93,6 +94,23 @@ void RoleMapping::addExpectedAgent(const Role& role, const AgentID& agent)
     }
 
     return;
+}
+
+void RoleMapping::clearExpectedAgents(const Role& role)
+{
+    std::map<Role, AgentIDList>::iterator it = mExpectedAgentMapping.find(role);
+    if(it != mExpectedAgentMapping.end())
+    {
+        it->second.clear();
+    }
+}
+
+void RoleMapping::resetExpectedAgents()
+{
+    mExpectedAgentMapping.clear();
+
+    addRole(SelfRole());
+    addExpectedAgent(SelfRole(), UndefinedAgentID());
 }
 
 bool RoleMapping::isExpected(const Role& role, const AgentID& agent) const

@@ -124,6 +124,18 @@ public:
     void addExpectedAgent(const Role& role, const AgentID& agent);
 
     /**
+     * Clear list of expected agents for a specific role
+     */
+    void clearExpectedAgents(const Role& role);
+
+    /**
+     * Clear list of expected agents for all known roles
+     *
+     * Note that the self role remains with will be reset to UndefinedAgentID
+     */
+    void resetExpectedAgents();
+
+    /**
      * Check whether the given agent belongs to the list of expected receivers
      * \throws If role is completely unknown to this role mapping
      */
