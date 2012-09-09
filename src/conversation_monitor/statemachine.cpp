@@ -77,6 +77,22 @@ void StateMachine::addState(const State& state)
     }
 }
 
+void StateMachine::updateRoles()
+{
+    std::map<StateId, State>::iterator it = mStates.begin();
+    for(; it != mStates.end(); ++it)
+    {
+        std::vector<Transition> transitions = it->second.getTransitions();
+        std::vector<Transition>::const_iterator transitionIt = transitions.begin();
+        for(; transitionIt != transitions.end(); ++transitionIt)
+        {
+            mRoleMapping.addRole(transitionIt->getSenderRole());
+            mRoleMapping.addRole(transitionIt->getReceiverRole());
+        }
+    }
+
+}
+
 void StateMachine::generateDefaultTransitions()
 {
     std::map<StateId, State>::iterator it = mStates.begin();

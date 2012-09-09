@@ -38,6 +38,7 @@ StateMachine StateMachineReader::loadSpecification(const std::string& protocolSp
     StateMachine statemachine = parseStateMachineNode(statemachineElement);
     statemachine.generateDefaultTransitions();
     statemachine.generateDefaultStates();
+    statemachine.updateRoles();
     statemachine.validate();
     statemachine.reset();
     return statemachine;

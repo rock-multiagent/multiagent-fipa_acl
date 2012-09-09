@@ -81,6 +81,11 @@ protected:
     void addState(const State& state);
 
     /**
+     * Given all states update the roles
+     */
+    void updateRoles();
+
+    /**
      * Get current state
      */
     const State& getCurrentState() const;
