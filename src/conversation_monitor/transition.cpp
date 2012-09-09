@@ -129,7 +129,18 @@ bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& valida
     }
 
     return true;
-     
+}
+
+std::string Transition::toString() const
+{
+    std::stringstream transition;
+    transition << "transition: sender role: " << mSenderRole.getId() << ", "; 
+    transition << "receiver role: " << mReceiverRole.getId() << ", ";
+    transition << "performative: " << PerformativeTxt[mPerformative] << ", ";
+    transition << "source state: " << mSourceStateId << ", ";
+    transition << "target state: " << mTargetStateId;
+
+    return transition.str();
 }
 
 bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping)

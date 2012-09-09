@@ -123,6 +123,11 @@ class Transition
          */
         StateId getTargetStateId() const { return mTargetStateId; }
 
+        /**
+         * Convert transition to string 
+         */
+        std::string toString() const;
+
     private:
         
         /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecipients vector) */
