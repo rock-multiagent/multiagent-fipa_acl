@@ -146,8 +146,35 @@ bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& rol
 }
 
 Transition Transition::not_understood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState)
+// FIPA include definitions of some default protocol elements
+// This library considers not-understood and cancel interaction-protocol as
+// default ones and embeds them into the standard construction of the state machine
+namespace default_transition
 {
-    return Transition(senderRole, receiverRole, ACLMessage::NOT_UNDERSTOOD, sourceState, State::NOT_UNDERSTOOD);
+
+NotUnderstood::NotUnderstood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState)
+    : Transition(senderRole, receiverRole, ACLMessage::NOT_UNDERSTOOD, sourceState, State::NOT_UNDERSTOOD)
+{
+}
+
+ConversationCancelling::ConversationCancelling(const Role& senderRole, const Role& receiverRole, const StateId& sourceState)
+    : Transition(senderRole, receiverRole, ACLMessage::CANCEL, sourceState, State::CONVERSATION_CANCELLING)
+{
+}
+
+// We loosen the role restriction here, to facilitate the integrating of the default states -- now we just need
+// one state per direction (which works multidirectional)
+// TODO: consider solving this issue using an embedded state machine
+ConversationCancelSuccess::ConversationCancelSuccess()
+    : Transition( Role(".*"), Role(".*"), ACLMessage::INFORM, State::CONVERSATION_CANCELLING, State::CONVERSATION_CANCEL_SUCCESS)
+{
+}
+
+ConversationCancelFailure::ConversationCancelFailure()
+    : Transition(Role(".*"), Role(".*"), ACLMessage::FAILURE, State::CONVERSATION_CANCELLING, State::CONVERSATION_CANCEL_FAILURE)
+{
+}
+
 }
 
 } // end of acl

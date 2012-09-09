@@ -27,7 +27,6 @@ namespace validation {
  */
 class Transition 
 {
-    friend class State;
     private:
         /** the role of the agent expected to be the sender of a message for this transition */
         Role mSenderRole;
@@ -42,13 +41,6 @@ class Transition
         StateId mSourceStateId;
         
         // state that this transition ends in
-
-    protected:
-
-        /**
-         * Default transition generation
-         */
-        static Transition not_understood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState);
         StateId mTargetStateId;
 
     public:
@@ -136,6 +128,52 @@ class Transition
         /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecipients vector) */
         bool validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping);
 };
+
+/**
+ * Default transition 
+ */
+namespace default_transition 
+{
+    /**
+     * Default transition for a not understood reply
+     * into the not understood state
+     */
+    class NotUnderstood : public Transition
+    {
+    public:
+        NotUnderstood(const Role& senderRole, const Role& receiverRole, const StateId& stateId);
+    };
+
+    /**
+     * Default transition for starting to cancel a conversation
+     */
+    class ConversationCancelling : public Transition
+    {
+    public:
+        ConversationCancelling(const Role& senderRole, const Role& receiverRole, const StateId& stateId);
+
+    };
+
+    /**
+     * Default transition when a conversation has successfully been canceled
+     */
+    class ConversationCancelSuccess : public Transition
+    {
+    public:
+        ConversationCancelSuccess();
+
+    };
+
+    /**
+     * Transition into (terminal) failed state, when conversation cancelling has failed
+     */
+    class ConversationCancelFailure : public Transition
+    {
+    public:
+        ConversationCancelFailure();
+
+    };
+}
 
     
 } // end of acl
