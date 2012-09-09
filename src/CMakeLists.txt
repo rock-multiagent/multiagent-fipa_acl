@@ -9,8 +9,9 @@ set(SOURCES
     message_generator/acl_message_output_parser.cpp
     conversation_monitor/role.cpp
     conversation_monitor/state.cpp
-    #conversation_monitor/statemachine_builder.cpp
-    #conversation_monitor/statemachine.cpp
+    conversation_monitor/statemachine_factory.cpp
+    conversation_monitor/statemachine_reader.cpp
+    conversation_monitor/statemachine.cpp
     conversation_monitor/transition.cpp
 )
 
@@ -35,11 +36,11 @@ set(HEADERS
     bitefficient_message.h
     conversation_monitor/role.h
     conversation_monitor/state.h
-    #conversation_monitor/types.h
+    conversation_monitor/statemachine_factory.h
+    conversation_monitor/statemachine_reader.h
+    conversation_monitor/statemachine.h
     conversation_monitor/transition.h
-    #conversation_monitor/statemachine_builder.h
-    #conversation_monitor/statemachine.h
-    #conversation_monitor.h
+    conversation_monitor.h
     fipa_acl.h
 )
 
@@ -61,7 +62,7 @@ rock_executable(fipa_acl-msg_generator
         DEPS ${PROJECT_NAME}
         )
 
-rock_executable(fipa_acl-conv_monitor-builder_test
+rock_executable(fipa_acl-conv_monitor-reader
         SOURCES conversation_monitor/main.cpp
         DEPS ${PROJECT_NAME}
         )
