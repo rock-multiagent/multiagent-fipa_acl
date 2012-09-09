@@ -68,8 +68,11 @@ void State::generateDefaultTransitions()
             continue;
         } else {
             // Add the not understood transition for every matching transition
-            default_transition::NotUnderstood transition = default_transition::NotUnderstood(it->getSenderRole(), it->getReceiverRole(), mId);
-            addTransition(*dynamic_cast<Transition*>(&transition));
+            default_transition::NotUnderstood transitionSender = default_transition::NotUnderstood(it->getSenderRole(), it->getReceiverRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionSender));
+
+            default_transition::NotUnderstood transitionReceiver = default_transition::NotUnderstood(it->getReceiverRole(), it->getSenderRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
 
         if ( it->getPerformative() == ACLMessage::CANCEL )
