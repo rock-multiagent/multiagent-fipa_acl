@@ -12,7 +12,7 @@
     </state>
     
     <state id="4">
-    	<transition performative="refuse-proposal" from="initiator" to="B" target="5"/>
+    	<transition performative="reject-proposal" from="initiator" to="B" target="5"/>
     	<transition performative="accept-proposal" from="initiator" to="B" target="6"/>
     </state>
     
