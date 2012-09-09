@@ -29,7 +29,7 @@ Transition::Transition(const Role& senderRole, const Role& receiverRole, const A
 {
 }
 
-bool Transition::triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping)
+bool Transition::triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping) const
 {
     if( validateMessage(msg, initiatingMsg, roleMapping, validation::ALL) )
     {
@@ -40,7 +40,7 @@ bool Transition::triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg
     return false;
 }
 
-bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& validatorMsg, const RoleMapping& roleMapping, validation::Flags flags)
+bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& validatorMsg, const RoleMapping& roleMapping, validation::Flags flags) const
 {
     if( flags == validation::NONE)
     {
@@ -144,7 +144,7 @@ std::string Transition::toString() const
     return transition.str();
 }
 
-bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping)
+bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping) const
 {
     AgentIDList actualReceivers = msg.getAllReceivers();
     if(actualReceivers.empty())

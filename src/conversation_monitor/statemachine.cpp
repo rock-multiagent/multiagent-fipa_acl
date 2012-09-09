@@ -113,13 +113,42 @@ void StateMachine::generateDefaultStates()
     }
 }
 
-bool StateMachine::inFinalState() const
+const State& StateMachine::getCurrentState() const
 {
     std::map<StateId, State>::const_iterator it = mStates.find(mCurrentStateId);
-    // Current state should always be known
     assert(it != mStates.end());
+    return it->second;
+}
 
-    return it->second.isFinal();
+void StateMachine::setSelfAgentId(const AgentID& self)
+{
+    mRoleMapping.setSelf(self);
+}
+
+void StateMachine::updateRoleMapping(const ACLMessage& msg, const Transition& transition)
+{
+    mRoleMapping.addExpectedAgent(transition.getSenderRole(), msg.getSender());
+    AgentIDList receivers = msg.getAllReceivers();
+    AgentIDList::const_iterator it = receivers.begin();
+    for(; it != receivers.end(); ++it)
+    {
+        mRoleMapping.addExpectedAgent(transition.getReceiverRole(), *it);
+    }
+}
+
+void StateMachine::consumeMessage(const ACLMessage& msg)
+{
+    const State& currentState = getCurrentState();
+
+    const Transition& transition = currentState.getTransition(msg, mMessageArchive, mRoleMapping);
+    updateRoleMapping(msg, transition);
+    mMessageArchive.addMessage(msg);
+}
+
+bool StateMachine::inFinalState() const
+{
+    const State& currentState = getCurrentState();
+    return currentState.isFinal();
 }
 
 bool StateMachine::cancelled() const

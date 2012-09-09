@@ -1,6 +1,7 @@
 #include "state.h"
 #include "transition.h"
 #include "role.h"
+#include "message_archive.h"
 #include "statemachine.h"
 
 #include <iostream>
@@ -89,37 +90,23 @@ void State::generateDefaultTransitions()
     }
 }
 
-StateId State::transitionTarget(const ACLMessage &msg, const MessageArchive& archive)
+const Transition& State::getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const
 {
     // TODO: consider embedded statemachines
-    if(!mEmbeddedStateMachines.empty())
-    {
-        // iterator and try to consume message
-        std::vector<StateMachine>::iterator it = mEmbeddedStateMachines.begin();
-        for(; it != mEmbeddedStateMachines.end(); ++it)
-        {
-            if(it->consumeMessage(msg))
-            {
-                break;
-            }
-        }
 
-        //
-        // when using state, make sure all embedded State machines are in final state 
-        // before leaving the current state
-    }
-
-    std::vector<Transition>::iterator it = mTransitions.begin();
+    std::vector<Transition>::const_iterator it = mTransitions.begin();
     for (; it != mTransitions.end(); ++it)
     {
-        const ACLMessage& initiatingMsg = archive.getCorrespondingInitiatorMessage(msg);
-        if (it->triggers(msg, initiatingMsg, mRoleMapping)) 
+        // TODO: better use the directly corresponding one
+        // but this should be ok for now
+        const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
+        if (it->triggers(msg, initiatingMsg, roleMapping)) 
         {
-            return it->getTargetStateId();
+            return *it;
         }
     }
 
-    throw std::runtime_error("Message does not match to state");
+    throw std::runtime_error("Message does not trigger any transition in this state");
 
 }
 

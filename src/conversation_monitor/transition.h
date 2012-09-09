@@ -62,14 +62,14 @@ class Transition
           \param initiatingMsg message that initiated the conversation or represents the direct predecessor of the current one
 	  \return true if message triggers this transition, false otherwise
         */
-        bool triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping);
+        bool triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping) const;
         
         /**
 	  \brief method that validates all parameters of a message
 	  \param msg message passed as parameter to be checked
 	  \return true if message is valid false otherwise
         */
-        bool validateMessage(const ACLMessage &msg, const ACLMessage& validatorMsg, const RoleMapping& roleMapping, validation::Flags flags = validation::ALL);
+        bool validateMessage(const ACLMessage &msg, const ACLMessage& validatorMsg, const RoleMapping& roleMapping, validation::Flags flags = validation::ALL) const;
 
         /** 
          * \brief setter methods for various fields of the class 
@@ -136,7 +136,7 @@ class Transition
     private:
         
         /** \brief checks whether the receiver parameter of the message is valid(checks from expectedRecipients vector) */
-        bool validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping);
+        bool validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping) const;
 };
 
 /**

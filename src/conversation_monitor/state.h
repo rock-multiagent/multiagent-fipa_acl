@@ -20,6 +20,7 @@ namespace fipa {
 namespace acl {
 
 class StateMachine;
+class MessageArchive;
 class Transition;
 namespace default_transition {
     class NotUnderstood;
@@ -27,16 +28,6 @@ namespace default_transition {
     class ConversationCancelSuccess;
     class ConversationCancelFailure;
 }
-
-class MessageArchive
-{
-public:
-    const ACLMessage getCorrespondingInitiatorMessage(const ACLMessage& msg) const
-    {
-        return ACLMessage();
-    }
-
-};
 
 /**
  * Definition of a StateId
@@ -80,17 +71,6 @@ private:
     */
     std::vector<StateMachine> mEmbeddedStateMachines;
 
-    /**
-    * \var archive {vector of acl messages that stores all the messages that have been processed and validated by a any transition
-    * of this state; needed to validate the in_reply_to parameter}
-    */
-    std::vector<ACLMessage> mMessageArchive;
-
-    /**
-     * The current role mapping
-     */
-    RoleMapping mRoleMapping;
-
 protected:
 
     /**
@@ -133,7 +113,7 @@ public:
     *  \return target of the transition 
     *  \throws runtime_error if the msg is invalid in the current state
     */
-    StateId transitionTarget(const ACLMessage &msg, const MessageArchive& archive);
+    const Transition& getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const;
 
     /**
     *  \brief method that generates implicit generic transitions applicable to all states, that may or may not be speciffied in the 
