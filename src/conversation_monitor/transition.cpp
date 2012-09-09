@@ -50,6 +50,7 @@ bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& valida
     {
         if( msg.getPerformative() != validatorMsg.getPerformative())
         {
+            LOG_DEBUG("Performative validation failed"); 
             return false;
         }
     }
@@ -59,6 +60,7 @@ bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& valida
         AgentID senderAgent = msg.getSender(); 
         if(!roleMapping.isExpected(mSenderRole, senderAgent))
         {
+                LOG_DEBUG("Sender validation failed"); 
                 return false;
         }
     }
@@ -67,6 +69,7 @@ bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& valida
     {
         if(!validateReceivers(msg, roleMapping))
         {
+            LOG_DEBUG("Receivers validation failed"); 
             return false;
         }
     }
