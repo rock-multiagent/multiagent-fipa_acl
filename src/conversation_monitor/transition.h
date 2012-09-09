@@ -28,7 +28,6 @@ namespace validation {
 class Transition 
 {
     friend class State;
-
     private:
         /** the role of the agent expected to be the sender of a message for this transition */
         Role mSenderRole;
@@ -40,10 +39,9 @@ class Transition
         ACLMessage::Performative mPerformative;
 
         // Source state where this transition starts from
-        StateId mSourceState;
+        StateId mSourceStateId;
         
         // state that this transition ends in
-        StateId mTargetState;
 
     protected:
 
@@ -51,6 +49,7 @@ class Transition
          * Default transition generation
          */
         static Transition not_understood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState);
+        StateId mTargetStateId;
 
     public:
 
@@ -89,12 +88,12 @@ class Transition
         /**
          * Set the source state of this transition
          */
-        void setSourceState(const StateId& stateId) { mSourceState = stateId; }
+        void setSourceState(const StateId& stateId) { mSourceStateId = stateId; }
 
         /**
          * Set the target state of this transition
          */
-        void setTargetState(const StateId& stateId) { mTargetState = stateId; }
+        void setTargetState(const StateId& stateId) { mTargetStateId = stateId; }
 
         /**
          * Set the sender role
@@ -123,14 +122,14 @@ class Transition
         ACLMessage::Performative getPerformative() const { return mPerformative; }
 
         /**
-         * Get the name of the source state
+         * Get the state id of the source state
          */
-        StateId getSourceState() const { return mSourceState; }
+        StateId getSourceStateId() const { return mSourceStateId; }
 
         /**
-         * Get the name of the target state
+         * Get the state id of the target state
          */
-        StateId getTargetState() const { return mTargetState; }
+        StateId getTargetStateId() const { return mTargetStateId; }
 
     private:
         

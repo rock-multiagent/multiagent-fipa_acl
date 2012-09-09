@@ -14,8 +14,8 @@ Transition::Transition()
     : mSenderRole()
     , mReceiverRole()
     , mPerformative()
-    , mSourceState()
-    , mTargetState()
+    , mSourceStateId()
+    , mTargetStateId()
 {
 }
 
@@ -23,10 +23,9 @@ Transition::Transition(const Role& senderRole, const Role& receiverRole, const A
     : mSenderRole(senderRole)
     , mReceiverRole(receiverRole)
     , mPerformative(performative)
-    , mSourceState(sourceState)
-    , mTargetState(targetState)
+    , mSourceStateId(sourceState)
+    , mTargetStateId(targetState)
 {
-
 }
 
 bool Transition::triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping)
