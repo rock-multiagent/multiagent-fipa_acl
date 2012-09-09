@@ -1,5 +1,6 @@
 set(SOURCES
     message_parser/agent_id.cpp
+    message_parser/date_time.cpp
     message_parser/message_printer.cpp
     message_parser/message_parser.cpp
     message_parser/grammar_bitefficient.cpp
@@ -48,7 +49,7 @@ set(HEADERS
 rock_library(${PROJECT_NAME} 
         SOURCES ${SOURCES}
         HEADERS ${HEADERS}
-        DEPS_PKGCONFIG base-lib tinyxml
+        DEPS_PKGCONFIG base-lib base-types tinyxml
         )
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 	
