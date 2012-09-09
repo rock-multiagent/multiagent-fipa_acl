@@ -1,9 +1,8 @@
 /**
  * \file message_generator/agent_id.cpp
  * \author Mircea Cretu Stancu
+ * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief Implements the general AgentID functionality, which is present throughout the fipa specifications(FIPA at http://www.fipa.org).
- * 
- * \version 1.0
  */
 #include "agent_id.h"
 #include "acl_message.h"
@@ -14,91 +13,85 @@
 namespace fipa {
 namespace acl {
     
-int AgentID::resCompDepth = 1;
+int AgentID::msResolverComparisonDepth = 1;
 
-const std::string AgentID::undefinedAgentName = "__undefined__";
+const std::string AgentID::UNDEFINED = "agent_id:undefined";
  
 AgentID::AgentID() 
-    : name(AgentID::undefinedAgentName)
 {
+    setName(AgentID::UNDEFINED);
 }
 
-AgentID::AgentID(const std::string& nam) 
-    : name(nam)
+AgentID::AgentID(const std::string& name) 
+    : mName(name)
 {
-    if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
+    if(!setName(name))
     {
-        LOG_ERROR("AgentID: name contains invalid characters - defaulting to empty name");
-        name = "";
+        LOG_ERROR("AgentID: name '%s' contains invalid characters - defaulting to empty name", name.c_str());
+        mName = "";
     }
 }
 
-std::string AgentID::getName() const {return name;}
-
-int AgentID::setName(const std::string& nam) 
+bool AgentID::setName(const std::string& name) 
 {
-    if ( (nam.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(nam.c_str()[0]) != std::string::npos) )
+    if ( (name.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(name.c_str()[0]) != std::string::npos) )
     {
-        return 1;
+        LOG_WARN("AgentID: name '%s' contains invalid characters", name.c_str());
+        return false;
     } else {
-        name = nam;
+        mName = name;
+        return true;
     }
-    return 0;
 }
 
-int AgentID::addAddress(const std::string &adr) 
+bool AgentID::addAddress(const std::string& address) 
 {
-    if ( (adr.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(adr.c_str()[0]) != std::string::npos) )
-    return 1;
-    addresses.insert(addresses.begin(),adr); return 0;
+    if ( (address.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(address.c_str()[0]) != std::string::npos) )
+    {
+        return false;
+    } else {
+        mAddresses.push_back(address);
+        return true;
+    }
 }
 
-std::vector<std::string> AgentID::getAddresses() const {return addresses;}
-
-void AgentID::addResolver(const AgentID &aid) 
+void AgentID::addResolver(const AgentID& aid) 
 {
     // prevent entering duplicates
-    // NOTE: this function searches for the resolver and uses the overloaded == op not the resDepthEq()
-    if ( find(resolvers.begin(),resolvers.end(),aid) == resolvers.end() )
-        resolvers.insert(resolvers.begin(),aid); 
+    // NOTE: this function searches for the resolver and uses the overloaded == op not the compareEqual()
+    if ( find(mResolvers.begin(), mResolvers.end(),aid) == mResolvers.end() )
+    {
+        mResolvers.push_back(aid); 
+    }
 }
 
-std::vector<AgentID> AgentID::getResolvers() const {return resolvers;}
-
-void AgentID::deleteResolver(const AgentID &aid) 
+void AgentID::deleteResolver(const AgentID& aid) 
 {
-    std::vector<AgentID>::iterator it;
+    std::vector<AgentID>::iterator it  = find(mResolvers.begin(), mResolvers.end(),aid);
     // prevent entering duplicates
-    // NOTE: this function searches for the resolver using the overloaded == op not the resDepthEq()
-    if ( (it = find(resolvers.begin(),resolvers.end(),aid)) != resolvers.end() )
-        resolvers.erase(it);
+    // NOTE: this function searches for the resolver using the overloaded == op not the compareEqual()
+    if( it != mResolvers.end() )
+    {
+        mResolvers.erase(it);
+    }
 }
 
-void AgentID::addUserdefParam(const UserdefParam &p) 
+void AgentID::addUserdefParam(const UserdefParam& p) 
 {
-    params.insert(params.begin(),p); 
+    mParameters.push_back(p); 
 }
 
-std::vector<UserdefParam> AgentID::getUserdefParams() const {return params;}
-
-//void AgentID::setResCompDepth(int x) {resCompDepth = x;}
-//int AgentID::getResCompDepth() {return resCompDepth;}
-
-
-bool operator== (const AgentID &a, const AgentID &b)
+bool AgentID::operator==(const AgentID& other) const
 {
-    return resDepthEqual(a,b,AgentID::resCompDepth);
+    return compareEqual(*this, other, AgentID::msResolverComparisonDepth);
 }
   
-bool resDepthEqual(const AgentID &a, const AgentID &b, int depth)
+bool AgentID::compareEqual(const AgentID& a, const AgentID& b, int depth)
 {
-    //saving the resCompDepth variable for later restoration
-    //int depthRestore = AgentID::getResCompDepth();
-    
-    //AgentID a = AgentID(&c);
-    //AgentID b = AgentID(&d);
-    if (a.getName().compare(b.getName()))
+    if (a.getName() != b.getName())
+    {
         return false;
+    }
     
     // comparing addresses
     std::vector<std::string> addrA = a.getAddresses();
@@ -150,7 +143,7 @@ bool resDepthEqual(const AgentID &a, const AgentID &b, int depth)
 	    bit = agentsB.begin();
 	    while (bit != agentsB.end())
 	    {
-	        if ( resDepthEqual((*ait),(*bit),depth-1)) 
+	        if ( compareEqual((*ait),(*bit),depth-1)) 
 	        {
                      agentsA.erase(ait);
                      ait = agentsA.begin();
@@ -215,13 +208,13 @@ bool resDepthEqual(const AgentID &a, const AgentID &b, int depth)
 
 bool AgentID::empty()
 {
-    return name.empty();
+    return mName.empty();
 }
 
 UndefinedAgentID::UndefinedAgentID()
     : AgentID()
 {
-    name = AgentID::undefinedAgentName;
+    mName = AgentID::UNDEFINED;
 }
 
 }//end of acl namespace

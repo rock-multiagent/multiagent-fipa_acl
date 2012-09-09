@@ -1,12 +1,8 @@
 /**
-*
 * \file message_generator/agent_id.h
 * \author Mircea Cretu Stancu
+* \author Thomas Roehr, thomas.roehr@dfki.de
 * \brief Defines the AgentID class
-* 
-* \version 1.0
-*  - has very basic features, only what was needed for the ACLMessage class
-*  - may need to be expanded/derived from depending on future needs
 */
 #ifndef FIPA_ACL_AGENTID_H
 #define FIPA_ACL_AGENTID_H
@@ -26,14 +22,6 @@ class AgentID;
 // switch to using boost::container in future
 typedef std::vector<AgentID> AgentIDList;
 
-/*
-      \brief overloaded equality operator for AgentID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
-      
-      The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
-      in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
-*/
-    //extern bool operator== ( AgentID &a,  AgentID &b);
-
 /**
     \class AgentID
     \brief Implements the general AgentID functionality, which is present throughout the fipa 
@@ -41,28 +29,30 @@ typedef std::vector<AgentID> AgentIDList;
     Important notice: the probably main field of an AgentID, the actual id, is not yet declared/implemented, as it was not 
     need for the encoding and it was not discussed what should it be 
 */
-class AgentID {
-
+class AgentID 
+{
+    friend class ACLMessage;
 /**
 The fields are not based on the Architecture specification and utilities, but rather on the bit-Efficient encoding specification,
 so they have the name, values and functionality needed to implement this specification(they happen to coincide almost completely though)
 */
 private:
     /** set of strings representing the addresses of the agent*/
-    std::vector<std::string> addresses;
+    std::vector<std::string> mAddresses;
 
     /** set of AgentIDs representing the resolvers of the current agent */
-    AgentIDList resolvers;
+    AgentIDList mResolvers;
 
     /** set of UserdefParams representing the parameters of an agent id */
-    std::vector<UserdefParam> params;
+    std::vector<UserdefParam> mParameters;
+
 
 protected:
     /** name of the agent*/
-    std::string name;
+    std::string mName;
 
     /** name representing an undefined agent */
-    static const std::string undefinedAgentName;
+    static const std::string UNDEFINED;
 
 public:
 
@@ -70,7 +60,7 @@ public:
     \param resCompDepth variable which indicates up to what depth in the resolver network to compare 2 agent aids; default is 1; 
     very not thread safe; worked around it, only relevance it has now is that of an implicit value for the comparison, saved as a static variable
     */
-    static int resCompDepth;
+    static int msResolverComparisonDepth;
 
     /**
      * Retrieve an undefined agent instance
@@ -94,27 +84,27 @@ public:
     \brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, 
     but this can be easily changed if needed through the overloaded operator which do
     */
-    std::string getName() const;
+    std::string getName() const { return mName; }
     
     /**
     \brief the method checks whether the passed name string is a word or not(according to the fipa spec)
     \param name Name
-    \return 0 if successful 1 otherwise(name is un-alterred)
+    \return true if successful and false otherwise(name is un-alterred)
     */
-    int setName(const std::string& name);
+    bool setName(const std::string& name);
     
     /**
     \brief the method checks whether the passed address string is a word or not(according to the fipa spec)
     \param adr Address
-    \return 0 if successful 1 otherwise(address is not inserted)
+    \return true if successful and false otherwise(address is not inserted)
     */
-    int addAddress(const std::string &adr);
+    bool addAddress(const std::string &adr);
     
     /**
     * \brief Retrieve list of addresses
     * \return List of addresses
     */
-    std::vector<std::string> getAddresses() const;
+    std::vector<std::string> getAddresses() const { return mAddresses; }
     
     /**
     * \brief Add resolver
@@ -126,7 +116,7 @@ public:
     * \brief Get list of resolvers
     * \return list of resolvers, i.e. agentids
     */
-    std::vector<AgentID> getResolvers() const;
+    std::vector<AgentID> getResolvers() const { return mResolvers; }
     
     /**
     * \brief Delete a resolver
@@ -144,7 +134,7 @@ public:
     * \brief Get the all userdefined parameter
     * \return List of userdefined parameters
     */
-    std::vector<UserdefParam> getUserdefParams() const;
+    std::vector<UserdefParam> getUserdefParams() const { return mParameters; }
     
     //static void setResCompDepth(int);
     //static int getResCompDepth();
@@ -154,6 +144,20 @@ public:
     * \return True, if empty, False otherwise
     */
     bool empty();
+
+    /**
+    * \brief overloaded equality operator for AgentID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)
+    * 
+    * The parameters are not passed by reference on purpose so that the copy constructor of the class is called. This is necessary because 
+    * in the comparison, pointer fields are modified(removed) and we don't want this to affect the original object
+    */
+    bool operator==(const AgentID& other) const;
+
+    /**
+      \brief alternative function for equality operator; the depth can be specified through the depth param 
+    */
+    static bool compareEqual(const AgentID& a, const AgentID& b, int depth);
+
 };
 
 /**
@@ -165,16 +169,6 @@ public:
     UndefinedAgentID();
 };
 
-
-
-/**
-    \brief overloaded equality operator; the depth is the default one kept in the resComDepth member field 
-*/
-extern bool operator== (const AgentID &a,const AgentID &b);
-/**
-    \brief alternative function for equality operator; the depth can be specified through the depth param 
-*/
-extern bool resDepthEqual(const AgentID &a,const AgentID &b, int depth);
 
 }//end of acl namespace
 
