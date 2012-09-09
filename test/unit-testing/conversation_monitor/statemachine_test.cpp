@@ -8,6 +8,17 @@
 #include <fipa_acl/conversation_monitor.h>
 BOOST_AUTO_TEST_SUITE(conversation_monitor_suite)
 
+std::string getProtocolPath()
+{
+    char buffer[1024];
+    BOOST_REQUIRE_MESSAGE( readlink("/proc/self/exe", buffer, 1024) != -1, "Retrieving current execution path");
+    std::string str(buffer);
+    std::string executionDir = str.substr(0, str.rfind('/'));
+    // Assuming we have do a build into build/ parallel to src/ 
+    std::string configurationPath = executionDir + "/../../../../configuration/protocols";
+    return configurationPath;
+}
+
 BOOST_AUTO_TEST_CASE(transition_test)
 {
     using namespace fipa::acl;
@@ -86,12 +97,15 @@ BOOST_AUTO_TEST_CASE(transition_test)
 
     // Test performative
     inputMsg.setPerformative(ACLMessage::INFORM);
+    t.setPerformative(ACLMessage::INFORM);
     validatorMsg.setPerformative(ACLMessage::REQUEST);
-    BOOST_REQUIRE(! t.validateMessage(inputMsg, validatorMsg, roleMapping, validation::PERFORMATIVE) );
-
-    validatorMsg.setPerformative(ACLMessage::INFORM);
     BOOST_REQUIRE(t.validateMessage(inputMsg, validatorMsg, roleMapping, validation::PERFORMATIVE) );
-    validatorMsg.setPerformative(ACLMessage::REQUEST);
+    // Transition's performative is relevant, not the validatorMsg one
+    t.setPerformative(ACLMessage::REQUEST);
+    BOOST_REQUIRE(!t.validateMessage(inputMsg, validatorMsg, roleMapping, validation::PERFORMATIVE) );
+
+    t.setPerformative(ACLMessage::INFORM);
+    BOOST_REQUIRE(t.validateMessage(inputMsg, validatorMsg, roleMapping, validation::PERFORMATIVE) );
 
     std::string testString = "test";
     std::string testOtherString = "test-other";
@@ -222,12 +236,8 @@ BOOST_AUTO_TEST_CASE(state_test)
 BOOST_AUTO_TEST_CASE(statemachine_reader_test)
 {
     using namespace fipa::acl;
-    char buffer[1024];
-    BOOST_REQUIRE_MESSAGE( readlink("/proc/self/exe", buffer, 1024) != -1, "Retrieving current execution path");
-    std::string str(buffer);
-    std::string executionDir = str.substr(0, str.rfind('/'));
-    // Assuming we have do a build into build/ parallel to src/ 
-    std::string configurationPath = executionDir + "/../../../../configuration/protocols";
+
+    std::string configurationPath = getProtocolPath();
 
     StateMachineReader reader;
     BOOST_CHECK_MESSAGE(1, "NOTE: Assuming a this test resides in a build directory parallel to the folder configuration/");
@@ -236,6 +246,23 @@ BOOST_AUTO_TEST_CASE(statemachine_reader_test)
     BOOST_REQUIRE_NO_THROW(reader.loadSpecification(configurationPath + "/subscribe"));
 
     StateMachine statemachine = reader.loadSpecification(configurationPath + "/inform");
+
+}
+
+BOOST_AUTO_TEST_CASE(statemachine_test)
+{
+    using namespace fipa::acl;
+
+    std::string configurationPath = getProtocolPath();
+    StateMachineFactory::setProtocolResourceDir(configurationPath);
+    StateMachine inform = StateMachineFactory::getStateMachine("inform");
+
+    ACLMessage msg(ACLMessage::REQUEST);
+    BOOST_REQUIRE_THROW(inform.consumeMessage(msg), std::runtime_error);
+
+    inform = StateMachineFactory::getStateMachine("inform");
+    ACLMessage informMsg(ACLMessage::INFORM);
+    BOOST_REQUIRE_NO_THROW(inform.consumeMessage(informMsg));
 
 }
 BOOST_AUTO_TEST_SUITE_END()
