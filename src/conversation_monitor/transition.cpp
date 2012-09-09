@@ -1,6 +1,7 @@
 
 #include "transition.h"
 #include "state.h"
+#include "statemachine.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -189,7 +190,6 @@ bool Transition::operator==(const Transition& other) const
     return true;
 }
 
-Transition Transition::not_understood(const Role& senderRole, const Role& receiverRole, const StateId& sourceState)
 // FIPA include definitions of some default protocol elements
 // This library considers not-understood and cancel interaction-protocol as
 // default ones and embeds them into the standard construction of the state machine
