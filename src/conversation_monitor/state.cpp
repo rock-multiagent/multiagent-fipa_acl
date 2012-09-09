@@ -11,6 +11,9 @@ namespace fipa {
 namespace acl {
 
 const StateId State::NOT_UNDERSTOOD = "__internal_state:not_understood__";
+const StateId State::CONVERSATION_CANCELLING = "__internal_state:conversation_cancelling__";
+const StateId State::CONVERSATION_CANCEL_SUCCESS = "__internal_state:conversation_cancel_success__";
+const StateId State::CONVERSATION_CANCEL_FAILURE = "__internal_state:conversation_cancel_failure__";
 const StateId State::UNDEFINED_ID = "__undefined__";
 
 State::State() 
@@ -42,23 +45,44 @@ Transition State::addTransition(const Transition& t)
 
 void State::generateDefaultTransitions()
 {
-        // Not adding any transition for final states
-        if(isFinal())
+    // Not adding any transition for final states
+    if(isFinal())
+    {
+        return; 
+    }
+
+    if(mTransitions.empty())
+    {
+        throw std::runtime_error("Invalid state: non final state without transition defined");
+    }
+
+    std::vector<Transition> transitions(mTransitions);
+
+    std::vector<Transition>::const_iterator it = transitions.begin();
+    for (; it != transitions.end();++it)
+    {
+        // we don't generate a not-understood transition for not-understood message...
+        if ( it->getPerformative() == ACLMessage::NOT_UNDERSTOOD ) 
         {
-            return; 
+            continue;
+        } else {
+            // Add the not understood transition for every matching transition
+            default_transition::NotUnderstood transition = default_transition::NotUnderstood(it->getSenderRole(), it->getReceiverRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transition));
         }
 
-        std::vector<Transition>::iterator it = mTransitions.begin();
-        for (; it != mTransitions.end();++it)
+        if ( it->getPerformative() == ACLMessage::CANCEL )
         {
-	    // we don't generate a not-understood transition for not-understood message...
-	    if ( it->getPerformative() == PerformativeTxt[ACLMessage::NOT_UNDERSTOOD] ) 
-            {
-	        continue;
-            }
-            Transition defaultTransition = Transition::not_understood(it->getSenderRole(), it->getReceiverRole(), mId);
-            addTransition(defaultTransition);
+            continue;
+        } else {
+            // Add the cancel transition -- bidirectional regarding receiver/sender role
+            default_transition::ConversationCancelling transitionSender = default_transition::ConversationCancelling(it->getSenderRole(), it->getReceiverRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionSender));
+
+            default_transition::ConversationCancelling transitionReceiver = default_transition::ConversationCancelling(it->getReceiverRole(), it->getSenderRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
+    }
 }
 
 StateId State::transitionTarget(const ACLMessage &msg, const MessageArchive& archive)
@@ -109,6 +133,21 @@ FinalState::FinalState(const StateId& id)
 UndefinedState::UndefinedState() 
     : State(State::UNDEFINED_ID)
 {}
+
+namespace default_state {
+
+ConversationCancelling::ConversationCancelling() 
+    : State(State::CONVERSATION_CANCELLING)
+{
+    // Add the cancel transitions -> success or failure
+    default_transition::ConversationCancelSuccess transitionSuccess;
+    addTransition(*dynamic_cast<Transition*>(&transitionSuccess));
+
+    default_transition::ConversationCancelFailure transitionFailure;
+    addTransition(*dynamic_cast<Transition*>(&transitionFailure));
+}
+
+}
 
 } // end of acl
 } // end of fipa

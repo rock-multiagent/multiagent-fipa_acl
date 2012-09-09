@@ -21,6 +21,12 @@ namespace acl {
 
 class StateMachine;
 class Transition;
+namespace default_transition {
+    class NotUnderstood;
+    class ConversationCancelling;
+    class ConversationCancelSuccess;
+    class ConversationCancelFailure;
+}
 
 class MessageArchive
 {
@@ -44,6 +50,12 @@ typedef std::string StateId;
 class State 
 {
     friend class Transition;
+    friend class default_transition::NotUnderstood;
+    friend class default_transition::ConversationCancelling;
+    friend class default_transition::ConversationCancelSuccess;
+    friend class default_transition::ConversationCancelFailure;
+    friend class StateMachineReader;
+    friend class StateMachine;
 
 private:
     /** 
@@ -57,7 +69,7 @@ private:
     bool mIsFinal;
     
     /**
-    * \var transitions: vector of transitions that belong to the current state
+    * List of outgoing transitions that belong to this state
     */
     std::vector<Transition> mTransitions;
 
@@ -86,7 +98,9 @@ protected:
      */
     const static StateId UNDEFINED_ID;
     const static StateId NOT_UNDERSTOOD;
-
+    const static StateId CONVERSATION_CANCELLING;
+    const static StateId CONVERSATION_CANCEL_SUCCESS;
+    const static StateId CONVERSATION_CANCEL_FAILURE;
 
     /**
       \brief setter method for the final field of the class
@@ -172,6 +186,48 @@ class UndefinedState : public State
 public:
     UndefinedState();
 };
+
+namespace default_state
+{
+    /**
+     * Default final state for not understood
+     */
+    class NotUnderstood : public FinalState
+    {
+    public:
+        NotUnderstood() : FinalState(State::NOT_UNDERSTOOD)
+        {}
+    };
+
+    /**
+     * Default state for conversation cancel
+     */
+    class ConversationCancelling : public State
+    {
+    public: 
+        ConversationCancelling();
+    };
+
+    /**
+     * Default final state for a successful conversation cancel
+     */
+    class ConversationCancelSuccess : public FinalState
+    {
+    public: 
+        ConversationCancelSuccess() : FinalState(State::CONVERSATION_CANCEL_SUCCESS)
+        {}
+    };
+
+    /**
+     * Default final state for a failed conversation cancel
+     */
+    class ConversationCancelFailure : public FinalState
+    {
+    public: 
+        ConversationCancelFailure() : FinalState(State::CONVERSATION_CANCEL_FAILURE)
+        {}
+    };
+}
 
 } // end of acl
 } // end of fipa
