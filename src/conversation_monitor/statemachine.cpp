@@ -159,6 +159,9 @@ void StateMachine::consumeMessage(const ACLMessage& msg)
     const Transition& transition = currentState.getTransition(msg, mMessageArchive, mRoleMapping);
     updateRoleMapping(msg, transition);
     mMessageArchive.addMessage(msg);
+
+    // Perform transition
+    mCurrentStateId = transition.getTargetStateId();
 }
 
 bool StateMachine::inFinalState() const
