@@ -17,7 +17,7 @@ class StateMachineFactory
         // Reader for state machine files
         static StateMachineReader msStateMachineReader;
 
-        static std::string msResourceDir;
+        static std::vector<std::string> msResourceDirs;
 
         // Marked when the function prepareProtocolFromResourceDir has already been called
         // Used for lazy initialization in getStateMachine
@@ -28,13 +28,26 @@ class StateMachineFactory
         /**
         * Instanciates all available machines from the resource directory
         */
-        static void prepareProtocolsFromResourceDir();
+        static void prepareProtocolsFromResourceDirs();
+
+        /**
+        * Instanciates all available machines a resource directory
+        */
+        static void prepareProtocolsFromResourceDir(const std::string& directory);
 
 public: 
         /**
         * Set the resource dir where to search for the protocol definitions
+        * (implies a clearing of all previous entries)
+        * \throws std::runtime_error if resource directory does not exist
         */
         static void setProtocolResourceDir(const std::string& resourceDir);
+
+        /**
+        * Add the resource dir where to search for the protocol definitions
+        * \throws std::runtime_error if resource directory does not exist
+        */
+        static void addProtocolResourceDir(const std::string& resourceDir);
 
         /**
          * Create a statemachine for a given protocol

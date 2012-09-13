@@ -10,24 +10,49 @@ namespace fipa {
 namespace acl {
 
 bool StateMachineFactory::msPreparedResourceDir = false;
-std::string StateMachineFactory::msResourceDir = std::string("");
+std::vector<std::string> StateMachineFactory::msResourceDirs;
 std::map<std::string, StateMachine> StateMachineFactory::msStateMachines;
 
 StateMachineReader StateMachineFactory::msStateMachineReader;
 
 void StateMachineFactory::setProtocolResourceDir(const std::string& resourceDir)
 {
+    msResourceDirs.clear();
+    addProtocolResourceDir(resourceDir);
+}
+
+void StateMachineFactory::addProtocolResourceDir(const std::string& resourceDir)
+{
     fs::path protocolDir = fs::path(resourceDir);
     if(fs::is_directory(protocolDir))
     {
-        msResourceDir = protocolDir.string();
+        std::vector<std::string>::iterator resourcesIt = std::find(msResourceDirs.begin(), msResourceDirs.end(), protocolDir.string());
+        if(resourcesIt == msResourceDirs.end())
+        {
+            msResourceDirs.push_back(protocolDir.string());
+            msPreparedResourceDir = false;
+            LOG_INFO("Add protocol resource dir: '%s'", protocolDir.string().c_str());
+        } else {
+            LOG_WARN("Protocol resource dir '%s' already added", protocolDir.string().c_str());
+        }
+    } else {
+        std::string msg = "Could not add resource dir: '" + resourceDir + "', since it does not exist";
+        throw std::runtime_error(msg);
     }
-    LOG_INFO("Set protocol resource dir to: '%s' -- from '%s'", msResourceDir.c_str(), resourceDir.c_str());
 }
 
-void StateMachineFactory::prepareProtocolsFromResourceDir()
+void StateMachineFactory::prepareProtocolsFromResourceDirs()
 {
-    fs::path protocolDir = fs::path(msResourceDir);
+    std::vector<std::string>::const_iterator it = msResourceDirs.begin();
+    for(; it != msResourceDirs.end(); ++it)
+    {
+        prepareProtocolsFromResourceDir(*it);
+    }
+}
+
+void StateMachineFactory::prepareProtocolsFromResourceDir(const std::string& resourceDir)
+{
+    fs::path protocolDir = fs::path(resourceDir);
     LOG_INFO("Prepare protocols from: '%s'", protocolDir.string().c_str());
     if(fs::is_directory(protocolDir))
     {
@@ -47,7 +72,12 @@ void StateMachineFactory::prepareProtocolsFromResourceDir()
                 try {
                     // Loading the state machine from the given spec
                     StateMachine statemachine = msStateMachineReader.loadSpecification(it->string()); 
-                    LOG_INFO("Register protocol %s", protocolName.c_str());                    
+                    LOG_INFO("Register protocol %s", protocolName.c_str());
+                    std::map<std::string, StateMachine>::const_iterator statemachinesIt = msStateMachines.find(protocolName);
+                    if( statemachinesIt != msStateMachines.end())
+                    {
+                        LOG_WARN("Protocol '%s' already registered - will use statemachine specification from '%s'", protocolName.c_str(), it->string().c_str());
+                    }
                     msStateMachines[protocolName] = statemachine;
                 } catch(const std::runtime_error& e)
                 {
@@ -64,7 +94,7 @@ StateMachine StateMachineFactory::getStateMachine(const std::string& protocol)
 {
     if(!msPreparedResourceDir)
     {
-        StateMachineFactory::prepareProtocolsFromResourceDir();
+        StateMachineFactory::prepareProtocolsFromResourceDirs();
     }
 
     std::map<std::string, StateMachine>::iterator it = msStateMachines.find(protocol);
