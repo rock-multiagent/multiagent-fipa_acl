@@ -263,7 +263,7 @@ bool ACLMessage::operator==(const ACLMessage& other) const
         return false;
     if (getInReplyTo().compare(other.getInReplyTo()))
         return false;
-    if (getReplyBy() == other.getReplyBy())
+    if (getReplyBy() != other.getReplyBy())
         return false;
     if (!(getSender() == other.getSender()) )
         return false;

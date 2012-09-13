@@ -138,6 +138,19 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
         uint32_t outputMsgSize = outputMsg.getContent().size();
         BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len32: " << size << " expected - contained: " << outputMsgSize);
     }
+
+    {
+        ACLMessage msg(ACLMessage::REQUEST);
+        msg.setContent("content");
+        msg.setEncoding("encoding");
+        msg.setLanguage("language");
+        msg.addReceiver(AgentID("test"));
+        msg.setSender(AgentID("sender"));
+        msg.addReceiver(AgentID("sender"));
+
+        ACLMessage msgCopy = msg;
+        BOOST_REQUIRE(msgCopy == msg);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

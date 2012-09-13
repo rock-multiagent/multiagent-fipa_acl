@@ -49,7 +49,7 @@ void setupTest()
     m2.setEncoding(string("test encoding"));
     m2.setOntology(string("test ontology"));
     m2.setReplyWith(string("test reply_with"));
-    base::Time time1 = base::Time::fromString("20110920-00:00:30", base::Time::Seconds);
+    base::Time time1 = base::Time::fromString("20110917-00:00:30", base::Time::Seconds);
     m2.setReplyBy(time1);
     m2.setInReplyTo(string("test in_reply_to"));
     m2.setConversationID(string("test conversationID"));
