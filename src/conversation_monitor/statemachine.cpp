@@ -136,7 +136,7 @@ const State& StateMachine::getCurrentState() const
     return it->second;
 }
 
-void StateMachine::setSelfAgentId(const AgentID& self)
+void StateMachine::setSelf(const AgentID& self)
 {
     mRoleMapping.setSelf(self);
 }

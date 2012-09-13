@@ -113,7 +113,7 @@ public:
     /**
      * Set self agents id -- can only be called once per state machine
      */
-    void setSelfAgentId(const AgentID& self);
+    void setSelf(const AgentID& self);
 
     /**
      * Consume a message
