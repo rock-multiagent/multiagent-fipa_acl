@@ -255,15 +255,101 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
 
     std::string configurationPath = getProtocolPath();
     StateMachineFactory::setProtocolResourceDir(configurationPath);
-    StateMachine inform = StateMachineFactory::getStateMachine("inform");
+    {
+        StateMachine inform = StateMachineFactory::getStateMachine("inform");
 
-    ACLMessage msg(ACLMessage::REQUEST);
-    BOOST_REQUIRE_THROW(inform.consumeMessage(msg), std::runtime_error);
+        ACLMessage msg(ACLMessage::REQUEST);
+        BOOST_REQUIRE_THROW(inform.consumeMessage(msg), std::runtime_error);
 
-    inform = StateMachineFactory::getStateMachine("inform");
-    ACLMessage informMsg(ACLMessage::INFORM);
-    BOOST_REQUIRE_NO_THROW(inform.consumeMessage(informMsg));
+        inform = StateMachineFactory::getStateMachine("inform");
+        ACLMessage informMsg(ACLMessage::INFORM);
+        BOOST_REQUIRE_NO_THROW(inform.consumeMessage(informMsg));
+    }
 
+    {
+        // Trying request
+        // request ->
+        // final <- refuse
+        // <- agree
+        // <- failure/inform
+        StateMachine request = StateMachineFactory::getStateMachine("request");
+        AgentID self("self");
+        AgentID other("other");
+        request.setSelf(self);
+        {
+            ACLMessage msg(ACLMessage::REQUEST);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE(request.getCurrentStateId() == "1");
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            BOOST_REQUIRE(request.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!request.inFinalState());
+        }
+
+        {
+            ACLMessage msg(ACLMessage::REFUSE);
+            msg.setSender(other);
+            msg.addReceiver(self);
+            msg.setLanguage("language");
+            BOOST_REQUIRE_THROW(request.consumeMessage(msg), std::runtime_error);
+            BOOST_REQUIRE(request.getCurrentStateId() == "2");
+        }
+
+        {
+            ACLMessage msg(ACLMessage::REFUSE);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_THROW(request.consumeMessage(msg), std::runtime_error);
+            BOOST_REQUIRE(request.getCurrentStateId() == "2");
+        }
+
+        {
+            ACLMessage msg(ACLMessage::REFUSE);
+            msg.setSender(other);
+            msg.addReceiver(self);
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            BOOST_REQUIRE(request.getCurrentStateId() == "3");
+            BOOST_REQUIRE(request.inFinalState());
+        }
+    }
+
+    {
+        // Trying request
+        // request ->
+        // final <- refuse
+        // <- agree
+        // <- failure/inform
+        StateMachine request = StateMachineFactory::getStateMachine("request");
+        AgentID self("self");
+        AgentID other("other");
+        request.setSelf(self);
+        {
+            ACLMessage msg(ACLMessage::REQUEST);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            BOOST_REQUIRE(request.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!request.inFinalState());
+        }
+
+        {
+            ACLMessage msg(ACLMessage::AGREE);
+            msg.setSender(other);
+            msg.addReceiver(self);
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            BOOST_REQUIRE(request.getCurrentStateId() == "4");
+            BOOST_REQUIRE(!request.inFinalState());
+        }
+
+        {
+            ACLMessage msg(ACLMessage::INFORM);
+            msg.setSender(other);
+            msg.addReceiver(self);
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            BOOST_REQUIRE(request.getCurrentStateId() == "5");
+            BOOST_REQUIRE(request.inFinalState());
+        }
+    }
 }
 BOOST_AUTO_TEST_SUITE_END()
 
