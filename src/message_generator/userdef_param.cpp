@@ -1,11 +1,10 @@
 /**
  *
  * \file userdef_param.cpp
- * \author Mircea Cretu Stancu, Thomas Roehr
+ * \author Mircea Cretu Stancu
+ * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief Implements the general User-defined parameters, which are present throughout the fipa specifications(FIPA at http://www.fipa.org).
  * 
- * \version 1.0
- *  
  */
 
 #include "userdef_param.h"

@@ -2,8 +2,6 @@
  * \file transition.h
  * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief describes the structure and operation of a transition of the state machine
- * 
- * \version 1.0
  */
 
 #ifndef _FIPAACL_CONVMONITOR_TRANSITION_H_

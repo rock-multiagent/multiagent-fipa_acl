@@ -4,8 +4,6 @@
  * \author Mircea Cretu Stancu
  * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief rebuilds an ACLMessage from a parsed bit-efficient encoded received message
- * 
- * \version 1.0
  */
 #ifndef FIPAACL_MESSAGE_PARSER_H_
 #define FIPAACL_MESSAGE_PARSER_H_

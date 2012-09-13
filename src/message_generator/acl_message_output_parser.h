@@ -3,13 +3,6 @@
 * \file acl_message_output_parser.h
 * \author Mircea Cretu Stancu
 * \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
-* 
-* \version 1.0
-*  - can encode any message accordingly
-*  - as future practical requirements may demand more functionality may be added; currently, some productions of the encoding grammar 
-*    are not  implemented as I could not identify the practical restraints and scenarios that may demand them;
-*  - as more of the fipa multi-agent systems module speciffications will be implemented, these productions may need to be implemented
-*  - for the actual places where the full functionality has not been implemented see the function comments in the .cpp file
 */
 
 #ifndef FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H

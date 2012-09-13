@@ -1,11 +1,8 @@
 /**
  * \file userdef_param.h
- * \author Mircea Cretu Stancu, Thomas Roehr
+ * \author Mircea Cretu Stancu
+ * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief defines the UserdefParam class
- * 
- * \version 1.0
- *  - has very basic features, only what was needed for the ACLMessage and AgentID classes
- *  - may need to be expanded/derived from depending on future needs
  */
 
 #ifndef FIPA_ACL_USERDEF_MESSAGEPARAM_H

@@ -2,9 +2,8 @@
  *
  * \file statemachine.h
  * \author Mircea Cretu Stancu
+ * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief describes the structure and operation of a state machine
- * 
- * \version 1.0
  */
 
 #ifndef _FIPAACL_CONVMONITOR_STATEMACHINE_H_

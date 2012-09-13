@@ -3,8 +3,6 @@
  * \file acl_message_output_parser.cpp
  * \author Mircea Cretu Stancu
  * \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
- * 
- * \mVersion 1.0
  */
 
 #include <iostream>
@@ -32,11 +30,10 @@ void ACLMessageOutputParser::setMessage(const ACLMessage& msg)
 	mMessage = msg;
 }
 
-
 ACLMessageOutputParser::ACLMessageOutputParser()
     : mUseCodeTables(false)
     , mUpdateCodeTables(true)
-    , mVersion("1.0")
+    , mVersion("1.3")
     , mResolverDepth(1)
 {
 }

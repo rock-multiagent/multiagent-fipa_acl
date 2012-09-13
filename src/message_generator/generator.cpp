@@ -1,6 +1,6 @@
 /**
 * \file generator.cpp
-* \author Thomas Roehr
+* \author Thomas Roehr, thomas.roehr@dfki.de
 * \brief Console program that asks for settings of the fipa message
 * and output the corresponding bytestream of a bitefficient message
 *

@@ -3,8 +3,6 @@
  * \file message_parser.cpp
  * \author Mircea Cretu Stancu
  * \brief rebuilds an ACLMessage from a parsed bit-efficient encoded received message
- * 
- * \version 1.0
  */
 #include <set>
 

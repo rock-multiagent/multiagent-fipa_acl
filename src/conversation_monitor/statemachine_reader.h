@@ -1,9 +1,8 @@
 /**
  * \file statemachine_reader.h
  * \author Mircea Cretu Stancu
+ * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief defines the StateMachineReader Class, used to generate a state macine from a spec. file
- * 
- * \version 1.0
  */
 
 #ifndef FIPAACL_CONVERSATIONMONITOR_STATEMACHINE_READER_H

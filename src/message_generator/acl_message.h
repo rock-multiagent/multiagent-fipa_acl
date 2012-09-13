@@ -4,7 +4,6 @@
  * \author Mircea Cretu Stancu
  * \brief describes the general data structure of a message in conformity with the fipa specifications. The methods are pretty straight forward getter and setter methods. The set container is used for various colective fields, in order to avoid duplicates
  * 
- * \version 1.0
  */
 #ifndef FIPA_ACL_ACLMESSAGE_H
 #define FIPA_ACL_ACLMESSAGE_H

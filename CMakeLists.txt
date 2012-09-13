@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 include($ENV{ROCK_CMAKE_MACROS}/Rock.cmake)
-rock_init(fipa_acl 1.2)
+rock_init(fipa_acl 1.3)
 set(PROJECT_DESCRIPTION "Library for FIPA Agent Communication Language and handling bit-efficient FIPA Messages")
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
