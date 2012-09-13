@@ -18,7 +18,7 @@ namespace fipa {
 namespace acl {
 
 namespace validation {
-        enum Flags : uint32_t { NONE = 0x00, ALL = 0xFFFF, PERFORMATIVE=0x01, SENDER = 0x02, RECEIVERS = 0x04, CONVERSATION_ID = 0x08,
+        enum Flags { NONE = 0x00, ALL = 0xFFFF, PERFORMATIVE=0x01, SENDER = 0x02, RECEIVERS = 0x04, CONVERSATION_ID = 0x08,
             PROTOCOL = 0x10, ENCODING = 0x20, LANGUAGE=0x40, ONTOLOGY = 0x80, IN_REPLY_TO=0x100 };
 }
 
