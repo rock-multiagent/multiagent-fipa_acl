@@ -119,6 +119,14 @@ void RoleMapping::resetExpectedAgents()
 
 bool RoleMapping::isExpected(const Role& role, const AgentID& agent) const
 {
+    // Check first if role regex matches agent name
+    // afterwards try to resolve roles
+    boost::regex roleRegex(role.getId());
+    if(regex_match(agent.getName(), roleRegex))
+    {
+        return true;
+    }
+
     std::map<Role, AgentIDList>::const_iterator it = mExpectedAgentMapping.find(role);
     if(it == mExpectedAgentMapping.end())
     {
