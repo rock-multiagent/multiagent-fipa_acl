@@ -131,6 +131,12 @@ public:
     bool inFinalState() const;
 
     /**
+     * Check if state machine is in a known failure state
+     * \return true if the current state of the machine is in a (known) error state
+     */
+    bool inFailureState() const; 
+
+    /**
      * Check wether the conversation has been successfully cancelled
      * \return true if the conversation was successfully cancelled
      */

@@ -63,7 +63,7 @@ bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& valida
         AgentID senderAgent = msg.getSender(); 
         if(!roleMapping.isExpected(mSenderRole, senderAgent))
         {
-                LOG_DEBUG("Sender validation failed"); 
+                LOG_DEBUG("Sender validation failed: '%s' unexpected for role '%s'", senderAgent.getName().c_str(), mSenderRole.getId().c_str()); 
                 return false;
         }
     }
@@ -220,6 +220,10 @@ ConversationCancelFailure::ConversationCancelFailure()
     : Transition(Role(".*"), Role(".*"), ACLMessage::FAILURE, State::CONVERSATION_CANCELLING, State::CONVERSATION_CANCEL_FAILURE)
 {
 }
+
+GeneralFailure::GeneralFailure(const StateId& sourceState)
+    : Transition(Role(".*"), SelfRole(), ACLMessage::FAILURE, sourceState, State::GENERAL_FAILURE_STATE)
+{}
 
 }
 

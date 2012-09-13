@@ -183,6 +183,18 @@ namespace default_transition
         ConversationCancelFailure();
 
     };
+
+    /**
+     * Transition into (terminal) general failure state -- when a third party (which might
+     * not be part of the actual conversation) notifies the system about an error
+     * TODO: Safety, i.e. handling rejection of 'false' injected errors, e.g. by setting
+     * a list of trusted agents (via pattern or similar), for now all (.*) agents
+     */
+    class GeneralFailure : public Transition
+    {
+    public:
+        GeneralFailure(const StateId& sourceState);
+    };
 }
 
     

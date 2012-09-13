@@ -121,6 +121,10 @@ void StateMachine::generateDefaultStates()
 
         default_state::ConversationCancelFailure cancelFailure;
         addState(*dynamic_cast<State*>(&cancelFailure));
+
+        default_state::GeneralFailure generalFailure;
+        addState(*dynamic_cast<State*>(&generalFailure));
+
     } catch (const std::runtime_error& e)
     {
         LOG_FATAL("%s", e.what());
@@ -168,6 +172,11 @@ bool StateMachine::inFinalState() const
 {
     const State& currentState = getCurrentState();
     return currentState.isFinal();
+}
+
+bool StateMachine::inFailureState() const
+{
+    return mCurrentStateId == State::GENERAL_FAILURE_STATE || mCurrentStateId == State::CONVERSATION_CANCEL_FAILURE;
 }
 
 bool StateMachine::cancelled() const

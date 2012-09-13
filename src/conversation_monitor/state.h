@@ -27,6 +27,7 @@ namespace default_transition {
     class ConversationCancelling;
     class ConversationCancelSuccess;
     class ConversationCancelFailure;
+    class GeneralFailure;
 }
 
 /**
@@ -45,6 +46,7 @@ class State
     friend class default_transition::ConversationCancelling;
     friend class default_transition::ConversationCancelSuccess;
     friend class default_transition::ConversationCancelFailure;
+    friend class default_transition::GeneralFailure;
     friend class StateMachineReader;
     friend class StateMachine;
 
@@ -81,6 +83,7 @@ protected:
     const static StateId CONVERSATION_CANCELLING;
     const static StateId CONVERSATION_CANCEL_SUCCESS;
     const static StateId CONVERSATION_CANCEL_FAILURE;
+    const static StateId GENERAL_FAILURE_STATE;
 
     /**
       \brief setter method for the final field of the class
@@ -211,6 +214,13 @@ namespace default_state
     {
     public: 
         ConversationCancelFailure() : FinalState(State::CONVERSATION_CANCEL_FAILURE)
+        {}
+    };
+
+    class GeneralFailure : public FinalState
+    {
+    public: 
+        GeneralFailure() : FinalState(State::GENERAL_FAILURE_STATE)
         {}
     };
 }

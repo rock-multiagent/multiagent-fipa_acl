@@ -260,10 +260,12 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
 
         ACLMessage msg(ACLMessage::REQUEST);
         BOOST_REQUIRE_THROW(inform.consumeMessage(msg), std::runtime_error);
+        BOOST_REQUIRE(!inform.inFailureState());
 
         inform = StateMachineFactory::getStateMachine("inform");
         ACLMessage informMsg(ACLMessage::INFORM);
         BOOST_REQUIRE_NO_THROW(inform.consumeMessage(informMsg));
+        BOOST_REQUIRE(!inform.inFailureState());
     }
 
     {
@@ -284,6 +286,7 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
             BOOST_REQUIRE(request.getCurrentStateId() == "2");
             BOOST_REQUIRE(!request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
         }
 
         {
@@ -293,6 +296,7 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             msg.setLanguage("language");
             BOOST_REQUIRE_THROW(request.consumeMessage(msg), std::runtime_error);
             BOOST_REQUIRE(request.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!request.inFailureState());
         }
 
         {
@@ -301,6 +305,7 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             msg.addReceiver(other);
             BOOST_REQUIRE_THROW(request.consumeMessage(msg), std::runtime_error);
             BOOST_REQUIRE(request.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!request.inFailureState());
         }
 
         {
@@ -310,6 +315,7 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
             BOOST_REQUIRE(request.getCurrentStateId() == "3");
             BOOST_REQUIRE(request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
         }
     }
 
@@ -330,6 +336,7 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
             BOOST_REQUIRE(request.getCurrentStateId() == "2");
             BOOST_REQUIRE(!request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
         }
 
         {
@@ -339,6 +346,7 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
             BOOST_REQUIRE(request.getCurrentStateId() == "4");
             BOOST_REQUIRE(!request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
         }
 
         {
@@ -348,8 +356,75 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
             BOOST_REQUIRE(request.getCurrentStateId() == "5");
             BOOST_REQUIRE(request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
         }
     }
+
+    {
+        // Trying request
+        // request ->
+        // final <- refuse
+        // <- agree
+        // <- failure/inform
+        StateMachine request = StateMachineFactory::getStateMachine("request");
+        AgentID self("self");
+        AgentID other("other");
+        AgentID foreign("foreign");
+        request.setSelf(self);
+        {
+            ACLMessage msg(ACLMessage::REQUEST);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            BOOST_REQUIRE(request.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
+        }
+
+        {
+            ACLMessage msg(ACLMessage::FAILURE);
+            msg.setSender(foreign);
+            msg.addReceiver(self);
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            default_state::GeneralFailure failureState;
+            BOOST_REQUIRE(request.getCurrentStateId() == failureState.getId());
+            BOOST_REQUIRE(request.inFinalState());
+            BOOST_REQUIRE(request.inFailureState());
+        }
+    }
+
+    {
+        // Trying request
+        // request ->
+        // final <- refuse
+        // <- agree
+        // <- failure/inform
+        StateMachine request = StateMachineFactory::getStateMachine("request");
+        AgentID self("self");
+        AgentID other("other");
+        AgentID foreign("foreign");
+        request.setSelf(self);
+        {
+            ACLMessage msg(ACLMessage::REQUEST);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
+            BOOST_REQUIRE(request.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
+        }
+
+        {
+            ACLMessage msg(ACLMessage::FAILURE);
+            msg.setSender(foreign);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_THROW(request.consumeMessage(msg), std::runtime_error);
+            BOOST_REQUIRE(request.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!request.inFinalState());
+            BOOST_REQUIRE(!request.inFailureState());
+        }
+    }
+
 }
 BOOST_AUTO_TEST_SUITE_END()
 

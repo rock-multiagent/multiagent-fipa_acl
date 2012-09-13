@@ -17,6 +17,7 @@ const StateId State::CONVERSATION_CANCELLING = "__internal_state:conversation_ca
 const StateId State::CONVERSATION_CANCEL_SUCCESS = "__internal_state:conversation_cancel_success__";
 const StateId State::CONVERSATION_CANCEL_FAILURE = "__internal_state:conversation_cancel_failure__";
 const StateId State::UNDEFINED_ID = "__undefined__";
+const StateId State::GENERAL_FAILURE_STATE = "__internal_state:general_failure__";
 
 State::State() 
     : mId(State::UNDEFINED_ID)
@@ -85,6 +86,15 @@ void State::generateDefaultTransitions()
             addTransition(*dynamic_cast<Transition*>(&transitionSender));
 
             default_transition::ConversationCancelling transitionReceiver = default_transition::ConversationCancelling(it->getReceiverRole(), it->getSenderRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
+        }
+
+        if( it->getPerformative() == ACLMessage::FAILURE)
+        {
+            continue;
+        } else {
+            // Add default failure transition -- which only applies for self as receiver
+            default_transition::GeneralFailure transitionReceiver = default_transition::GeneralFailure(mId);
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
     }
