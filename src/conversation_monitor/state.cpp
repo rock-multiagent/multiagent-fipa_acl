@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <boost/regex.hpp>
 #include <base/logging.h>
 
 namespace fipa {
@@ -131,11 +130,7 @@ void State::tickInvolvedAgent(const AgentID& ag)
     std::map<AgentID,bool>::iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {
-        boost::regex regex(it->first.getName());
-        if (regex_match(ag.getName(), regex))
-        {
-            it->second = true;
-        }
+        if (it->first == ag) it->second = true;
     }
 }
 
@@ -153,11 +148,7 @@ bool State::checkAllAgentsAccountedFor() const
     std::map<AgentID,bool>::const_iterator it;
     for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
     {    
-        if (it->second == false) 
-        {
-            LOG_DEBUG("Not acounted for agent: '%s'", it->first.getName().c_str());
-            return false;
-        }
+        if (it->second == false) return false;
     }
     return true;
 }

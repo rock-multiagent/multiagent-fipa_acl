@@ -13,48 +13,6 @@
 
 BOOST_AUTO_TEST_SUITE(conversation_monitor_suite)
 
-BOOST_AUTO_TEST_CASE(transition_test)
-{
-    using namespace fipa::acl;
-
-    Transition t;
-    t.setFrom("agent-0");
-    t.setTo("agent-1");
-
-    ACLMessage msg; 
-    msg.addReceiver(AgentID(t.getTo()));
-    msg.setSender(AgentID(t.getFrom()));
-
-    std::vector<AgentID> senders; 
-    std::vector<AgentID> receivers;
-    senders.push_back(AgentID(".*"));
-    receivers.push_back(AgentID(".*"));
-    t.setExpectedSenders(senders);
-    t.setExpectedRecepients(receivers);
-
-    BOOST_REQUIRE(t.validateSender(msg));
-    BOOST_REQUIRE(t.validateRecepients(msg));
-
-    senders.clear();
-    receivers.clear();
-    senders.push_back(AgentID("agent-0"));
-    receivers.push_back(AgentID("agent-1"));
-    t.setExpectedSenders(senders);
-    t.setExpectedRecepients(receivers);
-
-    BOOST_REQUIRE(t.validateSender(msg));
-    BOOST_REQUIRE(t.validateRecepients(msg));
-
-    senders.clear();
-    receivers.clear();
-    senders.push_back(AgentID("agent-10"));
-    receivers.push_back(AgentID("agent-11"));
-    t.setExpectedSenders(senders);
-    t.setExpectedRecepients(receivers);
-
-    BOOST_REQUIRE(!t.validateSender(msg));
-    BOOST_REQUIRE(!t.validateRecepients(msg));
-}
 
 BOOST_AUTO_TEST_CASE(state_test)
 {
