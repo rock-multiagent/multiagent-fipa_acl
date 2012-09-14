@@ -3,9 +3,6 @@
     \file grammar_bitefficient.cpp
     \brief delcares instances needed for the grammar
     \author Mircea Cretu Stancu
-    
-    \version 1.0
-    
 */
 namespace fipa {
 

@@ -1,313 +1,175 @@
-
 #include "state.h"
+#include "transition.h"
+#include "role.h"
+#include "message_archive.h"
 #include "statemachine.h"
 
 #include <iostream>
 #include <stdexcept>
 #include <base/logging.h>
+#include <sstream>
 
 namespace fipa {
 namespace acl {
-    
+
+const StateId State::NOT_UNDERSTOOD = "__internal_state:not_understood__";
+const StateId State::CONVERSATION_CANCELLING = "__internal_state:conversation_cancelling__";
+const StateId State::CONVERSATION_CANCEL_SUCCESS = "__internal_state:conversation_cancel_success__";
+const StateId State::CONVERSATION_CANCEL_FAILURE = "__internal_state:conversation_cancel_failure__";
+const StateId State::UNDEFINED_ID = "__undefined__";
+const StateId State::GENERAL_FAILURE_STATE = "__internal_state:general_failure__";
 
 State::State() 
-    : uid()
-    , final(false)
-    , transitions()
-    , subSM()
-    , archive()
-    , involvedAgents()
-    , owningMachine(0)
+    : mId(State::UNDEFINED_ID)
+    , mIsFinal(false)
 {
 }
 
-State::State(const std::string& _uid) 
-    : uid(_uid)
-    , final(false)
-    , transitions()
-    , subSM()
-    , archive()
-    , involvedAgents()
-    , owningMachine(0)
+State::State(const StateId& uid) 
+    : mId(uid)
+    , mIsFinal(false)
 {
 }
 
-State::~State()
+Transition State::addTransition(const Transition& t)
 {
-}
-
-void State::addTransition(Transition &t)
-{
-    std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); ++it)
+    std::vector<Transition>::const_iterator it;
+    it = std::find(mTransitions.begin(), mTransitions.end(), t);
+    if( it == mTransitions.end())
     {
-        if (unloadedEqual(*it,t) )
-            return;
+        Transition transition = t;
+        transition.setSourceState(mId);
+        mTransitions.push_back(transition);
+        return transition;
+    } else {
+        return *it;
     }
-    
-    t.setOwningState(this);
-    t.setMachine(owningMachine);
-    transitions.push_back(t);
 }
 
 void State::generateDefaultTransitions()
 {
-        // Not adding any transition for final states
-        if(isFinal())
-            return; 
-
-        std::vector<Transition>::iterator trit;
-        for (trit = transitions.begin(); trit != transitions.end();++trit)
-        {
-	  // we don't generate a not-understood transition for not-understood message...
-	  if ( trit->getExpectedPerformative() == PerformativeTxt[ACLMessage::NOT_UNDERSTOOD] ) 
-	      continue;
-	  
-	  Transition t; 
-	  t.setExpectedPerformative(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD]);
-	  t.setFrom(trit->getTo());
-	  t.setTo(trit->getFrom());
-	  
-	  t.setNextStateName(StateMachine::NOT_UNDERSTOOD);
-	  addTransition(t);	  
-        }
-}
-
-int State::consumeMessage(const ACLMessage &msg)
-{
-    LOG_DEBUG("State::consumeMessage state %s", uid.c_str());
-    if (!subSM.empty())
+    // Not adding any transition for final states
+    if(isFinal())
     {
-        LOG_DEBUG("Checking the sub-state machines");
-        bool found_one = false;
-        bool stillActiveSubSM = false;
-        std::vector<StateMachine>::iterator smit;
-        for (smit = subSM.begin(); smit != subSM.end();++smit)
+        return; 
+    }
+
+    if(mTransitions.empty())
+    {
+        throw std::runtime_error("Invalid state: non final state without transition defined");
+    }
+
+    std::vector<Transition> transitions(mTransitions);
+
+    std::vector<Transition>::const_iterator it = transitions.begin();
+    for (; it != transitions.end();++it)
+    {
+        // we don't generate a not-understood transition for not-understood message...
+        if ( it->getPerformative() == ACLMessage::NOT_UNDERSTOOD ) 
         {
-	  if (smit->isActive() )
-          {
-	      if (smit->isConversationOver() )
-              {
-                  continue;
-	      } else { 
-                  stillActiveSubSM = true;
-		  if (smit->consumeMessage(msg)) 
-		  {
-		      found_one = true;
-		  } 
-              }
-	  } else {
-              smit->startMachine(msg);
-              if(smit->consumeMessage(msg))
-              {
-                  stillActiveSubSM = true;
-                  found_one = true;
-              }
-          }
+            continue;
+        } else {
+            // Add the not understood transition for every matching transition
+            default_transition::NotUnderstood transitionSender = default_transition::NotUnderstood(it->getSenderRole(), it->getReceiverRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionSender));
+
+            default_transition::NotUnderstood transitionReceiver = default_transition::NotUnderstood(it->getReceiverRole(), it->getSenderRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
 
-        if (stillActiveSubSM)
+        if ( it->getPerformative() == ACLMessage::CANCEL )
         {
-	  if (found_one)
-              return true;
-	  else
-              return false;
+            continue;
+        } else {
+            // Add the cancel transition -- bidirectional regarding receiver/sender role
+            default_transition::ConversationCancelling transitionSender = default_transition::ConversationCancelling(it->getSenderRole(), it->getReceiverRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionSender));
+
+            default_transition::ConversationCancelling transitionReceiver = default_transition::ConversationCancelling(it->getReceiverRole(), it->getSenderRole(), mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
-    } 
 
-    std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); ++it)
-    {
-        LOG_DEBUG("Forwarding message in machine %p to transition from state %s to %s", owningMachine, uid.c_str(), it->getNextStateName().c_str());
-        if (it->consumeMessage(msg)) 
-            return true;
-    }
-    return false;
-}
-
-void State::tickInvolvedAgent(const AgentID& ag)
-{
-    std::map<AgentID,bool>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
-    {
-        if (it->first == ag) it->second = true;
-    }
-}
-
-void State::tickInvolvedAgent(const std::vector<AgentID>& agents)
-{
-    std::vector<AgentID>::const_iterator it;
-    for (it = agents.begin(); it != agents.end(); ++it)
-    {
-        tickInvolvedAgent(*it);
-    }
-}
-
-bool State::checkAllAgentsAccountedFor() const
-{
-    std::map<AgentID,bool>::const_iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
-    {    
-        if (it->second == false) return false;
-    }
-    return true;
-}
-void State::updateInvolvedAgentsMap(Transition &it)
-{
-    std::vector<AgentID> temp = it.getExpectedSenders();
-    std::vector<AgentID>::iterator agit;
-    for (agit = temp.begin(); agit != temp.end();++agit)
-    {
-        std::map<AgentID,bool>::iterator found;
-        if ( (found = involvedAgents.find((*agit) ) ) == involvedAgents.end() )
+        if( it->getPerformative() == ACLMessage::FAILURE)
         {
-	  std::pair<AgentID,bool> mypair = std::pair<AgentID,bool>(*agit,false);
-          LOG_INFO("Insert agent into involved agents map: %s", agit->getName().c_str());
-	  involvedAgents.insert(mypair);
+            continue;
+        } else {
+            // Add default failure transition -- which only applies for self as receiver
+            default_transition::GeneralFailure transitionReceiver = default_transition::GeneralFailure(mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
     }
 }
-void State::loadParameters()
-{
-    LOG_INFO("Load parameters for state: %s", uid.c_str());
-    std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); ++it)
-    {
-        assert(&(*it));
-        it->loadParameters();
-        updateInvolvedAgentsMap(*it);
-        
-    }
-}
 
-void State::updateAllAgentRoles()
+const Transition& State::getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const
 {
-    std::vector<Transition>::iterator it;
-    //std::map<AgentMapping>::iterator found;
-    for (std::vector<StateMachine>::iterator smit = subSM.begin(); smit != subSM.end();++smit)
+    // TODO: consider embedded statemachines
+
+    std::vector<Transition>::const_iterator it = mTransitions.begin();
+    for (; it != mTransitions.end(); ++it)
     {
-        std::vector<RoleCorrelation> tempRC = smit->getRoleCorrelation();
-        for (std::vector<RoleCorrelation>::iterator rcit = tempRC.begin(); rcit != tempRC.end();++rcit)
+        // TODO: better use the directly corresponding one
+        // but this should be ok for now
+        if(!archive.hasMessages())
         {
-	  if(owningMachine->checkIfRoleSet(rcit->master) && !rcit->check)
-	  {
-	      smit->updateAllAgentRoles(rcit->master, owningMachine->getAgentsAssignedTo(rcit->master));
-	  }
+            // Initiating message, i.e. validation should only apply to performative
+            if (it->getPerformative() == ACLMessage::performativeFromString(msg.getPerformative()) )
+            {
+                return *it;
+            }
+        } else {
+            const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
+            if (it->triggers(msg, initiatingMsg, roleMapping)) 
+            {
+                return *it;
+            }
         }
     }
-    
-    for (it = transitions.begin(); it != transitions.end(); ++it)
-    {    
-        it->updateRoles();
-        updateInvolvedAgentsMap(*it);
-    }
-    
+
+    throw std::runtime_error("Message does not trigger any transition in this state");
+
 }
-void State::setFinal(const bool _final)
-{
-    final = _final;
+
+std::vector<StateMachine> State::getEmbeddedStatemachines() const
+{ 
+    return mEmbeddedStateMachines;
 }
-bool State::isFinal() const
+
+std::string State::toString() const
 {
-    return final;
-}
-void State::resetInvolvedAgentsTicks()
-{
-    std::map<AgentID,bool>::iterator it;
-    for (it = involvedAgents.begin(); it != involvedAgents.end(); ++it)
+    std::stringstream state;
+    state << "state id: '" << mId << "', final: '" << mIsFinal << "'\n";
+    std::vector<Transition>::const_iterator it = mTransitions.begin();
+    for(; it != mTransitions.end(); ++it)
     {
-        it->second = false;
+        state << "\t" << it->toString() << "\n";
     }
+    return state.str();
 }
-void State::setAllPrecedingStates(State *st)
+
+FinalState::FinalState(const StateId& id)
+    : State(id)
 {
-    std::vector<Transition>::iterator it;
-    for (it = transitions.begin(); it != transitions.end(); ++it)
-    {
-        it->setPrecedingState(st);
-    }
+    setFinal(true);
 }
 
-ACLMessage* State::searchArchiveBySenderReceiver(const AgentID& m1, const AgentID& m2)
+UndefinedState::UndefinedState() 
+    : State(State::UNDEFINED_ID)
+{}
+
+namespace default_state {
+
+ConversationCancelling::ConversationCancelling() 
+    : State(State::CONVERSATION_CANCELLING)
 {
-    std::vector<ACLMessage>::iterator it;
-    for (it = archive.begin(); it != archive.end(); ++it)
-    {
-        std::vector<AgentID> recep = it->getAllReceivers();
-        if ( !it->getAllReplyTo().empty() )
-        {
-	  std::vector<AgentID> repto = it->getAllReplyTo();
-	  if ( (find(repto.begin(), repto.end(), m2) != repto.end()) && (find(recep.begin(),recep.end(),m1) != recep.end()) )
-	      return &(*it);
-        }
-        if ( (it->getSender() == m2) && (find(recep.begin(),recep.end(),m1) != recep.end()) ) return &(*it);
-    }
-    return NULL;
+    // Add the cancel transitions -> success or failure
+    default_transition::ConversationCancelSuccess transitionSuccess;
+    addTransition(*dynamic_cast<Transition*>(&transitionSuccess));
+
+    default_transition::ConversationCancelFailure transitionFailure;
+    addTransition(*dynamic_cast<Transition*>(&transitionFailure));
 }
 
-void State::setUID(const std::string& _uid)
-{
-    uid = _uid;
 }
-
-std::string State::getUID() const
-{
-    return uid;
-}
-
-void State::addToArchive(const ACLMessage &msg)
-{
-    archive.push_back(msg);
-}
-
-bool operator==(const State &a,const std::string &b)
-{
-    if (a.getUID().compare(b) ) return false;
-    return true;
-}
-bool operator<(const AgentID &a,const AgentID &b)
-{
-    return true;
-}
-
-
-void State::setOwningMachine(StateMachine *_machine)
-{
-    owningMachine = _machine;
-
-    updateTransitions();
-}
-
-void State::updateTransitions()
-{
-    std::vector<Transition>::iterator it = transitions.begin();
-    for(; it != transitions.end(); ++it)
-    {
-        it->setOwningState(this);
-        it->setMachine(owningMachine);
-    }
-}
-
-std::vector<ACLMessage> State::getMessageArchive() const	{return archive;}
-std::vector<Transition> State::getTransitions() 	const	{return transitions;}
-std::map<AgentID,bool> State::getInvolvedAgents() const	{return involvedAgents;}
-std::vector<StateMachine> State::getSubSM() const		{return subSM;}
-StateMachine* State::getOwningMachine() const	 	{return owningMachine;}
-
-void State::print()
-{
-    std::cout<<"\t*********** State ***********\n";
-    
-    std::cout<<"\tUID: "<<uid<<"\n";
-    std::cout<<"\tfinal: "<<final<<"\n";
-    
-    std::cout<<"\tTransitions:\n";
-    for (std::vector<Transition>::iterator it = transitions.begin(); it != transitions.end(); it ++)
-        it->print();
-    std::cout<<"\t*****************************\n";
-}
-
-
 
 } // end of acl
 } // end of fipa

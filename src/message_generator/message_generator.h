@@ -1,5 +1,5 @@
-#ifndef _MESSAGE_GENERATOR_H_
-#define _MESSAGE_GENERATOR_H_
+#ifndef FIPA_ACL_MESSAGE_GENERATOR_H
+#define FIPA_ACL_MESSAGE_GENERATOR_H
 
 #include <fipa_acl/message_generator/types.h>
 #include <fipa_acl/message_generator/acl_message.h>

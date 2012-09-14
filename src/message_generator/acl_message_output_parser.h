@@ -3,17 +3,10 @@
 * \file acl_message_output_parser.h
 * \author Mircea Cretu Stancu
 * \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
-* 
-* \version 1.0
-*  - can encode any message accordingly
-*  - as future practical requirements may demand more functionality may be added; currently, some productions of the encoding grammar 
-*    are not  implemented as I could not identify the practical restraints and scenarios that may demand them;
-*  - as more of the fipa multi-agent systems module speciffications will be implemented, these productions may need to be implemented
-*  - for the actual places where the full functionality has not been implemented see the function comments in the .cpp file
 */
 
-#ifndef ACLMessageOutputParser_H_
-#define ACLMessageOutputParser_H_
+#ifndef FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
+#define FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
 #include <string>
 #include <fipa_acl/message_generator/agent_id.h>
 #include <fipa_acl/message_generator/userdef_param.h>
@@ -49,25 +42,32 @@ private:
      @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentID's
      * see speciffication for details 
      */
-    ACLMessage msg;
-    int useCodeTables;
-    int updateCodeTables;
-    std::string version;
-    int res_depth;
+    ACLMessage mMessage;
+    bool mUseCodeTables;
+    bool mUpdateCodeTables;
+    std::string mVersion;
+    int mResolverDepth;
     
 public:
     ACLMessageOutputParser();
     /**
         \brief setter and getter methods for the parameters of the encoder
     */
-    void setUseCodeTables(int x);
-    int getUseCodeTables();
-    void setUpdateCodeTables(int x);
-    int getUpdateCodeTables();
-    void setResolverDepth(int res);
-    int getResolverDepth();
-    void setVersion(const std::string&);
-    std::string getVersion();
+    void setUseCodeTables(bool x) { mUseCodeTables = x; }
+
+    bool getUseCodeTables() { return mUseCodeTables; }
+
+    void setUpdateCodeTables(bool x) { mUpdateCodeTables = x; }
+
+    bool getUpdateCodeTables() { return mUpdateCodeTables; }
+
+    void setResolverDepth(int depth) { mResolverDepth = depth; }
+
+    int getResolverDepth() { return mResolverDepth; }
+
+    void setVersion(const std::string& version) { mVersion = version; }
+
+    std::string getVersion() { return mVersion; }
     /**
         \brief not a deep-copy assignment of msg but this should not be a problem as fields are not modified in the encoding process
     */
@@ -198,11 +198,6 @@ private:
     std::string getBitBinNumber(double n,char base);
     
     /**
-    \brief implements the binary string production; functionality not complete as code tables are not yet implemented
-    */
-    std::string getBitBinString(const std::string& sword);
-    
-    /**
     * Retrieve the byte length encoded string for the given word 
     * \param sword String containing the data to convert
     */
@@ -212,7 +207,7 @@ private:
     \brief implements the binary string production; functionality not complete as code tables are not yet implemented
     the second argument is an explicit option for codeTables(needed for the getBitBinExpression() )
     */
-    std::string getBitBinString(const std::string& sword,int codeTables);
+    std::string getBitBinString(const std::string& sword);
     
     std::string getBitDigits(const std::string& dig);
     

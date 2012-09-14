@@ -6,12 +6,6 @@
  * \author Thomas Roehr, thomas.roehr@dfki.de
  * \brief This grammar represents the bitefficient message specification
  * of the Foundation for Intelligent Physical Agents (FIPA at http://www.fipa.org)
- * 
- * \version 0.2
- *  - removed space skip parser, to avoid errors with spirit 2.3
- * \version 0.1
- *  - parses valid messages
- *  - extract some field information from messages
  */
 //#define BOOST_SPIRIT_DEBUG
 
@@ -201,7 +195,9 @@ namespace fipa
 		fipa::acl::Time operator()(std::string arg, std::string msecs) const
 		{
 			fipa::acl::Time	convertedTime;
-			// printf("convertToTimeImpl: %s:%s\n", arg.c_str(), msecs.c_str());
+#ifndef BOOST_SPIRIT_DEBUG
+			printf("convertToTimeImpl: %s:%s\n", arg.c_str(), msecs.c_str());
+#endif
 			// TODO: windows portage
 			strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
 			convertedTime.tm_msec = atoi(msecs.c_str());

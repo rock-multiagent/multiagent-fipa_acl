@@ -59,7 +59,8 @@ int main(int argc, char** argv)
     msg.setEncoding(std::string("test encoding"));
     msg.setOntology(std::string("test ontology"));
     msg.setReplyWith(std::string("test reply_with"));
-    msg.setReplyBy1(std::string("2010-12-23T12:00:37:980"));
+    base::Time time = base::Time::fromString("20101223-12:00:37:980", base::Time::Milliseconds);
+    msg.setReplyBy(time);
     msg.setConversationID(std::string("test conversationID"));
 
     uint32_t BUFFER_MAX = atoi(argv[1]);

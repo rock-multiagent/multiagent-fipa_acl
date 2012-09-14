@@ -3,8 +3,6 @@
  * \file message_parser.cpp
  * \author Mircea Cretu Stancu
  * \brief rebuilds an ACLMessage from a parsed bit-efficient encoded received message
- * 
- * \version 1.0
  */
 #include <set>
 
@@ -78,7 +76,7 @@ int MessageParser::buildPredefMessageParameters(MessageParameter param,ACLMessag
     if (param.name == "content")	 {buildContent(param, msg);  return 1;}
     
     if (param.name == "reply-with")	 {buildReplyWith(param, msg); return 1;}
-    if (param.name == "reply-by")	 {buildReplyBy1(param, msg); return 1;}
+    if (param.name == "reply-by")	 {buildReplyBy(param, msg); return 1;}
     if (param.name == "in-reply-to")	 {buildInReplyTo(param, msg); return 1;}
     if (param.name == "reply-to")	 {buildReplyTo(param, msg); return 1;}
     if (param.name == "language")	 {buildLanguage(param, msg); return 1;}
@@ -193,16 +191,11 @@ void MessageParser::buildReplyWith(MessageParameter param, ACLMessage &msg)
     msg.setReplyWith(replyWith);
 }
 
-void MessageParser::buildReplyBy1(MessageParameter param, ACLMessage &msg)
+void MessageParser::buildReplyBy(MessageParameter param, ACLMessage &msg)
 {
     DateTime dateTime = boost::get<DateTime>(param.data);
-    std::string mydate = dateTime.toString();
-    /// the first char in the parsed date is for relative time, that feature is not yet supported by the generator, thus the byte is 
-    /// simply discarded; if it is to be used in the reconstruction of the message, this is where it should be done
-    if (mydate.c_str()[0] == ' ') {mydate.assign(mydate,1,2000);}
-         
-    //if (msg.setReplyBy1(mydate) != 0) 
-    msg.setReplyBy1(mydate);
+    base::Time date = dateTime.toTime();
+    msg.setReplyBy(date);
 }
 
 void MessageParser::buildReplyTo(MessageParameter param, ACLMessage &msg)

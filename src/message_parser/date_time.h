@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <ctime>
+#include <base/time.h>
 
 namespace fipa { namespace acl {
 
@@ -17,26 +18,25 @@ struct Time : public std::tm
 
 struct DateTime
 {
-   char relative;
-   Time dateTime; 
-   char timezone;
+    char relative;
+    Time dateTime; 
+    char timezone;
 
-   DateTime() : relative(0), timezone(0) {}
+    static const std::string defaultFormat;
 
-   std::string toString()
-   {
-	char buffer[512];
-	// %Z missing so far
-	strftime(buffer,512, "%Y-%m-%dT%H:%M:%S", &dateTime);
+    DateTime() : relative(0), timezone(0) {}
 
-	std::string formattedOutput;
-	formattedOutput += relative;
-	formattedOutput += std::string(buffer);
-	formattedOutput += timezone;
+    /**
+     * convert to string
+     */
+    std::string toString();
 
-	return formattedOutput;
-   }
-
+    /**
+     * Convert to base time
+     * Does not fully support the relative time and timezone yet
+     * \return base time
+     */
+    base::Time toTime();
 }; 
 
 

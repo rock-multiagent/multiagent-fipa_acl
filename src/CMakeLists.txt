@@ -1,5 +1,6 @@
 set(SOURCES
     message_parser/agent_id.cpp
+    message_parser/date_time.cpp
     message_parser/message_printer.cpp
     message_parser/message_parser.cpp
     message_parser/grammar_bitefficient.cpp
@@ -7,8 +8,11 @@ set(SOURCES
     message_generator/agent_id.cpp
     message_generator/userdef_param.cpp
     message_generator/acl_message_output_parser.cpp
+    conversation_monitor/message_archive.cpp
+    conversation_monitor/role.cpp
     conversation_monitor/state.cpp
-    conversation_monitor/statemachine_builder.cpp
+    conversation_monitor/statemachine_factory.cpp
+    conversation_monitor/statemachine_reader.cpp
     conversation_monitor/statemachine.cpp
     conversation_monitor/transition.cpp
 )
@@ -32,11 +36,13 @@ set(HEADERS
     message_generator/acl_message.h
     message_generator/message_generator.h
     bitefficient_message.h
+    conversation_monitor/message_archive.h
+    conversation_monitor/role.h
     conversation_monitor/state.h
-    conversation_monitor/types.h
-    conversation_monitor/transition.h
-    conversation_monitor/statemachine_builder.h
+    conversation_monitor/statemachine_factory.h
+    conversation_monitor/statemachine_reader.h
     conversation_monitor/statemachine.h
+    conversation_monitor/transition.h
     conversation_monitor.h
     fipa_acl.h
 )
@@ -45,7 +51,7 @@ set(HEADERS
 rock_library(${PROJECT_NAME} 
         SOURCES ${SOURCES}
         HEADERS ${HEADERS}
-        DEPS_PKGCONFIG base-lib tinyxml
+        DEPS_PKGCONFIG base-lib base-types tinyxml
         )
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 	
@@ -59,7 +65,7 @@ rock_executable(fipa_acl-msg_generator
         DEPS ${PROJECT_NAME}
         )
 
-rock_executable(fipa_acl-conv_monitor-builder_test
+rock_executable(fipa_acl-conv_monitor-reader
         SOURCES conversation_monitor/main.cpp
         DEPS ${PROJECT_NAME}
         )

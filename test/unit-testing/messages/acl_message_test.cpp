@@ -37,7 +37,8 @@ void setupTest()
     m1.setEncoding(string("test encoding"));
     m1.setOntology(string("test ontology"));
     m1.setReplyWith(string("test reply_with"));
-    m1.setReplyBy1(string("2011-09-17T00:00:30"));
+    base::Time time0 = base::Time::fromString("20110917-00:00:30", base::Time::Seconds);
+    m1.setReplyBy(time0);
     m1.setInReplyTo(string("test in_reply_to"));
     m1.setConversationID(string("test conversationID"));
     m1.setProtocol(string("test-protocol"));
@@ -48,7 +49,8 @@ void setupTest()
     m2.setEncoding(string("test encoding"));
     m2.setOntology(string("test ontology"));
     m2.setReplyWith(string("test reply_with"));
-    m2.setReplyBy1(string("2011-09-17T00:00:30"));
+    base::Time time1 = base::Time::fromString("20110917-00:00:30", base::Time::Seconds);
+    m2.setReplyBy(time1);
     m2.setInReplyTo(string("test in_reply_to"));
     m2.setConversationID(string("test conversationID"));
     m2.setProtocol(string("test-protocol"));
@@ -61,9 +63,9 @@ void setupTest()
     a1.addUserdefParam(p3);
     
     
-    a3.setName(string("agent3 5"));
-    a4.setName(string("agent4"));
-    a5.setName(string("agent3 5"));
+    BOOST_REQUIRE(!a3.setName(string("agent3 5")));
+    BOOST_REQUIRE(a4.setName(string("agent4")));
+    BOOST_REQUIRE(!a5.setName(string("agent3 5")));
     
     a3.addAddress(addr1);
     a4.addAddress(addr1);
@@ -117,7 +119,7 @@ void AgentEqTest()
     a5.addUserdefParam(p3);
     BOOST_CHECK_EQUAL((a5==a3),true);
     //AgentID::setResCompDepth(5);
-    BOOST_CHECK_EQUAL(resDepthEqual(a5,a3,5),true);
+    BOOST_CHECK_EQUAL(AgentID::compareEqual(a5,a3,5),true);
     //AgentID::setResCompDepth(1);
     a5.deleteResolver(a1); 
     a2.addResolver(a4);
@@ -126,7 +128,7 @@ void AgentEqTest()
     a5.addResolver(a2);
     BOOST_CHECK_EQUAL((a5 == a3),true);
     //AgentID::setResCompDepth(5);
-    BOOST_CHECK_EQUAL(resDepthEqual(a5,a3,5),false);
+    BOOST_CHECK_EQUAL(AgentID::compareEqual(a5,a3,5),false);
     a5.addResolver(a1);
     BOOST_CHECK_EQUAL((a5 == a3),false);
     std::vector<AgentID> vec = a5.getResolvers();
@@ -147,8 +149,8 @@ void printMessage( ACLMessage &msg)
         cout<<"content:\t"<< msg.getContent()<<endl;
     if (!msg.getReplyWith().empty()) 
         cout<<"reply with:\t"<< msg.getReplyWith()<<endl;
-    if (!msg.getReplyBy1().empty()) 
-        cout<<"reply by1:\t"<< msg.getReplyBy1()<<endl;
+    if (!msg.getReplyBy().isNull()) 
+        cout<<"reply by:\t"<< msg.getReplyBy().toString()<<endl;
     if (!msg.getInReplyTo().empty()) 
         cout<<"in reply to:\t"<< msg.getInReplyTo()<<endl;
     if (!msg.getLanguage().empty()) 

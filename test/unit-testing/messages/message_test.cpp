@@ -13,16 +13,24 @@ BOOST_AUTO_TEST_CASE(message_test)
     AgentID origin("proxy");
     AgentID receiver("crex_0_CREXCORE");
 
+    AgentID resolver0("resolver0");
+    AgentID resolver1("resolver1");
+
+    receiver.addResolver(resolver0);
+    receiver.addResolver(resolver1);
+
     msg.setSender(origin);
     msg.addReceiver(receiver);
     msg.addReplyTo(origin);
-    msg.setPerformative(fipa::acl::ACLMessage::REQUEST);
+    msg.setPerformative(ACLMessage::REQUEST);
     msg.setProtocol(std::string("RIMRES"));
     msg.setLanguage(std::string("test language"));
     msg.setEncoding(std::string("test encoding"));
     msg.setOntology(std::string("test ontology"));
     msg.setReplyWith(std::string("test reply_with"));
-    msg.setReplyBy1(std::string("2010-12-23T12:00:37.00"));
+    base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
+    msg.setReplyBy(time);
+    BOOST_CHECK_MESSAGE(true, "Setting time " << time.toString());
     msg.setConversationID(std::string("test conversationID"));
     msg.setContent("test content");
 
@@ -37,13 +45,14 @@ BOOST_AUTO_TEST_CASE(message_test)
 
     BOOST_ASSERT( inputParser.parseData(encodedMsg, outputMsg) );
 
-    BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[REQUEST]);
+    BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[ACLMessage::REQUEST]);
     BOOST_ASSERT(outputMsg.getSender() == msg.getSender());
 
 
     BOOST_ASSERT(outputMsg.getAllReceivers() == msg.getAllReceivers());
     agents = outputMsg.getAllReceivers();
     BOOST_ASSERT(agents.size() == 1);
+    BOOST_ASSERT(agents[0].getResolvers().size() == 2);
 
     std::vector<AgentID>::iterator it = agents.begin();
     for(; it != agents.end(); ++it)
@@ -56,7 +65,7 @@ BOOST_AUTO_TEST_CASE(message_test)
     BOOST_ASSERT(outputMsg.getEncoding() == msg.getEncoding());
     BOOST_ASSERT(outputMsg.getOntology() == msg.getOntology());
     BOOST_ASSERT(outputMsg.getReplyWith() == msg.getReplyWith());
-    BOOST_ASSERT(outputMsg.getReplyBy() == msg.getReplyBy());
+    BOOST_REQUIRE_MESSAGE(outputMsg.getReplyBy() == msg.getReplyBy(), "output: " << outputMsg.getReplyBy().toString() << " vs. msg " << msg.getReplyBy().toString());
     BOOST_ASSERT(outputMsg.getConversationID() == msg.getConversationID());
     BOOST_ASSERT(outputMsg.getContent() == msg.getContent());
 }
@@ -128,6 +137,19 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
 
         uint32_t outputMsgSize = outputMsg.getContent().size();
         BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len32: " << size << " expected - contained: " << outputMsgSize);
+    }
+
+    {
+        ACLMessage msg(ACLMessage::REQUEST);
+        msg.setContent("content");
+        msg.setEncoding("encoding");
+        msg.setLanguage("language");
+        msg.addReceiver(AgentID("test"));
+        msg.setSender(AgentID("sender"));
+        msg.addReceiver(AgentID("sender"));
+
+        ACLMessage msgCopy = msg;
+        BOOST_REQUIRE(msgCopy == msg);
     }
 }
 
