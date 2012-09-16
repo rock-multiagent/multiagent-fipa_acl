@@ -29,14 +29,14 @@ struct DateTime
     /**
      * convert to string
      */
-    std::string toString();
+    std::string toString() const;
 
     /**
      * Convert to base time
      * Does not fully support the relative time and timezone yet
      * \return base time
      */
-    base::Time toTime();
+    base::Time toTime() const;
 }; 
 
 

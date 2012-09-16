@@ -138,7 +138,7 @@ struct ByteSequence
          * This will be a defined format: see ByteStringPrinter for that
 	 * \return A string containing the byte sequence
          */
-	std::string toPrettyString()
+	std::string toPrettyString() const
 	{
 		std::string tmp;
 		// Since bytes is a variant we apply the visitor pattern here
@@ -146,7 +146,7 @@ struct ByteSequence
 		return tmp;
 	}
 
-	std::string toRawDataString()
+	std::string toRawDataString() const
 	{
 		std::string tmp;
 		// Since bytes is a variant we apply the visitor pattern here
@@ -160,7 +160,7 @@ struct ByteSequence
          * to the receiver string to avoid copying of large
          * contents
          */
-	void toRawDataString(std::string* output)
+	void toRawDataString(std::string* output) const
 	{
 		// Since bytes is a variant we apply the visitor pattern here
 		boost::apply_visitor( ByteStringRawPrinter(output), bytes);

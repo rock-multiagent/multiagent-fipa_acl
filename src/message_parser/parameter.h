@@ -12,33 +12,33 @@ typedef boost::variant<std::string, fipa::acl::AgentIdentifier, std::vector<fipa
 class ParameterPrinter : public boost::static_visitor<std::string>
 {
         public:
-                std::string operator()(std::string s) const
+                std::string operator()(const std::string& s) const
                 {
                         return s;
                 }
 
-                std::string operator()(fipa::acl::AgentIdentifier agentID) const
+                std::string operator()(const fipa::acl::AgentIdentifier& agentID) const
                 {
                         return "AgentIdentifier";
                 }
 
-                std::string operator()(std::vector<fipa::acl::AgentIdentifier> ids) const
+                std::string operator()(const std::vector<fipa::acl::AgentIdentifier>& ids) const
                 {
 
                         return "AgentIdentifiers";
                 }
 
-                std::string operator()(fipa::acl::ByteSequence seq) const
+                std::string operator()(const fipa::acl::ByteSequence& seq) const
                 {
                         return "ByteSeq";
                 }
 
-                std::string operator()(fipa::acl::DateTime dt) const
+                std::string operator()(const fipa::acl::DateTime& dt) const
                 {
                         return dt.toString();
                 }
 
-                std::string operator()(fipa::acl::ByteString bs) const
+                std::string operator()(const fipa::acl::ByteString& bs) const
                 {
                         return "ByteString";
                 }

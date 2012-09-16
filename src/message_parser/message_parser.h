@@ -40,18 +40,14 @@ namespace acl {
 */
 class MessageParser
 {
-	
 	public: 
-		MessageParser();
-		~MessageParser();
-	
 		/**
 		  \brief parses a correctly encoded message according to grammar_bitefficient.h and creates a Message object for internal use
 		* \param storage Array of bytes that represent the bitefficient FIPA encoded message
 		* \param msg The message extracted from the data
 		* \return The decoded ACLMessage object
 		*/	
-		bool parseData(const std::string storage, ACLMessage &msg);
+		bool parseData(const std::string& storage, ACLMessage &msg);
 
 		/**
 		    \brief creates an unpopulated message object and passes it around to have its fields populated, along with the parsed message where the data is extracted from
@@ -59,50 +55,70 @@ class MessageParser
 		    \param msg The (final) ACLMessage to be filled with the parsed data
 		    \return the decoded ACLMessage object
 		*/
-		bool buildMessage(Message parsedMsg, ACLMessage &msg);
-		
+		bool buildMessage(const Message& parsedMsg, ACLMessage &msg);
+
 	private:
- 		/* Since the parser relies heavily on customized data structures, we require to apply conversion functions*/
-		void buildParameters(std::vector<MessageParameter> parsedParams,ACLMessage &msg);
+                /**
+                 * Fill the content field from message parameter object
+                 */
+                void buildContent(const MessageParameter& param,ACLMessage &msg);
+		
+ 		/**
+                 *  Since the parser relies heavily on customized data structures,
+                 *  we require to apply conversion functions
+                 */
+		void buildParameters(const std::vector<MessageParameter>& parsedParams,ACLMessage &msg);
 
-		int buildPredefMessageParameters(MessageParameter param,ACLMessage &msg);
+                /**
+                 * Build predefined message parameters
+                 * \throw std::runtime_error if message parameter is unknown
+                 */
+		void buildPredefMessageParameters(const MessageParameter& param, ACLMessage &msg);
 
-		void buildSender(MessageParameter param, ACLMessage &msg);
+                /**
+                 * Build sender from message parameter
+                 */
+		void buildSender(const MessageParameter& param, ACLMessage &msg);
 
-		AgentID buildAgentID(AgentIdentifier agent);
+                /**
+                 * Build agent id from agent identifier
+                 */
+		AgentID buildAgentID(const AgentIdentifier& agent);
 
-		void buildResolvers(AgentID &workAg, AgentIdentifier agent);
+                /**
+                 * Build resolvers from agent identifier
+                 */
+		void buildResolvers(const AgentIdentifier& agentIdentifier, AgentID& outAgentID);
 
-		void buildAgentParameters(AgentID &workAg, AgentIdentifier agent);
+                /**
+                 * Build agent id from agent identifier
+                 */
+		void buildAgentParameters(const AgentIdentifier& agentIdentifier, AgentID& outAgentID);
 
-		UserdefParam buildUserdefParameter(UserDefinedParameter param);
+                /**
+                 * Build user defined parameter from parser data type
+                 */
+		UserdefParam buildUserdefParameter(const UserDefinedParameter& param);
 
-		UserdefParam buildUserdefParameter(MessageParameter param);
+                 /**
+                  * Build userdefined parameter from message parameter
+                  */
+		UserdefParam buildUserdefParameter(const MessageParameter& param);
 
-		void buildReceiver(MessageParameter param, ACLMessage &msg);
+                /**
+                 * Build receiver from message parameter
+                 */
+		void buildReceiver(const MessageParameter& param, ACLMessage &msg);
 
-		void buildReplyWith(MessageParameter param, ACLMessage &msg);
+                /**
+                 * Build reply by from message parameter
+                 */
+		void buildReplyBy(const MessageParameter& param, ACLMessage &msg);
 
-		void buildReplyBy(MessageParameter param, ACLMessage &msg);
-
-		void buildInReplyTo(MessageParameter param, ACLMessage &msg);
-
-		void buildReplyTo(MessageParameter param, ACLMessage &msg);
-
-		void buildLanguage(MessageParameter param, ACLMessage &msg);
-
-		void buildEncoding(MessageParameter param, ACLMessage &msg);
-
-		void buildOntology(MessageParameter param, ACLMessage &msg);
-
-		void buildProtocol(MessageParameter param, ACLMessage &msg);
-
-		void buildConversationID(MessageParameter param, ACLMessage &msg);
-
-		void buildContent(MessageParameter param,ACLMessage &msg);
-
-
-
+                /**
+                 * Build reply to from message parameter
+                 */
+		void buildReplyTo(const MessageParameter& param, ACLMessage &msg);
 };
 
 
