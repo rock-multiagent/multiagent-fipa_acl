@@ -1,5 +1,7 @@
 #!/bin/sh
-TESTBINARY=../../build/src/testParser 
+TEST_DIR=`echo $0 | sed 's/\(.*\)\/.*/\1/'`
+
+TESTBINARY="$TEST_DIR/../../build/src/testParser"
 
 validate()
 {
@@ -20,19 +22,19 @@ validate()
 }
 
 echo "Positive tests"
-for file in `ls *.txt`
+for file in `ls $TEST_DIR/*.txt`
 do 
     validate $file
 done
 
-for file in `ls positive-test-messages/*`
+for file in `ls $TEST_DIR/positive-test-messages/*`
 do 
     validate $file
 done
 
 echo ""
 echo "Negative tests -> should return ERROR"
-for file in `ls negative-test-messages/*`
+for file in `ls $TEST_DIR/negative-test-messages/*`
 do
     validate $file
 done
