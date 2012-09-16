@@ -195,7 +195,7 @@ namespace fipa
 		fipa::acl::Time operator()(std::string arg, std::string msecs) const
 		{
 			fipa::acl::Time	convertedTime;
-#ifndef BOOST_SPIRIT_DEBUG
+#ifdef BOOST_SPIRIT_DEBUG
 			printf("convertToTimeImpl: %s:%s\n", arg.c_str(), msecs.c_str());
 #endif
 			// TODO: windows portage
