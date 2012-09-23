@@ -465,6 +465,64 @@ struct date_time : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::stri
 
 };
 
+
+template <typename Iterator>
+struct date_time_token : qi::grammar<Iterator, fipa::acl::DateTime()>
+{
+    date_time_token() : date_time_token::base_type(dateTimeToken, "date_time_token-bitefficient_grammar")
+    {
+        using qi::byte_;
+        using encoding::alpha;
+
+	// Absolute time, relative +/-
+	// identifier indicate if typeDesignator follows or not
+	// NOTE: When parser fails, make sure the data forwarded to the parser really(!) contains
+	// all characters. Since 0x20 is a special character in normal ASCII some ways of reading the data
+	// or using std::copy might lead to an unexpected failure, since these special characters will be discarded
+	dateTimeToken = ( byte_(0x20) 			[ phoenix::at_c<0>(label::_val) = ' ' ]
+			    >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
+			   )
+			// Relative time (-)
+			| ( byte_(0x21) 			[ phoenix::at_c<0>(label::_val) = '+' ]
+			   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
+                          )
+			// Relative time (+)
+			| ( byte_(0x22)				[ phoenix::at_c<0>(label::_val) = '-' ]
+			   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
+                          )
+			// Absolute time   
+			| ( byte_(0x24)				[ phoenix::at_c<0>(label::_val) = ' ' ] 
+				>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+				>> typeDesignator 		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+				) 
+			// Relative time (-)
+			| ( byte_(0x25) 			[ phoenix::at_c<0>(label::_val) = '+' ]
+				>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+				>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+				) 
+			// Relative time (+)
+			| ( byte_(0x26)				[ phoenix::at_c<0>(label::_val) = '-' ] 
+				>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
+				>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+					)
+	;    
+
+	// Timezone for UTC is Z
+	typeDesignator = alpha 		[ label::_val = label::_1 ]; 	
+
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(dateTimeToken);
+        BOOST_SPIRIT_DEBUG_NODE(binDate);
+        BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
+    #endif
+    }
+
+    qi::rule<Iterator, fipa::acl::DateTime() > dateTimeToken;
+    date_time<Iterator>  binDate;
+    qi::rule<Iterator, char() > typeDesignator;
+};
+
+
 template <typename Iterator>
 // IMPORTANT: ACLMessage with following () otherwise, compiler error
 struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
@@ -608,7 +666,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 		msgContent = binString.alias();	
 
 		replyWithParam = binExpression.alias();
-		replyByParam = binDateTimeToken.alias();
 		inReplyToParam = binExpression.alias();
 		replyToParam = recipientExpr.alias();
 		language = binExpression.alias();
@@ -647,38 +704,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
                                           >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
 			  ;         
 		
-		// Absolute time, relative +/-
-		// identifier indicate if typeDesignator follows or not
-		// NOTE: When parser fails, make sure the data forwarded to the parser really(!) contains
-		// all characters. Since 0x20 is a special character in normal ASCII some ways of reading the data
-		// or using std::copy might lead to an unexpected failure, since these special characters will be discarded
-		binDateTimeToken = ( byte_(0x20) 			[ phoenix::at_c<0>(label::_val) = ' ' ]
-				    >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
-				   )
-				// Relative time (-)
-				| ( byte_(0x21) 			[ phoenix::at_c<0>(label::_val) = '+' ]
-				   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
-                                  )
-				// Relative time (+)
-				| ( byte_(0x22)				[ phoenix::at_c<0>(label::_val) = '-' ]
-				   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
-                                  )
-				// Absolute time   
-				| ( byte_(0x24)				[ phoenix::at_c<0>(label::_val) = ' ' ] 
-					>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
-					>> typeDesignator 		[ phoenix::at_c<2>(label::_val) = label::_1 ]
-					) 
-				// Relative time (-)
-				| ( byte_(0x25) 			[ phoenix::at_c<0>(label::_val) = '+' ]
-					>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
-					>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
-					) 
-				// Relative time (+)
-				| ( byte_(0x26)				[ phoenix::at_c<0>(label::_val) = '-' ] 
-					>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
-					>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
-					)
-	;    
 		
 		
 		binExpression = binExpr				[ label::_val = label::_1 ] 
@@ -799,10 +824,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 						) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
 						;
 
-		// Timezone for UTC is Z
-		typeDesignator = alpha 		[ label::_val = label::_1 ]; 	
-
-
 		on_error<fail>
 		(
 		    //aclCommunicativeAct,
@@ -837,8 +858,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(parameterValue);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageType);
         BOOST_SPIRIT_DEBUG_NODE(binDateTimeToken);
-        BOOST_SPIRIT_DEBUG_NODE(binDate);
-        BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
         BOOST_SPIRIT_DEBUG_NODE(len8);
         BOOST_SPIRIT_DEBUG_NODE(len16);
         BOOST_SPIRIT_DEBUG_NODE(len32);
@@ -895,7 +914,7 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > recipientExpr;
 	qi::rule<Iterator, fipa::acl::ByteSequence() > msgContent;
 	qi::rule<Iterator, std::string() > replyWithParam;
-	qi::rule<Iterator, fipa::acl::DateTime() > replyByParam;
+	date_time_token<Iterator> replyByParam;
 	qi::rule<Iterator, std::string() > inReplyToParam;
 	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > replyToParam;
 	qi::rule<Iterator, std::string() > language;
@@ -908,8 +927,7 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	qi::rule<Iterator, std::string()> binNumber;
 	qi::rule<Iterator, std::string() > digits; 
 	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > binString;
-	qi::rule<Iterator, fipa::acl::DateTime() > binDateTimeToken;
-	date_time<Iterator> binDate;
+	date_time_token<Iterator> binDateTimeToken;
 	qi::rule<Iterator, std::string()> binExpression;
 	qi::rule<Iterator, std::string() > binExpr;
 	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
@@ -932,7 +950,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
 	qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
 	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byteLengthEncodedStringTerminated;
-	qi::rule<Iterator, char() > typeDesignator;
         coded_number<Iterator> codedNumber;
 };
 
