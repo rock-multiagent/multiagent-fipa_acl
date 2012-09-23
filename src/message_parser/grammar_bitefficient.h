@@ -396,25 +396,43 @@ namespace bitefficient {
 namespace label = qi::labels;
 
 template<typename Iterator>
-struct coded_number : qi::grammar<Iterator, std::string()>
+struct CodedNumber : qi::grammar<Iterator, std::string()>
 {
-    coded_number() : coded_number::base_type(number, "coded_number-bitefficient_grammar")
+    CodedNumber() : CodedNumber::base_type(coded_number_rule, "CodedNumber-bitefficient_grammar")
     {
         // two numbers in one byte - padding 00 if coding only one number
-        number = qi::byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
+        coded_number_rule = qi::byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
 
     #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(number);
+        BOOST_SPIRIT_DEBUG_NODE(coded_number_rule);
     #endif
     }
 
-    qi::rule<Iterator, std::string()> number;
+    qi::rule<Iterator, std::string()> coded_number_rule;
+};
+
+template<typename Iterator>
+struct Index : qi::grammar<Iterator, uint_least16_t()>
+{
+    Index() : Index::base_type(index_rule, "Index-bitefficient_grammar")
+    {
+	// Index is a pointer to code table entry and its size (in bits) depends on the code table size. 
+	// If the code table size is 256 entries, the size of the index is one byte;
+	//  otherwise its size is two bytes (represented in network byte order).
+	index_rule = qi::byte_ | (qi::word [ label::_val = lazy_ntohs(label::_val)]) ;
+
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(index_rule);
+    #endif
+    }
+
+    qi::rule<Iterator, uint_least16_t() > index_rule;
 };
 
 template <typename Iterator>
-struct date_time : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::string> >
+struct DateTime : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::string> >
 {
-    date_time() : date_time::base_type(dateTime, "date_time-bitefficient_grammar")
+    DateTime() : DateTime::base_type(date_time_rule, "DateTime-bitefficient_grammar")
     {
 
         // Construct/Fill Time()
@@ -423,7 +441,7 @@ struct date_time : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::stri
         
         // Fixme: label::_a = string, label::_a += "-" will return only label::_a as "-"
         // Currently using a workaround with 'buildString'
-        dateTime = ((        ( year	[ label::_a = buildString(label::_1,"-","") ]) //, label::_a = label::_1, label::_a += "-" ])//, print("yearinBinDate:", label::_1) ]*/ )
+        date_time_rule = ((        ( year	[ label::_a = buildString(label::_1,"-","") ]) //, label::_a = label::_1, label::_a += "-" ])//, print("yearinBinDate:", label::_1) ]*/ )
         		>> ( month	[ label::_a = buildString(label::_a, label::_1,"-") ]) 
         		>> ( day	[ label::_a = buildString(label::_a, label::_1,"T") ])
         		>> ( hour       [ label::_a = buildString(label::_a, label::_1,":") ])
@@ -448,28 +466,28 @@ struct date_time : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::stri
         BOOST_SPIRIT_DEBUG_NODE(minute);
         BOOST_SPIRIT_DEBUG_NODE(second);
         BOOST_SPIRIT_DEBUG_NODE(millisecond);
-        BOOST_SPIRIT_DEBUG_NODE(dateTime);
+        BOOST_SPIRIT_DEBUG_NODE(date_time_rule);
     #endif // BOOST_SPIRIT_DEBUG
     }
 
-    coded_number<Iterator> codedNumber;
+    CodedNumber<Iterator> codedNumber;
 
-    qi::rule<Iterator, fipa::acl::Time(), qi::locals<std::string> > dateTime;
+    qi::rule<Iterator, fipa::acl::Time(), qi::locals<std::string> > date_time_rule;
     qi::rule<Iterator, std::string() > year;
-    coded_number<Iterator> month;
-    coded_number<Iterator> day;
-    coded_number<Iterator> hour;
-    coded_number<Iterator> minute;
-    coded_number<Iterator> second;
+    CodedNumber<Iterator> month;
+    CodedNumber<Iterator> day;
+    CodedNumber<Iterator> hour;
+    CodedNumber<Iterator> minute;
+    CodedNumber<Iterator> second;
     qi::rule<Iterator, std::string() > millisecond;
 
 };
 
 
 template <typename Iterator>
-struct date_time_token : qi::grammar<Iterator, fipa::acl::DateTime()>
+struct BinDateTime : qi::grammar<Iterator, fipa::acl::DateTime()>
 {
-    date_time_token() : date_time_token::base_type(dateTimeToken, "date_time_token-bitefficient_grammar")
+    BinDateTime() : BinDateTime::base_type(bin_date_time_rule, "BinDateTime-bitefficient_grammar")
     {
         using qi::byte_;
         using encoding::alpha;
@@ -479,7 +497,7 @@ struct date_time_token : qi::grammar<Iterator, fipa::acl::DateTime()>
 	// NOTE: When parser fails, make sure the data forwarded to the parser really(!) contains
 	// all characters. Since 0x20 is a special character in normal ASCII some ways of reading the data
 	// or using std::copy might lead to an unexpected failure, since these special characters will be discarded
-	dateTimeToken = ( byte_(0x20) 			[ phoenix::at_c<0>(label::_val) = ' ' ]
+	bin_date_time_rule = ( byte_(0x20) 			[ phoenix::at_c<0>(label::_val) = ' ' ]
 			    >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
 			   )
 			// Relative time (-)
@@ -511,17 +529,269 @@ struct date_time_token : qi::grammar<Iterator, fipa::acl::DateTime()>
 	typeDesignator = alpha 		[ label::_val = label::_1 ]; 	
 
     #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(dateTimeToken);
+        BOOST_SPIRIT_DEBUG_NODE(bin_date_time_rule);
         BOOST_SPIRIT_DEBUG_NODE(binDate);
         BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
     #endif
     }
 
-    qi::rule<Iterator, fipa::acl::DateTime() > dateTimeToken;
-    date_time<Iterator>  binDate;
+    qi::rule<Iterator, fipa::acl::DateTime() > bin_date_time_rule;
+    DateTime<Iterator>  binDate;
     qi::rule<Iterator, char() > typeDesignator;
 };
 
+
+template <typename Iterator>
+struct Word : qi::grammar<Iterator, std::string()>
+{
+    Word() : Word::base_type(word_rule, "Word-bitefficient_grammar")
+    {
+        using encoding::char_;
+
+	word_rule = (char_ - wordExceptionsStart )  	[ label::_val += label::_1 ]
+		 >> *(char_ - wordExceptionsGeneral)    [ label::_val += label::_1 ]
+		;
+
+	wordExceptionsStart %= wordExceptionsGeneral
+                        | char_('#') 
+			| char_('0','9')
+			| char_('-')
+			| char_('@')
+			;
+	wordExceptionsGeneral %= char_('\x00','\x20') 
+			| char_('(')
+                        | char_(')')
+			;
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(word_rule);
+        BOOST_SPIRIT_DEBUG_NODE(wordExceptionsStart);
+        BOOST_SPIRIT_DEBUG_NODE(wordExceptionsGeneral);
+    #endif
+    }
+
+    qi::rule<Iterator, std::string()> word_rule;
+    qi::rule<Iterator> wordExceptionsStart;
+    qi::rule<Iterator> wordExceptionsGeneral;
+};
+
+template <typename Iterator>
+struct BinWord : qi::grammar<Iterator, std::string()>
+{
+    BinWord() : BinWord::base_type(bin_word_rule, "BinWord-bitefficient_grammar")
+    {
+        using qi::byte_;
+
+	bin_word_rule = ( ( byte_(0x10) 
+			>> word 			[ label::_val = label::_1 ]
+			>> byte_(0x00) )
+	        | byte_(0x11) >> index   		[ label::_val = extractFromCodetable(label::_1) ]
+		);
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(bin_word_rule);
+    #endif 
+    }
+
+    qi::rule<Iterator, std::string()> bin_word_rule;
+    Word<Iterator> word;
+    Index<Iterator> index;
+};
+
+template <typename Iterator>
+struct BinExpression : qi::grammar<Iterator, std::string()>
+{
+    BinExpression() : BinExpression::base_type(bin_expression_rule, "BinExpression-bitefficient_grammar")
+    {
+	using qi::on_error;
+	using qi::fail;
+	using phoenix::construct;
+	using phoenix::val;
+
+	// Inbuild parser:
+	// Encoding is ASCII here
+	using encoding::char_;
+	using encoding::string;
+	using encoding::digit;
+	using encoding::alpha;
+	using qi::byte_;
+
+	bin_expression_rule = binExpr			[ label::_val = label::_1 ] 
+		      | byte_(0xFF) >> binString        [ label::_val = convertToString(label::_1) ] 
+			      ;
+	binExpr = binWord				[ label::_val = label::_1 ]
+		| binString				[ label::_val = convertToString(label::_1) ] 
+		| binNumber				[ label::_val = label::_1 ]
+		// Every expression can look like the following of "(+ (-1 2) 3)"
+		| (exprStart 				[ label::_val = "(" , label::_val += label::_1 ]
+		  >> *binExpr				[ label::_val += label::_1 ]
+		  >> exprEnd 				[ label::_val += ")", label::_val += label::_1 ]
+		  )
+                ;
+
+	exprStart = ( byte_(0x60) ) 					 [ label::_val = "" ]
+		  | ( byte_(0x70) >> word       			 [ label::_val = label::_1 ]
+				  >> byte_(0x00) )
+		  | ( byte_(0x71) >> index      			 [ label::_val = extractFromCodetable(label::_1)] )
+		  | ( byte_(0x72) >> digits     			 [ label::_val = label::_1 ] )
+		  | ( byte_(0x73) >> digits     			 [ label::_val = label::_1 ] ) 
+		  | ( byte_(0x74) >> ( stringLiteralTerminated 
+				   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ] )
+		  | ( byte_(0x75) >> index      			 [ label::_val = extractFromCodetable(label::_1)])
+		  | ( byte_(0x76) >> len8 				 [ label::_a = label::_1 ]
+				  >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ]) 
+		  | ( byte_(0x77) >> len16 				 [ label::_a = label::_1 ] 
+				  >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ])
+		  | ( byte_(0x78) >> len32 				 [ label::_a = label::_1 ]
+			          >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ])
+		  | ( byte_(0x79) >> index 				 [ label::_val = extractFromCodetable(label::_1)])
+		 ;
+
+	exprEnd = ( byte_(0x40) ) 					 [ label::_val = "" ]
+		| ( byte_(0x50) >> word 	 			 [ label::_val = label::_1 ]
+				>> byte_(0x00) )
+		| ( byte_(0x51) >> index      				 [ label::_val = extractFromCodetable(label::_1)])
+		| ( byte_(0x52) >> digits 				 [ label::_val = label::_1 ] )
+		| ( byte_(0x53) >> digits 				 [ label::_val = label::_1 ] )
+		| ( byte_(0x54) >> ( stringLiteralTerminated 
+				   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ])
+		| ( byte_(0x55) >> index      				 [ label::_val = extractFromCodetable(label::_1)]) 
+		| ( byte_(0x56) >> len8       				 [ label::_a = label::_1 ]
+				>> fipaString(label::_a)		 [ label::_val = convertToString(label::_1)] )
+		| ( byte_(0x57) >> len16      				 [ label::_a = label::_1 ]
+				>> fipaString(label::_a)    		 [ label::_val = convertToString(label::_1)])
+		| ( byte_(0x58) >> len32      				 [ label::_a = label::_1 ]
+				>> fipaString(label::_a)		 [ label::_val = convertToString(label::_1)])
+		| ( byte_(0x59) >> index      		                 [ label::_val = extractFromCodetable(label::_1)])
+		;
+
+	// Decimal number 0x12
+	// Hex number 0x13
+	// Hexadecimal number are converted to int and then back
+	binNumber = ( byte_(0x12) >> digits 	[ label::_val = label::_1 ] )         
+		  | ( byte_(0x13) >> digits 	[ label::_val = convertDigitsToHex(label::_1) ]
+		  ); 
+
+	digits = +codedNumber [ label::_val += label::_1];
+
+	binString = ( byte_(0x14) >> ( stringLiteralTerminated 
+				   | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
+		  // string literal from code table
+		  | ( byte_(0x15) >> index 			        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])            
+		  // The byte length will be stored in the rule local variable (label::_a) and then forwarded to the qi::repeat instruction
+		  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
+				  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )  // new byteLengthEncoded string 
+		  | ( byte_(0x17) >> len16 			        [ label::_a = label::_1 ]
+			          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
+		  | ( byte_(0x18) >> index                              [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
+		  | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
+                                  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
+		  ;         
+
+	// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
+	// TODO: check value and reset
+	// repeat get the inherited variable as parameter (check were this rule is used) which
+	// defines the number of bytes to read
+	byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToCharVector(label::_1) ]
+		;
+
+	// pass the local length variable down to the rule using parent rules variable  _r1			
+	fipaString = (stringLiteral | byteLengthEncodedString(label::_r1) );
+
+	
+	// Order of statement is relevant here, since the character \ needs to be matched
+	// first -- matching is greedy with char_ otherwise
+	stringLiteral = ( char_('"') 
+		       >> * (( char_("\\") >> char_('"') ) 	[  label::_a += "\"" ]
+			  | (byte_ - char_('"') ) 		[  label::_a += label::_1 ]
+		          )
+		       >> char_('"')
+			)					[ phoenix::at_c<2>(label::_val) = label::_a ]
+			; 
+
+	stringLiteralTerminated = stringLiteral 		[ label::_val = label::_1 ]
+				>> byte_(0x00)
+				;
+	
+	byteLengthEncodedStringHeader = char_('#')
+				      >> + digit 	[ label::_val += label::_1 ]
+				      >> char_('"')
+				      ;
+
+	// Digits tell the byte encoding
+	// label::_r1 is an inherited local variable from the parent rule
+	byteLengthEncodedString = byteLengthEncodedStringHeader 		        [ phoenix::at_c<0>(label::_val) += label::_1 ]
+				>> qi::repeat(label::_r1)[byte_]     			[ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ]
+				;
+
+	byteLengthEncodedStringTerminated = ( byteLengthEncodedStringHeader 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
+					>> * (byte_ - byte_(0x00))			[ label::_a += label::_1 ]
+					>> byte_(0x00) 
+					) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
+					;
+
+	on_error<fail>
+	(
+	    //aclCommunicativeAct,
+	    byteLengthEncodedString,
+	    std::cout
+		<< val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< val(" here: \"")
+		<< construct<std::string>(label::_3,label::_2)
+		<< val("\"")
+		<< std::endl
+        );
+
+	len8 = byte_ ;
+        // boost::uint_least16_t
+	len16 = qi::word [ label::_val = lazy_ntohs(label::_1) ];
+        // boost::uint_least32_t
+	len32 = qi::dword [ label::_val = lazy_ntohl(label::_1) ];
+
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(bin_expression_rule);
+        BOOST_SPIRIT_DEBUG_NODE(byteLengthEncodedString);
+        BOOST_SPIRIT_DEBUG_NODE(binDateTime);
+        BOOST_SPIRIT_DEBUG_NODE(len8);
+        BOOST_SPIRIT_DEBUG_NODE(len16);
+        BOOST_SPIRIT_DEBUG_NODE(len32);
+    #endif
+    }
+
+    /**
+     * Allow to retrieve individual rule of this grammar
+     */
+    const qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> >& getBinStringRule() { return binString.alias(); }
+
+    // Main rule
+    qi::rule<Iterator, std::string()> bin_expression_rule;
+
+    BinWord<Iterator> binWord;
+    Word<Iterator> word;
+    Index<Iterator> index;
+    
+    qi::rule<Iterator, std::string()> binNumber;
+    qi::rule<Iterator, std::string() > digits; 
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > binString;
+    BinDateTime<Iterator> binDateTime;
+    qi::rule<Iterator, std::string() > binExpr;
+    qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
+    qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprEnd;
+    
+    //qi::symbols<char, qi::rule<Iterator> > exprKeyword;
+    
+    qi::rule<Iterator, std::vector<unsigned char>(boost::uint32_t) > byteSeq;
+    qi::rule<Iterator, boost::uint_least8_t() > len8;
+    qi::rule<Iterator, boost::uint_least16_t() > len16;
+    qi::rule<Iterator, boost::uint_least32_t() > len32;
+    
+    qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > fipaString;
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > stringLiteral;
+    qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteralTerminated;
+    qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
+    qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byteLengthEncodedStringTerminated;
+    CodedNumber<Iterator> codedNumber;
+};
 
 template <typename Iterator>
 // IMPORTANT: ACLMessage with following () otherwise, compiler error
@@ -537,14 +807,8 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 
 		using qi::lit;
 		using qi::lexeme; // prevents character skipping
+                using qi::byte_;
 		
-		// Inbuild parser:
-		// Encoding is ASCII here
-		using encoding::char_;
-		using encoding::string;
-		using encoding::digit;
-		using encoding::alpha;
-		using qi::byte_;
 		
 		// To avoid namespace clashes with boost::bind
 		namespace label = qi::labels;
@@ -585,8 +849,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 				       ;
 
 		
-		messageTypeName = binWord.alias();
-
 		// Note: never do a direct assignment like
 		// messageParameter = predefinedMessageParameter or you will be getting runtime errors	
 		// use messageParameter = predefinedMessageParameter.alias() instead
@@ -596,9 +858,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 					    >> parameterName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
 					    >> parameterValue           [ phoenix::at_c<1>(label::_val) = label::_1 ]
 					    ;
-
-		parameterName = binWord.alias();
-		parameterValue = binExpression.alias();
 
 		// Converting message type into predefined strings
 		predefinedMessageType = byte_(0x01)    [ label::_val = "accept-proposal" ]
@@ -646,7 +905,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 				 >> *userDefinedParameter		[ phoenix::push_back(phoenix::at_c<3>(label::_val), label::_1) ] 
 				 >> endOfCollection;				
 
-		agentName = binWord.alias();
 		addresses = byte_(0x02) >> urlCollection 		[ label::_val = label::_1 ];
 		resolvers = byte_(0x03) >> *agentIdentifier 		[ phoenix::push_back(label::_val, label::_1) ]
 					   >> endOfCollection;
@@ -657,185 +915,12 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 		
 		urlCollection = *url 					[ phoenix::push_back(label::_val, label::_1) ]
 				 >> endOfCollection;
-		url = binWord.alias();
 
 		recipientExpr = *agentIdentifier 			[ phoenix::push_back(label::_val, label::_1) ]
 				>> endOfCollection;
 		
-		// Make sure rule definition matches for alias()
-		msgContent = binString.alias();	
-
-		replyWithParam = binExpression.alias();
-		inReplyToParam = binExpression.alias();
 		replyToParam = recipientExpr.alias();
-		language = binExpression.alias();
-		encoding = binExpression.alias();
-		ontology = binExpression.alias();
-		protocol = binWord.alias();
-		conversationId = binExpression.alias();
-	
-
-		binWord = ( ( byte_(0x10) 
-				>> word 			[ label::_val = label::_1 ]
-				>> byte_(0x00) )
-		        | byte_(0x11) >> index   		[ label::_val = extractFromCodetable(label::_1) ]
-			);
-
-		// Decimal number 0x12
-		// Hex number 0x13
-		// Hexadecimal number are converted to int and then back
-		binNumber = ( byte_(0x12) >> digits 	[ label::_val = label::_1 ] )         
-			  | ( byte_(0x13) >> digits 	[ label::_val = convertDigitsToHex(label::_1) ]
-			  ); 
-
-		digits = +codedNumber [ label::_val += label::_1];
-
-		binString = ( byte_(0x14) >> ( stringLiteralTerminated 
-					   | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
-			  // string literal from code table
-			  | ( byte_(0x15) >> index 			        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])            
-			  // The byte length will be stored in the rule local variable (label::_a) and then forwarded to the qi::repeat instruction
-			  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
-					  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )  // new byteLengthEncoded string 
-			  | ( byte_(0x17) >> len16 			        [ label::_a = label::_1 ]
-				          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
-			  | ( byte_(0x18) >> index                              [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
-			  | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
-                                          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
-			  ;         
-		
-		
-		
-		binExpression = binExpr				[ label::_val = label::_1 ] 
-			      | byte_(0xFF) >> binString        [ label::_val = convertToString(label::_1) ] 
-			      ;
-
-		binExpr = binWord				[ label::_val = label::_1 ]
-			| binString				[ label::_val = convertToString(label::_1) ] 
-			| binNumber				[ label::_val = label::_1 ]
-			// Every expression can look like the following of "(+ (-1 2) 3)"
-			| (exprStart 				[ label::_val = "(" , label::_val += label::_1 ]
-			  >> *binExpr				[ label::_val += label::_1 ]
-			  >> exprEnd 				[ label::_val += ")", label::_val += label::_1 ]
-			  )
-			;
-
-		exprStart = ( byte_(0x60) ) 					 [ label::_val = "" ]
-			  | ( byte_(0x70) >> word       			 [ label::_val = label::_1 ]
-					  >> byte_(0x00) )
-			  | ( byte_(0x71) >> index      			 [ label::_val = extractFromCodetable(label::_1)] )
-			  | ( byte_(0x72) >> digits     			 [ label::_val = label::_1 ] )
-			  | ( byte_(0x73) >> digits     			 [ label::_val = label::_1 ] ) 
-			  | ( byte_(0x74) >> ( stringLiteralTerminated 
-					   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ] )
-			  | ( byte_(0x75) >> index      			 [ label::_val = extractFromCodetable(label::_1)])
-			  | ( byte_(0x76) >> len8 				 [ label::_a = label::_1 ]
-					  >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ]) 
-			  | ( byte_(0x77) >> len16 				 [ label::_a = label::_1 ] 
-					  >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ])
-			  | ( byte_(0x78) >> len32 				 [ label::_a = label::_1 ]
-				          >> fipaString(label::_a)		 [ label::_val = convertToString(label::_1) ])
-			  | ( byte_(0x79) >> index 				 [ label::_val = extractFromCodetable(label::_1)])
-			 ;
-
-		exprEnd = ( byte_(0x40) ) 					 [ label::_val = "" ]
-			| ( byte_(0x50) >> word 	 			 [ label::_val = label::_1 ]
-					>> byte_(0x00) )
-			| ( byte_(0x51) >> index      				 [ label::_val = extractFromCodetable(label::_1)])
-			| ( byte_(0x52) >> digits 				 [ label::_val = label::_1 ] )
-			| ( byte_(0x53) >> digits 				 [ label::_val = label::_1 ] )
-			| ( byte_(0x54) >> ( stringLiteralTerminated 
-					   | byteLengthEncodedStringTerminated ) [ label::_val = convertToString(label::_1) ])
-			| ( byte_(0x55) >> index      				 [ label::_val = extractFromCodetable(label::_1)]) 
-			| ( byte_(0x56) >> len8       				 [ label::_a = label::_1 ]
-					>> fipaString(label::_a)		 [ label::_val = convertToString(label::_1)] )
-			| ( byte_(0x57) >> len16      				 [ label::_a = label::_1 ]
-					>> fipaString(label::_a)    		 [ label::_val = convertToString(label::_1)])
-			| ( byte_(0x58) >> len32      				 [ label::_a = label::_1 ]
-					>> fipaString(label::_a)		 [ label::_val = convertToString(label::_1)])
-			| ( byte_(0x59) >> index      		                 [ label::_val = extractFromCodetable(label::_1)])
-			;
-		
-		// Index is a pointer to code table entry and its size (in bits) depends on the code table size. 
-		// If the code table size is 256 entries, the size of the index is one byte;
-		//  otherwise its size is two bytes (represented in network byte order).
-		index = byte_ | (qi::word [ label::_val = lazy_ntohs(label::_val)]) ;
-
-		// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
-		// TODO: check value and reset
-		// repeat get the inherited variable as parameter (check were this rule is used) which
-		// defines the number of bytes to read
-		byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToCharVector(label::_1) ]
-			;
-		
-		len8 = byte_ ;
-                // boost::uint_least16_t
-		len16 = qi::word [ label::_val = lazy_ntohs(label::_1) ];
-                // boost::uint_least32_t
-		len32 = qi::dword [ label::_val = lazy_ntohl(label::_1) ];
-	
-		word = (char_ - wordExceptionsStart )  		[ label::_val += label::_1 ]
-			 >> *(char_ - wordExceptionsGeneral)    [ label::_val += label::_1 ]
-			;  //TODO: TESTING
-
-		wordExceptionsStart %= wordExceptionsGeneral
-                                | char_('#') 
-				| char_('0','9')
-				| char_('-')
-				| char_('@')
-				;
-		wordExceptionsGeneral %= char_('\x00','\x20') 
-				| char_('(')
-                                | char_(')')
-				;
-		
-		// pass the local length variable down to the rule using parent rules variable  _r1			
-		fipaString = (stringLiteral | byteLengthEncodedString(label::_r1) );
-
-		
-		// Order of statement is relevant here, since the character \ needs to be matched
-		// first -- matching is greedy with char_ otherwise
-		stringLiteral = ( char_('"') 
-			       >> * (( char_("\\") >> char_('"') ) 	[  label::_a += "\"" ]
-				  | (byte_ - char_('"') ) 		[  label::_a += label::_1 ]
-			          )
-			       >> char_('"')
-				)					[ phoenix::at_c<2>(label::_val) = label::_a ]
-				; 
-
-		stringLiteralTerminated = stringLiteral 		[ label::_val = label::_1 ]
-					>> byte_(0x00)
-					;
-	
-		byteLengthEncodedStringHeader = char_('#')
-					      >> + digit 	[ label::_val += label::_1 ]
-					      >> char_('"')
-					      ;
-
-		// Digits tell the byte encoding
-		// label::_r1 is an inherited local variable from the parent rule
-		byteLengthEncodedString = byteLengthEncodedStringHeader 		        [ phoenix::at_c<0>(label::_val) += label::_1 ]
-					>> qi::repeat(label::_r1)[byte_]     			[ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ]
-					;
-
-		byteLengthEncodedStringTerminated = ( byteLengthEncodedStringHeader 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
-						>> * (byte_ - byte_(0x00))			[ label::_a += label::_1 ]
-						>> byte_(0x00) 
-						) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
-						;
-
-		on_error<fail>
-		(
-		    //aclCommunicativeAct,
-		    byteLengthEncodedString,
-		    std::cout
-			<< val("Error: expecting ")
-			<< label::_4 			   // what failed?
-			<< val(" here: \"")
-			<< construct<std::string>(label::_3,label::_2)
-			<< val("\"")
-			<< std::endl
-                );
+                msgContent = binExpression.getBinStringRule();
 
 	// Enables the debug tree when debug mode is active
 	// requires the include of stream operators as well
@@ -853,14 +938,9 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(messageParameter);
         BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageParameter);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageParameter);
-        BOOST_SPIRIT_DEBUG_NODE(byteLengthEncodedString);
         BOOST_SPIRIT_DEBUG_NODE(parameterName);
         BOOST_SPIRIT_DEBUG_NODE(parameterValue);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageType);
-        BOOST_SPIRIT_DEBUG_NODE(binDateTimeToken);
-        BOOST_SPIRIT_DEBUG_NODE(len8);
-        BOOST_SPIRIT_DEBUG_NODE(len16);
-        BOOST_SPIRIT_DEBUG_NODE(len32);
 	#endif
 		
 	}
@@ -892,65 +972,41 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 
 	qi::rule<Iterator, std::string() > messageType;
 	qi::rule<Iterator, std::string() > userDefinedMessageType;
-	qi::rule<Iterator, std::string() > messageTypeName;
+	BinWord<Iterator> messageTypeName;
 
 	qi::rule<Iterator, fipa::acl::MessageParameter() > messageParameter;
 	qi::rule<Iterator, fipa::acl::MessageParameter() > userDefinedMessageParameter;
 	qi::rule<Iterator, fipa::acl::MessageParameter() > predefinedMessageParameter;
 	
-	qi::rule<Iterator, std::string() > parameterName;
-	qi::rule<Iterator, std::string() > parameterValue;
+	BinWord<Iterator> parameterName;
+	BinExpression<Iterator> parameterValue;
 
 	qi::rule<Iterator, std::string() > predefinedMessageType;
 	
 	qi::rule<Iterator, fipa::acl::AgentIdentifier()> agentIdentifier;
-	qi::rule<Iterator, std::string() > agentName;
+	BinWord<Iterator> agentName;
 	qi::rule<Iterator, std::vector<std::string>() > addresses;
 	qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > resolvers;
  	qi::rule<Iterator, fipa::acl::UserDefinedParameter() > userDefinedParameter;
 	
 	qi::rule<Iterator, std::vector<std::string>() > urlCollection;
-	qi::rule<Iterator, std::string() > url;
+	BinWord<Iterator> url;
 	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > recipientExpr;
-	qi::rule<Iterator, fipa::acl::ByteSequence() > msgContent;
-	qi::rule<Iterator, std::string() > replyWithParam;
-	date_time_token<Iterator> replyByParam;
-	qi::rule<Iterator, std::string() > inReplyToParam;
+
+        BinExpression<Iterator> binExpression;
+        BinWord<Iterator> binWord;
+
+        qi::rule<Iterator, fipa::acl::ByteSequence()> msgContent;
+
+	BinExpression<Iterator> replyWithParam;
+	BinDateTime<Iterator> replyByParam;
+	BinExpression<Iterator> inReplyToParam;
 	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > replyToParam;
-	qi::rule<Iterator, std::string() > language;
-	qi::rule<Iterator, std::string() > encoding;
-	qi::rule<Iterator, std::string() > ontology;
-	qi::rule<Iterator, std::string() > protocol;
-	qi::rule<Iterator, std::string() > conversationId;
-	
-	qi::rule<Iterator, std::string()> binWord;
-	qi::rule<Iterator, std::string()> binNumber;
-	qi::rule<Iterator, std::string() > digits; 
-	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > binString;
-	date_time_token<Iterator> binDateTimeToken;
-	qi::rule<Iterator, std::string()> binExpression;
-	qi::rule<Iterator, std::string() > binExpr;
-	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
-	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprEnd;
-
-	//qi::symbols<char, qi::rule<Iterator> > exprKeyword;
-
-	qi::rule<Iterator, std::vector<unsigned char>(boost::uint32_t) > byteSeq;
-	qi::rule<Iterator, uint_least16_t() > index;
-	qi::rule<Iterator, boost::uint_least8_t() > len8;
-	qi::rule<Iterator, boost::uint_least16_t() > len16;
-	qi::rule<Iterator, boost::uint_least32_t() > len32;
-
-	qi::rule<Iterator, std::string() > word;
-	qi::rule<Iterator> wordExceptionsStart;
-	qi::rule<Iterator> wordExceptionsGeneral;
-	qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > fipaString;
-	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > stringLiteral;
-	qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteralTerminated;
-	qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
-	qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
-	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byteLengthEncodedStringTerminated;
-        coded_number<Iterator> codedNumber;
+	BinExpression<Iterator> language;
+	BinExpression<Iterator> encoding;
+	BinExpression<Iterator> ontology;
+	BinWord<Iterator> protocol;
+	BinExpression<Iterator> conversationId;
 };
 
 } // end namepsace bitefficient
