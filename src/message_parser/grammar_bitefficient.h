@@ -826,7 +826,7 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
     /**
      * Allow to retrieve individual rule of this grammar
      */
-    const qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> >& getBinStringRule() { return binString.alias(); }
+    qi::rule<Iterator, fipa::acl::ByteSequence()> getBinStringRule() { return binString; }
 
     // Main rule
     qi::rule<Iterator, std::string()> bin_expression_rule;
