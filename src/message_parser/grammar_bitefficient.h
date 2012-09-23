@@ -405,6 +405,18 @@ struct CodedNumber : qi::grammar<Iterator, std::string()>
 
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(coded_number_rule);
+
+        qi::on_error<qi::fail>
+	(
+	    coded_number_rule,
+	    std::cout
+		<< phoenix::val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< phoenix::val(" here: \"")
+		<< phoenix::construct<std::string>(label::_3,label::_2)
+		<< phoenix::val("\"")
+		<< std::endl
+        );
     #endif
     }
 
@@ -423,6 +435,18 @@ struct Index : qi::grammar<Iterator, uint_least16_t()>
 
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(index_rule);
+
+        qi::on_error<qi::fail>
+	(
+	    index_rule,
+	    std::cout
+		<< phoenix::val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< phoenix::val(" here: \"")
+		<< phoenix::construct<std::string>(label::_3,label::_2)
+		<< phoenix::val("\"")
+		<< std::endl
+        );
     #endif
     }
 
@@ -460,13 +484,20 @@ struct DateTime : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::strin
 
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(year);
-        BOOST_SPIRIT_DEBUG_NODE(month);
-        BOOST_SPIRIT_DEBUG_NODE(day);
-        BOOST_SPIRIT_DEBUG_NODE(hour);
-        BOOST_SPIRIT_DEBUG_NODE(minute);
-        BOOST_SPIRIT_DEBUG_NODE(second);
         BOOST_SPIRIT_DEBUG_NODE(millisecond);
         BOOST_SPIRIT_DEBUG_NODE(date_time_rule);
+
+        qi::on_error<qi::fail>
+	(
+	    date_time_rule,
+	    std::cout
+		<< phoenix::val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< phoenix::val(" here: \"")
+		<< phoenix::construct<std::string>(label::_3,label::_2)
+		<< phoenix::val("\"")
+		<< std::endl
+        );
     #endif // BOOST_SPIRIT_DEBUG
     }
 
@@ -530,8 +561,19 @@ struct BinDateTime : qi::grammar<Iterator, fipa::acl::DateTime()>
 
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(bin_date_time_rule);
-        BOOST_SPIRIT_DEBUG_NODE(binDate);
         BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
+
+        qi::on_error<qi::fail>
+	(
+	    bin_date_time_rule,
+	    std::cout
+		<< phoenix::val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< phoenix::val(" here: \"")
+		<< phoenix::construct<std::string>(label::_3,label::_2)
+		<< phoenix::val("\"")
+		<< std::endl
+        );
     #endif
     }
 
@@ -566,6 +608,18 @@ struct Word : qi::grammar<Iterator, std::string()>
         BOOST_SPIRIT_DEBUG_NODE(word_rule);
         BOOST_SPIRIT_DEBUG_NODE(wordExceptionsStart);
         BOOST_SPIRIT_DEBUG_NODE(wordExceptionsGeneral);
+
+        qi::on_error<qi::fail>
+	(
+	    word_rule,
+	    std::cout
+		<< phoenix::val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< phoenix::val(" here: \"")
+		<< phoenix::construct<std::string>(label::_3,label::_2)
+		<< phoenix::val("\"")
+		<< std::endl
+        );
     #endif
     }
 
@@ -588,6 +642,18 @@ struct BinWord : qi::grammar<Iterator, std::string()>
 		);
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(bin_word_rule);
+
+        qi::on_error<qi::fail>
+	(
+	    bin_word_rule,
+	    std::cout
+		<< phoenix::val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< phoenix::val(" here: \"")
+		<< phoenix::construct<std::string>(label::_3,label::_2)
+		<< phoenix::val("\"")
+		<< std::endl
+        );
     #endif 
     }
 
@@ -672,19 +738,6 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
 
 	digits = +codedNumber [ label::_val += label::_1];
 
-	binString = ( byte_(0x14) >> ( stringLiteralTerminated 
-				   | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
-		  // string literal from code table
-		  | ( byte_(0x15) >> index 			        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])            
-		  // The byte length will be stored in the rule local variable (label::_a) and then forwarded to the qi::repeat instruction
-		  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
-				  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )  // new byteLengthEncoded string 
-		  | ( byte_(0x17) >> len16 			        [ label::_a = label::_1 ]
-			          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
-		  | ( byte_(0x18) >> index                              [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
-		  | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
-                                  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
-		  ;         
 
 	// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
 	// TODO: check value and reset
@@ -728,18 +781,19 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
 					) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
 					;
 
-	on_error<fail>
-	(
-	    //aclCommunicativeAct,
-	    byteLengthEncodedString,
-	    std::cout
-		<< val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< val(" here: \"")
-		<< construct<std::string>(label::_3,label::_2)
-		<< val("\"")
-		<< std::endl
-        );
+	binString = ( byte_(0x14) >> ( stringLiteralTerminated 
+				   | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
+		  // string literal from code table
+		  | ( byte_(0x15) >> index 			        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])            
+		  // The byte length will be stored in the rule local variable (label::_a) and then forwarded to the qi::repeat instruction
+		  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
+				  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )  // new byteLengthEncoded string 
+		  | ( byte_(0x17) >> len16 			        [ label::_a = label::_1 ]
+			          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
+		  | ( byte_(0x18) >> index                              [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
+		  | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
+                                  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
+		  ;         
 
 	len8 = byte_ ;
         // boost::uint_least16_t
@@ -750,10 +804,22 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(bin_expression_rule);
         BOOST_SPIRIT_DEBUG_NODE(byteLengthEncodedString);
-        BOOST_SPIRIT_DEBUG_NODE(binDateTime);
         BOOST_SPIRIT_DEBUG_NODE(len8);
         BOOST_SPIRIT_DEBUG_NODE(len16);
         BOOST_SPIRIT_DEBUG_NODE(len32);
+
+        qi::on_error<qi::fail>
+	(
+	    //aclCommunicativeAct,
+	    byteLengthEncodedString,
+	    std::cout
+		<< phoenix::val("Error: expecting ")
+		<< label::_4 			   // what failed?
+		<< phoenix::val(" here: \"")
+		<< phoenix::construct<std::string>(label::_3,label::_2)
+		<< phoenix::val("\"")
+		<< std::endl
+        );
     #endif
     }
 
@@ -800,8 +866,6 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
       
 	message_grammar() : message_grammar::base_type(aclCommunicativeAct, "message-bitefficient_grammar")
 	{
-		using qi::on_error;
-		using qi::fail;
 		using phoenix::construct;
 		using phoenix::val;
 
@@ -933,13 +997,10 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(version);
         BOOST_SPIRIT_DEBUG_NODE(messageType);
         BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageType);
-        BOOST_SPIRIT_DEBUG_NODE(messageTypeName);
         BOOST_SPIRIT_DEBUG_NODE(agentIdentifier);
         BOOST_SPIRIT_DEBUG_NODE(messageParameter);
         BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageParameter);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageParameter);
-        BOOST_SPIRIT_DEBUG_NODE(parameterName);
-        BOOST_SPIRIT_DEBUG_NODE(parameterValue);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageType);
 	#endif
 		
