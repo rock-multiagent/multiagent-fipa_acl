@@ -826,7 +826,7 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
     /**
      * Allow to retrieve individual rule of this grammar
      */
-    qi::rule<Iterator, fipa::acl::ByteSequence()> getBinStringRule() { return binString; }
+    qi::rule<Iterator, fipa::acl::ByteSequence()> getBinStringRule() { return binString.alias(); }
 
     // Main rule
     qi::rule<Iterator, std::string()> bin_expression_rule;
@@ -857,6 +857,51 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
     qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
     qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byteLengthEncodedStringTerminated;
     CodedNumber<Iterator> codedNumber;
+};
+
+template<typename Iterator>
+struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentIdentifier()>
+{
+    AgentIdentifier() : AgentIdentifier::base_type(agent_identifier_rule, "AgentIdentifier-bitefficient_grammar")
+    {
+        using qi::byte_;
+
+        agent_identifier_rule = byte_(0x02) >> agentName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
+       		 >> -addresses  	   		[ phoenix::at_c<1>(label::_val) = label::_1 ]
+       		 >> -resolvers 	           		[ phoenix::at_c<2>(label::_val) = label::_1 ]
+       		 >> *userDefinedParameter		[ phoenix::push_back(phoenix::at_c<3>(label::_val), label::_1) ] 
+       		 >> endOfCollection;				
+        
+        addresses = byte_(0x02) >> urlCollection 		[ label::_val = label::_1 ];
+        resolvers = byte_(0x03) >> *agent_identifier_rule       [ phoenix::push_back(label::_val, label::_1) ]
+       			   >> endOfCollection;
+        
+        urlCollection = *url 					[ phoenix::push_back(label::_val, label::_1) ]
+       		 >> endOfCollection;
+        
+        userDefinedParameter = byte_(0x04) >> binWord 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
+       			 >> binExpression     		[ phoenix::at_c<1>(label::_val) = label::_1 ]  
+        			;
+        endOfCollection %= byte_(0x01); 
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(agent_identifier_rule);
+        BOOST_SPIRIT_DEBUG_NODE(addresses);
+        BOOST_SPIRIT_DEBUG_NODE(resolvers);
+        BOOST_SPIRIT_DEBUG_NODE(userDefinedParameter);
+    #endif 
+    }
+
+    BinWord<Iterator> binWord;
+    BinExpression<Iterator> binExpression;
+
+    qi::rule<Iterator, fipa::acl::AgentIdentifier()> agent_identifier_rule;
+    BinWord<Iterator> agentName;
+    qi::rule<Iterator, std::vector<std::string>() > addresses;
+    qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > resolvers;
+    qi::rule<Iterator, fipa::acl::UserDefinedParameter() > userDefinedParameter;
+    qi::rule<Iterator, std::vector<std::string>() > urlCollection;
+    BinWord<Iterator> url;
+    qi::rule<Iterator> endOfCollection;
 };
 
 template <typename Iterator>
@@ -963,22 +1008,11 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId  [ phoenix::at_c<1>(label::_val) = label::_1 ] // conversation-id
 					; 
 		
-		agentIdentifier = byte_(0x02) >> agentName 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-				 >> -addresses  	   		[ phoenix::at_c<1>(label::_val) = label::_1 ]
-				 >> -resolvers 	           		[ phoenix::at_c<2>(label::_val) = label::_1 ]
-				 >> *userDefinedParameter		[ phoenix::push_back(phoenix::at_c<3>(label::_val), label::_1) ] 
-				 >> endOfCollection;				
-
-		addresses = byte_(0x02) >> urlCollection 		[ label::_val = label::_1 ];
-		resolvers = byte_(0x03) >> *agentIdentifier 		[ phoenix::push_back(label::_val, label::_1) ]
-					   >> endOfCollection;
 
 		userDefinedParameter = byte_(0x04) >> binWord 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
 					 >> binExpression     		[ phoenix::at_c<1>(label::_val) = label::_1 ]  
 					;
 		
-		urlCollection = *url 					[ phoenix::push_back(label::_val, label::_1) ]
-				 >> endOfCollection;
 
 		recipientExpr = *agentIdentifier 			[ phoenix::push_back(label::_val, label::_1) ]
 				>> endOfCollection;
@@ -1043,16 +1077,11 @@ struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	BinExpression<Iterator> parameterValue;
 
 	qi::rule<Iterator, std::string() > predefinedMessageType;
-	
-	qi::rule<Iterator, fipa::acl::AgentIdentifier()> agentIdentifier;
-	BinWord<Iterator> agentName;
-	qi::rule<Iterator, std::vector<std::string>() > addresses;
-	qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > resolvers;
  	qi::rule<Iterator, fipa::acl::UserDefinedParameter() > userDefinedParameter;
 	
-	qi::rule<Iterator, std::vector<std::string>() > urlCollection;
-	BinWord<Iterator> url;
 	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > recipientExpr;
+
+        AgentIdentifier<Iterator> agentIdentifier;
 
         BinExpression<Iterator> binExpression;
         BinWord<Iterator> binWord;
