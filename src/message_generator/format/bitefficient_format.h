@@ -1,91 +1,21 @@
-/**
-*
-* \file acl_message_output_parser.h
-* \author Mircea Cretu Stancu
-* \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
-*/
+#ifndef FIPA_ACL_BITEFFICIENT_FORMATTER_H
+#define FIPA_ACL_BITEFFICIENT_FORMATTER_H
 
-#ifndef FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
-#define FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
-#include <string>
-#include <fipa_acl/message_generator/agent_id.h>
-#include <fipa_acl/message_generator/userdef_param.h>
-#include <fipa_acl/message_generator/acl_message.h>
-#include <fipa_acl/message_generator/exception.h>
+#include <fipa_acl/message_generator/format.h>
 
 namespace fipa {
-
 namespace acl {
-    
-/**
-* \class ACLMessageOutputParser
-* \brief encodes and ACLMessage class object according to the fipa spec(SC00069) all pointer extractin/passing methods are 
-* shallow(only the references passed); this is ok as they are not modiffied in the process of encoding; if this changes as 
-* utility increases(objects will be modified) then change to deep-copy retreival should be trivial, with the overloaded operators
-*/
-class ACLMessageOutputParser {
 
-private:
-     /**
-     @msg message to be parsed
-
-     @useCodeTables flag to determine whether we use code tables or not
-     * sice the code tables are not implemented yet, it's value is initialized with 0 and is not to be changed
-
-     @updateCodeTables flag to determine whether we update the code tables
-     * it does not have any practical relevance unless useCodeTables = 1
-
-     @version string that keeps the version of the encoder
-     * needed by the speciffication; initialized to "1.0"
-     * important restraint: as the speciffication states the version must be of strictly 2 digits;
-     
-     @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentID's
-     * see speciffication for details 
-     */
-    ACLMessage mMessage;
-    bool mUseCodeTables;
-    bool mUpdateCodeTables;
-    std::string mVersion;
-    int mResolverDepth;
-    
+class BitefficientFormat : public Format
+{
 public:
-    ACLMessageOutputParser();
     /**
-        \brief setter and getter methods for the parameters of the encoder
-    */
-    void setUseCodeTables(bool x) { mUseCodeTables = x; }
+     * Applies the format to the message
+     * \return the formatted message object
+     */
+    std::string apply(const ACLMessage& msg);
 
-    bool getUseCodeTables() { return mUseCodeTables; }
-
-    void setUpdateCodeTables(bool x) { mUpdateCodeTables = x; }
-
-    bool getUpdateCodeTables() { return mUpdateCodeTables; }
-
-    void setResolverDepth(int depth) { mResolverDepth = depth; }
-
-    int getResolverDepth() { return mResolverDepth; }
-
-    void setVersion(const std::string& version) { mVersion = version; }
-
-    std::string getVersion() { return mVersion; }
-    /**
-        \brief not a deep-copy assignment of msg but this should not be a problem as fields are not modified in the encoding process
-    */
-    void setMessage(const ACLMessage &a);
-    
-    /**
-        \brief prints the parsed message to an ofstream given as argument(as a string)
-        \param stream: name of the desired ofstream
-    */
-    int printParsedMessage(const std::string& stream);		
-    
-    /**
-       \brief  main function in the production tree, returns the encoded message as a sequence of bytes kept in a string object
-       \return string containing the encoded message
-       \throw MessageGeneratorException when the message could not be created correctly
-    */
-    std::string getBitMessage();
-
+private: 
     /**
         \brief encodes an AgentID instance
         
@@ -98,8 +28,6 @@ public:
     */
     std::string getBitAID(const AgentID& aid, int depth);
     
-    
-private:
     /**
     \brief returns the very used end-of-collection marker
     */
@@ -236,10 +164,9 @@ private:
     because the date string is passed as substrings and then concatenated back toghether in the caller function, the above function would not perform as desired(it adds a padding 0x00 byte after each substring)
     */
     std::string getBitCodedNumberByte(const std::string& cn);
-};
+}
 
+} // end namespace acl
+} // end namespace fipa
 
-}//end of acl namespace
-
-}// end of fipa namespace
-#endif
+#endif // FIPA_ACL_BITEFFICIENT_FORMATTER_H
