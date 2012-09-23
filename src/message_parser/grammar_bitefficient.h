@@ -389,16 +389,88 @@ namespace fipa
 	
 	extern phoenix::function<convertToCharVectorImpl> convertToCharVector;
 
+namespace acl {
+namespace bitefficient {
 
-namespace acl
+// To avoid namespace clashes with boost::bind
+namespace label = qi::labels;
+
+template<typename Iterator>
+struct coded_number : qi::grammar<Iterator, std::string()>
 {
+    coded_number() : coded_number::base_type(number, "coded_number-bitefficient_grammar")
+    {
+        // two numbers in one byte - padding 00 if coding only one number
+        number = qi::byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
+
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(number);
+    #endif
+    }
+
+    qi::rule<Iterator, std::string()> number;
+};
+
+template <typename Iterator>
+struct date_time : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::string> >
+{
+    date_time() : date_time::base_type(dateTime, "date_time-bitefficient_grammar")
+    {
+
+        // Construct/Fill Time()
+        // First read the standard input for struct tm
+        // then fill the extended millisecond field
+        
+        // Fixme: label::_a = string, label::_a += "-" will return only label::_a as "-"
+        // Currently using a workaround with 'buildString'
+        dateTime = ((        ( year	[ label::_a = buildString(label::_1,"-","") ]) //, label::_a = label::_1, label::_a += "-" ])//, print("yearinBinDate:", label::_1) ]*/ )
+        		>> ( month	[ label::_a = buildString(label::_a, label::_1,"-") ]) 
+        		>> ( day	[ label::_a = buildString(label::_a, label::_1,"T") ])
+        		>> ( hour       [ label::_a = buildString(label::_a, label::_1,":") ])
+        		>> ( minute	[ label::_a = buildString(label::_a, label::_1,":") ])
+        		>> ( second	[ label::_a = buildString(label::_a, label::_1,"")  ]) 
+        	   ) 		
+        	>> ( millisecond  	[ label::_val = convertToTime(label::_a, label::_1) ])
+        	)
+        	 ;
+        
+        year = ( codedNumber  	[ label::_val = label::_1] )
+               >> ( codedNumber [ label::_val += label::_1 ])
+               ;
+        // same format as year
+        millisecond = year.alias();
+
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(year);
+        BOOST_SPIRIT_DEBUG_NODE(month);
+        BOOST_SPIRIT_DEBUG_NODE(day);
+        BOOST_SPIRIT_DEBUG_NODE(hour);
+        BOOST_SPIRIT_DEBUG_NODE(minute);
+        BOOST_SPIRIT_DEBUG_NODE(second);
+        BOOST_SPIRIT_DEBUG_NODE(millisecond);
+        BOOST_SPIRIT_DEBUG_NODE(dateTime);
+    #endif // BOOST_SPIRIT_DEBUG
+    }
+
+    coded_number<Iterator> codedNumber;
+
+    qi::rule<Iterator, fipa::acl::Time(), qi::locals<std::string> > dateTime;
+    qi::rule<Iterator, std::string() > year;
+    coded_number<Iterator> month;
+    coded_number<Iterator> day;
+    coded_number<Iterator> hour;
+    coded_number<Iterator> minute;
+    coded_number<Iterator> second;
+    qi::rule<Iterator, std::string() > millisecond;
+
+};
 
 template <typename Iterator>
 // IMPORTANT: ACLMessage with following () otherwise, compiler error
-struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
+struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 {
       
-	bitefficient_grammar() : bitefficient_grammar::base_type(aclCommunicativeAct, "bitefficient-grammar")
+	message_grammar() : message_grammar::base_type(aclCommunicativeAct, "message-bitefficient_grammar")
 	{
 		using qi::on_error;
 		using qi::fail;
@@ -608,22 +680,6 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 					)
 	;    
 		
-		// Construct/Fill Time()
-		// First read the standard input for struct tm
-		// then fill the extended millisecond field
-		
-		// Fixme: label::_a = string, label::_a += "-" will return only label::_a as "-"
-		// Currently using a workaround with 'buildString'
-		binDate = ((        ( year	[ label::_a = buildString(label::_1,"-","") ]) //, label::_a = label::_1, label::_a += "-" ])//, print("yearinBinDate:", label::_1) ]*/ )
-				>> ( month	[ label::_a = buildString(label::_a, label::_1,"-") ]) 
-				>> ( day	[ label::_a = buildString(label::_a, label::_1,"T") ])
-				>> ( hour       [ label::_a = buildString(label::_a, label::_1,":") ])
-				>> ( minute	[ label::_a = buildString(label::_a, label::_1,":") ])
-				>> ( second	[ label::_a = buildString(label::_a, label::_1,"")  ]) 
-			   ) 		
-			>> ( millisecond  	[ label::_val = convertToTime(label::_a, label::_1) ])
-			)
-			 ;
 		
 		binExpression = binExpr				[ label::_val = label::_1 ] 
 			      | byte_(0xFF) >> binString        [ label::_val = convertToString(label::_1) ] 
@@ -693,18 +749,6 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
                 // boost::uint_least32_t
 		len32 = qi::dword [ label::_val = lazy_ntohl(label::_1) ];
 	
-		year = ( codedNumber  	[ label::_val = label::_1] )
-		       >> ( codedNumber [ label::_val += label::_1 ])
-		       ;
-
-		month = codedNumber.alias();
-		day = codedNumber.alias();
-		hour = codedNumber.alias();
-		minute = codedNumber.alias();
-		second = codedNumber.alias();
-		// same format as year
-		millisecond = year.alias();
-
 		word = (char_ - wordExceptionsStart )  		[ label::_val += label::_1 ]
 			 >> *(char_ - wordExceptionsGeneral)    [ label::_val += label::_1 ]
 			;  //TODO: TESTING
@@ -754,9 +798,6 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 						>> byte_(0x00) 
 						) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
 						;
-		// two numbers in one byte - padding 00 if coding only one number
-		codedNumber = byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
-	
 
 		// Timezone for UTC is Z
 		typeDesignator = alpha 		[ label::_val = label::_1 ]; 	
@@ -795,15 +836,8 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(parameterName);
         BOOST_SPIRIT_DEBUG_NODE(parameterValue);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageType);
-        BOOST_SPIRIT_DEBUG_NODE(year);
-        BOOST_SPIRIT_DEBUG_NODE(month);
-        BOOST_SPIRIT_DEBUG_NODE(day);
-        BOOST_SPIRIT_DEBUG_NODE(hour);
-        BOOST_SPIRIT_DEBUG_NODE(minute);
-        BOOST_SPIRIT_DEBUG_NODE(second);
-        BOOST_SPIRIT_DEBUG_NODE(millisecond);
-        BOOST_SPIRIT_DEBUG_NODE(binDate);
         BOOST_SPIRIT_DEBUG_NODE(binDateTimeToken);
+        BOOST_SPIRIT_DEBUG_NODE(binDate);
         BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
         BOOST_SPIRIT_DEBUG_NODE(len8);
         BOOST_SPIRIT_DEBUG_NODE(len16);
@@ -875,7 +909,7 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	qi::rule<Iterator, std::string() > digits; 
 	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > binString;
 	qi::rule<Iterator, fipa::acl::DateTime() > binDateTimeToken;
-	qi::rule<Iterator, fipa::acl::Time(), qi::locals<std::string> > binDate;
+	date_time<Iterator> binDate;
 	qi::rule<Iterator, std::string()> binExpression;
 	qi::rule<Iterator, std::string() > binExpr;
 	qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
@@ -888,13 +922,6 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	qi::rule<Iterator, boost::uint_least8_t() > len8;
 	qi::rule<Iterator, boost::uint_least16_t() > len16;
 	qi::rule<Iterator, boost::uint_least32_t() > len32;
-	qi::rule<Iterator, std::string() > year;
-	qi::rule<Iterator, std::string() > month;
-	qi::rule<Iterator, std::string() > day;
-	qi::rule<Iterator, std::string() > hour;
-	qi::rule<Iterator, std::string() > minute;
-	qi::rule<Iterator, std::string() > second;
-	qi::rule<Iterator, std::string() > millisecond;
 
 	qi::rule<Iterator, std::string() > word;
 	qi::rule<Iterator> wordExceptionsStart;
@@ -905,11 +932,11 @@ struct bitefficient_grammar : qi::grammar<Iterator, fipa::acl::Message()>
 	qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
 	qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
 	qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byteLengthEncodedStringTerminated;
-	qi::rule<Iterator, std::string()> codedNumber;
 	qi::rule<Iterator, char() > typeDesignator;
-
+        coded_number<Iterator> codedNumber;
 };
 
+} // end namepsace bitefficient
 } // end namespace acl
 } // end namespace fipa
 

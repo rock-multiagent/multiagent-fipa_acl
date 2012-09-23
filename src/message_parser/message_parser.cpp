@@ -19,8 +19,8 @@ namespace acl {
 
 bool MessageParser::parseData(const std::string& storage, ACLMessage &msg)
 {
-	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
-	bitefficient_grammar grammar;
+        typedef fipa::acl::bitefficient::message_grammar<std::string::const_iterator> bitefficient_message_grammar;
+	bitefficient_message_grammar grammar;
 	fipa::acl::Message parseTree;
 
 	std::string::const_iterator iter = storage.begin();
