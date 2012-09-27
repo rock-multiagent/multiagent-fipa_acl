@@ -1,0 +1,7 @@
+<scxml version="1.0" initial="1">
+    <state id="1">
+        <transition performative="inform" from="initiator" to="B" target="2"/>
+    </state>
+    <state id="2" final="yes">
+    </state>
+</scxml>
