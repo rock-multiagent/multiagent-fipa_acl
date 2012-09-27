@@ -135,9 +135,14 @@ void StateMachine::generateDefaultStates()
 
 const State& StateMachine::getCurrentState() const
 {
-    std::map<StateId, State>::const_iterator it = mStates.find(mCurrentStateId);
-    assert(it != mStates.end());
-    return it->second;
+    if(mCurrentStateId.empty())
+    {
+        throw std::runtime_error("Statemachine has not been properly initialized: current state not set");
+    } else {
+        std::map<StateId, State>::const_iterator it = mStates.find(mCurrentStateId);
+        assert(it != mStates.end());
+        return it->second;
+    }
 }
 
 void StateMachine::setSelf(const AgentID& self)

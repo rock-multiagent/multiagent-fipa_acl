@@ -254,6 +254,10 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
     using namespace fipa::acl;
 
     std::string configurationPath = getProtocolPath();
+
+    StateMachine test;
+    BOOST_REQUIRE_THROW(test.inFinalState(), std::runtime_error);
+
     StateMachineFactory::setProtocolResourceDir(configurationPath);
     {
         StateMachine inform = StateMachineFactory::getStateMachine("inform");

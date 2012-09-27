@@ -86,6 +86,7 @@ protected:
 
     /**
      * Get current state
+     * \throws std::runtime_error if statemachine has not been properly initialized
      */
     const State& getCurrentState() const;
 
