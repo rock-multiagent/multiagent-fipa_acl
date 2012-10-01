@@ -25,7 +25,6 @@ set(HEADERS
     message_parser/types.h
     message_parser/agent_id.h
     message_parser/parameter.h
-    message_parser/grammar_bitefficient_test.h
     message_parser/message_parser.h
     message_parser/message_printer.h
     message_generator/exception.h
