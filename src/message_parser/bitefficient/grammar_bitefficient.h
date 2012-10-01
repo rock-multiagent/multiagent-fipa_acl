@@ -825,6 +825,8 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
 
     /**
      * Allow to retrieve individual rule of this grammar
+     * 
+     * NOTE: this avoids a too granular split of the grammars
      */
     qi::rule<Iterator, fipa::acl::ByteSequence()> getBinStringRule() { return binString.alias(); }
 
@@ -906,10 +908,10 @@ struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentIdentifier()>
 
 template <typename Iterator>
 // IMPORTANT: ACLMessage with following () otherwise, compiler error
-struct message_grammar : qi::grammar<Iterator, fipa::acl::Message()>
+struct Message : qi::grammar<Iterator, fipa::acl::Message()>
 {
       
-	message_grammar() : message_grammar::base_type(aclCommunicativeAct, "message-bitefficient_grammar")
+	Message() : Message::base_type(aclCommunicativeAct, "message-bitefficient_grammar")
 	{
 		using phoenix::construct;
 		using phoenix::val;

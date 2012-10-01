@@ -11,7 +11,7 @@
 #include <base/logging.h>
 
 #include "message_parser.h"
-#include "grammar_bitefficient.h"
+#include "bitefficient/grammar_bitefficient.h"
 
 
 namespace fipa { 
@@ -19,7 +19,7 @@ namespace acl {
 
 bool MessageParser::parseData(const std::string& storage, ACLMessage &msg)
 {
-        typedef fipa::acl::bitefficient::message_grammar<std::string::const_iterator> bitefficient_message_grammar;
+        typedef fipa::acl::bitefficient::Message<std::string::const_iterator> bitefficient_message_grammar;
 	bitefficient_message_grammar grammar;
 	fipa::acl::Message parseTree;
 

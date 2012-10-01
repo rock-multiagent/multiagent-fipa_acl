@@ -30,7 +30,7 @@ template struct Word<iterator_type>;
 template struct BinWord<iterator_type>;
 template struct BinExpression<iterator_type>;
 template struct AgentIdentifier<iterator_type>;
-template struct message_grammar<iterator_type>;
+template struct Message<iterator_type>;
 
 } // end namespace bitefficient
 } // end namespace acl
