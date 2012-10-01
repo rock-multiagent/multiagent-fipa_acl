@@ -4,6 +4,7 @@ set(SOURCES
     message_parser/message_printer.cpp
     message_parser/message_parser.cpp
     message_parser/bitefficient/grammar_bitefficient.cpp
+    message_parser/bitefficient/grammar_bitefficient_envelope.cpp
     message_generator/acl_message.cpp
     message_generator/agent_id.cpp
     message_generator/userdef_param.cpp
@@ -40,6 +41,7 @@ set(HEADERS
     message_parser/date_time.h
     message_parser/debug.h
     message_parser/grammar_bitefficient.h
+    message_parser/grammar_bitefficient_envelope.h
     message_parser/message_parser.h
     message_parser/message_printer.h
     message_parser/parameter.h
