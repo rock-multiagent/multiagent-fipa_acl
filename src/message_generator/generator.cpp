@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <string>
 #include <map>
-#include "acl_message_output_parser.h"
+#include <fipa_acl/message_generator/message_generator.h>
 
 std::map<std::string, std::string> options;
 
@@ -58,10 +58,7 @@ int main(int argc, char** argv)
     fipa::acl::ACLMessage msg(options["performative"]);
     msg.setContent(options["content"]);
      
-    fipa::acl::ACLMessageOutputParser mop;
-    mop.setMessage(msg);
-    
-    std::string bitefficientMsg = mop.getBitMessage();
+    std::string bitefficientMsg = fipa::acl::MessageGenerator::create(msg, fipa::acl::message_format::BITEFFICIENT);
     int size = bitefficientMsg.size();
 
     for(int i = 0; i < size; i++)

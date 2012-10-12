@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 
-#include <fipa_acl/message_generator/acl_message_output_parser.h>
+#include <fipa_acl/message_generator/message_generator.h>
 
 #include <fipa_acl/message_parser/grammar_bitefficient.h>
 #include <fipa_acl/message_parser/message_printer.h>
@@ -122,9 +122,8 @@ bool parseInteractive()
 	//scanf(buffer, "%s");
 	msg.setContent("");
 	
-	fipa::acl::ACLMessageOutputParser mop;
-	mop.setMessage(msg);
-	std::string bitefficientMessage = mop.getBitMessage();
+	fipa::acl::MessageGenerator generator;
+	std::string bitefficientMessage = generator.create(msg, fipa::acl::message_format::BITEFFICIENT);
 	
 	return parseMsg(bitefficientMessage);
 }

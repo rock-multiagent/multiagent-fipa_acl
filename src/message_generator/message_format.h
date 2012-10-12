@@ -39,7 +39,6 @@ private:
      @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentID's
      * see speciffication for details 
      */
-    ACLMessage mMessage;
     bool mUseCodeTables;
     bool mUpdateCodeTables;
     std::string mVersion;
@@ -60,7 +59,7 @@ public:
      * Check if code tables shouldbe used
      * \return True, if code tables should be used, false otherwise
      */
-    bool getUseCodeTables() { return mUseCodeTables; }
+    bool getUseCodeTables() const { return mUseCodeTables; }
 
     /**
      * Set whether code tables should be updated
@@ -71,7 +70,7 @@ public:
      * Get update code tables
      * \return True if codetable should be update, false otherwise
      */
-    bool getUpdateCodeTables() { return mUpdateCodeTables; }
+    bool getUpdateCodeTables() const { return mUpdateCodeTables; }
 
     /**
      * Set resolver depth which should be considered for comparison
@@ -82,7 +81,7 @@ public:
      * Get resolver depth which should be considered for comparison
      * \return resolver depth
      */
-    int getResolverDepth() { return mResolverDepth; }
+    int getResolverDepth() const { return mResolverDepth; }
 
     /**
      * Set version format
@@ -92,7 +91,7 @@ public:
     /**
      * Get version of the format
      */
-    std::string getVersion() { return mVersion; }
+    std::string getVersion() const { return mVersion; }
 
     /**
      * Format the message 

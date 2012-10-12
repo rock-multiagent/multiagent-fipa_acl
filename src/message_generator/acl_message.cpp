@@ -206,8 +206,6 @@ void ACLMessage::setProtocol(const std::string& str)
     mProtocol = str; 
 }
 
-std::string* ACLMessage::getContentPtr() { return &mContent; }
-
 bool ACLMessage::hasBinaryContent() const 
 {
     // Check on the existance of 0x00 in the content

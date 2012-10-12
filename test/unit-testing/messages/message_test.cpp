@@ -8,7 +8,6 @@ BOOST_AUTO_TEST_CASE(message_test)
 {
     using namespace fipa::acl;
 
-    ACLMessageOutputParser outputParser;
     ACLMessage msg("inform");
     AgentID origin("proxy");
     AgentID receiver("crex_0_CREXCORE");
@@ -37,8 +36,7 @@ BOOST_AUTO_TEST_CASE(message_test)
     std::vector<AgentID> agents = msg.getAllReceivers();
     BOOST_CHECK_MESSAGE(agents.size() == 1, "Original msg: receiver agent size is one");
 
-    outputParser.setMessage(msg);
-    std::string encodedMsg = outputParser.getBitMessage();
+    std::string encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
 
     MessageParser inputParser;
     ACLMessage outputMsg;
@@ -74,7 +72,6 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
 {
     using namespace fipa::acl;
 
-    ACLMessageOutputParser outputParser;
     ACLMessage msg("inform");
     AgentID origin("proxy");
     AgentID receiver("crex_0_CREXCORE");
@@ -91,8 +88,7 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
     content_size = msg.getContent().size();
     BOOST_REQUIRE_MESSAGE(content_size > 0, "Content size > 0");
 
-    outputParser.setMessage(msg);
-    std::string encodedMsg = outputParser.getBitMessage();
+    std::string encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
 
     BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len8 size field" );
     std::string content_out = outputMsg.getContent();
@@ -112,8 +108,7 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
         content_size = msg.getContent().size();
         BOOST_REQUIRE_MESSAGE(content_size == size, "Content size " << content_size << " vs. size " << size);
 
-        outputParser.setMessage(msg);
-        encodedMsg = outputParser.getBitMessage();
+        encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
 
         BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len16 size field: size " << content_size);
         uint32_t outputMsgSize = outputMsg.getContent().size();
@@ -130,8 +125,7 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
         content_size = msg.getContent().size();
         BOOST_ASSERT(content_size == size);
 
-        outputParser.setMessage(msg);
-        encodedMsg = outputParser.getBitMessage();
+        encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
 
         BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len32 size field");
 

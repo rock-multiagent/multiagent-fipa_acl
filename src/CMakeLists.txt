@@ -6,8 +6,10 @@ set(SOURCES
     message_parser/grammar_bitefficient.cpp
     message_generator/acl_message.cpp
     message_generator/agent_id.cpp
+    message_generator/format/bitefficient_format.cpp
+    message_generator/message_format.cpp
     message_generator/userdef_param.cpp
-    message_generator/acl_message_output_parser.cpp
+    message_generator/message_generator.cpp
     conversation_monitor/message_archive.cpp
     conversation_monitor/role.cpp
     conversation_monitor/state.cpp
@@ -29,8 +31,10 @@ set(HEADERS
     message_parser/message_parser.h
     message_parser/message_printer.h
     message_generator/exception.h
+    message_generator/message_format.h
+    message_generator/format/bitefficient_format.h
     message_generator/userdef_param.h
-    message_generator/acl_message_output_parser.h
+    message_generator/message_generator.h
     message_generator/types.h
     message_generator/agent_id.h
     message_generator/acl_message.h
