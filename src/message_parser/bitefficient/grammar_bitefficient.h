@@ -29,6 +29,10 @@
 #ifdef BOOST_SPIRIT_DEBUG
 // include stream operators
 #include <fipa_acl/message_parser/debug.h>
+
+#define FIPA_DEBUG_RULE(X) BOOST_SPIRIT_DEBUG_NODE(X); qi::on_error<qi::fail> ( X, std::cout << phoenix::val("Error: expecting ") << label::_4 /* what failed? */ << phoenix::val(" here: \"") << phoenix::construct<std::string>(label::_3,label::_2) << phoenix::val("\"") << std::endl);
+#else
+#define FIPA_DEBUG_RULE(X) 
 #endif
 
 namespace fusion = boost::fusion;
@@ -128,6 +132,8 @@ namespace fipa
 			{
                                 // codetable index
 				index = arg;
+
+                                // TODO: search codetable and extract data
 			}
 
 			throw std::runtime_error("Codetable currently unsupported");
@@ -389,39 +395,12 @@ namespace fipa
 	
 	extern phoenix::function<convertToCharVectorImpl> convertToCharVector;
 
+
 namespace acl {
 namespace bitefficient {
 
 // To avoid namespace clashes with boost::bind
 namespace label = qi::labels;
-
-template<typename Iterator>
-struct CodedNumber : qi::grammar<Iterator, std::string()>
-{
-    CodedNumber() : CodedNumber::base_type(coded_number_rule, "CodedNumber-bitefficient_grammar")
-    {
-        // two numbers in one byte - padding 00 if coding only one number
-        coded_number_rule = qi::byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
-
-    #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(coded_number_rule);
-
-        qi::on_error<qi::fail>
-	(
-	    coded_number_rule,
-	    std::cout
-		<< phoenix::val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< phoenix::val(" here: \"")
-		<< phoenix::construct<std::string>(label::_3,label::_2)
-		<< phoenix::val("\"")
-		<< std::endl
-        );
-    #endif
-    }
-
-    qi::rule<Iterator, std::string()> coded_number_rule;
-};
 
 template<typename Iterator>
 struct Index : qi::grammar<Iterator, uint_least16_t()>
@@ -433,25 +412,255 @@ struct Index : qi::grammar<Iterator, uint_least16_t()>
 	//  otherwise its size is two bytes (represented in network byte order).
 	index_rule = qi::byte_ | (qi::word [ label::_val = lazy_ntohs(label::_val)]) ;
 
-    #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(index_rule);
-
-        qi::on_error<qi::fail>
-	(
-	    index_rule,
-	    std::cout
-		<< phoenix::val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< phoenix::val(" here: \"")
-		<< phoenix::construct<std::string>(label::_3,label::_2)
-		<< phoenix::val("\"")
-		<< std::endl
-        );
-    #endif
+        FIPA_DEBUG_RULE(index_rule);
     }
 
     qi::rule<Iterator, uint_least16_t() > index_rule;
 };
+
+template<typename Iterator>
+struct Len8 : qi::grammar<Iterator, boost::uint_least8_t()>
+{
+    Len8(): Len8::base_type(len8_rule, "Len8-bitefficient_grammar")
+    {
+	len8_rule = qi::byte_;
+
+        FIPA_DEBUG_RULE(len8_rule);
+    }
+
+    qi::rule<Iterator, boost::uint_least8_t() > len8_rule;
+};
+
+template<typename Iterator>
+struct Len16 : qi::grammar<Iterator, boost::uint_least16_t()>
+{
+    Len16(): Len16::base_type(len16_rule, "Len16-bitefficient_grammar")
+    {
+        // boost::uint_least16_t
+	len16_rule = qi::word [ label::_val = lazy_ntohs(label::_1) ];
+
+	FIPA_DEBUG_RULE(len16_rule);
+    }
+
+    qi::rule<Iterator, boost::uint_least16_t() > len16_rule;
+};
+
+template<typename Iterator>
+struct Len32 : qi::grammar<Iterator, boost::uint_least32_t()>
+{
+    Len32(): Len32::base_type(len32_rule, "Len32-bitefficient_grammar")
+    {
+        // boost::uint_least32_t
+	len32_rule = qi::dword [ label::_val = lazy_ntohl(label::_1) ];
+
+	FIPA_DEBUG_RULE(len32_rule);
+    }
+
+    qi::rule<Iterator, boost::uint_least32_t() > len32_rule;
+};
+
+template <typename Iterator>
+struct StringLiteral : qi::grammar<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> >
+{
+    StringLiteral() : StringLiteral::base_type(string_literal_rule, "StringLiteral-bitefficient_grammar")
+    {
+        using qi::byte_;
+	using encoding::char_;
+	using encoding::digit;
+
+	// Order of statement is relevant here, since the character \ needs to be matched
+	// first -- matching is greedy with char_ otherwise
+	string_literal_rule = ( char_('"')
+		       >> * (( char_("\\") >> char_('"') ) 	[  label::_a += "\"" ]
+			  | (byte_ - char_('"') ) 		[  label::_a += label::_1 ]
+		          )
+		       >> char_('"')
+			)					[ phoenix::at_c<2>(label::_val) = label::_a ]
+			;
+
+	FIPA_DEBUG_RULE(string_literal_rule);
+    }
+
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > string_literal_rule;
+};
+
+template<typename Iterator>
+struct StringLiteralTerminated : qi::grammar<Iterator, fipa::acl::ByteSequence() >
+{
+    StringLiteralTerminated() : StringLiteralTerminated::base_type(string_literal_terminated_rule, "StringLiteralTerminated-bitefficient_grammar")
+    {
+	string_literal_terminated_rule = stringLiteral 		[ label::_val = label::_1 ]
+				>> qi::byte_(0x00)
+				;
+
+	FIPA_DEBUG_RULE(string_literal_terminated_rule);
+    }
+ 
+    qi::rule<Iterator, fipa::acl::ByteSequence()> string_literal_terminated_rule;
+    StringLiteral<Iterator> stringLiteral;
+};
+
+template<typename Iterator>
+struct ByteLengthEncodedStringTerminated : qi::grammar<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> >
+{
+    ByteLengthEncodedStringTerminated() : ByteLengthEncodedStringTerminated::base_type(byte_length_encoded_string_terminated_rule, "ByteLengthEncodedStringTerminated-bitefficient_grammar")
+    {
+        using qi::byte_;
+        using encoding::char_;
+	using encoding::digit;
+
+	byte_length_encoded_string_terminated_rule = ( byteLengthEncodedStringHeader 	[ phoenix::at_c<0>(label::_val) += label::_1 ]
+					>> * (byte_ - byte_(0x00))			[ label::_a += label::_1 ]
+					>> byte_(0x00)
+					) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
+					;
+
+	byteLengthEncodedStringHeader = char_('#')
+				      >> + digit 	[ label::_val += label::_1 ]
+				      >> char_('"')
+				      ;
+
+	FIPA_DEBUG_RULE(byte_length_encoded_string_terminated_rule);
+    }
+
+    qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byte_length_encoded_string_terminated_rule;
+};
+
+template<typename Iterator>
+struct NullTerminatedString : qi::grammar<Iterator, fipa::acl::ByteSequence()>
+{
+    NullTerminatedString() : NullTerminatedString::base_type(null_terminated_string_rule, "NullTerminatedString-bitefficient_grammar")
+    {
+
+        null_terminated_string_rule = stringLiteralTerminated
+                | byteLengthEncodedStringTerminated
+		;
+
+	FIPA_DEBUG_RULE(null_terminated_string_rule);
+    }
+
+    qi::rule<Iterator, fipa::acl::ByteSequence()> null_terminated_string_rule;
+    StringLiteralTerminated<Iterator> stringLiteralTerminated;
+    ByteLengthEncodedStringTerminated<Iterator> byteLengthEncodedStringTerminated;
+};
+
+template<typename Iterator>
+struct BinStringNoCodetable : qi::grammar<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> >
+{
+    BinStringNoCodetable() : BinStringNoCodetable::base_type(bin_string_no_codetable_rule, "BinStringNoCodetable-bitefficient_grammar")
+    {
+        using namespace qi;
+
+        bin_string_no_codetable_rule = ( byte_(0x14) >> nullTerminatedString 	[ label::_val = label::_1 ])
+            // The byte length will be stored in the rule local variable (label::_a) and then forwarded to the qi::repeat instruction
+            | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
+                  	  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1] )  // new byteLengthEncoded string 
+            | ( byte_(0x17) >> len16 			        [ label::_a = label::_1 ]
+                            >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
+            | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
+                            >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
+            ;         
+
+	byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToCharVector(label::_1) ]
+		;
+	FIPA_DEBUG_RULE(bin_string_no_codetable_rule);
+    }
+
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > bin_string_no_codetable_rule;
+    Len8<Iterator> len8;
+    Len16<Iterator> len16;
+    Len32<Iterator> len32;
+    qi::rule<Iterator, std::vector<unsigned char>(boost::uint_least32_t) > byteSeq;
+    NullTerminatedString<Iterator> nullTerminatedString;
+};
+
+template<typename Iterator>
+struct BinStringCodetable : qi::grammar<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> >
+{
+    BinStringCodetable() : BinStringCodetable::base_type(bin_string_codetable_rule, "BinStringCodetable-bitefficient_grammar")
+    {
+        using namespace qi;
+
+        bin_string_codetable_rule =
+            // string literal from code table
+            ( byte_(0x15) >> index 	  [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])            
+            | ( byte_(0x18) >> index        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
+            ;
+
+	FIPA_DEBUG_RULE(bin_string_codetable_rule);
+    }
+
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > bin_string_codetable_rule;
+    Index<Iterator> index;
+};
+
+
+template<typename Iterator>
+struct BinString : qi::grammar<Iterator, fipa::acl::ByteSequence() >
+{
+    BinString() : BinString::base_type(bin_string_rule, "BinString-bitefficient_grammar")
+    {
+        bin_string_rule = ( binStringNoCodetable | binStringCodetable) [ label::_val = label::_1];
+
+	FIPA_DEBUG_RULE(bin_string_rule);
+    }
+
+    qi::rule<Iterator, fipa::acl::ByteSequence()> bin_string_rule;
+    BinStringNoCodetable<Iterator> binStringNoCodetable;
+    BinStringCodetable<Iterator> binStringCodetable;
+};
+
+template<typename Iterator>
+struct CodedNumber : qi::grammar<Iterator, std::string()>
+{
+    CodedNumber() : CodedNumber::base_type(coded_number_rule, "CodedNumber-bitefficient_grammar")
+    {
+        // two numbers in one byte - padding 00 if coding only one number
+        coded_number_rule = qi::byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
+
+	FIPA_DEBUG_RULE(coded_number_rule);
+    }
+
+    qi::rule<Iterator, std::string()> coded_number_rule;
+};
+
+template<typename Iterator>
+struct Digits : qi::grammar<Iterator, std::string()>
+{
+    Digits() : Digits::base_type(digits_rule, "Digits-bitefficient_grammar")
+    {
+	digits_rule = +codedNumber [ label::_val += label::_1];
+
+	FIPA_DEBUG_RULE(digits_rule);
+    }
+
+    qi::rule<Iterator, std::string() > digits_rule; 
+    CodedNumber<Iterator> codedNumber;
+
+};
+
+template<typename Iterator>
+struct BinNumber : qi::grammar<Iterator, std::string()>
+{
+    BinNumber() : BinNumber::base_type(bin_number_rule, "BinNumber-bitefficient_grammar")
+    {
+        using qi::byte_;
+	// Decimal number 0x12
+	// Hex number 0x13
+	// Hexadecimal number are converted to int and then back
+	bin_number_rule = ( byte_(0x12) >> digits 	[ label::_val = label::_1 ] )
+		  | ( byte_(0x13) >> digits 	[ label::_val = convertDigitsToHex(label::_1) ]
+		  );
+
+	FIPA_DEBUG_RULE(bin_number_rule);
+    }
+
+    qi::rule<Iterator, std::string()> bin_number_rule;
+    Digits<Iterator> digits;
+};
+
+
 
 template <typename Iterator>
 struct DateTime : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::string> >
@@ -485,20 +694,9 @@ struct DateTime : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::strin
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(year);
         BOOST_SPIRIT_DEBUG_NODE(millisecond);
-        BOOST_SPIRIT_DEBUG_NODE(date_time_rule);
-
-        qi::on_error<qi::fail>
-	(
-	    date_time_rule,
-	    std::cout
-		<< phoenix::val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< phoenix::val(" here: \"")
-		<< phoenix::construct<std::string>(label::_3,label::_2)
-		<< phoenix::val("\"")
-		<< std::endl
-        );
     #endif // BOOST_SPIRIT_DEBUG
+
+	FIPA_DEBUG_RULE(date_time_rule);
     }
 
     CodedNumber<Iterator> codedNumber;
@@ -559,21 +757,10 @@ struct BinDateTime : qi::grammar<Iterator, fipa::acl::DateTime()>
 	// Timezone for UTC is Z
 	typeDesignator = alpha 		[ label::_val = label::_1 ]; 	
 
-    #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(bin_date_time_rule);
-        BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
 
-        qi::on_error<qi::fail>
-	(
-	    bin_date_time_rule,
-	    std::cout
-		<< phoenix::val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< phoenix::val(" here: \"")
-		<< phoenix::construct<std::string>(label::_3,label::_2)
-		<< phoenix::val("\"")
-		<< std::endl
-        );
+    #ifdef BOOST_SPIRIT_DEBUG
+        BOOST_SPIRIT_DEBUG_NODE(typeDesignator);
+        FIPA_DEBUG_RULE(bin_date_time_rule);
     #endif
     }
 
@@ -605,21 +792,10 @@ struct Word : qi::grammar<Iterator, std::string()>
                         | char_(')')
 			;
     #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(word_rule);
         BOOST_SPIRIT_DEBUG_NODE(wordExceptionsStart);
         BOOST_SPIRIT_DEBUG_NODE(wordExceptionsGeneral);
 
-        qi::on_error<qi::fail>
-	(
-	    word_rule,
-	    std::cout
-		<< phoenix::val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< phoenix::val(" here: \"")
-		<< phoenix::construct<std::string>(label::_3,label::_2)
-		<< phoenix::val("\"")
-		<< std::endl
-        );
+        FIPA_DEBUG_RULE(word_rule);
     #endif
     }
 
@@ -640,21 +816,8 @@ struct BinWord : qi::grammar<Iterator, std::string()>
 			>> byte_(0x00) )
 	        | byte_(0x11) >> index   		[ label::_val = extractFromCodetable(label::_1) ]
 		);
-    #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(bin_word_rule);
 
-        qi::on_error<qi::fail>
-	(
-	    bin_word_rule,
-	    std::cout
-		<< phoenix::val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< phoenix::val(" here: \"")
-		<< phoenix::construct<std::string>(label::_3,label::_2)
-		<< phoenix::val("\"")
-		<< std::endl
-        );
-    #endif 
+        FIPA_DEBUG_RULE(bin_word_rule);
     }
 
     qi::rule<Iterator, std::string()> bin_word_rule;
@@ -729,41 +892,10 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
 		| ( byte_(0x59) >> index      		                 [ label::_val = extractFromCodetable(label::_1)])
 		;
 
-	// Decimal number 0x12
-	// Hex number 0x13
-	// Hexadecimal number are converted to int and then back
-	binNumber = ( byte_(0x12) >> digits 	[ label::_val = label::_1 ] )         
-		  | ( byte_(0x13) >> digits 	[ label::_val = convertDigitsToHex(label::_1) ]
-		  ); 
-
-	digits = +codedNumber [ label::_val += label::_1];
-
-
-	// Bytesequences can only be interpreted if the sequenceLength value is set correctly 
-	// TODO: check value and reset
-	// repeat get the inherited variable as parameter (check were this rule is used) which
-	// defines the number of bytes to read
-	byteSeq = qi::repeat(label::_r1)[byte_]	[ label::_val = convertToCharVector(label::_1) ]
-		;
 
 	// pass the local length variable down to the rule using parent rules variable  _r1			
 	fipaString = (stringLiteral | byteLengthEncodedString(label::_r1) );
 
-	
-	// Order of statement is relevant here, since the character \ needs to be matched
-	// first -- matching is greedy with char_ otherwise
-	stringLiteral = ( char_('"') 
-		       >> * (( char_("\\") >> char_('"') ) 	[  label::_a += "\"" ]
-			  | (byte_ - char_('"') ) 		[  label::_a += label::_1 ]
-		          )
-		       >> char_('"')
-			)					[ phoenix::at_c<2>(label::_val) = label::_a ]
-			; 
-
-	stringLiteralTerminated = stringLiteral 		[ label::_val = label::_1 ]
-				>> byte_(0x00)
-				;
-	
 	byteLengthEncodedStringHeader = char_('#')
 				      >> + digit 	[ label::_val += label::_1 ]
 				      >> char_('"')
@@ -775,71 +907,23 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
 				>> qi::repeat(label::_r1)[byte_]     			[ phoenix::at_c<2>(label::_val) = convertToString(label::_1) ]
 				;
 
-	byteLengthEncodedStringTerminated = ( byteLengthEncodedStringHeader 		[ phoenix::at_c<0>(label::_val) += label::_1 ]
-					>> * (byte_ - byte_(0x00))			[ label::_a += label::_1 ]
-					>> byte_(0x00) 
-					) 						[ phoenix::at_c<2>(label::_val) = label::_a ] 
-					;
-
-	binString = ( byte_(0x14) >> ( stringLiteralTerminated 
-				   | byteLengthEncodedStringTerminated )  		[ label::_val = label::_1 ])
-		  // string literal from code table
-		  | ( byte_(0x15) >> index 			        [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ])            
-		  // The byte length will be stored in the rule local variable (label::_a) and then forwarded to the qi::repeat instruction
-		  | ( byte_(0x16) >> len8                       	[ label::_a = label::_1 ]
-				  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )  // new byteLengthEncoded string 
-		  | ( byte_(0x17) >> len16 			        [ label::_a = label::_1 ]
-			          >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
-		  | ( byte_(0x18) >> index                              [ phoenix::at_c<2>(label::_val) = extractFromCodetable(label::_1) ]) // byteLengthEncoded from code table
-		  | ( byte_(0x19) >> len32 			        [ label::_a = label::_1 ]
-                                  >> byteSeq(label::_a)			[ phoenix::at_c<2>(label::_val) = label::_1 ] )
-		  ;         
-
-	len8 = byte_ ;
-        // boost::uint_least16_t
-	len16 = qi::word [ label::_val = lazy_ntohs(label::_1) ];
-        // boost::uint_least32_t
-	len32 = qi::dword [ label::_val = lazy_ntohl(label::_1) ];
-
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(bin_expression_rule);
-        BOOST_SPIRIT_DEBUG_NODE(byteLengthEncodedString);
-        BOOST_SPIRIT_DEBUG_NODE(len8);
-        BOOST_SPIRIT_DEBUG_NODE(len16);
-        BOOST_SPIRIT_DEBUG_NODE(len32);
-
-        qi::on_error<qi::fail>
-	(
-	    //aclCommunicativeAct,
-	    byteLengthEncodedString,
-	    std::cout
-		<< phoenix::val("Error: expecting ")
-		<< label::_4 			   // what failed?
-		<< phoenix::val(" here: \"")
-		<< phoenix::construct<std::string>(label::_3,label::_2)
-		<< phoenix::val("\"")
-		<< std::endl
-        );
+	FIPA_DEBUG_RULE(byteLengthEncodedString);
     #endif
     }
-
-    /**
-     * Allow to retrieve individual rule of this grammar
-     * 
-     * NOTE: this avoids a too granular split of the grammars
-     */
-    qi::rule<Iterator, fipa::acl::ByteSequence()> getBinStringRule() { return binString.alias(); }
 
     // Main rule
     qi::rule<Iterator, std::string()> bin_expression_rule;
 
+    BinNumber<Iterator> binNumber;
     BinWord<Iterator> binWord;
     Word<Iterator> word;
     Index<Iterator> index;
     
-    qi::rule<Iterator, std::string()> binNumber;
-    qi::rule<Iterator, std::string() > digits; 
-    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<boost::uint_least32_t> > binString;
+    Digits<Iterator> digits;
+    BinString<Iterator> binString;
+
     BinDateTime<Iterator> binDateTime;
     qi::rule<Iterator, std::string() > binExpr;
     qi::rule<Iterator, std::string(), qi::locals<boost::uint_least32_t> > exprStart;
@@ -848,16 +932,16 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
     //qi::symbols<char, qi::rule<Iterator> > exprKeyword;
     
     qi::rule<Iterator, std::vector<unsigned char>(boost::uint32_t) > byteSeq;
-    qi::rule<Iterator, boost::uint_least8_t() > len8;
-    qi::rule<Iterator, boost::uint_least16_t() > len16;
-    qi::rule<Iterator, boost::uint_least32_t() > len32;
+    Len8<Iterator> len8;
+    Len16<Iterator> len16;
+    Len32<Iterator> len32;
     
     qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > fipaString;
-    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > stringLiteral;
+    StringLiteral<Iterator> stringLiteral;
     qi::rule<Iterator, fipa::acl::ByteSequence() > stringLiteralTerminated;
     qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
     qi::rule<Iterator, fipa::acl::ByteSequence(boost::uint32_t) > byteLengthEncodedString;
-    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> > byteLengthEncodedStringTerminated;
+    ByteLengthEncodedStringTerminated<Iterator> byteLengthEncodedStringTerminated;
     CodedNumber<Iterator> codedNumber;
 };
 
@@ -886,10 +970,11 @@ struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentIdentifier()>
         			;
         endOfCollection %= byte_(0x01); 
     #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(agent_identifier_rule);
         BOOST_SPIRIT_DEBUG_NODE(addresses);
         BOOST_SPIRIT_DEBUG_NODE(resolvers);
         BOOST_SPIRIT_DEBUG_NODE(userDefinedParameter);
+
+	FIPA_DEBUG_RULE(agent_identifier_rule);
     #endif 
     }
 
@@ -1020,7 +1105,6 @@ struct Message : qi::grammar<Iterator, fipa::acl::Message()>
 				>> endOfCollection;
 		
 		replyToParam = recipientExpr.alias();
-                msgContent = binExpression.getBinStringRule();
 
 	// Enables the debug tree when debug mode is active
 	// requires the include of stream operators as well
@@ -1033,7 +1117,6 @@ struct Message : qi::grammar<Iterator, fipa::acl::Message()>
         BOOST_SPIRIT_DEBUG_NODE(version);
         BOOST_SPIRIT_DEBUG_NODE(messageType);
         BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageType);
-        BOOST_SPIRIT_DEBUG_NODE(agentIdentifier);
         BOOST_SPIRIT_DEBUG_NODE(messageParameter);
         BOOST_SPIRIT_DEBUG_NODE(userDefinedMessageParameter);
         BOOST_SPIRIT_DEBUG_NODE(predefinedMessageParameter);
@@ -1087,8 +1170,8 @@ struct Message : qi::grammar<Iterator, fipa::acl::Message()>
 
         BinExpression<Iterator> binExpression;
         BinWord<Iterator> binWord;
-
-        qi::rule<Iterator, fipa::acl::ByteSequence()> msgContent;
+        BinString<Iterator> binString;
+        BinString<Iterator> msgContent;
 
 	BinExpression<Iterator> replyWithParam;
 	BinDateTime<Iterator> replyByParam;
