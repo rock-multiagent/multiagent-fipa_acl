@@ -9,7 +9,13 @@ int main(int argc, char** argv)
     std::string protocolfile;
 
     int opt;
-    while( (opt = getopt(argc, argv, "pf:d:hr")) != -1)
+    if(argc == 1)
+    {
+        printf("usage: %s -f <protocolfile>\n", argv[0]);
+        return 0;
+    }
+
+    while( (opt = getopt(argc, argv, "f:h")) != -1)
     {
         switch(opt)
         {
@@ -18,7 +24,7 @@ int main(int argc, char** argv)
                 break;
             case 'h': 
             default:
-                printf("usage: %s [-f <protocolfile>]\n", argv[0]);
+                printf("usage: %s -f <protocolfile>\n", argv[0]);
                 return 0;
                 
         }
