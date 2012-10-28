@@ -10,13 +10,13 @@ phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 phoenix::function<buildStringImpl> buildString;
 phoenix::function<printImpl> print;
 phoenix::function<convertToTimeImpl> convertToTime;
+phoenix::function<convertToBaseTimeImpl> convertToBaseTime;
 phoenix::function<convertToNumberTokenImpl> convertToNumberToken;
 phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;
 phoenix::function<convertToStringImpl> convertToString;
 phoenix::function<convertToCharVectorImpl> convertToCharVector;
 phoenix::function<convertToNativeShortImpl> lazy_ntohs;
 phoenix::function<convertToNativeLongImpl> lazy_ntohl;
-phoenix::function<debugCharacterImpl> debugCharacter;
 
 typedef std::string::const_iterator iterator_type;
 

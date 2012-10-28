@@ -2,11 +2,8 @@
 #define FIPA_ACL_MESSAGE_ENVELOPE_H
 
 #include <stdint.h>
-#include <string>
-#include <vector>
-#include <base/time.h>
-#include <fipa_acl/message_generator/userdef_param.h>
 #include <fipa_acl/message_generator/agent_id.h>
+#include <fipa_acl/message_generator/received_object.h>
 
 namespace fipa {
 namespace acl {
@@ -14,275 +11,314 @@ namespace acl {
 typedef std::string Comments;
 typedef uint32_t PayloadLength;
 typedef std::string PayloadEncoding;
-typedef std::string URL;
-typedef std::string ID;
-typedef std::string Via;
 typedef std::string ACLRepresentation;
 typedef std::string TransportBehaviour;
+typedef std::vector<ReceivedObject> ReceivedObjectList;
 
-/**
- * Received object is attached to the message envelope by each Message Transport Service
- */
-class ReceivedObject
-{
-private: 
-    /**
-     * The URL representing the transport address of the receiving ACC.
-     */
-    URL mBy;
+class ACLBaseMessageEnvelope;
+typedef std::vector<ACLBaseMessageEnvelope> ACLBaseMessageEnvelopeList;
 
-    /**
-     *  The URL representing the transport address of the sending ACC.
-     */
-    URL mFrom;
+namespace envelope {
 
-    /**
-     * The date when a message was received.
-     */
-    base::Time mDate;
-    
-    /**
-     *  The unique identifier of a message. It is required that uniqueness be guaranteed within the scope of the sending ACC only.
-     */
-    ID mId;
+    enum ParameterId { NONE = 0x00, TO = 0x01, FROM = 0x02, COMMENTS = 0x04,
+ACL_REPRESENTATION = 0x08, PAYLOAD_LENGTH = 0x10, PAYLOAD_ENCODING = 0x20, DATE = 0x40, INTENDED_RECEIVERS = 0x80, RECEIVED_OBJECTS = 0x0100, TRANSPORT_BEHAVIOUR = 0x0200, USERDEFINED_PARAMETERS = 0x0400, PARAMETER_END = 0x0800};
+}
+namespace representation {
+    enum Type { UNKNOWN, BITEFFICIENT, STRING, XML };
 
-    /**
-     *  The type of MTP the message was delivered over.
-     */
-    Via mVia;
+    const std::string TypeTxt[] = { "unknown", "fipa.acl.rep.bitefficient.std", "fipa.acl.rep.string.std", "fipa.acl.rep.xml.std"};
+}
 
-    /**
-     * Additional parameters users can add
-     */
-    std::vector<UserdefParam> mUserdefinedParameters;
-
-public:
-
-    /**
-     * Get URL representing the transport address of the receiving ACC
-     */
-    const URL& getBy() { return mBy; }
-
-    /**
-     * Set URL representing the transport address of the receiving ACC
-     */
-    void setBy(const URL& by) { mBy = by; }
-
-    /**
-     * Get URL representing the transport address of the sending ACC
-     */
-    const URL& getFrom() { return mFrom; }
-
-    /**
-     * Set URL representing the transport address of the sending ACC
-     */
-    void setFrom(const URL& from) { mFrom = from; }
-
-    /**
-     * Get the date when the message was received
-     */
-    const base::Time& getDate() { return mDate; }
-
-    /**
-     * Set the date when the message was received
-     */
-    void setDate(const base::Time& date) { mDate = date; }
-
-    /**
-     * Get the unique id of the message - unique within the scope of the sending ACC
-     */
-    const ID& getId() { return mId; }
-
-    /**
-     * Set the unique id of the message - unique within the scope of the sending ACC
-     */
-    void setId(const ID& id) { mId = id; }
-
-    /**
-     * Get the via - the MTP the message was delivered over
-     */
-    const Via& getVia() { return mVia; }
-
-    /**
-     * Set via
-     */
-    void setVia(const Via& via) { mVia = via; }
-
-    /**
-     * Get userdefined parameters
-     */ 
-    const std::vector<UserdefParam>& getUserdefinedParameters() { return mUserdefinedParameters; }
-
-    /**
-     * Set userdefined parameters
-     */
-    void setUserdefinedParameters(const std::vector<UserdefParam>& paramList) { mUserdefinedParameters = paramList; }
-
-};
-
-class ACLMessageEnvelope
+class ACLBaseMessageEnvelope
 {
 private:
+    envelope::ParameterId mParameters;
+
     /**
-     * If no intended-receiver parameter is present, then the information in this parameter is used to generate intended-receiver field for the messages the ACC subsequently forwards. 
+     * If no intended-receiver parameter is present, then the information in this parameter is used to generate intended-receiver field for the messages the ACC subsequently forwards.
+     *
+     * Mandatory field
      */
     AgentIDList mTo;
 
     /**
      * If required, the ACC returns error and confirmation messages to the agent specified in this parameter.
+     *
+     * Mandatory field
      */
     AgentID mFrom;
 
     /**
-     * This information is intended for the final recipient of the message. 
+     * This information is intended for the final recipient of the message.
+     *
+     * Optional field
+
      */
     Comments mComments;
 
     /**
      * Representation
+     *
+     * Mandatory field
      */
-    ACLRepresentation mACLRepresentation;
+    representation::Type mACLRepresentation;
 
     /**
      * The ACC may use this information to improve parsing efficiency.
+     *
+     * Optional field
      */
     PayloadLength mPayloadLength;
 
     /**
      * This information is intended for the final recipient of the message.
+     *
+     * Optional field
      */
     PayloadEncoding mPayloadEncoding;
 
     /**
      * This information is intended for the final recipient of the message.
+     *
+     * Mandatory field
      */
     base::Time mDate;
 
     /**
      * An ACC uses this parameter to determine where this instance of a message should be sent.
      * If this parameter is not provided, then the first ACC to receive the message should generate an intended-receiver parameter using the to parameter.
+     * Remarks in spec: http://www.fipa.org/specs/fipa00067/SC00067F.html
+     * If an ACC receives a message envelope without an intended-receiver parameter, then it generates a new intended-receiver parameter from the to parameter (possibly containing multiple AIDs).
+     * It may also generate multiple copies of the message with different intended-receiver parameters
+     * if multiple receivers are specified. In all cases, the ACC is required to process all entries in
+     * the to field parameter and enforced not to add and not to remove any AID that was contained in
+     * the original message. The intended-receiver parameters form a delivery path showing the route that
+     * a message has taken.
+     *
+     * If an ACC receives a message envelope with an intended-receiver parameter, this is used for delivery of this instance of the message and the to parameter is ignored.
+     *
+     * If an ACC receives a message envelope with more than one intended-receiver parameter, the most recent is used.
+     *
+     * Optional field
      */
-    AgentIDList mIntendedReceiver;
+    AgentIDList mIntendedReceivers;
 
     /**
-     *  A new received parameter is added to the envelope by each ACC that the message passes through. 
-     *  Each ACC handling a message must add a completed received parameter. 
-     *  If an ACC receives a message it has already stamped, it is free to discard the message without any need to generate an error message.
+     * A new received parameter is added to the envelope by each ACC that the message passes through.
+     * Each ACC handling a message must add a completed received parameter.
+     * If an ACC receives a message it has already stamped, it is free to discard the message without any need to generate an error message.
+     *
+     * Before forwarding the message, the ACC adds a completed received parameter to the message envelope. Once an ACC has forwarded a message it no longer needs to keep any record of the existence of that message.
+     *
+     * Optional field
      */
-    ReceivedObject mReceivedObject; 
+    ReceivedObjectList mReceivedObjects;
 
     /**
      * Reserved for future use.
+     *
+     * Optional field
      */
     TransportBehaviour mTransportBehaviour;
 
-public: 
+    /**
+     * Userdefined parameter than can be set for an envelope
+     * keys should start with 'X-'
+     */
+    UserdefinedParameterList mUserdefinedParameters;
+
+public:
+    /**
+     * DefaultConstructor
+     */
+    ACLBaseMessageEnvelope();
+
+    /**
+     + Test wether a certain content element is set in this envelope object
+     *
+     */
+    bool contains(envelope::ParameterId id) { return mParameters & id; }
+
     /**
      * Get destination
      * \return destination of this message envelope as list of agents
      */
-    const AgentIDList& getTo() { return mTo; }
+    const AgentIDList& getTo() const { return mTo; }
+
+    /**
+     * Add an agent identifier to the destination list
+     */
+    void addTo(const AgentID& agent);
 
     /**
      * Set destination
      * \param receivers receiver list
      */
-    void setTo(const AgentIDList& receivers) { mTo = receivers; }
+    void setTo(const AgentIDList& receivers);
 
     /**
-     * Get sender id 
+     * Remove an agents from the 'to' list
+     * \return true upon success, i.e. if the agent was is this list
+     * false otherwise
+     */
+    bool removeTo(const AgentID& agentId);
+
+    /**
+     * Clear 'to' list
+     */
+    void clearAllTo() { mTo.clear(); }
+
+    /**
+     * Get sender id
      * \return agent id of sender
      */
-    const AgentID& getFrom() { return mFrom; }
+    const AgentID& getFrom() const { return mFrom; }
 
     /**
      * Set sender id
      * \param from
      */
-    void setFrom(const AgentID& from) { mFrom = from; }
+    void setFrom(const AgentID& from);
 
     /**
      * Get comments
      * \return comments
      */
-    const Comments& getComments() { return mComments; }
+    const Comments& getComments() const { return mComments; }
 
     /**
      * Set comments
      * \param comments Comments to be set
      */
-    void setComments(const Comments& comments) { mComments = comments; }
+    void setComments(const Comments& comments);
 
     /**
      * Get the ACLRepresentation in use
      * \return acl representation
      */
-    const ACLRepresentation& getACLRepresentation() { return mACLRepresentation; }
+    const representation::Type& getACLRepresentation() const { return mACLRepresentation; }
 
     /**
      * Set the acl representation in use
      */
-    void setACLRepresentation(const ACLRepresentation& representation) { mACLRepresentation = representation; }
+    void setACLRepresentation(representation::Type representation);
 
     /**
      * Get the length of the payload
      */
-    PayloadLength getPayloadLength() { return mPayloadLength; }
+    const PayloadLength& getPayloadLength() const { return mPayloadLength; }
 
     /**
      * Set the length of the payload
      */
-    void setPayloadLength(const PayloadLength& length) { mPayloadLength = length; }
+    void setPayloadLength(const PayloadLength& length);
 
     /**
-     * Get the payload encoding
+     * Get the payload encoding (default is US-ASCII)
      */
-    PayloadEncoding getPayloadEncoding() { return mPayloadEncoding; }
+    const PayloadEncoding& getPayloadEncoding() const { return mPayloadEncoding; }
 
     /**
-     * Set the payload encoding
+     * Set the payload encoding (default is US-ASCII)
      */
-    void setPayloadEncoding(const PayloadEncoding& encoding) { mPayloadEncoding = encoding; }
+    void setPayloadEncoding(const PayloadEncoding& encoding);
 
     /**
-     * Retrieve date
+     * Retrieve creation date and time of the message envelope
      */
-    const base::Time& getDate() { return mDate; }
+    const base::Time& getDate() const { return mDate; }
 
     /**
-     * Set date
+     * Set creation date and time of the message envelope
      */
-    void setDate(const base::Time& date) { mDate = date; }
+    void setDate(const base::Time& date);
 
     /**
      * Get intended receivers
      */
-    AgentIDList getIntendedReceiver() { return mIntendedReceiver; }
+    const AgentIDList& getIntendedReceivers() const { return mIntendedReceivers; }
 
     /**
      * Set intended receivers
      */
-    void setIntendedReceiver(const AgentIDList& receiver) { mIntendedReceiver = receiver; }
+    void setIntendedReceivers(const AgentIDList& receivers);
 
     /**
-     * Get received object
+     * Add intended receiver to the list of intended receivers
      */
-    const ReceivedObject& getReceivedObject() { return mReceivedObject; }
+    void addIntendedReceiver(const AgentID& agent);
 
     /**
-     * Set receiver object
+     * Remove an intended receiver from this list of intended receivers
      */
-    void setReceivedObject(const ReceivedObject& receivedObject) { mReceivedObject = receivedObject; }
+    bool removeIntendedReceiver(const AgentID& agent);
+
+    /**
+     * Clear list of intended receivers
+     */
+    void clearAllIntendedReceivers() { mIntendedReceivers.clear(); }
+
+    /**
+     * Get all received objects
+     */
+    const ReceivedObjectList& getReceivedObjects() const { return mReceivedObjects; }
+
+    /**
+     * Add received object
+     */
+    void addReceivedObject(const ReceivedObject& receivedObject);
+
+    /**
+     * Set the received object list
+     */
+    void setReceivedObjects(const ReceivedObjectList& receivedObjects);
 
     /**
      * Get the transport behaviour
      */
-    const TransportBehaviour& getTransportBehaviour() { return mTransportBehaviour; }
+    const TransportBehaviour& getTransportBehaviour() const { return mTransportBehaviour; }
 
     /**
      * Set the transport behaviour
      */
-    void setTransportBehaviour(const TransportBehaviour& transportBehaviour) { mTransportBehaviour = transportBehaviour; }
+    void setTransportBehaviour(const TransportBehaviour& transportBehaviour);
+
+    /**
+     * Get userdefined parameter list
+     */
+    const UserdefinedParameterList& getUserdefinedParameters() const { return mUserdefinedParameters; }
+
+    /**
+     * Set userdefined parameters
+     */
+    void setUserdefinedParameters(const UserdefinedParameterList& parameters);
+
+    /**
+     * Merges the information of two envelopes -- only empty field in this will be overwritten by other
+     */
+    ACLBaseMessageEnvelope merge(const ACLBaseMessageEnvelope& other) const;
+
+    /**
+     * Add a receipt for this message, i.e. add a received object to the envelope. This function is an alias for setReceivedObject
+     */
+    void addStamp(const ReceivedObject& receivedObject) { addReceivedObject(receivedObject); }
+};
+
+
+class ACLMessageEnvelope
+{
+    ACLBaseMessageEnvelopeList mExtraEnvelopes;
+
+    ACLBaseMessageEnvelope mBaseEnvelope;
+
+public:
+    const ACLBaseMessageEnvelopeList& getExtraEnvelopes() const { return mExtraEnvelopes; }
+
+    void setExtraEnvelopes(const ACLBaseMessageEnvelopeList& envelopes) { mExtraEnvelopes = envelopes; }
+
+    const ACLBaseMessageEnvelope& getBaseEnvelope() const { return mBaseEnvelope; }
+
+    void setBaseEnvelope(const ACLBaseMessageEnvelope& envelope) { mBaseEnvelope = envelope; }
 };
 
 } // end namespace acl

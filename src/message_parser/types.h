@@ -43,10 +43,12 @@ struct Header
 
 };
 
-struct MessageParameter
+namespace message {
+
+struct Parameter
 {
 	std::string name;
-	fipa::acl::ParameterValue data;
+	ParameterValue data;
 
         std::string toString() const
         {
@@ -57,6 +59,23 @@ struct MessageParameter
 
 };
 
+}
+
+namespace envelope
+{
+    struct Parameter
+    {
+        std::string name;
+        ParameterValue data;
+
+        std::string toString() const
+        {
+            return name + "<" + data + ">";
+        }
+    };
+
+}
+
 // Define the final message structure here
 struct Message
 {
@@ -64,7 +83,7 @@ struct Message
 
 	Header header;
 	std::string type;
-	std::vector<fipa::acl::MessageParameter> parameters;
+	std::vector<message::Parameter> parameters;
 };
 
 

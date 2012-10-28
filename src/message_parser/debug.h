@@ -55,9 +55,15 @@ std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::a
 }
 
 template< typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::MessageParameter p)
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::message::Parameter p)
 {
 	        return out << "MessageParameter<" << p.toString() << ">";
+}
+
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::envelope::Parameter p)
+{
+	        return out << "EnvelopeParameter<" << p.toString() << ">";
 }
 
 template< typename C, typename E>

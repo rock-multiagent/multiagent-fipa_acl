@@ -24,6 +24,8 @@
 #include <arpa/inet.h>
 #include <ctime>
 
+#include <base/logging.h>
+
 #include <fipa_acl/message_parser/types.h>
 
 #ifdef BOOST_SPIRIT_DEBUG
@@ -79,9 +81,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
-	fipa::acl::MessageParameter,
+	fipa::acl::message::Parameter,
 	(std::string, name)
-	(fipa::acl::ParameterValue, data)
+	(fipa::acl::message::ParameterValue, data)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -103,7 +105,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 	fipa::acl::Message,
 	(fipa::acl::Header, header)
 	(std::string, type)
-	(std::vector<fipa::acl::MessageParameter>, parameters)
+	(std::vector<fipa::acl::message::Parameter>, parameters)
 )
 
 namespace fipa
@@ -211,8 +213,31 @@ namespace fipa
 			return fipa::acl::Time(convertedTime);
 		}
 	};
-	
+
 	extern phoenix::function<convertToTimeImpl> convertToTime;
+
+	/** Convert Time to base::Time */
+	struct convertToBaseTimeImpl
+	{
+		template <typename T, typename U>
+		struct result
+		{
+			typedef fipa::acl::Time type;
+		};
+
+		template <typename T, typename U>
+		base::Time operator()(T arg) const
+		{
+			return base::Time();
+		}
+
+		base::Time operator()(fipa::acl::DateTime arg) const
+		{
+			return arg.toTime();
+		}
+	};
+	
+	extern phoenix::function<convertToBaseTimeImpl> convertToBaseTime;
 	
 	/** Convert byte to number according to the FIPA definition */
 	struct convertToNumberTokenImpl
@@ -401,6 +426,19 @@ namespace bitefficient {
 
 // To avoid namespace clashes with boost::bind
 namespace label = qi::labels;
+
+template<typename Iterator>
+struct EndOfCollection : qi::grammar<Iterator, char>
+{
+    EndOfCollection() : EndOfCollection::base_type(eof_collection_rule, "EndOfCollection-bitefficient_grammar")
+    {
+        eof_collection_rule = qi::byte_(0x01);
+
+        FIPA_DEBUG_RULE(eof_collection_rule);
+    }
+ 
+    qi::rule<Iterator, char> eof_collection_rule;
+};
 
 template<typename Iterator>
 struct Index : qi::grammar<Iterator, uint_least16_t()>
@@ -946,6 +984,24 @@ struct BinExpression : qi::grammar<Iterator, std::string()>
 };
 
 template<typename Iterator>
+struct UserdefinedParameter : qi::grammar<Iterator, fipa::acl::UserDefinedParameter()>
+{
+    UserdefinedParameter() : UserdefinedParameter::base_type(userdefined_parameter_rule, "UserdefinedParameter-bitefficient_grammar")
+    {
+        userdefined_parameter_rule = qi::byte_(0x04)
+                 >> binWord 	    [ phoenix::at_c<0>(label::_val) = label::_1 ]
+       		 >> binExpression   [ phoenix::at_c<1>(label::_val) = label::_1 ]
+
+        FIPA_DEBUG_RULE(userdefined_parameter_rule);
+    }
+
+    qi::rule<Iterator, fipa::acl::UserDefinedParameter() > userdefined_parameter_rule;
+
+    BinWord<Iterator> binWord;
+    BinExpression<Iterator> binExpression;
+};
+
+template<typename Iterator>
 struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentIdentifier()>
 {
     AgentIdentifier() : AgentIdentifier::base_type(agent_identifier_rule, "AgentIdentifier-bitefficient_grammar")
@@ -965,27 +1021,20 @@ struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentIdentifier()>
         urlCollection = *url 					[ phoenix::push_back(label::_val, label::_1) ]
        		 >> endOfCollection;
         
-        userDefinedParameter = byte_(0x04) >> binWord 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-       			 >> binExpression     		[ phoenix::at_c<1>(label::_val) = label::_1 ]  
         			;
         endOfCollection %= byte_(0x01); 
     #ifdef BOOST_SPIRIT_DEBUG
         BOOST_SPIRIT_DEBUG_NODE(addresses);
         BOOST_SPIRIT_DEBUG_NODE(resolvers);
-        BOOST_SPIRIT_DEBUG_NODE(userDefinedParameter);
-
 	FIPA_DEBUG_RULE(agent_identifier_rule);
     #endif 
     }
-
-    BinWord<Iterator> binWord;
-    BinExpression<Iterator> binExpression;
 
     qi::rule<Iterator, fipa::acl::AgentIdentifier()> agent_identifier_rule;
     BinWord<Iterator> agentName;
     qi::rule<Iterator, std::vector<std::string>() > addresses;
     qi::rule<Iterator, std::vector<fipa::acl::Resolver>() > resolvers;
-    qi::rule<Iterator, fipa::acl::UserDefinedParameter() > userDefinedParameter;
+    UserdefinedParameter<Iterator> userDefinedParameter;
     qi::rule<Iterator, std::vector<std::string>() > urlCollection;
     BinWord<Iterator> url;
     qi::rule<Iterator> endOfCollection;
@@ -1094,12 +1143,6 @@ struct Message : qi::grammar<Iterator, fipa::acl::Message()>
 					| byte_(0x0c) [ phoenix::at_c<0>(label::_val) = "protocol" ]        >> protocol        [ phoenix::at_c<1>(label::_val) = label::_1 ] // protocol
 					| byte_(0x0d) [ phoenix::at_c<0>(label::_val) = "conversation-id" ] >> conversationId  [ phoenix::at_c<1>(label::_val) = label::_1 ] // conversation-id
 					; 
-		
-
-		userDefinedParameter = byte_(0x04) >> binWord 		[ phoenix::at_c<0>(label::_val) = label::_1 ]
-					 >> binExpression     		[ phoenix::at_c<1>(label::_val) = label::_1 ]  
-					;
-		
 
 		recipientExpr = *agentIdentifier 			[ phoenix::push_back(label::_val, label::_1) ]
 				>> endOfCollection;
@@ -1154,15 +1197,15 @@ struct Message : qi::grammar<Iterator, fipa::acl::Message()>
 	qi::rule<Iterator, std::string() > userDefinedMessageType;
 	BinWord<Iterator> messageTypeName;
 
-	qi::rule<Iterator, fipa::acl::MessageParameter() > messageParameter;
-	qi::rule<Iterator, fipa::acl::MessageParameter() > userDefinedMessageParameter;
-	qi::rule<Iterator, fipa::acl::MessageParameter() > predefinedMessageParameter;
+	qi::rule<Iterator, fipa::acl::message::Parameter() > messageParameter;
+	qi::rule<Iterator, fipa::acl::message::Parameter() > userDefinedMessageParameter;
+	qi::rule<Iterator, fipa::acl::message::Parameter() > predefinedMessageParameter;
 	
 	BinWord<Iterator> parameterName;
 	BinExpression<Iterator> parameterValue;
 
 	qi::rule<Iterator, std::string() > predefinedMessageType;
- 	qi::rule<Iterator, fipa::acl::UserDefinedParameter() > userDefinedParameter;
+	UserdefinedParameter<Iterator> userDefinedParameter;
 	
 	qi::rule<Iterator, std::vector<fipa::acl::AgentIdentifier>() > recipientExpr;
 

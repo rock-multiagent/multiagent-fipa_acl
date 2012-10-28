@@ -27,7 +27,7 @@ void MessagePrinter::print(const fipa::acl::Message& msg)
 	printf("msg-parameters count:     %d\n",(int) msg.parameters.size());
 	for(uint32_t i=0; i < msg.parameters.size(); i++)
 	{
-		MessageParameter mp = msg.parameters[i];
+		message::Parameter mp = msg.parameters[i];
 		printf("\tparameter #%d:  %s\n",i, mp.name.c_str()); 
 	
 		if(mp.name == "sender")
