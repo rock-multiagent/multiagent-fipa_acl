@@ -1,8 +1,43 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <fipa_acl/bitefficient_message.h>
+#include <fipa_acl/message_parser/bitefficient/grammar_bitefficient.h>
+#include <string>
 #include <limits>
 
 BOOST_AUTO_TEST_SUITE(fipa_message_test_suite)
+
+BOOST_AUTO_TEST_CASE(grammar_test)
+{
+        typedef fipa::acl::bitefficient::BinStringNoCodetable<std::string::const_iterator> bitefficient_message_grammar;
+	bitefficient_message_grammar grammar;
+	fipa::acl::ByteSequence parseTree;
+        {
+            std::string storage;
+            uint8_t dataSize = 1;
+            storage += char(0x16);
+            storage += char(0x0a);
+            storage += char(0x00);
+            storage += "123456789";
+
+	    std::string::const_iterator iter = storage.begin();
+	    std::string::const_iterator end = storage.end();
+	    bool r = parse(iter, end, grammar, parseTree);
+
+            BOOST_REQUIRE(r);
+        }
+        {
+            std::string storage;
+            storage += char(0x14);
+            storage += "#1\"A";
+            storage += char(0x00);
+
+	    std::string::const_iterator iter = storage.begin();
+	    std::string::const_iterator end = storage.end();
+	    bool r = parse(iter, end, grammar, parseTree);
+
+            BOOST_REQUIRE(r);
+        }
+}
 
 BOOST_AUTO_TEST_CASE(message_test)
 {
@@ -86,6 +121,8 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
     // Testing binary content with len8 as size descriptor
     content += '\0';
     content += "012345689";
+    content += '\0';
+    content += "012345689";
     msg.setContent(content);
     
     content_size = msg.getContent().size();
@@ -93,6 +130,11 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
 
     outputParser.setMessage(msg);
     std::string encodedMsg = outputParser.getBitMessage();
+
+    for(size_t i = 0; i < encodedMsg.size(); ++i)
+    {
+        fprintf(stderr,"%x",i);
+    }
 
     BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len8 size field" );
     std::string content_out = outputMsg.getContent();
