@@ -4,10 +4,27 @@
 #include <string>
 #include <limits>
 
+template< template<class> class TIn, typename TOut>
+TOut testGrammar(const std::string& storage)
+{
+    typedef TIn<std::string::const_iterator> grammar_type;
+    grammar_type grammar;
+    TOut parseTree;
+
+    std::string::const_iterator iter = storage.begin();
+    std::string::const_iterator end = storage.end();
+    bool r = parse(iter, end, grammar, parseTree);
+
+    BOOST_REQUIRE(r);
+    return parseTree;
+}
+
 BOOST_AUTO_TEST_SUITE(fipa_message_test_suite)
 
 BOOST_AUTO_TEST_CASE(grammar_test)
 {
+        namespace fab = fipa::acl::bitefficient;
+
         typedef fipa::acl::bitefficient::BinStringNoCodetable<std::string::const_iterator> bitefficient_message_grammar;
 	bitefficient_message_grammar grammar;
 	fipa::acl::ByteSequence parseTree;
@@ -24,6 +41,8 @@ BOOST_AUTO_TEST_CASE(grammar_test)
 	    bool r = parse(iter, end, grammar, parseTree);
 
             BOOST_REQUIRE(r);
+
+            testGrammar<fipa::acl::bitefficient::BinStringNoCodetable, fipa::acl::ByteSequence>(storage);
         }
         {
             std::string storage;
@@ -36,6 +55,49 @@ BOOST_AUTO_TEST_CASE(grammar_test)
 	    bool r = parse(iter, end, grammar, parseTree);
 
             BOOST_REQUIRE(r);
+        }
+
+        // Index
+        {
+            std::string storage;
+            storage += char(0x0a);
+            uint32_t number = testGrammar<fab::Index,uint_least16_t>(storage);
+            BOOST_REQUIRE_MESSAGE(number == 10, "Number is " << number);
+        }
+        {
+            std::string storage;
+            storage += char(0x10);
+            storage += char(0x00);
+            uint32_t number = testGrammar<fab::Index,uint_least16_t>(storage);
+            BOOST_REQUIRE_MESSAGE(number == 4096, "Number is " << number);
+        }
+
+        // Len8
+        {
+            std::string storage;
+            storage += char(0x0a);
+            uint32_t number = testGrammar<fab::Len8,uint_least8_t>(storage);
+            BOOST_REQUIRE_MESSAGE(number == 10, "Number is " << number);
+        }
+
+        // Len16
+        {
+            std::string storage;
+            storage += char(0x10);
+            storage += char(0x00);
+            uint32_t number = testGrammar<fab::Len16,uint_least16_t>(storage);
+            BOOST_REQUIRE_MESSAGE(number == 4096, "Number is " << number);
+        }
+
+        // Len32
+        {
+            std::string storage;
+            storage += char(0x10);
+            storage += char(0x00);
+            storage += char(0x00);
+            storage += char(0x00);
+            uint32_t number = testGrammar<fab::Len32,uint_least32_t>(storage);
+           BOOST_REQUIRE_MESSAGE(number == 268435456, "Number is " << number);
         }
 }
 
