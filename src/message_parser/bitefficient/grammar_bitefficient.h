@@ -448,7 +448,9 @@ struct Index : qi::grammar<Iterator, uint_least16_t()>
 	// Index is a pointer to code table entry and its size (in bits) depends on the code table size. 
 	// If the code table size is 256 entries, the size of the index is one byte;
 	//  otherwise its size is two bytes (represented in network byte order).
-	index_rule = qi::byte_ | (qi::word [ label::_val = lazy_ntohs(label::_val)]) ;
+	index_rule = qi::word     [ label::_val = lazy_ntohs(label::_1)] 
+                   | qi::byte_    [ label::_val = label::_1 ]
+                   ;
 
         FIPA_DEBUG_RULE(index_rule);
     }
