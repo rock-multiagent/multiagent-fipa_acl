@@ -10,6 +10,7 @@
   <depend package="base/types" />
   <depend package="boost" />
   <depend package="rice" />
+  <depend package="ruby" />
   <depend package="external/tinyxml" />
   <versioncontrol type="git" url="" />
   <export>
