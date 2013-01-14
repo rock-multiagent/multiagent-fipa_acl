@@ -1,7 +1,7 @@
 #include "grammar_bitefficient.h"
 /**
     \file grammar_bitefficient.cpp
-    \brief delcares instances needed for the grammar
+    \brief declares instances needed for the grammar
     \author Mircea Cretu Stancu
 */
 namespace fipa {
@@ -17,6 +17,7 @@ phoenix::function<convertToStringImpl> convertToString;
 phoenix::function<convertToCharVectorImpl> convertToCharVector;
 phoenix::function<convertToNativeShortImpl> lazy_ntohs;
 phoenix::function<convertToNativeLongImpl> lazy_ntohl;
+phoenix::function<digitPaddingBytesImpl> digitPaddingBytes;
 
 typedef std::string::const_iterator iterator_type;
 

@@ -48,22 +48,23 @@ std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::Ti
 }
 
 template< typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::ParameterValue& p)
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::message::ParameterValue& p)
 {
-	        std::string tmp = boost::apply_visitor(fipa::acl::ParameterPrinter(), p);
-                return out << "ParameterValue<" << tmp << ">";
+	        std::string tmp = boost::apply_visitor(fipa::acl::message::ParameterPrinter(), p);
+                return out << "message::ParameterValue<" << tmp << ">";
 }
+
+/* Already covered by previous definition for fipa::acl::message::ParameterValue  -- adding this definition creates duplication error
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::envelope::ParameterValue& p)
+{
+                return out << "envelope::ParameterValue<" << p << ">";
+}*/
 
 template< typename C, typename E>
 std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::message::Parameter p)
 {
-	        return out << "MessageParameter<" << p.toString() << ">";
-}
-
-template< typename C, typename E>
-std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, fipa::acl::envelope::Parameter p)
-{
-	        return out << "EnvelopeParameter<" << p.toString() << ">";
+	        return out << "message::Parameter<" << p.toString() << ">";
 }
 
 template< typename C, typename E>

@@ -129,11 +129,11 @@ namespace fipa
 		template <typename T>
 		std::string operator()(T arg) const
 		{
-			unsigned short index;
 			if(typeid(T) == typeid(unsigned short))
 			{
-                                // codetable index
-				index = arg;
+				//unsigned short index;
+                                //// codetable index
+				//index = arg;
 
                                 // TODO: search codetable and extract data
 			}
@@ -238,6 +238,34 @@ namespace fipa
 	};
 	
 	extern phoenix::function<convertToBaseTimeImpl> convertToBaseTime;
+
+        struct digitPaddingBytesImpl
+        {
+             template <typename T>
+             struct result
+             {
+                 typedef uint32_t type;
+             };
+             
+             template <typename T>
+             uint32_t operator()(T digit /* std::string */) const
+             {
+                   char lastbyte = digit[0];
+                   // odd number of characters
+                   // check if last byte is properly padded
+                   if( (lastbyte & 0x0F) == 0)
+                   {
+                       // properly padded
+                       LOG_DEBUG("CodedNumber properly padded byte detected: %x", lastbyte);
+                       return 0;
+                   } else {
+                       LOG_DEBUG("CodedNumber with unpadded byte detected: %x", lastbyte);
+                       return 1;
+                   }
+             }
+        };
+
+	extern phoenix::function<digitPaddingBytesImpl> digitPaddingBytes;
 	
 	/** Convert byte to number according to the FIPA definition */
 	struct convertToNumberTokenImpl
@@ -319,7 +347,7 @@ namespace fipa
 			unsigned int hexNumber = atoi(arg.c_str());
 			
 			char buffer[512];
-			sprintf(buffer,"%x",hexNumber);
+			sprintf(buffer,"%#x",hexNumber);
 
 			return std::string(buffer);
 		}
@@ -657,7 +685,8 @@ struct CodedNumber : qi::grammar<Iterator, std::string()>
     CodedNumber() : CodedNumber::base_type(coded_number_rule, "CodedNumber-bitefficient_grammar")
     {
         // two numbers in one byte - padding 00 if coding only one number
-        coded_number_rule = qi::byte_ 		[ label::_val = convertToNumberToken(label::_1)]; 
+        coded_number_rule = (qi::byte_ - qi::byte_(0x00))[ label::_val = convertToNumberToken(label::_1)]
+                          ;
 
 	FIPA_DEBUG_RULE(coded_number_rule);
     }
@@ -666,18 +695,19 @@ struct CodedNumber : qi::grammar<Iterator, std::string()>
 };
 
 template<typename Iterator>
-struct Digits : qi::grammar<Iterator, std::string()>
+struct Digits : qi::grammar<Iterator, std::string(), qi::locals<std::string> >
 {
     Digits() : Digits::base_type(digits_rule, "Digits-bitefficient_grammar")
     {
-	digits_rule = +codedNumber [ label::_val += label::_1];
+        // store the last byte to validate the padding
+	digits_rule = *((qi::byte_ - qi::byte_(0x00)) [ label::_val += convertToNumberToken(label::_1)]) [ label::_a = label::_1]
+                    >> qi::repeat(digitPaddingBytes(label::_a))[qi::byte_(0x00)];
+        // padding bytes should only apply if the last codedNumber does not have 00 in the lowerbyte
 
 	FIPA_DEBUG_RULE(digits_rule);
     }
 
-    qi::rule<Iterator, std::string() > digits_rule; 
-    CodedNumber<Iterator> codedNumber;
-
+    qi::rule<Iterator, std::string(), qi::locals<std::string> > digits_rule; 
 };
 
 template<typename Iterator>
@@ -769,11 +799,11 @@ struct BinDateTime : qi::grammar<Iterator, fipa::acl::DateTime()>
 	bin_date_time_rule = ( byte_(0x20) 			[ phoenix::at_c<0>(label::_val) = ' ' ]
 			    >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
 			   )
-			// Relative time (-)
+			// Relative time (+)
 			| ( byte_(0x21) 			[ phoenix::at_c<0>(label::_val) = '+' ]
 			   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
                           )
-			// Relative time (+)
+			// Relative time (-)
 			| ( byte_(0x22)				[ phoenix::at_c<0>(label::_val) = '-' ]
 			   >> binDate				[ phoenix::at_c<1>(label::_val) = label::_1 ]
                           )
@@ -782,12 +812,12 @@ struct BinDateTime : qi::grammar<Iterator, fipa::acl::DateTime()>
 				>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
 				>> typeDesignator 		[ phoenix::at_c<2>(label::_val) = label::_1 ]
 				) 
-			// Relative time (-)
+			// Relative time (+)
 			| ( byte_(0x25) 			[ phoenix::at_c<0>(label::_val) = '+' ]
 				>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
 				>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
 				) 
-			// Relative time (+)
+			// Relative time (-)
 			| ( byte_(0x26)				[ phoenix::at_c<0>(label::_val) = '-' ] 
 				>> binDate			[ phoenix::at_c<1>(label::_val) = label::_1 ]
 				>> typeDesignator		[ phoenix::at_c<2>(label::_val) = label::_1 ]
@@ -827,7 +857,7 @@ struct Word : qi::grammar<Iterator, std::string()>
 			| char_('-')
 			| char_('@')
 			;
-	wordExceptionsGeneral %= char_('\x00','\x20') 
+	wordExceptionsGeneral %= char_(0x00,0x20) 
 			| char_('(')
                         | char_(')')
 			;
@@ -992,7 +1022,7 @@ struct UserdefinedParameter : qi::grammar<Iterator, fipa::acl::UserDefinedParame
     {
         userdefined_parameter_rule = qi::byte_(0x04)
                  >> binWord 	    [ phoenix::at_c<0>(label::_val) = label::_1 ]
-       		 >> binExpression   [ phoenix::at_c<1>(label::_val) = label::_1 ]
+       		 >> binExpression   [ phoenix::at_c<1>(label::_val) = label::_1 ];
 
         FIPA_DEBUG_RULE(userdefined_parameter_rule);
     }
@@ -1025,11 +1055,10 @@ struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentIdentifier()>
         
         			;
         endOfCollection %= byte_(0x01); 
-    #ifdef BOOST_SPIRIT_DEBUG
-        BOOST_SPIRIT_DEBUG_NODE(addresses);
-        BOOST_SPIRIT_DEBUG_NODE(resolvers);
+
+        FIPA_DEBUG_RULE(addresses);
+        FIPA_DEBUG_RULE(resolvers);
 	FIPA_DEBUG_RULE(agent_identifier_rule);
-    #endif 
     }
 
     qi::rule<Iterator, fipa::acl::AgentIdentifier()> agent_identifier_rule;
