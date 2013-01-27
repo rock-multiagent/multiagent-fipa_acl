@@ -34,7 +34,6 @@ set(HEADERS
     fipa_acl.h
     message_generator/exception.h
     message_generator/userdef_param.h
-    message_generator/acl_message_output_parser.h
     message_generator/types.h
     message_generator/agent_id.h
     message_generator/acl_message.h
