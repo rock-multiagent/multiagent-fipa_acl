@@ -15,8 +15,6 @@ public:
      */
     std::string apply(const ACLMessage& msg) const;
 
-private: 
-
     /**
         \brief encodes an AgentID instance
         
@@ -149,6 +147,19 @@ private:
     std::string getBitBinDateTimeToken(const std::string& date1) const;
     
     /**
+    \brief implements the date time token production of the grammar; not complete(w.r.t. the specification) in functionality 
+    implementing the messages without the rest of the architecture makes it difficult to anticipate when and how some productions 
+    may/will be used so only a few of the productions were implemented and the char parameter was added to choose between them, 
+    as no other decission maker/constraint was identified
+    */
+    std::string getBitBinDateTimeToken(const base::Time& time) const;
+   
+    /**
+     * Retrieve bitefficient encoding for base time
+     */
+    std::string getBitBinDate(const base::Time& time) const;
+
+    /**
     \brief takes the string representing the date and passes it's digits 2 by 2(as length 2 sugstrings) to the byte encoding function
     it did not explicitly specify but it was induced from the way it was stated that the date is to be encoded as a coded number(comment 9 of the specification)
     */
@@ -161,10 +172,9 @@ private:
     std::string getBitCodedNumber(const std::string& cn) const;
     
     /**
-    \brief different version of the above function needed for parsing the date string
-    because the date string is passed as substrings and then concatenated back toghether in the caller function, the above function would not perform as desired(it adds a padding 0x00 byte after each substring)
+    \brief Allow proper generation of natural numbers, will remove any leading zeros
     */
-    std::string getBitCodedNumberByte(const std::string& cn) const;
+    std::string getBitCodedNaturalNumber(const std::string& cn) const;
 };
 
 } // end namespace acl

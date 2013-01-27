@@ -305,14 +305,6 @@ public:
     void setUserdefParams(const std::vector<UserdefParam>& p);
 
     /**
-     * Allow to retrieve the ReplyBy time either formatted or unformatted. 
-     * Unformatted: YYYYmmddHHMMSSsss
-     * Formatted: default time format YYYYmmdd-HH:MM:SS:sss
-       \param formatted option to get the parameter as it is stored or formated. default is formatted,call with false to get unformatted
-    */
-    std::string getReplyByString(bool formatted) const;
-
-    /**
      * Return reply by as time object
      */
     base::Time getReplyBy() const { return mReplyBy; }

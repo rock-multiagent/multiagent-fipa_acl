@@ -10,6 +10,8 @@
 #include <arpa/inet.h>
 #include <limits>
 
+#include<boost/algorithm/string/erase.hpp>
+
 #include <base/logging.h>
 
 #include <fipa_acl/message_generator/acl_message.h>
@@ -167,9 +169,7 @@ std::string BitefficientFormat::getBitPredefMessageParams(const ACLMessage& msg)
 
     if (!msg.getReplyBy().isNull())
     {
-        // Get the formatted string YYYYmmddHHMMSSsss
-        std::string replyBy = msg.getReplyByString(false);
-        retstr = retstr + char(0x06) + getBitBinDateTimeToken(replyBy); 
+        retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy()); 
     }
             
     std::string inReplyTo = msg.getInReplyTo();
@@ -358,13 +358,34 @@ std::string BitefficientFormat::getBitBinDateTimeToken(const std::string& date1)
     return char(0x20) + getBitBinDate(date1);
 }
 
+std::string BitefficientFormat::getBitBinDateTimeToken(const base::Time& time) const
+{
+    return char(0x20) + getBitBinDate(time);
+}
+
+std::string BitefficientFormat::getBitBinDate(const base::Time& baseTime) const
+{
+
+    std::string time = baseTime.toString(base::Time::Milliseconds);
+
+    // Input format should be "%Y%m%d-%H:%M:%S"
+    // Strip ':' and '-' to allow from_iso_string to work
+    boost::erase_all(time,":");
+    boost::erase_all(time,"-");
+
+    // extend millisecond field to 4 digits
+    time.insert(14,sizeof(char),'0');
+
+    return getBitBinDate(time);
+}
+
 std::string BitefficientFormat::getBitBinDate(const std::string& date1) const
 {
     std::string retstr;
     unsigned int i;
     for (i = 0; i < date1.length(); i = i + 2)
     {
-        retstr = retstr + getBitCodedNumberByte(date1.substr(i,2));
+        retstr = retstr + getBitCodedNaturalNumber(date1.substr(i,2));
     }
     
     return retstr;
@@ -375,8 +396,10 @@ std::string BitefficientFormat::getBitCodedNumber(const std::string& cn) const
 {
     std::string retstr;
     unsigned int i;
-    char code = char(0x00);
-    for(i = 0; i < cn.length(); i++)
+    char code(0x00);
+    size_t decimal_size = cn.length();
+
+    for(i = 0; i < decimal_size; i++)
     {
         if ((cn[i]>='0') && (cn[i]<='9')) code = char(code + 1 + int(cn[i]) - 48);
         if (cn[i] == '+') code = char(code + 12);
@@ -384,30 +407,38 @@ std::string BitefficientFormat::getBitCodedNumber(const std::string& cn) const
         if (cn[i] == '-') code = char(code + 14);
         if (cn[i] == '.') code = char(code + 15);
         
-        if (i%2 == 0) code = code<<4;
-        if (i%2 == 1) {retstr = retstr + code; code = char(0x00); }
+        if (i%2 == 0)
+        {
+            code = code<<4;
+        } else {
+            retstr += code;
+            code = char(0x00);
+        }
     }
-    if (code!=char(0x00)) 
+
+    if (decimal_size % 2 != 0)
     {
-        code = char(code + 0);
-        retstr = retstr + code;
+        retstr += code;
     } else {
-        retstr = retstr + char(0x00);
+        retstr += char(0x00);
     }
      
     return retstr;
 }
 
-std::string BitefficientFormat::getBitCodedNumberByte(const std::string& cn) const
+std::string BitefficientFormat::getBitCodedNaturalNumber(const std::string& cn) const
 {
     std::string retstr;
 
     unsigned int i;
-    char code = char(0x00);
-    for(i = 0; i < cn.length(); i++)
+    char code(0x00);
+    size_t decimal_size = cn.length();
+
+    for(i = 0; i < decimal_size; ++i)
     {
         switch(cn[i])
         {
+            // Ignoring leading zeros here, 
             case '0': code += char(0x01); break;
             case '1': code += char(0x02); break;
             case '2': code += char(0x03); break;
@@ -418,29 +449,30 @@ std::string BitefficientFormat::getBitCodedNumberByte(const std::string& cn) con
             case '7': code += char(0x08); break;
             case '8': code += char(0x09); break;
             case '9': code += char(0x0a); break;
-            case '+': code += char(0x0c); break;
-            case 'e': 
-            case 'E': code += char(0x0d); break;
-            case '-': code += char(0x0e); break;
-            case '.': code += char(0x0f); break;
+            //case '+': code += char(0x0c); break;
+            //case 'e': 
+            //case 'E': code += char(0x0d); break;
+            //case '-': code += char(0x0e); break;
+            //case '.': code += char(0x0f); break;
             default: 
                       assert(false);
         }
+
           
         if (i%2 == 0)
         { 
             code = code<<4;
-        } else if (i%2 == 1) {
-            retstr = retstr + code; 
+        } else {
+            retstr += code; 
             code = char(0x00); 
         }
     }
 
-    if (code!=char(0x00)) 
+    if (i%2 != 0)
     {
-        code = char(code + 0);
-        retstr = retstr + code;
+        retstr += code;
     }
+     
     return retstr;
 }
 
