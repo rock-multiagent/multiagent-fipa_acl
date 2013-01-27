@@ -42,8 +42,8 @@ set(HEADERS
     message_parser/byte_sequence.h
     message_parser/date_time.h
     message_parser/debug.h
-    message_parser/grammar_bitefficient.h
-    message_parser/grammar_bitefficient_envelope.h
+    message_parser/bitefficient/grammar_bitefficient.h
+    message_parser/bitefficient/grammar_bitefficient_envelope.h
     message_parser/message_parser.h
     message_parser/message_printer.h
     message_parser/parameter.h
