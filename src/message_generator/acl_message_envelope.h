@@ -347,6 +347,16 @@ public:
      */
     void setBaseEnvelope(const ACLBaseMessageEnvelope& envelope) { mBaseEnvelope = envelope; }
 
+    /**
+     * Set the payload which is wrapped by this envelope as byte get
+     */
+    void setPayload(std::vector<uint8_t> payload) { mPayload = payload; }
+
+    /**
+     * Get the payload which is wrapped by this envelope
+     * \return byte vector
+     */
+    std::vector<uint8_t> getPayload() const { return mPayload; }
 };
 
 } // end namespace acl
