@@ -200,6 +200,7 @@ public:
 
     /**
      * Set the acl representation in use
+     * "This is the name of the syntax representation of the message payload." [http://www.fipa.org/specs/fipa00067/SC00067F.html#_Toc26669814]
      */
     void setACLRepresentation(representation::Type representation);
 
@@ -305,20 +306,47 @@ public:
 };
 
 
+/**
+ * Message envelope includes the base envelope and updated fields, along with the actual payload
+ * data that is wrapped by this envelope
+ */
 class ACLMessageEnvelope
 {
+    /**
+     * Updated envelope information as part of the relaying through various
+     * message transport services
+     */
     ACLBaseMessageEnvelopeList mExtraEnvelopes;
 
+    /**
+     * Base envelope, i.e. the one the first mts created 
+     */
     ACLBaseMessageEnvelope mBaseEnvelope;
 
+    // The payload data that is transported within this envelope
+    std::vector<uint8_t> mPayload;
+
 public:
+    /**
+     * Get all extra envelopes
+     */
     const ACLBaseMessageEnvelopeList& getExtraEnvelopes() const { return mExtraEnvelopes; }
 
+    /**
+     * Set all extra envelopes
+     */
     void setExtraEnvelopes(const ACLBaseMessageEnvelopeList& envelopes) { mExtraEnvelopes = envelopes; }
 
+    /**
+     * Get the base envelope
+     */
     const ACLBaseMessageEnvelope& getBaseEnvelope() const { return mBaseEnvelope; }
 
+    /**
+     * Set the base envelope
+     */
     void setBaseEnvelope(const ACLBaseMessageEnvelope& envelope) { mBaseEnvelope = envelope; }
+
 };
 
 } // end namespace acl
