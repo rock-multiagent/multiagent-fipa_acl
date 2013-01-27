@@ -8,8 +8,10 @@ set(SOURCES
     message_generator/acl_message.cpp
     message_generator/acl_message_envelope.cpp
     message_generator/agent_id.cpp
+    message_generator/format/bitefficient_format.cpp
+    message_generator/message_format.cpp
     message_generator/userdef_param.cpp
-    message_generator/acl_message_output_parser.cpp
+    message_generator/message_generator.cpp
     conversation_monitor/message_archive.cpp
     conversation_monitor/role.cpp
     conversation_monitor/state.cpp
@@ -37,6 +39,8 @@ set(HEADERS
     message_generator/agent_id.h
     message_generator/acl_message.h
     message_generator/acl_message_envelope.h
+    message_generator/format/bitefficient_format.h
+    message_generator/message_format.h
     message_generator/message_generator.h
     message_parser/agent_id.h
     message_parser/byte_sequence.h

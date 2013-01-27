@@ -45,7 +45,6 @@ int main(int argc, char** argv)
     }
 
     using namespace fipa::acl;
-    ACLMessageOutputParser outputParser;
     ACLMessage msg("inform");
     AgentID origin("proxy");
     AgentID receiver("crex_0");
@@ -69,7 +68,6 @@ int main(int argc, char** argv)
     buffer[BUFFER_MAX] = '\0';
     msg.setContent(buffer);
 
-    outputParser.setMessage(msg);
     // 1 MB ~ 10 ms > 200 runs
     // 0 MB ~ 0 ms > 200000
     int32_t epochs = atoi(argv[2]);
@@ -88,7 +86,9 @@ int main(int argc, char** argv)
         struct timeval start, stop, diff;
         gettimeofday(&start, 0);
         for(int i = 0; i < epochs; i++)
-           encodedMsg = outputParser.getBitMessage();
+        {
+           encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
+        }
         gettimeofday(&stop, 0);
 	
         timeval_subtract(&diff, &stop, &start);

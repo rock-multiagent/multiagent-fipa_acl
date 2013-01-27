@@ -1,90 +1,21 @@
-/**
-*
-* \file acl_message_output_parser.h
-* \author Mircea Cretu Stancu
-* \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
-*/
+#ifndef FIPA_ACL_BITEFFICIENT_FORMATTER_H
+#define FIPA_ACL_BITEFFICIENT_FORMATTER_H
 
-#ifndef FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
-#define FIPA_ACL_ACLMESSAGE_OUTPUTPARSER_H
-#include <string>
-#include <fipa_acl/message_generator/agent_id.h>
-#include <fipa_acl/message_generator/userdef_param.h>
-#include <fipa_acl/message_generator/acl_message.h>
-#include <fipa_acl/message_generator/exception.h>
+#include <fipa_acl/message_generator/message_format.h>
 
 namespace fipa {
-
 namespace acl {
-    
-/**
-* \class ACLMessageOutputParser
-* \brief encodes and ACLMessage class object according to the fipa spec(SC00069) all pointer extractin/passing methods are 
-* shallow(only the references passed); this is ok as they are not modiffied in the process of encoding; if this changes as 
-* utility increases(objects will be modified) then change to deep-copy retreival should be trivial, with the overloaded operators
-*/
-class ACLMessageOutputParser {
 
-private:
-     /**
-     @msg message to be parsed
-
-     @useCodeTables flag to determine whether we use code tables or not
-     * sice the code tables are not implemented yet, it's value is initialized with 0 and is not to be changed
-
-     @updateCodeTables flag to determine whether we update the code tables
-     * it does not have any practical relevance unless useCodeTables = 1
-
-     @version string that keeps the version of the encoder
-     * needed by the speciffication; initialized to "1.0"
-     * important restraint: as the speciffication states the version must be of strictly 2 digits;
-     
-     @res_depth a control variable that speciffies the depth of speciffing resolvers when encoding AgentID's
-     * see speciffication for details 
-     */
-    ACLMessage mMessage;
-    bool mUseCodeTables;
-    bool mUpdateCodeTables;
-    std::string mVersion;
-    int mResolverDepth;
-    
+class BitefficientFormat : public MessageFormat
+{
 public:
-    ACLMessageOutputParser();
     /**
-        \brief setter and getter methods for the parameters of the encoder
-    */
-    void setUseCodeTables(bool x) { mUseCodeTables = x; }
+     * Applies the format to the message
+     * \return the formatted message object
+     */
+    std::string apply(const ACLMessage& msg) const;
 
-    bool getUseCodeTables() { return mUseCodeTables; }
-
-    void setUpdateCodeTables(bool x) { mUpdateCodeTables = x; }
-
-    bool getUpdateCodeTables() { return mUpdateCodeTables; }
-
-    void setResolverDepth(int depth) { mResolverDepth = depth; }
-
-    int getResolverDepth() { return mResolverDepth; }
-
-    void setVersion(const std::string& version) { mVersion = version; }
-
-    std::string getVersion() { return mVersion; }
-    /**
-        \brief not a deep-copy assignment of msg but this should not be a problem as fields are not modified in the encoding process
-    */
-    void setMessage(const ACLMessage &a);
-    
-    /**
-        \brief prints the parsed message to an ofstream given as argument(as a string)
-        \param stream: name of the desired ofstream
-    */
-    int printParsedMessage(const std::string& stream);		
-    
-    /**
-       \brief  main function in the production tree, returns the encoded message as a sequence of bytes kept in a string object
-       \return string containing the encoded message
-       \throw MessageGeneratorException when the message could not be created correctly
-    */
-    std::string getBitMessage();
+private: 
 
     /**
         \brief encodes an AgentID instance
@@ -96,87 +27,85 @@ public:
         \param depth: depth of the resolver tree to be encoded
         \return the encoded agentAID as string
     */
-    std::string getBitAID(const AgentID& aid, int depth);
+    std::string getBitAID(const AgentID& aid, int depth) const;
     
-    
-private:
     /**
     \brief returns the very used end-of-collection marker
     */
-    char getBitEndOfColl();
+    char getBitEndOfColl() const;
 
     /**
     \brief puts the header toghether
     */
-    std::string  getBitHeader();
+    std::string  getBitHeader() const;
 
     /**
     \brief depending on the flags it sets the ID
     */
-    char  getBitMessageID();
+    char  getBitMessageID() const;
 
     /**
     \brief gets the message version in one byte
     the message version has a very specific format: digit+dot+digit
     */
-    char getBitMessageVersion();
+    char getBitMessageVersion() const;
 
     /**
     \brief encodes the message performative;
     it compares the string of the message performative to all the predefined ones; if it is one of them it returns accordingly if not it returns the 
     custom performative
     */
-    std::string getBitMessageType();
+    std::string getBitMessageType(const ACLMessage& msg) const;
     
     /**
     \brief quite frequently used production;
     * currently it does not have complete functionality: the code tables need to be implemented in order to use them
     */
-    std::string getBitBinWord(const std::string& sword);
+    std::string getBitBinWord(const std::string& sword) const;
     
     /** 
     \brief puts together all the message parameters 
     */
-    std::string getBitMessageParameters();
+    std::string getBitMessageParameters(const ACLMessage& msg) const;
     
     /**	
     \brief checks all predefined message parameters whether they are set or not and it encodes them accordingly
     */
-    std::string getBitPredefMessageParams();
+    std::string getBitPredefMessageParams(const ACLMessage& msg) const;
     
     /**
     parses all the user defined parameters of the message if any
     */
-    std::string getBitUserdefMessageParams();
+    std::string getBitUserdefMessageParams(const ACLMessage& msg) const;
     
     /**
     \brief parses a set of user defined parameters;
     different from the getBitUserdefMessageParams() method in that there is more general; the former is to be called only for message parameters;
     difference was imposed by the specification	
     */
-    std::string getBitUserdefParams(const std::vector<UserdefParam>& params);
+    std::string getBitUserdefParams(const std::vector<UserdefParam>& params) const;
     
     /**
     \brief parses one user defined parameter
     the specification does not differentiate at this level between message parameters and other kinds so this method is called by both
     */
-    std::string bitParseParam(const UserdefParam&);
+    std::string bitParseParam(const UserdefParam&) const;
     
     /**
     \brief currently used to encode the addresses of the AgentID instances(strings)
     */
-    std::string getBinURLCol(const std::vector<std::string>&);
+    std::string getBinURLCol(const std::vector<std::string>&) const;
     
     /**
     \brief basically a wrapper function of the getBitAIDColl(), to add the required specific flag
     */
-    std::string getBitResolvers(const std::vector<AgentID>& aids,int depth);
+    std::string getBitResolvers(const std::vector<AgentID>& aids,int depth) const;
     
     /**
     \brief parses a set of AgentID instances
     the resolvers depth variable that is being passed around is not modified in this function
     */
-    std::string getBitAIDColl(const std::vector<AgentID>& aids, int depth);
+    std::string getBitAIDColl(const std::vector<AgentID>& aids, int depth) const;
     
     /**
     \brief implements the binary expression production of the grammar; not complete(w.r.t. the specification) in functionality
@@ -184,32 +113,32 @@ private:
     may/will be used so only a few of the productions were implemented(for the binary expression) and the char parameter was added 
     to choose between them, as no other decission maker/constraint was identified
     */
-    std::string getBitBinExpression(const std::string& sword,char c);
+    std::string getBitBinExpression(const std::string& sword,char c) const;
     
     /**
     \brief overloaded version of the above function
     */
-    std::string getBitBinExpression(double n,char base);
+    std::string getBitBinExpression(double n,char base) const;
     
     /**
     \brief parses a number according to the specification(see comment 9 of the specification)
     for ease it is turned into a string and passed on
     */
-    std::string getBitBinNumber(double n,char base);
+    std::string getBitBinNumber(double n,char base) const;
     
     /**
     * Retrieve the byte length encoded string for the given word 
     * \param sword String containing the data to convert
     */
-    std::string getByteLengthEncodedString(const std::string& sword);
+    std::string getByteLengthEncodedString(const std::string& sword) const;
     
     /**
     \brief implements the binary string production; functionality not complete as code tables are not yet implemented
     the second argument is an explicit option for codeTables(needed for the getBitBinExpression() )
     */
-    std::string getBitBinString(const std::string& sword);
+    std::string getBitBinString(const std::string& sword) const;
     
-    std::string getBitDigits(const std::string& dig);
+    std::string getBitDigits(const std::string& dig) const;
     
     /**
     \brief implements the date time token production of the grammar; not complete(w.r.t. the specification) in functionality 
@@ -217,29 +146,28 @@ private:
     may/will be used so only a few of the productions were implemented and the char parameter was added to choose between them, 
     as no other decission maker/constraint was identified
     */
-    std::string getBitBinDateTimeToken(const std::string& date1);
+    std::string getBitBinDateTimeToken(const std::string& date1) const;
     
     /**
     \brief takes the string representing the date and passes it's digits 2 by 2(as length 2 sugstrings) to the byte encoding function
     it did not explicitly specify but it was induced from the way it was stated that the date is to be encoded as a coded number(comment 9 of the specification)
     */
-    std::string getBitBinDate(const std::string& date1);
+    std::string getBitBinDate(const std::string& date1) const;
     
     /**
     \brief implements a coded number passed as a string
     it goes through it digit by digit(char by char)
     */
-    std::string getBitCodedNumber(const std::string& cn);
+    std::string getBitCodedNumber(const std::string& cn) const;
     
     /**
     \brief different version of the above function needed for parsing the date string
     because the date string is passed as substrings and then concatenated back toghether in the caller function, the above function would not perform as desired(it adds a padding 0x00 byte after each substring)
     */
-    std::string getBitCodedNumberByte(const std::string& cn);
+    std::string getBitCodedNumberByte(const std::string& cn) const;
 };
 
+} // end namespace acl
+} // end namespace fipa
 
-}//end of acl namespace
-
-}// end of fipa namespace
-#endif
+#endif // FIPA_ACL_BITEFFICIENT_FORMATTER_H

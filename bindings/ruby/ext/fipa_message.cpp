@@ -152,10 +152,7 @@ Array wrap_toByteVector(Object message)
 
    Data_Object<fipa::acl::ACLMessage> msg(message, rb_cFipaMessage);
 
-   fipa::acl::ACLMessageOutputParser mop;
-   mop.setMessage(*msg);
-   
-   std::string bitefficientMsg = mop.getBitMessage();
+   std::string bitefficientMsg = fipa::acl::MessageGenerator::create(*msg, fipa::acl::message_format::BITEFFICIENT);
    int size = bitefficientMsg.size();
 
    std::vector<uint8_t> bytes;

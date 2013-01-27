@@ -1,9 +1,4 @@
-/**
- *
- * \file acl_message_output_parser.cpp
- * \author Mircea Cretu Stancu
- * \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
- */
+#include "bitefficient_format.h"
 
 #include <iostream>
 #include <fstream>
@@ -12,57 +7,25 @@
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
-#include "acl_message_output_parser.h"
-#include "acl_message.h"
-#include "userdef_param.h"
-#include "agent_id.h"
-#include <base/logging.h>
 #include <arpa/inet.h>
 #include <limits>
 
+#include <base/logging.h>
+
+#include <fipa_acl/message_generator/acl_message.h>
+#include <fipa_acl/message_generator/message_format.h>
+
 namespace fipa {
-
 namespace acl {
-    
 
-void ACLMessageOutputParser::setMessage(const ACLMessage& msg)
-{
-	mMessage = msg;
-}
-
-ACLMessageOutputParser::ACLMessageOutputParser()
-    : mUseCodeTables(false)
-    , mUpdateCodeTables(true)
-    , mVersion("1.3")
-    , mResolverDepth(1)
-{
-}
-
-
-int ACLMessageOutputParser::printParsedMessage(const std::string& stream)
-{
-    std::ofstream out(stream.c_str(), std::ios_base::binary);
-	if (!out)
-		return 0;
-	
-	std::string output = getBitMessage();
-
-	for (unsigned int i = 0; i < output.length(); i++)
-		out.put(output[i]);
-
-	out.close();
-	return 1;
-}
-
-
-std::string ACLMessageOutputParser::getBitMessage()
+std::string BitefficientFormat::apply(const ACLMessage& msg) const
 {
 
-	std::string mes = getBitHeader() + getBitMessageType() + getBitMessageParameters();
+	std::string mes = getBitHeader() + getBitMessageType(msg) + getBitMessageParameters(msg);
 
         // Since content can be of arbitrary sicne add content here
         // to avoid copying around large content object
-        std::string* content = mMessage.getContentPtr();
+        const std::string* content = msg.getContentPtr();
         if (!content->empty())
         {
             uint32_t digit = content->size();	
@@ -104,45 +67,47 @@ std::string ACLMessageOutputParser::getBitMessage()
 	return mes;
 }
 
-char ACLMessageOutputParser::getBitEndOfColl()
+char BitefficientFormat::getBitEndOfColl() const
 {
 	return char(0x01); 
 }
 
-std::string ACLMessageOutputParser::getBitHeader()
+std::string BitefficientFormat::getBitHeader() const
 {	
 	std::string retstr;
 	
 	char id = getBitMessageID();
-	char mVersion = getBitMessageVersion();
+	char version = getBitMessageVersion();
 	
-	return retstr.append(1,id).append(1,mVersion);
+	return retstr.append(1,id).append(1,version);
 }
 
-char ACLMessageOutputParser::getBitMessageID()
+char BitefficientFormat::getBitMessageID() const
 {	
-    if (!mUseCodeTables)
+    if (!getUseCodeTables())
     {
         return 0xfa;
     }
-    if (mUpdateCodeTables)
+    if (getUpdateCodeTables())
     {
         return 0xfb;
     }
     return 0xfc;
 }
 
-char ACLMessageOutputParser::getBitMessageVersion()
+char BitefficientFormat::getBitMessageVersion() const
 {
-	return char(((int)mVersion[0]-48)*16 + ((int)mVersion[2]-48));
+    std::string version = getVersion();
+    return char(((int) version[0]-48)*16 + ((int)version[2]-48));
 }
 
-std::string ACLMessageOutputParser::getBitMessageType()
+std::string BitefficientFormat::getBitMessageType(const ACLMessage& msg) const
 {
+    std::string performative = msg.getPerformative();
     // Check if we have one of the predefined performatives
     for (int i = (int) ACLMessage::ACCEPT_PROPOSAL; i < (int) ACLMessage::END_PERFORMATIVE; ++i)
     {
-        if (PerformativeTxt[(ACLMessage::Performative) i] == mMessage.getPerformative())
+        if (PerformativeTxt[(ACLMessage::Performative) i] == performative)
         { 				
             char a[2]; 
             a[0] = char(i+1); 
@@ -152,107 +117,107 @@ std::string ACLMessageOutputParser::getBitMessageType()
     }
 
     // actually we will have user defined performative here
-    if(mMessage.getPerformative().empty())
+    if(performative.empty())
         throw MessageGeneratorException("Performative cannot be empty");
 	
-    return (char(0x00) + getBitBinWord(mMessage.getPerformative()));
+    return (char(0x00) + getBitBinWord(performative));
 } 
 
-std::string ACLMessageOutputParser::getBitBinWord(const std::string& sword)
+std::string BitefficientFormat::getBitBinWord(const std::string& sword) const
 {
-    if (!mUseCodeTables)
+    if (!getUseCodeTables())
     {
         return (char(0x10) + sword + char(0x00));
     }
 
-    throw std::runtime_error("ACLMessageOutputParser does not support codetables");
+    throw std::runtime_error("BitefficientFormat does not support codetables");
 }
 
-std::string ACLMessageOutputParser::getBitMessageParameters()
+std::string BitefficientFormat::getBitMessageParameters(const ACLMessage& msg) const
 {
-	return (getBitPredefMessageParams() + getBitUserdefMessageParams());
+	return (getBitPredefMessageParams(msg) + getBitUserdefMessageParams(msg));
 }
 
 
 
-std::string ACLMessageOutputParser::getBitPredefMessageParams()
+std::string BitefficientFormat::getBitPredefMessageParams(const ACLMessage& msg) const
 {
     std::string retstr;
 
     // Check if entries exists for the predefined message parameters
     // sender is not always required, 
-    AgentID sender = mMessage.getSender();
+    AgentID sender = msg.getSender();
     if ( !sender.empty()) 
     {
-        LOG_DEBUG("Writing sender: %s", getBitAID(sender, mResolverDepth).c_str());
-        retstr = retstr + char(0x02) + getBitAID(sender, mResolverDepth); 
+        LOG_DEBUG("Writing sender: %s", getBitAID(sender, getResolverDepth()).c_str());
+        retstr = retstr + char(0x02) + getBitAID(sender, getResolverDepth()); 
     }
 
-    std::vector<AgentID> receivers = mMessage.getAllReceivers();
+    std::vector<AgentID> receivers = msg.getAllReceivers();
     if (!receivers.empty())
     {
-        retstr = retstr + char(0x03) + getBitAIDColl(receivers,mResolverDepth); 
+        retstr = retstr + char(0x03) + getBitAIDColl(receivers,getResolverDepth()); 
     }
 
     ///** Content added at higher level to minimize copies of large content objects **/
 
-    std::string replyWith = mMessage.getReplyWith();	
+    std::string replyWith = msg.getReplyWith();	
     if (!replyWith.empty())
         retstr = retstr + char(0x05) + getBitBinExpression(replyWith,'s'); 
 
-    if (!mMessage.getReplyBy().isNull())
+    if (!msg.getReplyBy().isNull())
     {
         // Get the formatted string YYYYmmddHHMMSSsss
-        std::string replyBy = mMessage.getReplyByString(false);
+        std::string replyBy = msg.getReplyByString(false);
         retstr = retstr + char(0x06) + getBitBinDateTimeToken(replyBy); 
     }
             
-    std::string inReplyTo = mMessage.getInReplyTo();
+    std::string inReplyTo = msg.getInReplyTo();
     if (!inReplyTo.empty())
     {
         retstr = retstr + char(0x07) + getBitBinExpression(inReplyTo,'s'); 
     }
 
-    std::vector<AgentID> replyTo = mMessage.getAllReplyTo();
+    std::vector<AgentID> replyTo = msg.getAllReplyTo();
     if (!replyTo.empty()) 
     {
-        retstr = retstr + char(0x08) + getBitAIDColl(replyTo,mResolverDepth);
+        retstr = retstr + char(0x08) + getBitAIDColl(replyTo,getResolverDepth());
     }
 
-    std::string language = mMessage.getLanguage();
+    std::string language = msg.getLanguage();
     if (!language.empty())
     {
         retstr = retstr + char(0x09) + getBitBinExpression(language,'s'); 
     }
 
-    std::string encoding = mMessage.getEncoding();
+    std::string encoding = msg.getEncoding();
     if (!encoding.empty())
     {
         retstr = retstr + char(0x0a) + getBitBinExpression(encoding,'s');
     }
 
-    std::string ontology = mMessage.getOntology();
+    std::string ontology = msg.getOntology();
     if (!ontology.empty())
         retstr = retstr + char(0x0b) + getBitBinExpression(ontology,'s'); 
 
-    std::string protocol = mMessage.getProtocol();
+    std::string protocol = msg.getProtocol();
     if (!protocol.empty())
     {
         retstr = retstr + char(0x0c) + getBitBinWord(protocol);
     }
 
-    std::string conversationID = mMessage.getConversationID();
+    std::string conversationID = msg.getConversationID();
     if (!conversationID.empty())
         retstr = retstr + char(0x0d) + getBitBinExpression(conversationID,'s');
     
     return retstr;
 }
 
-std::string ACLMessageOutputParser::getBitUserdefMessageParams()
+std::string BitefficientFormat::getBitUserdefMessageParams(const ACLMessage& msg) const
 {
     std::string retstr;
 
-    std::vector<UserdefParam> s = mMessage.getUserdefParams();
+    std::vector<UserdefParam> s = msg.getUserdefParams();
     if( s.empty() )
     {
         return retstr;
@@ -270,7 +235,7 @@ std::string ACLMessageOutputParser::getBitUserdefMessageParams()
     return retstr;
 }
 
-std::string ACLMessageOutputParser::getBitUserdefParams(const std::vector<UserdefParam>& params)
+std::string BitefficientFormat::getBitUserdefParams(const std::vector<UserdefParam>& params) const
 {
     std::string retstr;
     std::vector<UserdefParam>::const_iterator it = params.begin();
@@ -280,13 +245,13 @@ std::string ACLMessageOutputParser::getBitUserdefParams(const std::vector<Userde
     return retstr;
 }
 
-std::string ACLMessageOutputParser::bitParseParam(const UserdefParam& p)
+std::string BitefficientFormat::bitParseParam(const UserdefParam& p) const
 {
     return getBitBinWord(p.getName()) + getBitBinExpression(p.getValue(),'s');
 }
 
 
-std::string ACLMessageOutputParser::getBitAID(const AgentID& aid, int depth)
+std::string BitefficientFormat::getBitAID(const AgentID& aid, int depth) const
 {
     if (depth > 0)
         return char(0x02) + getBitBinWord(aid.getName())+
@@ -303,7 +268,7 @@ std::string ACLMessageOutputParser::getBitAID(const AgentID& aid, int depth)
 }
 
 
-std::string ACLMessageOutputParser::getBinURLCol(const std::vector<std::string>& adrr)
+std::string BitefficientFormat::getBinURLCol(const std::vector<std::string>& adrr) const
 {
     std::string retstr; 
     std::vector<std::string>::const_iterator it = adrr.begin();
@@ -314,12 +279,12 @@ std::string ACLMessageOutputParser::getBinURLCol(const std::vector<std::string>&
     return retstr;
 }
 
-std::string ACLMessageOutputParser::getBitResolvers(const std::vector<AgentID>& aids,int depth)
+std::string BitefficientFormat::getBitResolvers(const std::vector<AgentID>& aids,int depth) const
 {
     return (char(0x03) + getBitAIDColl(aids,depth));
 }
 
-std::string ACLMessageOutputParser::getBitAIDColl(const std::vector<AgentID>& aids, int depth)
+std::string BitefficientFormat::getBitAIDColl(const std::vector<AgentID>& aids, int depth) const
 {
     std::string retstr;
     std::vector<AgentID>::const_iterator it = aids.begin();
@@ -328,7 +293,7 @@ std::string ACLMessageOutputParser::getBitAIDColl(const std::vector<AgentID>& ai
     return retstr + getBitEndOfColl();
 }
 
-std::string ACLMessageOutputParser::getByteLengthEncodedString(const std::string& sword)
+std::string BitefficientFormat::getByteLengthEncodedString(const std::string& sword) const
 {
     char digitString[100];
     int digit = sword.size();	
@@ -337,12 +302,12 @@ std::string ACLMessageOutputParser::getByteLengthEncodedString(const std::string
     return digitString + sword + char(0x00);
 }
 
-std::string ACLMessageOutputParser::getBitBinExpression(const std::string& sword,char c)
+std::string BitefficientFormat::getBitBinExpression(const std::string& sword,char c) const
 {
-    if (!sword.compare(mMessage.getContent())) 
-    {
-        return char(0xff) + getBitBinString(sword);
-    }
+    //if (!sword.compare(msg.getContent())) 
+    //{
+    //    return char(0xff) + getBitBinString(sword);
+    //}
 
     if (c == 's') 
         return getBitBinString(sword);
@@ -350,15 +315,15 @@ std::string ACLMessageOutputParser::getBitBinExpression(const std::string& sword
     if (c == 'w') 
         return getBitBinWord(sword);
 
-    throw std::runtime_error("ACLMessageOutputParser: getBitBinExpression called with wrong base character");
+    throw std::runtime_error("BitefficientFormat: getBitBinExpression called with wrong base character");
 }
 
-std::string ACLMessageOutputParser::getBitBinExpression(double n,char base)
+std::string BitefficientFormat::getBitBinExpression(double n,char base) const
 {
     return getBitBinNumber(n,base);
 }
 
-std::string ACLMessageOutputParser::getBitBinNumber(double n,char base)
+std::string BitefficientFormat::getBitBinNumber(double n,char base) const
 {
     std::stringstream ss (std::stringstream::in | std::stringstream::out);
     ss << n;
@@ -369,31 +334,31 @@ std::string ACLMessageOutputParser::getBitBinNumber(double n,char base)
     if(base == 'o' || base == 'd') 
         return char(0x12) + getBitDigits(test);
 
-    throw std::runtime_error("ACLMessageOutputParser: getBitBinNumber called with wrong base character");
+    throw std::runtime_error("BitefficientFormat: getBitBinNumber called with wrong base character");
 }
 
-std::string ACLMessageOutputParser::getBitBinString(const std::string& sword)
+std::string BitefficientFormat::getBitBinString(const std::string& sword) const
 {
-    if (!mUseCodeTables)
+    if (!getUseCodeTables())
     {
         return char(0x14) + ( '\"' + sword + '\"') + char(0x00);
     }
         // char(0x15) + return getCTIndex(sword);
-    throw std::runtime_error("ACLMessageOutputParser does not support codetables");
+    throw std::runtime_error("BitefficientFormat does not support codetables");
 
 }
 
-std::string ACLMessageOutputParser::getBitDigits(const std::string& dig)
+std::string BitefficientFormat::getBitDigits(const std::string& dig) const
 {
     return getBitCodedNumber(dig);
 }
 
-std::string ACLMessageOutputParser::getBitBinDateTimeToken(const std::string& date1)
+std::string BitefficientFormat::getBitBinDateTimeToken(const std::string& date1) const
 {
     return char(0x20) + getBitBinDate(date1);
 }
 
-std::string ACLMessageOutputParser::getBitBinDate(const std::string& date1)
+std::string BitefficientFormat::getBitBinDate(const std::string& date1) const
 {
     std::string retstr;
     unsigned int i;
@@ -406,7 +371,7 @@ std::string ACLMessageOutputParser::getBitBinDate(const std::string& date1)
 
 }
 
-std::string ACLMessageOutputParser::getBitCodedNumber(const std::string& cn)
+std::string BitefficientFormat::getBitCodedNumber(const std::string& cn) const
 {
     std::string retstr;
     unsigned int i;
@@ -433,7 +398,7 @@ std::string ACLMessageOutputParser::getBitCodedNumber(const std::string& cn)
     return retstr;
 }
 
-std::string ACLMessageOutputParser::getBitCodedNumberByte(const std::string& cn)
+std::string BitefficientFormat::getBitCodedNumberByte(const std::string& cn) const
 {
     std::string retstr;
 
@@ -478,7 +443,6 @@ std::string ACLMessageOutputParser::getBitCodedNumberByte(const std::string& cn)
     }
     return retstr;
 }
-}//end of acl namespace
 
-}// end of fipa namespace
-
+} // end namespace acl
+} // end namespace fipa
