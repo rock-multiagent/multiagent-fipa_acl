@@ -12,7 +12,7 @@
 
 #include <fipa_acl/message_generator/acl_message_output_parser.h>
 
-#include <fipa_acl/message_parser/grammar_bitefficient.h>
+#include <fipa_acl/message_parser/bitefficient/grammar_bitefficient.h>
 #include <fipa_acl/message_parser/message_printer.h>
 
 std::map<std::string, std::string> options;
@@ -53,8 +53,9 @@ bool usage(int argc, char** argv)
 
 bool parseMsg(const std::string& storage)
 {
-	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
-	bitefficient_grammar grammar;
+	typedef fipa::acl::bitefficient::Message<std::string::const_iterator> bitefficient_message_grammar;
+
+	bitefficient_message_grammar grammar;
 	fipa::acl::Message parseTree;
 
 	std::string::const_iterator iter = storage.begin();

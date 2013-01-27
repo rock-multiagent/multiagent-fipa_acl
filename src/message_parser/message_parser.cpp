@@ -11,7 +11,7 @@
 #include <base/logging.h>
 
 #include "message_parser.h"
-#include "grammar_bitefficient.h"
+#include "bitefficient/grammar_bitefficient.h"
 
 
 namespace fipa { 
@@ -19,8 +19,8 @@ namespace acl {
 
 bool MessageParser::parseData(const std::string& storage, ACLMessage &msg)
 {
-	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
-	bitefficient_grammar grammar;
+        typedef fipa::acl::bitefficient::Message<std::string::const_iterator> bitefficient_message_grammar;
+	bitefficient_message_grammar grammar;
 	fipa::acl::Message parseTree;
 
 	std::string::const_iterator iter = storage.begin();
@@ -43,9 +43,9 @@ bool MessageParser::buildMessage(const Message& parsedMsg, ACLMessage &msg)
 	return true;
 }
 
-void MessageParser::buildParameters(const std::vector<MessageParameter>& parsedParams, ACLMessage &msg)
+void MessageParser::buildParameters(const std::vector<message::Parameter>& parsedParams, ACLMessage &msg)
 {
-    std::vector<MessageParameter>::const_iterator it = parsedParams.begin();
+    std::vector<message::Parameter>::const_iterator it = parsedParams.begin();
  
     for (; it != parsedParams.end(); ++it)
     {	
@@ -60,7 +60,7 @@ void MessageParser::buildParameters(const std::vector<MessageParameter>& parsedP
     }
 }
 
-void MessageParser::buildPredefMessageParameters(const MessageParameter& param, ACLMessage &msg)
+void MessageParser::buildPredefMessageParameters(const message::Parameter& param, ACLMessage &msg)
 {
     // Parameter that require custom conversion from internal data types
     if (param.name == "sender") 
@@ -141,7 +141,7 @@ void MessageParser::buildPredefMessageParameters(const MessageParameter& param, 
     throw std::runtime_error(errorMsg);
 }
 
-void MessageParser::buildSender(const MessageParameter& param, ACLMessage &msg)
+void MessageParser::buildSender(const message::Parameter& param, ACLMessage &msg)
 {
     const AgentIdentifier& temp = boost::get<AgentIdentifier>(param.data);
     AgentID sender = buildAgentID(temp);
@@ -210,7 +210,7 @@ UserdefParam MessageParser::buildUserdefParameter(const UserDefinedParameter& pa
     return retParam;
 }
 
-UserdefParam MessageParser::buildUserdefParameter(const MessageParameter& param)
+UserdefParam MessageParser::buildUserdefParameter(const message::Parameter& param)
 {
     const std::string& value = boost::get<std::string>(param.data); // boost::get() -> to return a specific type value from a boost::variant
 
@@ -222,7 +222,7 @@ UserdefParam MessageParser::buildUserdefParameter(const MessageParameter& param)
 
 }
 
-void MessageParser::buildReceiver(const MessageParameter& param, ACLMessage &msg)
+void MessageParser::buildReceiver(const message::Parameter& param, ACLMessage &msg)
 {
    // boost::get() -> to return a specific type value from a boost::variant
    const std::vector<AgentIdentifier>& unbuiltReceivers = boost::get<std::vector<AgentIdentifier> >(param.data); 
@@ -234,14 +234,14 @@ void MessageParser::buildReceiver(const MessageParameter& param, ACLMessage &msg
    }
 }
 
-void MessageParser::buildReplyBy(const MessageParameter& param, ACLMessage &msg)
+void MessageParser::buildReplyBy(const message::Parameter& param, ACLMessage &msg)
 {
     const DateTime& dateTime = boost::get<DateTime>(param.data);
     base::Time date = dateTime.toTime();
     msg.setReplyBy(date);
 }
 
-void MessageParser::buildReplyTo(const MessageParameter& param, ACLMessage &msg)
+void MessageParser::buildReplyTo(const message::Parameter& param, ACLMessage &msg)
 {
     const std::vector<AgentIdentifier>& agentIds = boost::get<std::vector<AgentIdentifier> >(param.data);
      
@@ -253,7 +253,7 @@ void MessageParser::buildReplyTo(const MessageParameter& param, ACLMessage &msg)
     }
 }
 
-void MessageParser::buildContent(const MessageParameter& param,ACLMessage &msg)
+void MessageParser::buildContent(const message::Parameter& param,ACLMessage &msg)
 {
     const ByteSequence& byteSequence = boost::get<ByteSequence>(param.data);
     std::string content;

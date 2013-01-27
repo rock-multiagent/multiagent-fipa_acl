@@ -13,10 +13,15 @@ std::string DateTime::toString() const
      strftime(buffer,512,defaultFormat.c_str(), &dateTime);
 
      std::string formattedOutput;
-     formattedOutput += relative;
+     if(relative != '\0')
+     {
+     	formattedOutput += relative;
+     }
      formattedOutput += std::string(buffer);
-     formattedOutput += timezone;
-
+     if(timezone != '\0')
+     {
+         formattedOutput += timezone;
+     }
      return formattedOutput;
 }
 
