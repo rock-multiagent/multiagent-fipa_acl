@@ -331,6 +331,12 @@ public:
      */
     static Performative performativeFromString(const std::string& performative);
 
+    /**
+     * Convert message to string
+     * \return Message in string format
+     */
+    std::string toString() const;
+
 };
 
 extern std::map<ACLMessage::Performative, std::string> PerformativeTxt;

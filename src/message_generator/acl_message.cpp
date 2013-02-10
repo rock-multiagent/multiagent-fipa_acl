@@ -5,6 +5,7 @@
 #include "acl_message.h"
 #include <boost/assign/list_of.hpp>
 #include <boost/date_time.hpp>
+#include <boost/foreach.hpp>
 #include <stdexcept>
 
 namespace fipa {
@@ -374,6 +375,83 @@ bool ACLMessage::operator==(const ACLMessage& other) const
         return false;
    
     return true;
+}
+
+std::string ACLMessage::toString() const
+{
+    std::stringstream ss;
+    ss << "(";
+    ss << mPerformative << std::endl;
+    ss << ":sender (agent-identifier :name " << mSender.getName() << " )" << std::endl;
+
+    if(!mReceivers.empty())
+    {
+        ss << ":receiver (set "<< std::endl;
+        BOOST_FOREACH(const AgentID& agent, mReceivers)
+        {
+            ss << "\t(agent-identifier ";
+            ss << ":name " << agent.getName();
+            ss << ") " << std::endl;
+        }
+        ss << ")" << std::endl;
+    }
+
+    if(!mLanguage.empty())
+    {
+        ss << ":language " << mLanguage << std::endl;
+    }
+
+    if(!mEncoding.empty())
+    {
+        ss << ":encoding " << mEncoding << std::endl;
+    }
+
+    if(!mOntology.empty())
+    {
+        ss << ":ontology " << mOntology << std::endl;
+    }
+
+    if(!mProtocol.empty())
+    {
+        ss << ":protocol " << mProtocol << std::endl;
+    }
+
+    if(!mConversationId.empty())
+    {
+        ss << ":conversation-id " << mConversationId << std::endl;
+    }
+
+    if(!mReplyWith.empty())
+    {
+        ss << ":reply-with " << mReplyWith << std::endl;
+    }
+
+    if(!mInReplyTo.empty())
+    {
+        ss << ":in-reply-to " << mInReplyTo << std::endl;
+    }
+
+    if(!mReplyBy.isNull())
+    {
+        ss << ":reply-by " << mReplyBy.toString() << std::endl;
+    }
+
+    if(!mParameters.empty())
+    {
+        BOOST_FOREACH(const UserdefParam& param, mParameters)
+        {
+            ss << param.getName() << " " << param.getValue() << std::endl;
+        }
+    }
+
+    if(!mContent.empty())
+    {
+        ss << ":content " << mContent << std::endl;
+    }
+
+
+    ss << ")" << std::endl;
+    return ss.str();
 }
 
 }//end of acl namespace
