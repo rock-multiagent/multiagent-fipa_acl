@@ -10,10 +10,7 @@
 #include <vector>
 #include <map>
 
-#include <fipa_acl/message_generator/acl_message_output_parser.h>
-
-#include <fipa_acl/message_parser/grammar_bitefficient.h>
-#include <fipa_acl/message_parser/message_printer.h>
+#include <fipa_acl/fipa_acl.h>
 
 std::map<std::string, std::string> options;
 
@@ -53,22 +50,19 @@ bool usage(int argc, char** argv)
 
 bool parseMsg(const std::string& storage)
 {
-	typedef fipa::acl::bitefficient_grammar<std::string::const_iterator> bitefficient_grammar;
-	bitefficient_grammar grammar;
-	fipa::acl::Message parseTree;
+    using namespace fipa::acl;
 
-	std::string::const_iterator iter = storage.begin();
-	std::string::const_iterator end = storage.end();
-	bool r = parse(iter, end, grammar, parseTree);
+    MessageParser parser;
+    ACLMessage msg;
+    bool success = parser.parseData(storage, msg);
 
-	if(r && iter == end)
+	if(success)
 	{
 		std::cout << "------------------------------------\n";
 		std::cout << " Parsing succeeded\n";
 		std::cout << "------------------------------------\n";
+        std::cout << msg.toString() << std::endl;
 
-		fipa::acl::MessagePrinter printer;
-		printer.print(parseTree);
 
 	        return true;
 	} else {
