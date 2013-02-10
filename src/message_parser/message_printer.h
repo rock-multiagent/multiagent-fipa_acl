@@ -18,7 +18,7 @@ public:
          * Print the output of a fipa message to stdout
 	 * \param msg
          */
-	void print(const fipa::acl::Message& msg);
+	void print(const fipa::acl::Message& msg) const;
 };
 
 }} // namespace fipa::acl

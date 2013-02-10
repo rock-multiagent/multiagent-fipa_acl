@@ -10,7 +10,7 @@ MessagePrinter::~MessagePrinter()
 {
 }
 
-void MessagePrinter::print(const fipa::acl::Message& msg)
+void MessagePrinter::print(const fipa::acl::Message& msg) const
 {	
 	printf("FIPA Message read:\n");
 	printf("id:          %x\n", msg.header.id);
