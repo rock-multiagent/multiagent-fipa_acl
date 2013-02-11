@@ -76,8 +76,6 @@ int main(int argc, char** argv)
     
     MessageParser inputParser;
 
-    time_t start;
-    time_t stop;
     std::string encodedMsg;
 
     double encodingMsPerMsg;
