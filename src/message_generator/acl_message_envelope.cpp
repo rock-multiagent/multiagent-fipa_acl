@@ -211,6 +211,24 @@ ACLBaseMessageEnvelope ACLBaseMessageEnvelope::merge(const ACLBaseMessageEnvelop
     return envelope;
 }
 
+ACLMessageEnvelope::ACLMessageEnvelope()
+{}
+
+ACLMessageEnvelope::ACLMessageEnvelope(const fipa::acl::ACLMessage& message, const fipa::acl::representation::Type& representation)
+{
+    using namespace fipa::acl;
+    mPayload = MessageGenerator::create(message, representation);
+}
+
+fipa::acl::ACLMessage ACLMessageEnvelope::getACLMessage() const
+{
+    using namespace fipa::acl;
+    ACLMessage msg;
+    MessageParser mp;
+    mp.parseData(mPayload, msg);
+    return msg;
+}
+
 void ACLMessageEnvelope::stamp(const fipa::acl::AgentID& id)
 {
     ReceivedObject receivedObject;

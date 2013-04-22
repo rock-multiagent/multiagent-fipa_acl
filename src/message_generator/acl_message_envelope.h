@@ -336,13 +336,30 @@ class ACLMessageEnvelope
     ACLBaseMessageEnvelope mBaseEnvelope;
 
     // The payload data that is transported within this envelope
-    std::vector<uint8_t> mPayload;
+    std::string mPayload;
 
 public:
+
+    /**
+     * Default envelope constructor
+     */
+    ACLMessageEnvelope();
+
+    /**
+     * Creates and envelope for a acl message.
+     * Note the the acl message will be encoded according to the given representation format
+     */
+    ACLMessageEnvelope(const ACLMessage& msg, const fipa::acl::representation::Type& format);
+
     /**
      * Get all extra envelopes
      */
     const ACLBaseMessageEnvelopeList& getExtraEnvelopes() const { return mExtraEnvelopes; }
+
+    /**
+     * Add an extra envelope to overwrite existing parameters
+     */
+    void addExtraEnvelope(const ACLBaseMessageEnvelope& envelope)  { mExtraEnvelopes.push_back(envelope); }
 
     /**
      * Set all extra envelopes
@@ -362,13 +379,19 @@ public:
     /**
      * Set the payload which is wrapped by this envelope as byte get
      */
-    void setPayload(std::vector<uint8_t> payload) { mPayload = payload; }
+    void setPayload(const std::string& payload) { mPayload = payload; }
 
     /**
      * Get the payload which is wrapped by this envelope
-     * \return byte vector
+     * \return string as byte container
      */
-    std::vector<uint8_t> getPayload() const { return mPayload; }
+    std::string getPayload() const { return mPayload; }
+
+    /**
+     * Retrieve the contained message if possible. 
+     * \throws std::runtime_error if the acl message could not be extracted
+     */
+    fipa::acl::ACLMessage getACLMessage() const;
 
     /**
      * Stamp a letter with a given agent id
