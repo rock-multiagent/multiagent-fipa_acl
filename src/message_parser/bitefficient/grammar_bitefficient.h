@@ -1160,7 +1160,7 @@ struct Message : qi::grammar<Iterator, fipa::acl::Message()>
 					| byte_(0x16)  [ label::_val = "subscribe" ]  
 					; 
 								
-		// predefinedMessageParamter uses a boost::variant
+		// predefinedMessageParameter uses a boost::variant
 		predefinedMessageParameter = byte_(0x02) [ phoenix::at_c<0>(label::_val) = "sender" ]       >> agentIdentifier [ phoenix::at_c<1>(label::_val) = label::_1 ]    // sender
 					| byte_(0x03) [ phoenix::at_c<0>(label::_val) = "receiver" ]        >> recipientExpr   [ phoenix::at_c<1>(label::_val) = label::_1 ]   // receiver 
 					| byte_(0x04) [ phoenix::at_c<0>(label::_val) = "content" ]         >> msgContent      [ phoenix::at_c<1>(label::_val) = label::_1 ]   // content 
