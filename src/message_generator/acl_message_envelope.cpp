@@ -211,6 +211,18 @@ ACLBaseMessageEnvelope ACLBaseMessageEnvelope::merge(const ACLBaseMessageEnvelop
     return envelope;
 }
 
+ACLBaseMessageEnvelope ACLBaseMessageEnvelope::flatten(const ACLBaseMessageEnvelopeList& extraEnvelopes) const
+{
+    ACLBaseMessageEnvelope envelope = *this;
+    ACLBaseMessageEnvelopeList::const_iterator cit = extraEnvelopes.begin();
+    for(; cit != extraEnvelopes.end(); ++cit)
+    {
+        envelope.merge(*cit);
+    }
+
+    return envelope;
+}
+
 ACLMessageEnvelope::ACLMessageEnvelope()
 {}
 

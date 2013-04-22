@@ -303,6 +303,12 @@ public:
     ACLBaseMessageEnvelope merge(const ACLBaseMessageEnvelope& other) const;
 
     /**
+     * Flatten the current envelope plus the extra envelopes
+     * (the most current/latest has to be at the end of the list
+     * \param list of overlay envelopes
+     * \return the most current ACLBaseMessageEnvelope representation 
+     */
+    ACLBaseMessageEnvelope flatten(const ACLBaseMessageEnvelopeList& extraEnvelopes) const;
 
     /**
      * Add a receipt for this message, i.e. add a received object to the envelope. This function is an alias for setReceivedObject
