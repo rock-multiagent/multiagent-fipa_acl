@@ -2,8 +2,9 @@
 #define FIPA_ACL_MESSAGE_ENVELOPE_H
 
 #include <stdint.h>
-#include <fipa_acl/message_generator/agent_id.h>
+#include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/message_generator/received_object.h>
+#include <fipa_acl/message_generator/types.h>
 
 namespace fipa {
 namespace acl {
@@ -265,6 +266,12 @@ public:
     const ReceivedObjectList& getReceivedObjects() const { return mReceivedObjects; }
 
     /**
+     * Has received object test whether the list of received object
+     * contains an object of the same sender / By-Field
+     */
+    bool hasReceivedObject(const ReceivedObject& receivedObject) const;
+
+    /**
      * Add received object
      */
     void addReceivedObject(const ReceivedObject& receivedObject);
@@ -300,9 +307,18 @@ public:
     ACLBaseMessageEnvelope merge(const ACLBaseMessageEnvelope& other) const;
 
     /**
+
+    /**
      * Add a receipt for this message, i.e. add a received object to the envelope. This function is an alias for setReceivedObject
      */
-    void addStamp(const ReceivedObject& receivedObject) { addReceivedObject(receivedObject); }
+    void stamp(const ReceivedObject& receivedObject) { addReceivedObject(receivedObject); }
+
+
+    /**
+     * Test whether this envelope has been stamped. This is an alias for hasReceivedObject
+     * \return true if the sender has already stamped this message
+     */
+    bool hasStamp(const ReceivedObject& receivedObject) const { return hasReceivedObject(receivedObject); }
 };
 
 
@@ -357,7 +373,20 @@ public:
      * \return byte vector
      */
     std::vector<uint8_t> getPayload() const { return mPayload; }
+
+    /**
+     * Stamp a letter with a given agent id
+     */
+    void stamp(const fipa::acl::AgentID& id);
+
+    /**
+     * Check whether the letter has already been stamped 
+     */
+    bool hasStamp(fipa::acl::AgentID id) const;
 };
+
+// We also define a letter to be the envelope and the payload
+typedef ACLMessageEnvelope Letter;
 
 } // end namespace acl
 } // end namespace fipa

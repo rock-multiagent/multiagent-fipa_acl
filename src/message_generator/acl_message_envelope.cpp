@@ -4,6 +4,9 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
+#include <fipa_acl/message_parser/message_parser.h>
+#include <fipa_acl/message_generator/message_generator.h>
+
 using namespace boost::phoenix;
 using namespace boost::phoenix::arg_names;
 using namespace std;
@@ -109,11 +112,21 @@ bool ACLBaseMessageEnvelope::removeIntendedReceiver(const AgentID& agentId)
      return false;
 }
 
+bool ACLBaseMessageEnvelope::hasReceivedObject(const ReceivedObject& receivedObject) const
+{
+    std::vector<ReceivedObject>::const_iterator it = find_if(mReceivedObjects.begin(), mReceivedObjects.end(), arg1 == receivedObject);
+    if(it != mReceivedObjects.end())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void ACLBaseMessageEnvelope::addReceivedObject(const ReceivedObject& receivedObject)
 {
     mParameters = (ParameterId) (mParameters | RECEIVED_OBJECTS);
-    std::vector<ReceivedObject>::const_iterator it = find_if(mReceivedObjects.begin(), mReceivedObjects.end(), arg1 == receivedObject);
-    if(it == mReceivedObjects.end())
+    if(!hasReceivedObject(receivedObject))
     {
         mReceivedObjects.push_back(receivedObject);
     }
@@ -196,6 +209,25 @@ ACLBaseMessageEnvelope ACLBaseMessageEnvelope::merge(const ACLBaseMessageEnvelop
     }
 
     return envelope;
+}
+
+void ACLMessageEnvelope::stamp(const fipa::acl::AgentID& id)
+{
+    ReceivedObject receivedObject;
+
+    // Mandatory fields
+    receivedObject.setBy(id.getName());
+    receivedObject.setDate(base::Time::now());
+
+    mBaseEnvelope.stamp(receivedObject);
+}
+
+bool ACLMessageEnvelope::hasStamp(const fipa::acl::AgentID id) const
+{
+    ReceivedObject receivedObject;
+    receivedObject.setBy(id.getName());
+
+    return mBaseEnvelope.hasStamp(receivedObject);
 }
 
 
