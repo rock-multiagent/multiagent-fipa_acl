@@ -19,8 +19,13 @@ namespace acl {
     typedef std::string ReplyBy;
     typedef std::string InReplyTo;
     typedef std::string ReplyWith;
-    
+
+    namespace representation {
+        enum Type { UNKNOWN, BITEFFICIENT, STRING, XML };
+
+        const std::string TypeTxt[] = { "unknown", "fipa.acl.rep.bitefficient.std", "fipa.acl.rep.string.std", "fipa.acl.rep.xml.std"};
+    }
+
 } // end of acl
 } // end of fipa
-
-#endif
+#endif // FIPA_ACL_MESSAGEGENERATOR_TYPES

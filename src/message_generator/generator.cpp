@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     fipa::acl::ACLMessage msg(options["performative"]);
     msg.setContent(options["content"]);
      
-    std::string bitefficientMsg = fipa::acl::MessageGenerator::create(msg, fipa::acl::message_format::BITEFFICIENT);
+    std::string bitefficientMsg = fipa::acl::MessageGenerator::create(msg, fipa::acl::representation::BITEFFICIENT);
     int size = bitefficientMsg.size();
 
     for(int i = 0; i < size; i++)

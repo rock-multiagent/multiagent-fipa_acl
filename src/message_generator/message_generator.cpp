@@ -8,12 +8,12 @@
 namespace fipa {
 namespace acl {
 
-std::map<message_format::Type, MessageFormatPtr > MessageGenerator::msFormats = boost::assign::map_list_of
-    (message_format::BITEFFICIENT, boost::shared_ptr<MessageFormat>(new BitefficientFormat()) );
+std::map<representation::Type, MessageFormatPtr > MessageGenerator::msFormats = boost::assign::map_list_of
+    (representation::BITEFFICIENT, boost::shared_ptr<MessageFormat>(new BitefficientFormat()) );
 
-std::string MessageGenerator::create(const ACLMessage& msg, message_format::Type type)
+std::string MessageGenerator::create(const ACLMessage& msg, const representation::Type& type)
 {
-    std::map<message_format::Type, MessageFormatPtr >::const_iterator it = msFormats.find(type);
+    std::map<representation::Type, MessageFormatPtr >::const_iterator it = msFormats.find(type);
 
     if( it != msFormats.end())
     {
@@ -21,7 +21,7 @@ std::string MessageGenerator::create(const ACLMessage& msg, message_format::Type
     } else
     {
         char buffer[512];
-        snprintf(buffer, 512, "Message format of type '%d' is unknown", (int) type);
+        snprintf(buffer, 512, "Message format of type '%s' is unknown", representation::TypeTxt[type].c_str());
         LOG_ERROR("%s", buffer);
         throw std::runtime_error(buffer);
     }

@@ -124,7 +124,7 @@ bool parseInteractive()
 	msg.setContent("");
 	
 	fipa::acl::MessageGenerator generator;
-	std::string bitefficientMessage = generator.create(msg, fipa::acl::message_format::BITEFFICIENT);
+	std::string bitefficientMessage = generator.create(msg, fipa::acl::representation::BITEFFICIENT);
 	
 	return parseMsg(bitefficientMessage);
 }

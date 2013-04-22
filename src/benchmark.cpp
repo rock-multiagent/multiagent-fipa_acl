@@ -87,7 +87,7 @@ int main(int argc, char** argv)
         gettimeofday(&start, 0);
         for(int i = 0; i < epochs; i++)
         {
-           encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
+           encodedMsg = MessageGenerator::create(msg, representation::BITEFFICIENT);
         }
         gettimeofday(&stop, 0);
 	

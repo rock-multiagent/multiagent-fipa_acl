@@ -10,23 +10,18 @@
 namespace fipa {
 namespace acl {
 
-namespace message_format
-{
-    enum Type { NONE, BITEFFICIENT };
-}
-
 typedef boost::shared_ptr<MessageFormat> MessageFormatPtr;
 
 class MessageGenerator
 {
-    static std::map<message_format::Type, MessageFormatPtr> msFormats;
+    static std::map<representation::Type, MessageFormatPtr> msFormats;
 public:
 
     /**
-     * Create a message of a certain message type
-     * \return message object of the select format
+     * Create a message of a certain acl representation (format), e.g. bitefficient, string, xml
+     * \return message object using the given acl representation (format)
      */
-    static std::string create(const ACLMessage& msg, message_format::Type type);
+    static std::string create(const ACLMessage& msg, const representation::Type& acl_representation);
 };
 
 
