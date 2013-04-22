@@ -24,11 +24,7 @@ namespace envelope {
     enum ParameterId { NONE = 0x00, TO = 0x01, FROM = 0x02, COMMENTS = 0x04,
 ACL_REPRESENTATION = 0x08, PAYLOAD_LENGTH = 0x10, PAYLOAD_ENCODING = 0x20, DATE = 0x40, INTENDED_RECEIVERS = 0x80, RECEIVED_OBJECTS = 0x0100, TRANSPORT_BEHAVIOUR = 0x0200, USERDEFINED_PARAMETERS = 0x0400, PARAMETER_END = 0x0800};
 }
-namespace representation {
-    enum Type { UNKNOWN, BITEFFICIENT, STRING, XML };
 
-    const std::string TypeTxt[] = { "unknown", "fipa.acl.rep.bitefficient.std", "fipa.acl.rep.string.std", "fipa.acl.rep.xml.std"};
-}
 
 class ACLBaseMessageEnvelope
 {
