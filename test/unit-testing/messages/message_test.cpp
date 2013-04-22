@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 storage += dateTimeStorage;
             	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
                 std::string expected = " " + expectedDateTimeString; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "DateTime is '" << time.toString() << "' expected '" << expected << "'" << time.toString().size() << " vs " << expected.size());
+                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'" << time.toString().size() << " vs " << expected.size());
             }
             {
                 std::string storage;
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 storage += dateTimeStorage;
             	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
                 std::string expected = "+" + expectedDateTimeString; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "DateTime is '" << time.toString() << "' expected '" << expected << "'");
+                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
             }
             {
                 std::string storage;
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 storage += dateTimeStorage;
             	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
                 std::string expected = "-" + expectedDateTimeString; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "DateTime is '" << time.toString() << "' expected '" << expected << "'");
+                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
             }
 
             //typeDesignator
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 storage += dateTimeStorage;
             	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
                 std::string expected = " " + expectedDateTimeString + "Z"; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "DateTime is '" << time.toString() << "' expected '" << expected << "'");
+                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
             }
             {
                 std::string storage;
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 storage += dateTimeStorage;
             	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
                 std::string expected = "+" + expectedDateTimeString + "Z"; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "DateTime is '" << time.toString() << "' expected '" << expected << "'");
+                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
             }
             {
                 std::string storage;
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 storage += dateTimeStorage;
             	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
                 std::string expected = "-" + expectedDateTimeString + "Z"; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "DateTime is '" << time.toString() << "' expected '" << expected << "'");
+                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
             }
         }
         // StringLiteral
@@ -483,15 +483,15 @@ BOOST_AUTO_TEST_CASE(message_test)
     std::vector<AgentID> agents = msg.getAllReceivers();
     BOOST_CHECK_MESSAGE(agents.size() == 1, "Original msg: receiver agent size is one");
 
-    std::string encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
+    std::string encodedMsg = MessageGenerator::create(msg, representation::BITEFFICIENT);
 
     MessageParser inputParser;
     ACLMessage outputMsg;
 
-    BOOST_ASSERT( inputParser.parseData(encodedMsg, outputMsg) );
+    BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing of message");
 
-    BOOST_ASSERT(outputMsg.getPerformative() == PerformativeTxt[ACLMessage::REQUEST]);
-    BOOST_ASSERT(outputMsg.getSender() == msg.getSender());
+    BOOST_REQUIRE_MESSAGE(outputMsg.getPerformative() == PerformativeTxt[ACLMessage::REQUEST], "Performative '" << outputMsg.getPerformative() << "' vs. input '" << PerformativeTxt[ACLMessage::REQUEST] << "'");
+    BOOST_REQUIRE_MESSAGE(outputMsg.getSender() == msg.getSender(), "Sender '" << outputMsg.getSender().getName() << "' vs. input '" << msg.getSender().getName() << "'");
 
 
     BOOST_ASSERT(outputMsg.getAllReceivers() == msg.getAllReceivers());
@@ -505,102 +505,102 @@ BOOST_AUTO_TEST_CASE(message_test)
         BOOST_ASSERT(it->getName() == receiver.getName());
     }
     
-    BOOST_ASSERT(outputMsg.getProtocol() == msg.getProtocol());
-    BOOST_ASSERT(outputMsg.getLanguage() == msg.getLanguage());
-    BOOST_ASSERT(outputMsg.getEncoding() == msg.getEncoding());
-    BOOST_ASSERT(outputMsg.getOntology() == msg.getOntology());
-    BOOST_ASSERT(outputMsg.getReplyWith() == msg.getReplyWith());
-    BOOST_REQUIRE_MESSAGE(outputMsg.getReplyBy() == msg.getReplyBy(), "output: " << outputMsg.getReplyBy().toString() << " vs. msg " << msg.getReplyBy().toString());
-    BOOST_ASSERT(outputMsg.getConversationID() == msg.getConversationID());
-    BOOST_ASSERT(outputMsg.getContent() == msg.getContent());
+    BOOST_REQUIRE_MESSAGE(outputMsg.getProtocol() == msg.getProtocol(), "Procotol '" << outputMsg.getProtocol() << "' vs. input '" << msg.getProtocol() << "'");
+    BOOST_REQUIRE_MESSAGE(outputMsg.getLanguage() == msg.getLanguage(), "Language '" << outputMsg.getLanguage() << "' vs. input '" << msg.getLanguage() << "'");
+    BOOST_REQUIRE_MESSAGE(outputMsg.getEncoding() == msg.getEncoding(), "Encoding '" << outputMsg.getEncoding() << "' vs. input '" << msg.getEncoding() << "'");
+    BOOST_REQUIRE_MESSAGE(outputMsg.getOntology() == msg.getOntology(), "Ontology '" << outputMsg.getOntology() << "' vs. input '" << msg.getOntology() << "'");
+    BOOST_REQUIRE_MESSAGE(outputMsg.getReplyWith() == msg.getReplyWith(), "ReplyWith '" << outputMsg.getReplyWith() << "' vs. input '" << msg.getReplyWith() << "'");
+    BOOST_REQUIRE_MESSAGE(outputMsg.getReplyBy() == msg.getReplyBy(), "ReplyBy '" << outputMsg.getReplyBy().toString() << "' vs. msg " << msg.getReplyBy().toString());
+    BOOST_REQUIRE_MESSAGE(outputMsg.getConversationID() == msg.getConversationID(), "ConversationID '" << outputMsg.getConversationID() << "' vs. input '" << msg.getConversationID() << "'");
+    BOOST_REQUIRE_MESSAGE(outputMsg.getContent() == msg.getContent(), "Content '" << outputMsg.getContent() << "' vs. input '" << msg.getContent() << "'");
 }
 
 
-//BOOST_AUTO_TEST_CASE(binary_message_content)
-//{
-//    using namespace fipa::acl;
-//
-//    ACLMessage msg("inform");
-//    AgentID origin("proxy");
-//    AgentID receiver("crex_0_CREXCORE");
-//    std::string content;
-//    size_t content_size;
-//    MessageParser inputParser;
-//    ACLMessage outputMsg;
-//
-//    // Testing binary content with len8 as size descriptor
-//    content += '\0';
-//    content += "012345689";
-//    content += '\0';
-//    content += "012345689";
-//    msg.setContent(content);
-//    
-//    content_size = msg.getContent().size();
-//    BOOST_REQUIRE_MESSAGE(content_size > 0, "Content size > 0");
-//
-//    std::string encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
-//
-//    for(size_t i = 0; i < encodedMsg.size(); ++i)
-//    {
-//        fprintf(stderr,"%x",(int) i);
-//    }
-//
-//    BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len8 size field" );
-//    std::string content_out = outputMsg.getContent();
-//    for(size_t i = 0; i < content_out.size(); ++i)
-//    {
-//        BOOST_CHECK_MESSAGE(1==1, "" << content_out.data()[i]);
-//    }
-//
-//    BOOST_REQUIRE_MESSAGE(outputMsg.getContent().size() == content_size, "Check content size output " << outputMsg.getContent().size() << " vs. " << content_size);
-//
-//    // Testing binary content with len16 as size descriptor
-//    uint32_t size = std::numeric_limits<uint8_t>::max() + 10;
-//    {
-//        std::string msgContent(size, '\0');
-//        msg.setContent(msgContent);
-//
-//        content_size = msg.getContent().size();
-//        BOOST_REQUIRE_MESSAGE(content_size == size, "Content size " << content_size << " vs. size " << size);
-//
-//        encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
-//
-//        BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len16 size field: size " << content_size);
-//        uint32_t outputMsgSize = outputMsg.getContent().size();
-//        BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len16: " << size << " expected - contained: " << outputMsgSize);
-//    }
-//
-//    {
-//        // Testing binary content with len32 as size descriptor
-//        size = std::numeric_limits<uint16_t>::max() + 10;
-//
-//        std::string msgContent(size, '\0');
-//        msg.setContent(msgContent);
-//
-//        content_size = msg.getContent().size();
-//        BOOST_ASSERT(content_size == size);
-//
-//        encodedMsg = MessageGenerator::create(msg, message_format::BITEFFICIENT);
-//
-//        BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len32 size field");
-//
-//        uint32_t outputMsgSize = outputMsg.getContent().size();
-//        BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len32: " << size << " expected - contained: " << outputMsgSize);
-//    }
-//
-//    {
-//        ACLMessage msg(ACLMessage::REQUEST);
-//        msg.setContent("content");
-//        msg.setEncoding("encoding");
-//        msg.setLanguage("language");
-//        msg.addReceiver(AgentID("test"));
-//        msg.setSender(AgentID("sender"));
-//        msg.addReceiver(AgentID("sender"));
-//
-//        ACLMessage msgCopy = msg;
-//        BOOST_REQUIRE(msgCopy == msg);
-//    }
-//}
+BOOST_AUTO_TEST_CASE(binary_message_content)
+{
+    using namespace fipa::acl;
+
+    ACLMessage msg("inform");
+    AgentID origin("proxy");
+    AgentID receiver("crex_0_CREXCORE");
+    std::string content;
+    size_t content_size;
+    MessageParser inputParser;
+    ACLMessage outputMsg;
+
+    // Testing binary content with len8 as size descriptor
+    content += '\0';
+    content += "012345689";
+    content += '\0';
+    content += "012345689";
+    msg.setContent(content);
+    
+    content_size = msg.getContent().size();
+    BOOST_REQUIRE_MESSAGE(content_size > 0, "Content size > 0");
+
+    std::string encodedMsg = MessageGenerator::create(msg, representation::BITEFFICIENT);
+
+    for(size_t i = 0; i < encodedMsg.size(); ++i)
+    {
+        fprintf(stderr,"%x",(int) i);
+    }
+
+    BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len8 size field" );
+    std::string content_out = outputMsg.getContent();
+    for(size_t i = 0; i < content_out.size(); ++i)
+    {
+        BOOST_CHECK_MESSAGE(1==1, "" << content_out.data()[i]);
+    }
+
+    BOOST_REQUIRE_MESSAGE(outputMsg.getContent().size() == content_size, "Check content size output " << outputMsg.getContent().size() << " vs. " << content_size);
+
+    // Testing binary content with len16 as size descriptor
+    uint32_t size = std::numeric_limits<uint8_t>::max() + 10;
+    {
+        std::string msgContent(size, '\0');
+        msg.setContent(msgContent);
+
+        content_size = msg.getContent().size();
+        BOOST_REQUIRE_MESSAGE(content_size == size, "Content size " << content_size << " vs. size " << size);
+
+        encodedMsg = MessageGenerator::create(msg, representation::BITEFFICIENT);
+
+        BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len16 size field: size " << content_size);
+        uint32_t outputMsgSize = outputMsg.getContent().size();
+        BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len16: " << size << " expected - contained: " << outputMsgSize);
+    }
+
+    {
+        // Testing binary content with len32 as size descriptor
+        size = std::numeric_limits<uint16_t>::max() + 10;
+
+        std::string msgContent(size, '\0');
+        msg.setContent(msgContent);
+
+        content_size = msg.getContent().size();
+        BOOST_ASSERT(content_size == size);
+
+        encodedMsg = MessageGenerator::create(msg, representation::BITEFFICIENT);
+
+        BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing binary content with len32 size field");
+
+        uint32_t outputMsgSize = outputMsg.getContent().size();
+        BOOST_REQUIRE_MESSAGE(outputMsgSize == size, "Check content size of output for len32: " << size << " expected - contained: " << outputMsgSize);
+    }
+
+    {
+        ACLMessage msg(ACLMessage::REQUEST);
+        msg.setContent("content");
+        msg.setEncoding("encoding");
+        msg.setLanguage("language");
+        msg.addReceiver(AgentID("test"));
+        msg.setSender(AgentID("sender"));
+        msg.addReceiver(AgentID("sender"));
+
+        ACLMessage msgCopy = msg;
+        BOOST_REQUIRE(msgCopy == msg);
+    }
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
