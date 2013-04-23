@@ -28,4 +28,4 @@ public:
 } // end namespace acl
 } // end namespace fipa
 
-#endif // _MESSAGE_GENERATOR_H_
+#endif // FIPA_ACL_MESSAGE_GENERATOR_H_

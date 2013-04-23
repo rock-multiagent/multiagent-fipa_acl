@@ -6,7 +6,7 @@
 namespace fipa {
 namespace acl {
 
-class BitefficientFormat : public MessageFormat
+class BitefficientMessageFormat : public MessageFormat
 {
 public:
     /**
@@ -135,7 +135,10 @@ public:
     the second argument is an explicit option for codeTables(needed for the getBitBinExpression() )
     */
     std::string getBitBinString(const std::string& sword) const;
-    
+   
+    /**
+     * Get bitefficient representation of digits
+     */
     std::string getBitDigits(const std::string& dig) const;
     
     /**
