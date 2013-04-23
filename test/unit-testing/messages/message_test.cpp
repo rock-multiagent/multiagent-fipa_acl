@@ -1,6 +1,7 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <fipa_acl/bitefficient_message.h>
 #include <fipa_acl/message_parser/bitefficient/grammar_bitefficient.h>
+#include <fipa_acl/message_generator/format/bitefficient_message_format.h>
 #include <fipa_acl/message_generator/format/bitefficient_format.h>
 #include <string>
 #include <limits>
@@ -45,7 +46,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
         namespace fab = fipa::acl::bitefficient;
 
         // Generator
-        fipa::acl::BitefficientFormat bitefficientFormat;
+        fipa::acl::BitefficientMessageFormat bitefficientFormat;
 
         typedef fipa::acl::bitefficient::BinStringNoCodetable<std::string::const_iterator> bitefficient_message_grammar;
 	bitefficient_message_grammar grammar;
@@ -136,7 +137,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                     }
 		    std::string token = testGrammar<fab::CodedNumber, std::string>(storage);
 		    BOOST_REQUIRE_MESSAGE( token == tokens[i], "CodedNumber is <" << token << "> expected <" << tokens[i] << ">"); 
-            std::string generated = bitefficientFormat.getBitCodedNumber(token);
+            std::string generated = fipa::acl::BitefficientFormat::getCodedNumber(token);
             BOOST_REQUIRE_MESSAGE(  generated == storage, "CodedNumberGenerator is <" << generated << "> expected <" << storage << ">" );
 		}
         }
@@ -148,7 +149,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0x00);
             std::string number = testGrammar<fab::Digits,std::string>(storage);
            BOOST_REQUIRE_MESSAGE(number == "33", "Number is " << number << " expected 33");
-           std::string generated = bitefficientFormat.getBitDigits(number);
+           std::string generated = fipa::acl::BitefficientFormat::getDigits(number);
             BOOST_REQUIRE_MESSAGE( generated == storage, "NumberGenerator is <" << generated << "> expected <" << storage << ">" );
         }
         
@@ -226,7 +227,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             //%tm_isdst	Daylight Saving Time flag
 
             base::Time baseTime = base::Time::fromString("20130101-12:59:59:020", base::Time::Milliseconds);
-            std::string generated = bitefficientFormat.getBitBinDate(baseTime);
+            std::string generated = fipa::acl::BitefficientFormat::getBinDate(baseTime);
             BOOST_REQUIRE_MESSAGE(generated == storage, "DateTime Generator is <" << generated << "> expected <" << storage << ">");
         }
         // BinDateTime

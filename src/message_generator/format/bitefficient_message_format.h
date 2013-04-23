@@ -26,11 +26,6 @@ public:
         \return the encoded agentAID as string
     */
     std::string getBitAID(const AgentID& aid, int depth) const;
-    
-    /**
-    \brief returns the very used end-of-collection marker
-    */
-    char getBitEndOfColl() const;
 
     /**
     \brief puts the header toghether
@@ -141,43 +136,6 @@ public:
      */
     std::string getBitDigits(const std::string& dig) const;
     
-    /**
-    \brief implements the date time token production of the grammar; not complete(w.r.t. the specification) in functionality 
-    implementing the messages without the rest of the architecture makes it difficult to anticipate when and how some productions 
-    may/will be used so only a few of the productions were implemented and the char parameter was added to choose between them, 
-    as no other decission maker/constraint was identified
-    */
-    std::string getBitBinDateTimeToken(const std::string& date1) const;
-    
-    /**
-    \brief implements the date time token production of the grammar; not complete(w.r.t. the specification) in functionality 
-    implementing the messages without the rest of the architecture makes it difficult to anticipate when and how some productions 
-    may/will be used so only a few of the productions were implemented and the char parameter was added to choose between them, 
-    as no other decission maker/constraint was identified
-    */
-    std::string getBitBinDateTimeToken(const base::Time& time) const;
-   
-    /**
-     * Retrieve bitefficient encoding for base time
-     */
-    std::string getBitBinDate(const base::Time& time) const;
-
-    /**
-    \brief takes the string representing the date and passes it's digits 2 by 2(as length 2 sugstrings) to the byte encoding function
-    it did not explicitly specify but it was induced from the way it was stated that the date is to be encoded as a coded number(comment 9 of the specification)
-    */
-    std::string getBitBinDate(const std::string& date1) const;
-    
-    /**
-    \brief implements a coded number passed as a string
-    it goes through it digit by digit(char by char)
-    */
-    std::string getBitCodedNumber(const std::string& cn) const;
-    
-    /**
-    \brief Allow proper generation of natural numbers, will remove any leading zeros
-    */
-    std::string getBitCodedNaturalNumber(const std::string& cn) const;
 };
 
 } // end namespace acl

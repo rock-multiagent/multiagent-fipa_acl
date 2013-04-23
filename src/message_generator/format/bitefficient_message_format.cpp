@@ -1,4 +1,4 @@
-#include "bitefficient_format.h"
+#include "bitefficient_message_format.h"
 
 #include <iostream>
 #include <fstream>
@@ -17,12 +17,13 @@
 #include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/message_generator/message_format.h>
 
+#include "bitefficient_format.h"
+
 namespace fipa {
 namespace acl {
 
 std::string BitefficientMessageFormat::apply(const ACLMessage& msg) const
 {
-
 	std::string mes = getBitHeader() + getBitMessageType(msg) + getBitMessageParameters(msg);
 
         // Since content can be of arbitrary sicne add content here
@@ -65,13 +66,8 @@ std::string BitefficientMessageFormat::apply(const ACLMessage& msg) const
             }
         }
 
-        mes += getBitEndOfColl();
+        mes += BitefficientFormat::getEOFCollection();
 	return mes;
-}
-
-char BitefficientMessageFormat::getBitEndOfColl() const
-{
-	return char(0x01); 
 }
 
 std::string BitefficientMessageFormat::getBitHeader() const
@@ -169,7 +165,7 @@ std::string BitefficientMessageFormat::getBitPredefMessageParams(const ACLMessag
 
     if (!msg.getReplyBy().isNull())
     {
-        retstr = retstr + char(0x06) + getBitBinDateTimeToken(msg.getReplyBy()); 
+        retstr = retstr + char(0x06) + BitefficientFormat::getBinDateTimeToken(msg.getReplyBy()); 
     }
             
     std::string inReplyTo = msg.getInReplyTo();
@@ -258,13 +254,13 @@ std::string BitefficientMessageFormat::getBitAID(const AgentID& aid, int depth) 
             (( aid.getAddresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAddresses()))) +
             (( aid.getResolvers().empty() == true)? "" : getBitResolvers(aid.getResolvers(),depth-1)) +
             (( aid.getUserdefParams().empty() == true)? "" : getBitUserdefParams(aid.getUserdefParams())) +
-            getBitEndOfColl();
+            BitefficientFormat::getEOFCollection();
              
                          
     return char(0x02) + getBitBinWord(aid.getName())+
             (( aid.getAddresses().empty() == true)? "" : (char(0x02) + getBinURLCol(aid.getAddresses()))) + 
             (( aid.getUserdefParams().empty() == true)? "" : getBitUserdefParams(aid.getUserdefParams())) +
-            getBitEndOfColl();
+            BitefficientFormat::getEOFCollection();
 }
 
 
@@ -275,7 +271,7 @@ std::string BitefficientMessageFormat::getBinURLCol(const std::vector<std::strin
     for (; it != adrr.end(); ++it)
         retstr = retstr + getBitBinWord(*it);
 
-    retstr = retstr + getBitEndOfColl();
+    retstr = retstr + BitefficientFormat::getEOFCollection();
     return retstr;
 }
 
@@ -290,16 +286,12 @@ std::string BitefficientMessageFormat::getBitAIDColl(const std::vector<AgentID>&
     std::vector<AgentID>::const_iterator it = aids.begin();
     for (; it != aids.end(); ++it)
         retstr = retstr + getBitAID(*it, depth);
-    return retstr + getBitEndOfColl();
+    return retstr + BitefficientFormat::getEOFCollection();
 }
 
 std::string BitefficientMessageFormat::getByteLengthEncodedString(const std::string& sword) const
 {
-    char digitString[100];
-    int digit = sword.size();	
-    snprintf(digitString,100, "%c#%d%c",0x14,digit,'\"');
-
-    return digitString + sword + char(0x00);
+    return char(0x14) + BitefficientFormat::getByteLengthEncodedString(sword) + char(0x00);
 }
 
 std::string BitefficientMessageFormat::getBitBinExpression(const std::string& sword,char c) const
@@ -330,9 +322,9 @@ std::string BitefficientMessageFormat::getBitBinNumber(double n,char base) const
     std::string test = ss.str();  
 
     if(base == 'h') 
-        return char(0x13) + getBitDigits(test);
+        return char(0x13) + BitefficientFormat::getDigits(test);
     if(base == 'o' || base == 'd') 
-        return char(0x12) + getBitDigits(test);
+        return char(0x12) + BitefficientFormat::getDigits(test);
 
     throw std::runtime_error("BitefficientMessageFormat: getBitBinNumber called with wrong base character");
 }
@@ -346,134 +338,6 @@ std::string BitefficientMessageFormat::getBitBinString(const std::string& sword)
         // char(0x15) + return getCTIndex(sword);
     throw std::runtime_error("BitefficientMessageFormat does not support codetables");
 
-}
-
-std::string BitefficientMessageFormat::getBitDigits(const std::string& dig) const
-{
-    return getBitCodedNumber(dig);
-}
-
-std::string BitefficientMessageFormat::getBitBinDateTimeToken(const std::string& date1) const
-{
-    return char(0x20) + getBitBinDate(date1);
-}
-
-std::string BitefficientMessageFormat::getBitBinDateTimeToken(const base::Time& time) const
-{
-    return char(0x20) + getBitBinDate(time);
-}
-
-std::string BitefficientMessageFormat::getBitBinDate(const base::Time& baseTime) const
-{
-
-    std::string time = baseTime.toString(base::Time::Milliseconds);
-
-    // Input format should be "%Y%m%d-%H:%M:%S"
-    // Strip ':' and '-' to allow from_iso_string to work
-    boost::erase_all(time,":");
-    boost::erase_all(time,"-");
-
-    // extend millisecond field to 4 digits
-    time.insert(14,sizeof(char),'0');
-
-    return getBitBinDate(time);
-}
-
-std::string BitefficientMessageFormat::getBitBinDate(const std::string& date1) const
-{
-    std::string retstr;
-    unsigned int i;
-    for (i = 0; i < date1.length(); i = i + 2)
-    {
-        retstr = retstr + getBitCodedNaturalNumber(date1.substr(i,2));
-    }
-    
-    return retstr;
-
-}
-
-std::string BitefficientMessageFormat::getBitCodedNumber(const std::string& cn) const
-{
-    std::string retstr;
-    unsigned int i;
-    char code(0x00);
-    size_t decimal_size = cn.length();
-
-    for(i = 0; i < decimal_size; i++)
-    {
-        if ((cn[i]>='0') && (cn[i]<='9')) code = char(code + 1 + int(cn[i]) - 48);
-        if (cn[i] == '+') code = char(code + 12);
-        if ((cn[i] == 'E') || (cn[i] == 'e')) code = char(code + 13);
-        if (cn[i] == '-') code = char(code + 14);
-        if (cn[i] == '.') code = char(code + 15);
-        
-        if (i%2 == 0)
-        {
-            code = code<<4;
-        } else {
-            retstr += code;
-            code = char(0x00);
-        }
-    }
-
-    if (decimal_size % 2 != 0)
-    {
-        retstr += code;
-    } else {
-        retstr += char(0x00);
-    }
-     
-    return retstr;
-}
-
-std::string BitefficientMessageFormat::getBitCodedNaturalNumber(const std::string& cn) const
-{
-    std::string retstr;
-
-    unsigned int i;
-    char code(0x00);
-    size_t decimal_size = cn.length();
-
-    for(i = 0; i < decimal_size; ++i)
-    {
-        switch(cn[i])
-        {
-            // Ignoring leading zeros here, 
-            case '0': code += char(0x01); break;
-            case '1': code += char(0x02); break;
-            case '2': code += char(0x03); break;
-            case '3': code += char(0x04); break;
-            case '4': code += char(0x05); break;
-            case '5': code += char(0x06); break;
-            case '6': code += char(0x07); break;
-            case '7': code += char(0x08); break;
-            case '8': code += char(0x09); break;
-            case '9': code += char(0x0a); break;
-            //case '+': code += char(0x0c); break;
-            //case 'e': 
-            //case 'E': code += char(0x0d); break;
-            //case '-': code += char(0x0e); break;
-            //case '.': code += char(0x0f); break;
-            default: 
-                      assert(false);
-        }
-
-          
-        if (i%2 == 0)
-        { 
-            code = code<<4;
-        } else {
-            retstr += code; 
-            code = char(0x00); 
-        }
-    }
-
-    if (i%2 != 0)
-    {
-        retstr += code;
-    }
-     
-    return retstr;
 }
 
 } // end namespace acl
