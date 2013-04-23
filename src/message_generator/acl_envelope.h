@@ -16,8 +16,8 @@ typedef std::string ACLRepresentation;
 typedef std::string TransportBehaviour;
 typedef std::vector<ReceivedObject> ReceivedObjectList;
 
-class ACLBaseMessageEnvelope;
-typedef std::vector<ACLBaseMessageEnvelope> ACLBaseMessageEnvelopeList;
+class ACLBaseEnvelope;
+typedef std::vector<ACLBaseEnvelope> ACLBaseEnvelopeList;
 
 namespace envelope {
 
@@ -26,7 +26,7 @@ ACL_REPRESENTATION = 0x08, PAYLOAD_LENGTH = 0x10, PAYLOAD_ENCODING = 0x20, DATE 
 }
 
 
-class ACLBaseMessageEnvelope
+class ACLBaseEnvelope
 {
 private:
     envelope::ParameterId mParameters;
@@ -128,7 +128,7 @@ public:
     /**
      * DefaultConstructor
      */
-    ACLBaseMessageEnvelope();
+    ACLBaseEnvelope();
 
     /**
      + Test wether a certain content element is set in this envelope object
@@ -300,15 +300,15 @@ public:
     /**
      * Merges the information of two envelopes -- only empty field in this will be overwritten by other
      */
-    ACLBaseMessageEnvelope merge(const ACLBaseMessageEnvelope& other) const;
+    ACLBaseEnvelope merge(const ACLBaseEnvelope& other) const;
 
     /**
      * Flatten the current envelope plus the extra envelopes
      * (the most current/latest has to be at the end of the list
      * \param list of overlay envelopes
-     * \return the most current ACLBaseMessageEnvelope representation 
+     * \return the most current ACLBaseEnvelope representation 
      */
-    ACLBaseMessageEnvelope flatten(const ACLBaseMessageEnvelopeList& extraEnvelopes) const;
+    ACLBaseEnvelope flatten(const ACLBaseEnvelopeList& extraEnvelopes) const;
 
     /**
      * Add a receipt for this message, i.e. add a received object to the envelope. This function is an alias for setReceivedObject
@@ -328,18 +328,18 @@ public:
  * Message envelope includes the base envelope and updated fields, along with the actual payload
  * data that is wrapped by this envelope
  */
-class ACLMessageEnvelope
+class ACLEnvelope
 {
     /**
      * Updated envelope information as part of the relaying through various
      * message transport services
      */
-    ACLBaseMessageEnvelopeList mExtraEnvelopes;
+    ACLBaseEnvelopeList mExtraEnvelopes;
 
     /**
      * Base envelope, i.e. the one the first mts created 
      */
-    ACLBaseMessageEnvelope mBaseEnvelope;
+    ACLBaseEnvelope mBaseEnvelope;
 
     // The payload data that is transported within this envelope
     std::string mPayload;
@@ -349,38 +349,38 @@ public:
     /**
      * Default envelope constructor
      */
-    ACLMessageEnvelope();
+    ACLEnvelope();
 
     /**
      * Creates and envelope for a acl message.
      * Note the the acl message will be encoded according to the given representation format
      */
-    ACLMessageEnvelope(const ACLMessage& msg, const fipa::acl::representation::Type& format);
+    ACLEnvelope(const ACLMessage& msg, const fipa::acl::representation::Type& format);
 
     /**
      * Get all extra envelopes
      */
-    const ACLBaseMessageEnvelopeList& getExtraEnvelopes() const { return mExtraEnvelopes; }
+    const ACLBaseEnvelopeList& getExtraEnvelopes() const { return mExtraEnvelopes; }
 
     /**
      * Add an extra envelope to overwrite existing parameters
      */
-    void addExtraEnvelope(const ACLBaseMessageEnvelope& envelope)  { mExtraEnvelopes.push_back(envelope); }
+    void addExtraEnvelope(const ACLBaseEnvelope& envelope)  { mExtraEnvelopes.push_back(envelope); }
 
     /**
      * Set all extra envelopes
      */
-    void setExtraEnvelopes(const ACLBaseMessageEnvelopeList& envelopes) { mExtraEnvelopes = envelopes; }
+    void setExtraEnvelopes(const ACLBaseEnvelopeList& envelopes) { mExtraEnvelopes = envelopes; }
 
     /**
      * Get the base envelope
      */
-    const ACLBaseMessageEnvelope& getBaseEnvelope() const { return mBaseEnvelope; }
+    const ACLBaseEnvelope& getBaseEnvelope() const { return mBaseEnvelope; }
 
     /**
      * Set the base envelope
      */
-    void setBaseEnvelope(const ACLBaseMessageEnvelope& envelope) { mBaseEnvelope = envelope; }
+    void setBaseEnvelope(const ACLBaseEnvelope& envelope) { mBaseEnvelope = envelope; }
 
     /**
      * Set the payload which is wrapped by this envelope as byte get
@@ -411,7 +411,7 @@ public:
 };
 
 // We also define a letter to be the envelope and the payload
-typedef ACLMessageEnvelope Letter;
+typedef ACLEnvelope Letter;
 
 } // end namespace acl
 } // end namespace fipa

@@ -1,6 +1,6 @@
 #ifndef FIPA_ACL_GRAMMAR_ENVELOPE_BITEFFICIENT_H
 #define FIPA_ACL_GRAMMAR_ENVELOPE_BITEFFICIENT_H
-#include <fipa_acl/message_generator/acl_message_envelope.h>
+#include <fipa_acl/message_generator/acl_envelope.h>
 #include <fipa_acl/message_parser/bitefficient/grammar_bitefficient.h>
 #include <fipa_acl/message_parser/types.h>
 
@@ -25,13 +25,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 );
 
 FIPA_ACL_FUSION_ADAPT(
-    fipa::acl::ACLMessageEnvelope,
-    (const fipa::acl::ACLBaseMessageEnvelope&, const fipa::acl::ACLBaseMessageEnvelope&, obj.getBaseEnvelope(), obj.setBaseEnvelope(val))
-    (const fipa::acl::ACLBaseMessageEnvelopeList&, const fipa::acl::ACLBaseMessageEnvelopeList&, obj.getExtraEnvelopes(), obj.setExtraEnvelopes(val))
+    fipa::acl::ACLEnvelope,
+    (const fipa::acl::ACLBaseEnvelope&, const fipa::acl::ACLBaseEnvelope&, obj.getBaseEnvelope(), obj.setBaseEnvelope(val))
+    (const fipa::acl::ACLBaseEnvelopeList&, const fipa::acl::ACLBaseEnvelopeList&, obj.getExtraEnvelopes(), obj.setExtraEnvelopes(val))
 );
 
 FIPA_ACL_FUSION_ADAPT(
-    fipa::acl::ACLBaseMessageEnvelope,
+    fipa::acl::ACLBaseEnvelope,
     (const fipa::acl::AgentIDList&, const fipa::acl::AgentIDList&, obj.getTo(), obj.setTo(val))
     (const fipa::acl::AgentID&, const fipa::acl::AgentID&, obj.getFrom(), obj.setFrom(val))
     (const fipa::acl::Comments&, const fipa::acl::Comments&, obj.getComments(), obj.setComments(val))
@@ -67,16 +67,16 @@ namespace fipa {
         template <typename T>
         struct result
         {
-	    typedef fipa::acl::ACLBaseMessageEnvelope type;
+	    typedef fipa::acl::ACLBaseEnvelope type;
         };
 
 	template <typename T>
-	fipa::acl::ACLBaseMessageEnvelope operator()(T arg0, T arg1) const
+	fipa::acl::ACLBaseEnvelope operator()(T arg0, T arg1) const
 	{
 	    throw std::runtime_error("mergeBaseEnvelope called with wrong arguments");
 	}
 
-	::fipa::acl::ACLBaseMessageEnvelope operator()(const ::fipa::acl::ACLBaseMessageEnvelope& baseEnv, const ::fipa::acl::ACLBaseMessageEnvelope& otherEnv)
+	::fipa::acl::ACLBaseEnvelope operator()(const ::fipa::acl::ACLBaseEnvelope& baseEnv, const ::fipa::acl::ACLBaseEnvelope& otherEnv)
 	{
 	    return baseEnv.merge(otherEnv);
 	}
@@ -207,9 +207,9 @@ struct ReceivedObject : qi::grammar<Iterator, fipa::acl::ReceivedObject()>
 
 
 template <typename Iterator>
-struct MessageEnvelope : qi::grammar<Iterator, fipa::acl::ACLMessageEnvelope(), qi::locals< std::vector<fipa::acl::ACLBaseMessageEnvelope> > >
+struct Envelope : qi::grammar<Iterator, fipa::acl::ACLEnvelope(), qi::locals< std::vector<fipa::acl::ACLBaseEnvelope> > >
 {
-    MessageEnvelope() : MessageEnvelope::base_type(message_envelope_rule, "MessageEnvelope-bitefficient_grammar")
+    Envelope() : Envelope::base_type(message_envelope_rule, "Envelope-bitefficient_grammar")
     {
         using qi::byte_;
         namespace label = qi::labels;
@@ -288,11 +288,11 @@ struct MessageEnvelope : qi::grammar<Iterator, fipa::acl::ACLMessageEnvelope(), 
     qi::rule<Iterator, fipa::acl::envelope::Parameter() > userdefinedParameter;
     qi::rule<Iterator, fipa::acl::envelope::Parameter() > predefinedParameter;
 
-    qi::rule<Iterator, fipa::acl::ACLMessageEnvelope(), std::vector<fipa::acl::ACLBaseMessageEnvelope> > message_envelope_rule;
-    qi::rule<Iterator, fipa::acl::ACLBaseMessageEnvelope> extEnvelope;
-    qi::rule<Iterator, fipa::acl::ACLBaseMessageEnvelope> extEnvelopeHeader;
-    qi::rule<Iterator, fipa::acl::ACLBaseMessageEnvelope> baseEnvelopeHeader;
-    qi::rule<Iterator, fipa::acl::ACLBaseMessageEnvelope> baseEnvelope;
+    qi::rule<Iterator, fipa::acl::ACLEnvelope(), std::vector<fipa::acl::ACLBaseEnvelope> > message_envelope_rule;
+    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope> extEnvelope;
+    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope> extEnvelopeHeader;
+    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope> baseEnvelopeHeader;
+    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope> baseEnvelope;
     qi::rule<Iterator, fipa::acl::envelope::Parameter> parameter;
     EndOfCollection<Iterator> endOfEnvelope;
     EndOfCollection<Iterator> endOfCollection;

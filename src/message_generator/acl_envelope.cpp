@@ -15,13 +15,13 @@ using namespace fipa::acl::envelope;
 namespace fipa {
 namespace acl {
 
-ACLBaseMessageEnvelope::ACLBaseMessageEnvelope()
+ACLBaseEnvelope::ACLBaseEnvelope()
     : mParameters(NONE)
     , mACLRepresentation(representation::UNKNOWN)
     , mPayloadEncoding("US-ASCII")
 {}
 
-void ACLBaseMessageEnvelope::addTo(const AgentID& agentId)
+void ACLBaseEnvelope::addTo(const AgentID& agentId)
 {
     AgentID agent = agentId;
     AgentIDList::const_iterator it = find_if(mTo.begin(), mTo.end(), arg1 == agentId );
@@ -31,13 +31,13 @@ void ACLBaseMessageEnvelope::addTo(const AgentID& agentId)
     }
 }
 
-void ACLBaseMessageEnvelope::setTo(const AgentIDList& receivers)
+void ACLBaseEnvelope::setTo(const AgentIDList& receivers)
 {
     mParameters = TO;
     mTo = receivers;
 }
 
-bool ACLBaseMessageEnvelope::removeTo(const AgentID& agentId)
+bool ACLBaseEnvelope::removeTo(const AgentID& agentId)
 {
     AgentIDList::iterator it = find_if(mTo.begin(), mTo.end(), arg1 == agentId);
     if(it != mTo.end())
@@ -49,50 +49,50 @@ bool ACLBaseMessageEnvelope::removeTo(const AgentID& agentId)
 }
 
 
-void ACLBaseMessageEnvelope::setFrom(const AgentID& from)
+void ACLBaseEnvelope::setFrom(const AgentID& from)
 {
     mParameters = (ParameterId) (mParameters | FROM);
     mFrom = from;
 }
 
 
-void ACLBaseMessageEnvelope::setComments(const Comments& comments)
+void ACLBaseEnvelope::setComments(const Comments& comments)
 {
     mParameters = (ParameterId) (mParameters | COMMENTS);
     mComments = comments;
 }
 
-void ACLBaseMessageEnvelope::setACLRepresentation(representation::Type representation)
+void ACLBaseEnvelope::setACLRepresentation(representation::Type representation)
 {
     mParameters = (ParameterId) (mParameters | ACL_REPRESENTATION);
     mACLRepresentation = representation;
 }
 
-void ACLBaseMessageEnvelope::setPayloadLength(const PayloadLength& length)
+void ACLBaseEnvelope::setPayloadLength(const PayloadLength& length)
 {
     mParameters = (ParameterId) (mParameters | PAYLOAD_LENGTH);
     mPayloadLength = length;
 }
 
-void ACLBaseMessageEnvelope::setPayloadEncoding(const PayloadEncoding& encoding)
+void ACLBaseEnvelope::setPayloadEncoding(const PayloadEncoding& encoding)
 {
     mParameters = (ParameterId) (mParameters | PAYLOAD_ENCODING);
     mPayloadEncoding = encoding;
 }
 
-void ACLBaseMessageEnvelope::setDate(const base::Time& date)
+void ACLBaseEnvelope::setDate(const base::Time& date)
 {
     mParameters = (ParameterId) (mParameters | DATE);
     mDate = date;
 }
 
-void ACLBaseMessageEnvelope::setIntendedReceivers(const AgentIDList& receivers)
+void ACLBaseEnvelope::setIntendedReceivers(const AgentIDList& receivers)
 {
     mParameters = (ParameterId) (mParameters | INTENDED_RECEIVERS);
     mIntendedReceivers = receivers;
 }
 
-void ACLBaseMessageEnvelope::addIntendedReceiver(const AgentID& agentId)
+void ACLBaseEnvelope::addIntendedReceiver(const AgentID& agentId)
 {
      AgentIDList::const_iterator it = find_if(mIntendedReceivers.begin(), mIntendedReceivers.end(), arg1 == agentId);
      if(it == mIntendedReceivers.end())
@@ -101,7 +101,7 @@ void ACLBaseMessageEnvelope::addIntendedReceiver(const AgentID& agentId)
      }
 }
 
-bool ACLBaseMessageEnvelope::removeIntendedReceiver(const AgentID& agentId)
+bool ACLBaseEnvelope::removeIntendedReceiver(const AgentID& agentId)
 {
      AgentIDList::iterator it = find_if(mIntendedReceivers.begin(), mIntendedReceivers.end(), arg1 == agentId);
      if(it != mIntendedReceivers.end())
@@ -112,7 +112,7 @@ bool ACLBaseMessageEnvelope::removeIntendedReceiver(const AgentID& agentId)
      return false;
 }
 
-bool ACLBaseMessageEnvelope::hasReceivedObject(const ReceivedObject& receivedObject) const
+bool ACLBaseEnvelope::hasReceivedObject(const ReceivedObject& receivedObject) const
 {
     std::vector<ReceivedObject>::const_iterator it = find_if(mReceivedObjects.begin(), mReceivedObjects.end(), arg1 == receivedObject);
     if(it != mReceivedObjects.end())
@@ -123,7 +123,7 @@ bool ACLBaseMessageEnvelope::hasReceivedObject(const ReceivedObject& receivedObj
     return false;
 }
 
-void ACLBaseMessageEnvelope::addReceivedObject(const ReceivedObject& receivedObject)
+void ACLBaseEnvelope::addReceivedObject(const ReceivedObject& receivedObject)
 {
     mParameters = (ParameterId) (mParameters | RECEIVED_OBJECTS);
     if(!hasReceivedObject(receivedObject))
@@ -132,27 +132,27 @@ void ACLBaseMessageEnvelope::addReceivedObject(const ReceivedObject& receivedObj
     }
 }
 
-void ACLBaseMessageEnvelope::setReceivedObjects(const ReceivedObjectList& receivedObjects)
+void ACLBaseEnvelope::setReceivedObjects(const ReceivedObjectList& receivedObjects)
 {
     mParameters = (ParameterId) (mParameters | RECEIVED_OBJECTS);
     mReceivedObjects = receivedObjects;
 }
 
-void ACLBaseMessageEnvelope::setTransportBehaviour(const TransportBehaviour& transportBehaviour)
+void ACLBaseEnvelope::setTransportBehaviour(const TransportBehaviour& transportBehaviour)
 {
     mParameters = (ParameterId) (mParameters | TRANSPORT_BEHAVIOUR);
     mTransportBehaviour = transportBehaviour;
 }
 
-void ACLBaseMessageEnvelope::setUserdefinedParameters(const UserdefinedParameterList& parameters)
+void ACLBaseEnvelope::setUserdefinedParameters(const UserdefinedParameterList& parameters)
 {
     mParameters = (ParameterId) (mParameters | USERDEFINED_PARAMETERS);
     mUserdefinedParameters = parameters;
 }
 
-ACLBaseMessageEnvelope ACLBaseMessageEnvelope::merge(const ACLBaseMessageEnvelope& other) const
+ACLBaseEnvelope ACLBaseEnvelope::merge(const ACLBaseEnvelope& other) const
 {
-    ACLBaseMessageEnvelope envelope(*this);
+    ACLBaseEnvelope envelope(*this);
     if(!envelope.contains(TO))
     {
         envelope.setTo(other.getTo());
@@ -211,10 +211,10 @@ ACLBaseMessageEnvelope ACLBaseMessageEnvelope::merge(const ACLBaseMessageEnvelop
     return envelope;
 }
 
-ACLBaseMessageEnvelope ACLBaseMessageEnvelope::flatten(const ACLBaseMessageEnvelopeList& extraEnvelopes) const
+ACLBaseEnvelope ACLBaseEnvelope::flatten(const ACLBaseEnvelopeList& extraEnvelopes) const
 {
-    ACLBaseMessageEnvelope envelope = *this;
-    ACLBaseMessageEnvelopeList::const_iterator cit = extraEnvelopes.begin();
+    ACLBaseEnvelope envelope = *this;
+    ACLBaseEnvelopeList::const_iterator cit = extraEnvelopes.begin();
     for(; cit != extraEnvelopes.end(); ++cit)
     {
         envelope.merge(*cit);
@@ -223,16 +223,16 @@ ACLBaseMessageEnvelope ACLBaseMessageEnvelope::flatten(const ACLBaseMessageEnvel
     return envelope;
 }
 
-ACLMessageEnvelope::ACLMessageEnvelope()
+ACLEnvelope::ACLEnvelope()
 {}
 
-ACLMessageEnvelope::ACLMessageEnvelope(const fipa::acl::ACLMessage& message, const fipa::acl::representation::Type& representation)
+ACLEnvelope::ACLEnvelope(const fipa::acl::ACLMessage& message, const fipa::acl::representation::Type& representation)
 {
     using namespace fipa::acl;
     mPayload = MessageGenerator::create(message, representation);
 }
 
-fipa::acl::ACLMessage ACLMessageEnvelope::getACLMessage() const
+fipa::acl::ACLMessage ACLEnvelope::getACLMessage() const
 {
     using namespace fipa::acl;
     ACLMessage msg;
@@ -241,7 +241,7 @@ fipa::acl::ACLMessage ACLMessageEnvelope::getACLMessage() const
     return msg;
 }
 
-void ACLMessageEnvelope::stamp(const fipa::acl::AgentID& id)
+void ACLEnvelope::stamp(const fipa::acl::AgentID& id)
 {
     ReceivedObject receivedObject;
 
@@ -252,7 +252,7 @@ void ACLMessageEnvelope::stamp(const fipa::acl::AgentID& id)
     mBaseEnvelope.stamp(receivedObject);
 }
 
-bool ACLMessageEnvelope::hasStamp(const fipa::acl::AgentID id) const
+bool ACLEnvelope::hasStamp(const fipa::acl::AgentID id) const
 {
     ReceivedObject receivedObject;
     receivedObject.setBy(id.getName());

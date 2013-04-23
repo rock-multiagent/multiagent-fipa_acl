@@ -11,7 +11,7 @@ namespace bitefficient {
 
 template struct Url<iterator_type>;
 template struct Any<iterator_type>;
-//template struct MessageEnvelope<iterator_type>;
+//template struct Envelope<iterator_type>;
 
 } // end namespace bitefficient
 } // end namespace acl
