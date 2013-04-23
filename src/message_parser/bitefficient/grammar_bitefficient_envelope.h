@@ -40,7 +40,7 @@ FIPA_ACL_FUSION_ADAPT(
     (const fipa::acl::PayloadEncoding&, const fipa::acl::PayloadEncoding&, obj.getPayloadEncoding(), obj.setPayloadEncoding(val))
     (const base::Time&, const base::Time&, obj.getDate(), obj.setDate(val))
     (const fipa::acl::AgentIDList&, const fipa::acl::AgentIDList&, obj.getIntendedReceivers(), obj.setIntendedReceivers(val))
-    (const fipa::acl::ReceivedObjectList&, const fipa::acl::ReceivedObjectList&, obj.getReceivedObjects(), obj.setReceivedObjects(val))
+    (const fipa::acl::ReceivedObject&, const fipa::acl::ReceivedObject&, obj.getReceivedObject(), obj.setReceivedObject(val))
     (const fipa::acl::TransportBehaviour&, const fipa::acl::TransportBehaviour&, obj.getTransportBehaviour(), obj.setTransportBehaviour(val))
     ( const fipa::acl::UserdefinedParameterList&, const fipa::acl::UserdefinedParameterList&, obj.getUserdefinedParameters(), obj.setUserdefinedParameters(val))
 );

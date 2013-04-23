@@ -1,4 +1,4 @@
-#include "acl_message_envelope.h"
+#include "acl_envelope.h"
 
 #include <algorithm>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -112,30 +112,20 @@ bool ACLBaseEnvelope::removeIntendedReceiver(const AgentID& agentId)
      return false;
 }
 
+void ACLBaseEnvelope::setReceivedObject(const ReceivedObject& receivedObject)
+{
+    mParameters = (ParameterId) (mParameters | RECEIVED_OBJECT);
+    mReceivedObject = receivedObject;
+}
+
 bool ACLBaseEnvelope::hasReceivedObject(const ReceivedObject& receivedObject) const
 {
-    std::vector<ReceivedObject>::const_iterator it = find_if(mReceivedObjects.begin(), mReceivedObjects.end(), arg1 == receivedObject);
-    if(it != mReceivedObjects.end())
+    if (mParameters & RECEIVED_OBJECT)
     {
-        return true;
+        return receivedObject.getBy() == mReceivedObject.getBy();
     }
 
     return false;
-}
-
-void ACLBaseEnvelope::addReceivedObject(const ReceivedObject& receivedObject)
-{
-    mParameters = (ParameterId) (mParameters | RECEIVED_OBJECTS);
-    if(!hasReceivedObject(receivedObject))
-    {
-        mReceivedObjects.push_back(receivedObject);
-    }
-}
-
-void ACLBaseEnvelope::setReceivedObjects(const ReceivedObjectList& receivedObjects)
-{
-    mParameters = (ParameterId) (mParameters | RECEIVED_OBJECTS);
-    mReceivedObjects = receivedObjects;
 }
 
 void ACLBaseEnvelope::setTransportBehaviour(const TransportBehaviour& transportBehaviour)
@@ -193,9 +183,9 @@ ACLBaseEnvelope ACLBaseEnvelope::merge(const ACLBaseEnvelope& other) const
         envelope.setIntendedReceivers(other.getIntendedReceivers());
     }
 
-    if(!envelope.contains(RECEIVED_OBJECTS))
+    if(!envelope.contains(RECEIVED_OBJECT))
     {
-        envelope.setReceivedObjects(other.getReceivedObjects());
+        envelope.setReceivedObject(other.getReceivedObject());
     }
 
     if(!envelope.contains(TRANSPORT_BEHAVIOUR))
@@ -249,7 +239,10 @@ void ACLEnvelope::stamp(const fipa::acl::AgentID& id)
     receivedObject.setBy(id.getName());
     receivedObject.setDate(base::Time::now());
 
-    mBaseEnvelope.stamp(receivedObject);
+    ACLBaseEnvelope extraEnvelope;
+    extraEnvelope.stamp(receivedObject);
+
+    mExtraEnvelopes.push_back(extraEnvelope);
 }
 
 bool ACLEnvelope::hasStamp(const fipa::acl::AgentID id) const
@@ -257,7 +250,15 @@ bool ACLEnvelope::hasStamp(const fipa::acl::AgentID id) const
     ReceivedObject receivedObject;
     receivedObject.setBy(id.getName());
 
-    return mBaseEnvelope.hasStamp(receivedObject);
+    ACLBaseEnvelopeList::const_iterator cit = mExtraEnvelopes.begin();
+    for(; cit != mExtraEnvelopes.end(); ++cit)
+    {
+        if(cit->hasStamp(receivedObject))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 

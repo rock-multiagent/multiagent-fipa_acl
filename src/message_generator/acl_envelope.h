@@ -22,7 +22,7 @@ typedef std::vector<ACLBaseEnvelope> ACLBaseEnvelopeList;
 namespace envelope {
 
     enum ParameterId { NONE = 0x00, TO = 0x01, FROM = 0x02, COMMENTS = 0x04,
-ACL_REPRESENTATION = 0x08, PAYLOAD_LENGTH = 0x10, PAYLOAD_ENCODING = 0x20, DATE = 0x40, INTENDED_RECEIVERS = 0x80, RECEIVED_OBJECTS = 0x0100, TRANSPORT_BEHAVIOUR = 0x0200, USERDEFINED_PARAMETERS = 0x0400, PARAMETER_END = 0x0800};
+ACL_REPRESENTATION = 0x08, PAYLOAD_LENGTH = 0x10, PAYLOAD_ENCODING = 0x20, DATE = 0x40, INTENDED_RECEIVERS = 0x80, RECEIVED_OBJECT = 0x0100, TRANSPORT_BEHAVIOUR = 0x0200, USERDEFINED_PARAMETERS = 0x0400, PARAMETER_END = 0x0800};
 }
 
 
@@ -106,10 +106,10 @@ private:
      * If an ACC receives a message it has already stamped, it is free to discard the message without any need to generate an error message.
      *
      * Before forwarding the message, the ACC adds a completed received parameter to the message envelope. Once an ACC has forwarded a message it no longer needs to keep any record of the existence of that message.
-     *
+     * The adding of the parameter is done by adding an additional envelope with the corresponding parameter set
      * Optional field
      */
-    ReceivedObjectList mReceivedObjects;
+    ReceivedObject mReceivedObject;
 
     /**
      * Reserved for future use.
@@ -257,25 +257,20 @@ public:
     void clearAllIntendedReceivers() { mIntendedReceivers.clear(); }
 
     /**
-     * Get all received objects
+     * Get the associated received object 
      */
-    const ReceivedObjectList& getReceivedObjects() const { return mReceivedObjects; }
-
-    /**
-     * Has received object test whether the list of received object
-     * contains an object of the same sender / By-Field
-     */
-    bool hasReceivedObject(const ReceivedObject& receivedObject) const;
-
-    /**
-     * Add received object
-     */
-    void addReceivedObject(const ReceivedObject& receivedObject);
+    const ReceivedObject& getReceivedObject() const { return mReceivedObject; }
 
     /**
      * Set the received object list
      */
-    void setReceivedObjects(const ReceivedObjectList& receivedObjects);
+    void setReceivedObject(const ReceivedObject& receivedObject);
+
+    /**
+     * Test whether the received object has the same sender
+     * \return true if the By field is the same, false otherwise
+     */
+    bool hasReceivedObject(const ReceivedObject& receivedObject) const;
 
     /**
      * Get the transport behaviour
@@ -313,8 +308,7 @@ public:
     /**
      * Add a receipt for this message, i.e. add a received object to the envelope. This function is an alias for setReceivedObject
      */
-    void stamp(const ReceivedObject& receivedObject) { addReceivedObject(receivedObject); }
-
+    void stamp(const ReceivedObject& receivedObject) { setReceivedObject(receivedObject); }
 
     /**
      * Test whether this envelope has been stamped. This is an alias for hasReceivedObject
@@ -324,12 +318,15 @@ public:
 };
 
 
+class EnvelopeFormat;
 /**
  * Message envelope includes the base envelope and updated fields, along with the actual payload
  * data that is wrapped by this envelope
  */
 class ACLEnvelope
 {
+    friend class EnvelopeFormat;
+
     /**
      * Updated envelope information as part of the relaying through various
      * message transport services
