@@ -196,12 +196,23 @@ public:
     const representation::Type& getACLRepresentation() const { return mACLRepresentation; }
 
     /**
+     * Get the ACLRepresentation in use
+     * \return acl representation
+     */
+    const std::string& getACLRepresentationString() const { return representation::TypeTxt[mACLRepresentation]; }
+
+    /**
      * Set the acl representation in use
      * "This is the name of the syntax representation of the message payload." [http://www.fipa.org/specs/fipa00067/SC00067F.html#_Toc26669814]
      */
     void setACLRepresentation(representation::Type representation);
 
     /**
+     * Set ACLRepresentation from string as defined in standard specification
+     * \throws if the ACLRepresentation in unknown to the system
+     */
+    void setACLRepresentation(const std::string& represention);
+
      * Get the length of the payload
      */
     const PayloadLength& getPayloadLength() const { return mPayloadLength; }

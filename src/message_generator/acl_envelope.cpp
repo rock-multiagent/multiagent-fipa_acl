@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <base/logging.h>
 
 #include <fipa_acl/message_parser/message_parser.h>
 #include <fipa_acl/message_generator/message_generator.h>
@@ -66,6 +67,22 @@ void ACLBaseEnvelope::setACLRepresentation(representation::Type representation)
 {
     mParameters = (ParameterId) (mParameters | ACL_REPRESENTATION);
     mACLRepresentation = representation;
+}
+
+
+void ACLBaseEnvelope::setACLRepresentation(const std::string& representation)
+{
+    for(int i = (int) representation::UNKNOWN; i < (int) representation::END_MARKER; ++i)
+    {
+        if(representation == representation::TypeTxt[i])
+        {
+            setACLRepresentation((representation::Type) i);
+            return;
+        }
+    }
+    std::string msg = "Trying to set unknown representation '" + representation + "'";
+    LOG_ERROR_S << msg;
+    throw std::runtime_error(msg);
 }
 
 void ACLBaseEnvelope::setPayloadLength(const PayloadLength& length)
@@ -220,6 +237,7 @@ ACLEnvelope::ACLEnvelope(const fipa::acl::ACLMessage& message, const fipa::acl::
 {
     using namespace fipa::acl;
     mPayload = MessageGenerator::create(message, representation);
+    mBaseEnvelope.setACLRepresentation(representation);
 }
 
 fipa::acl::ACLMessage ACLEnvelope::getACLMessage() const
