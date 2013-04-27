@@ -3,11 +3,13 @@ set(SOURCES
     message_parser/date_time.cpp
     message_parser/message_printer.cpp
     message_parser/message_parser.cpp
+    message_parser/envelope_parser.cpp
     message_parser/grammar/grammar_bitefficient.cpp
     message_parser/grammar/grammar_bitefficient_envelope.cpp
     message_generator/acl_message.cpp
     message_generator/acl_envelope.cpp
     message_generator/agent_id.cpp
+    message_generator/envelope_generator.cpp
     message_generator/format/bitefficient_format.cpp
     message_generator/format/bitefficient_envelope_format.cpp
     message_generator/format/bitefficient_message_format.cpp
@@ -40,6 +42,7 @@ set(HEADERS
     message_generator/agent_id.h
     message_generator/acl_message.h
     message_generator/acl_envelope.h
+    message_generator/envelope_generator.h
     message_generator/format/bitefficient_format.h
     message_generator/format/bitefficient_envelope_format.h
     message_generator/format/bitefficient_message_format.h
@@ -50,6 +53,7 @@ set(HEADERS
     message_parser/byte_sequence.h
     message_parser/date_time.h
     message_parser/debug.h
+    message_parser/envelope_parser.h
     message_parser/grammar/grammar_bitefficient.h
     message_parser/grammar/grammar_bitefficient_envelope.h
     message_parser/message_parser.h
