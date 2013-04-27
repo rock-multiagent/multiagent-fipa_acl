@@ -11,7 +11,7 @@
 #include <base/logging.h>
 
 #include "message_parser.h"
-#include "bitefficient/grammar_bitefficient.h"
+#include "grammar/grammar_bitefficient.h"
 
 
 namespace fipa { 

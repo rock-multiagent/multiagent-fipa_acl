@@ -1,7 +1,7 @@
 #ifndef FIPA_ACL_GRAMMAR_ENVELOPE_BITEFFICIENT_H
 #define FIPA_ACL_GRAMMAR_ENVELOPE_BITEFFICIENT_H
 #include <fipa_acl/message_generator/acl_envelope.h>
-#include <fipa_acl/message_parser/bitefficient/grammar_bitefficient.h>
+#include <fipa_acl/message_parser/grammar/grammar_bitefficient.h>
 #include <fipa_acl/message_parser/types.h>
 
 // BOOST_FUSION_ADAPT_CLASS has been renamed to BOOST_FUSION_ADAPT_ADT for boost version > 104500
