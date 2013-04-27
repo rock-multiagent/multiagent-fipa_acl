@@ -213,6 +213,7 @@ public:
      */
     void setACLRepresentation(const std::string& represention);
 
+    /**
      * Get the length of the payload
      */
     const PayloadLength& getPayloadLength() const { return mPayloadLength; }
@@ -389,6 +390,11 @@ public:
      * Set the base envelope
      */
     void setBaseEnvelope(const ACLBaseEnvelope& envelope) { mBaseEnvelope = envelope; }
+
+    /**
+     * Retrieve the fully merged envelope
+     */
+    ACLBaseEnvelope flattened() const { return mBaseEnvelope.flatten(mExtraEnvelopes); }
 
     /**
      * Set the payload which is wrapped by this envelope as byte get
