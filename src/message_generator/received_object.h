@@ -12,8 +12,6 @@ namespace acl {
 typedef std::string URL;
 typedef std::string ID;
 typedef std::string Via;
-typedef std::vector<UserdefParam> UserdefinedParameterList;
-
 
 /**
  * Received object is attached to the message envelope by each Message Transport Service

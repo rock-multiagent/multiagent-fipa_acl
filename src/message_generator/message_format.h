@@ -15,9 +15,8 @@ namespace acl {
     
 /**
 * \class MessageFormat
-* \brief encodes and ACLMessage class object according to the fipa spec(SC00069) all pointer extractin/passing methods are 
-* shallow(only the references passed); this is ok as they are not modiffied in the process of encoding; if this changes as 
-* utility increases(objects will be modified) then change to deep-copy retreival should be trivial, with the overloaded operators
+* \brief Abstract class which should be implemented by a specific format to
+* encode an ACLMessage according to the fipa specification (SC00069) 
 */
 class MessageFormat 
 {
