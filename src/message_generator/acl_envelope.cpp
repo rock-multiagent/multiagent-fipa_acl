@@ -160,57 +160,57 @@ void ACLBaseEnvelope::setUserdefinedParameters(const UserdefinedParameterList& p
 ACLBaseEnvelope ACLBaseEnvelope::merge(const ACLBaseEnvelope& other) const
 {
     ACLBaseEnvelope envelope(*this);
-    if(!envelope.contains(TO))
+    if(other.contains(TO))
     {
         envelope.setTo(other.getTo());
     }
 
-    if(!envelope.contains(FROM))
+    if(other.contains(FROM))
     {
         envelope.setFrom(other.getFrom());
     }
 
-    if(!envelope.contains(COMMENTS))
+    if(other.contains(COMMENTS))
     {
         envelope.setComments(other.getComments());
     }
 
-    if(!envelope.contains(ACL_REPRESENTATION))
+    if(other.contains(ACL_REPRESENTATION))
     {
         envelope.setACLRepresentation(other.getACLRepresentation());
     }
 
-    if(!envelope.contains(PAYLOAD_LENGTH))
+    if(other.contains(PAYLOAD_LENGTH))
     {
         envelope.setPayloadLength(other.getPayloadLength());
     }
 
-    if(!envelope.contains(PAYLOAD_ENCODING))
+    if(other.contains(PAYLOAD_ENCODING))
     {
         envelope.setPayloadEncoding(other.getPayloadEncoding());
     }
 
-    if(!envelope.contains(PAYLOAD_ENCODING))
+    if(other.contains(DATE))
     {
         envelope.setDate(other.getDate());
     }
 
-    if(!envelope.contains(INTENDED_RECEIVERS))
+    if(other.contains(INTENDED_RECEIVERS))
     {
         envelope.setIntendedReceivers(other.getIntendedReceivers());
     }
 
-    if(!envelope.contains(RECEIVED_OBJECT))
+    if(other.contains(RECEIVED_OBJECT))
     {
         envelope.setReceivedObject(other.getReceivedObject());
     }
 
-    if(!envelope.contains(TRANSPORT_BEHAVIOUR))
+    if(other.contains(TRANSPORT_BEHAVIOUR))
     {
         envelope.setTransportBehaviour(other.getTransportBehaviour());
     }
 
-    if(!envelope.contains(USERDEFINED_PARAMETERS))
+    if(other.contains(USERDEFINED_PARAMETERS))
     {
         envelope.setUserdefinedParameters(other.getUserdefinedParameters());
     }
@@ -224,7 +224,7 @@ ACLBaseEnvelope ACLBaseEnvelope::flatten(const ACLBaseEnvelopeList& extraEnvelop
     ACLBaseEnvelopeList::const_iterator cit = extraEnvelopes.begin();
     for(; cit != extraEnvelopes.end(); ++cit)
     {
-        envelope.merge(*cit);
+        envelope = envelope.merge(*cit);
     }
 
     return envelope;
