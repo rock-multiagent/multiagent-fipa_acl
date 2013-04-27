@@ -18,12 +18,15 @@ phoenix::function<convertToCharVectorImpl> convertToCharVector;
 phoenix::function<convertToNativeShortImpl> lazy_ntohs;
 phoenix::function<convertToNativeLongImpl> lazy_ntohl;
 phoenix::function<digitPaddingBytesImpl> digitPaddingBytes;
+phoenix::function<createAgentIDImpl> createAgentID;
+phoenix::function<convertStringToNumberImpl> convertStringToNumber;
 
 typedef std::string::const_iterator iterator_type;
 
 namespace acl {
 namespace bitefficient {
 
+template struct EndOfCollection<iterator_type>;
 template struct Index<iterator_type>;
 template struct Len8<iterator_type>;
 template struct Len16<iterator_type>;
@@ -43,6 +46,7 @@ template struct BinString<iterator_type>;
 template struct Word<iterator_type>;
 template struct BinWord<iterator_type>;
 template struct BinExpression<iterator_type>;
+template struct UserdefinedParameter<iterator_type>;
 template struct AgentIdentifier<iterator_type>;
 template struct Message<iterator_type>;
 

@@ -3,6 +3,8 @@
 
 #include <string>
 #include <base/time.h>
+#include <fipa_acl/message_generator/acl_envelope.h>
+#include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/message_generator/types.h>
 
 namespace fipa {
@@ -66,6 +68,11 @@ public:
     static std::string getBinDate(const std::string& date1);
 
     /**
+     * Retrieve number string
+     */
+    static std::string getBinNumber(uint32_t number, bool asHex = false);
+
+    /**
      * Encode representation
      */
     static std::string getACLRepresentation(const representation::Type& type);
@@ -74,6 +81,32 @@ public:
      * Retrieve digits for a number string
      */
     static std::string getDigits(const std::string& numberString)  { return getCodedNumber(numberString); }
+
+    /**
+     * Get digits from unsigned integer
+     */
+    static std::string getDigits(uint32_t number);
+
+    /**
+     * Retrieve encoded received object
+     */
+    static std::string getReceivedObject(const ReceivedObject& object);
+
+    /**
+     * Retrieve encoded agent id
+     */
+    static std::string getAgentID(const AgentID& agentId);
+
+    /**
+     * Get sequence of agents ids
+     */
+    static std::string getAgentIDSequence(const std::vector<AgentID>& agentIds);
+
+    /**
+     *
+     */
+    static std::string getBinStringNoCodetable(const std::string& sword) { return char(0x14) + getNullTerminatedString(sword); }
+
 };
 
 } // end namespace acl

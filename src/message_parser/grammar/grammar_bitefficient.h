@@ -21,12 +21,14 @@
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <arpa/inet.h>
 #include <ctime>
 
 #include <base/logging.h>
 
 #include <fipa_acl/message_parser/types.h>
+#include <fipa_acl/message_generator/agent_id.h>
 
 #ifdef BOOST_SPIRIT_DEBUG
 // include stream operators
@@ -219,16 +221,16 @@ namespace fipa
 	/** Convert Time to base::Time */
 	struct convertToBaseTimeImpl
 	{
-		template <typename T, typename U>
+		template <typename T>
 		struct result
 		{
-			typedef fipa::acl::Time type;
+			typedef base::Time type;
 		};
 
-		template <typename T, typename U>
+		template <typename T>
 		base::Time operator()(T arg) const
 		{
-			return base::Time();
+			return arg.toTime();
 		}
 
 		base::Time operator()(fipa::acl::DateTime arg) const
@@ -448,6 +450,50 @@ namespace fipa
 	
 	extern phoenix::function<convertToCharVectorImpl> convertToCharVector;
 
+    struct createAgentIDImpl
+    {
+        template <typename T>
+        struct result
+        {
+            typedef fipa::acl::AgentID type;
+        };
+
+        template<typename T>
+        fipa::acl::AgentID operator()(T arg) const
+        {
+            return fipa::acl::AgentID(arg);
+        }
+
+    };
+
+	extern phoenix::function<createAgentIDImpl> createAgentID;
+
+    struct convertStringToNumberImpl
+    {
+        template <typename T>
+        struct result
+        {
+            typedef boost::uint32_t type;
+        };
+
+        template<typename T>
+        boost::uint32_t operator()(T arg) const
+        {
+            std::string number(arg.begin(),arg.begin() + strlen(arg.c_str()));
+            try {
+                return boost::lexical_cast<boost::uint32_t>(number);
+            } catch(const std::bad_cast& e)
+            {
+                LOG_ERROR("ConvertString failed: '%s'", arg.c_str());
+                LOG_ERROR("String_size: '%d'", arg.size());
+                LOG_ERROR("String_length: '%d'", strlen(arg.c_str()));
+                std::string msg = "ConvertStringToNumber failed for '" + number + "' " + std::string(e.what());
+                throw std::runtime_error(msg);
+            }
+        }
+    };
+
+	extern phoenix::function<convertStringToNumberImpl> convertStringToNumber;
 
 namespace acl {
 namespace bitefficient {
@@ -456,7 +502,7 @@ namespace bitefficient {
 namespace label = qi::labels;
 
 template<typename Iterator>
-struct EndOfCollection : qi::grammar<Iterator, char>
+struct EndOfCollection : qi::grammar<Iterator, qi::unused_type>
 {
     EndOfCollection() : EndOfCollection::base_type(eof_collection_rule, "EndOfCollection-bitefficient_grammar")
     {
@@ -465,7 +511,7 @@ struct EndOfCollection : qi::grammar<Iterator, char>
         FIPA_DEBUG_RULE(eof_collection_rule);
     }
  
-    qi::rule<Iterator, char> eof_collection_rule;
+    qi::rule<Iterator, qi::unused_type> eof_collection_rule;
 };
 
 template<typename Iterator>
@@ -701,7 +747,7 @@ struct Digits : qi::grammar<Iterator, std::string(), qi::locals<std::string> >
     {
         // store the last byte to validate the padding
 	digits_rule = *((qi::byte_ - qi::byte_(0x00)) [ label::_val += convertToNumberToken(label::_1)]) [ label::_a = label::_1]
-                    >> qi::repeat(digitPaddingBytes(label::_a))[qi::byte_(0x00)];
+                    >> qi::repeat(digitPaddingBytes(label::_a))[qi::byte_(0x00)]
         // padding bytes should only apply if the last codedNumber does not have 00 in the lowerbyte
 
 	FIPA_DEBUG_RULE(digits_rule);

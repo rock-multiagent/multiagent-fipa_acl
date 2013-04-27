@@ -21,7 +21,7 @@ namespace acl {
     typedef std::string ReplyWith;
 
     namespace representation {
-        enum Type { UNKNOWN, BITEFFICIENT, STRING, XML };
+        enum Type { UNKNOWN, BITEFFICIENT, STRING, XML, END_MARKER };
 
         const std::string TypeTxt[] = { "unknown", "fipa.acl.rep.bitefficient.std", "fipa.acl.rep.string.std", "fipa.acl.rep.xml.std"};
     }

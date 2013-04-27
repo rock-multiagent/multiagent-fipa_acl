@@ -1,5 +1,7 @@
 #include "bitefficient_format.h"
 #include <boost/algorithm/string.hpp>
+#include <sstream>
+#include <base/logging.h>
 
 namespace fipa {
 namespace acl {
@@ -146,6 +148,31 @@ std::string BitefficientFormat::getCodedNaturalNumber(const std::string& cn)
     return retstr;
 }
 
+std::string BitefficientFormat::getBinNumber(uint32_t number, bool asHex)
+{
+    std::string encoded;
+    if(asHex)
+    {
+        encoded += char(0x13);
+    } else {
+        encoded += char(0x12);
+    }
+
+    std::stringstream ss;
+    ss << number;
+
+    encoded += getDigits(ss.str());
+    return encoded;
+}
+
+std::string BitefficientFormat::getDigits(uint32_t number)
+{
+    std::stringstream ss;
+    ss << number;
+
+    return getDigits(ss.str());
+}
+
 std::string BitefficientFormat::getACLRepresentation(const representation::Type& type)
 {
     std::string msg = "";
@@ -158,10 +185,106 @@ std::string BitefficientFormat::getACLRepresentation(const representation::Type&
         case representation::XML:
             msg += char(0x12); break;
         default:
-            throw std::runtime_error("Cannot encode unknown acl representation");
+            throw std::runtime_error("BitefficientFormat: Cannot encode unknown acl representation");
     }
 
     return msg;
+}
+
+std::string BitefficientFormat::getReceivedObject(const ReceivedObject& receivedObject)
+{
+    // by
+    std::string receivedObjectString = getNullTerminatedString(receivedObject.getBy());
+    // date
+    receivedObjectString += getBinDateTimeToken(receivedObject.getDate());
+    // from
+    std::string from = receivedObject.getFrom();
+    if(!from.empty())
+    {
+        receivedObjectString += char(0x02) + getNullTerminatedString(from);
+    }
+    // id
+    std::string id = receivedObject.getId();
+    if(!id.empty())
+    {
+        receivedObjectString += char(0x03) + getNullTerminatedString(id);
+    }
+    // via
+    std::string via = receivedObject.getVia();
+    if(!via.empty())
+    {
+        receivedObjectString += char(0x04) + getNullTerminatedString(via);
+    }
+    
+    const UserdefinedParameterList& list = receivedObject.getUserdefinedParameters();
+    std::vector<UserdefParam>::const_iterator cit = list.begin();
+    for(; cit != list.end(); ++cit)
+    {
+        receivedObjectString += char(0x00) + getNullTerminatedString(cit->getName()) + getNullTerminatedString(cit->getValue());
+    }
+
+    receivedObjectString += getEOFCollection();
+
+    return receivedObjectString;
+}
+
+std::string BitefficientFormat::getAgentID(const AgentID& agentId)
+{
+    std::string agentIdString = char(0x02) + getNullTerminatedString(agentId.getName());
+    // addresses (optional)
+    {
+        const Addresses& addresses = agentId.getAddresses();
+        if(!addresses.empty())
+        {
+            Addresses::const_iterator cit = addresses.begin();
+            agentIdString += char(0x02);
+            for(; cit != addresses.end(); ++cit)
+            {
+                agentIdString +=  getNullTerminatedString(*cit);
+            }
+        }
+    }
+    // resolvers(optional)
+    {
+        const Resolvers& resolvers = agentId.getResolvers();
+        if(!resolvers.empty())
+        {
+            Resolvers::const_iterator cit = resolvers.begin();
+            agentIdString += char(0x03);
+            for(; cit != resolvers.end(); ++cit)
+            {
+                agentIdString += getAgentID(*cit);
+            }
+        }
+    }
+    // userdefined parameters
+    {
+        const UserdefinedParameterList& userdefParams = agentId.getUserdefParams();
+        if(!userdefParams.empty())
+        {
+            UserdefinedParameterList::const_iterator cit = userdefParams.begin();
+            agentIdString += char(0x05);
+            for(; cit != userdefParams.end(); ++cit)
+            {
+                agentIdString += getNullTerminatedString(cit->getName());
+                agentIdString += getBinStringNoCodetable(cit->getValue());
+            }
+        }
+    }
+    agentIdString += getEOFCollection();
+    return agentIdString;
+}
+
+std::string BitefficientFormat::getAgentIDSequence(const std::vector<AgentID>& agentIds)
+{
+    std::vector<AgentID>::const_iterator cit = agentIds.begin();
+    std::string sequence;
+    for(;cit != agentIds.end(); ++cit)
+    {
+        sequence += getAgentID(*cit);
+    }
+    sequence += getEOFCollection();
+    return sequence;
 }
 
 } // end namespace acl
