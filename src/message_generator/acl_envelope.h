@@ -134,7 +134,7 @@ public:
      + Test wether a certain content element is set in this envelope object
      *
      */
-    bool contains(envelope::ParameterId id) { return mParameters & id; }
+    bool contains(envelope::ParameterId id) const { return mParameters & id; }
 
     /**
      * Get destination
@@ -399,7 +399,7 @@ public:
      * Get the payload which is wrapped by this envelope
      * \return string as byte container
      */
-    std::string getPayload() const { return mPayload; }
+    const std::string& getPayload() const { return mPayload; }
 
     /**
      * Retrieve the contained message if possible. 
