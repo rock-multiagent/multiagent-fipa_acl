@@ -6,38 +6,7 @@
 #include <string>
 #include <limits>
 
-template< template<class> class TIn, typename TOut>
-TOut testGrammar(const std::string& storage, bool expectedSuccess = true)
-{
-    typedef TIn<std::string::const_iterator> grammar_type;
-    grammar_type grammar;
-    TOut parseTree;
-
-    std::string::const_iterator iter = storage.begin();
-    std::string::const_iterator end = storage.end();
-    bool r = parse(iter, end, grammar, parseTree);
-    if(expectedSuccess)
-    {
-    	BOOST_REQUIRE_MESSAGE(r, "Test Grammar with string of size: " << storage.size());
-    } else {
-    	BOOST_REQUIRE_MESSAGE(!r, "Test Grammar with string of size: " << storage.size());
-    }
-    return parseTree;
-}
-
-template< template<class> class TIn, typename TOut>
-void testFailGrammar(const std::string& storage)
-{
-    typedef TIn<std::string::const_iterator> grammar_type;
-    grammar_type grammar;
-    TOut parseTree;
-
-    std::string::const_iterator iter = storage.begin();
-    std::string::const_iterator end = storage.end();
-    bool r = parse(iter, end, grammar, parseTree);
-
-    BOOST_REQUIRE(!r);
-}
+#include "test_utils.h"
 
 BOOST_AUTO_TEST_SUITE(fipa_message_test_suite)
 
@@ -49,8 +18,9 @@ BOOST_AUTO_TEST_CASE(grammar_test)
         fipa::acl::BitefficientMessageFormat bitefficientFormat;
 
         typedef fipa::acl::bitefficient::BinStringNoCodetable<std::string::const_iterator> bitefficient_message_grammar;
-	bitefficient_message_grammar grammar;
-	fipa::acl::ByteSequence parseTree;
+        bitefficient_message_grammar grammar;
+
+        fipa::acl::ByteSequence parseTree;
         {
             std::string storage;
             storage += char(0x16);
@@ -191,7 +161,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0b10000011);
             storage += char(0x00);
             std::string number = testGrammar<fab::BinNumber,std::string>(storage);
-           BOOST_REQUIRE_MESSAGE(number == "30.2-E72", "Number is " << number << " expected 30.2-E72");
+            BOOST_REQUIRE_MESSAGE(number == "30.2-E72", "Number is " << number << " expected 30.2-E72");
         }
         {
             // hex number-> 0xb -> decimal 11
@@ -200,7 +170,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0b00100010);
             storage += char(0x00);
             std::string number = testGrammar<fab::BinNumber,std::string>(storage);
-           BOOST_REQUIRE_MESSAGE(number == "0xb", "Number is " << number << " expected 0xb");
+            BOOST_REQUIRE_MESSAGE(number == "0xb", "Number is " << number << " expected 0xb");
         }
         
         // DateTime
@@ -252,49 +222,49 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 std::string expected = " " + expectedDateTimeString; 
                 BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'" << time.toString().size() << " vs " << expected.size());
             }
-            {
-                std::string storage;
-                storage += char(0x21);
-                storage += dateTimeStorage;
-            	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
-                std::string expected = "+" + expectedDateTimeString; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
-            }
-            {
-                std::string storage;
-                storage += char(0x22);
-                storage += dateTimeStorage;
-            	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
-                std::string expected = "-" + expectedDateTimeString; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
-            }
+              {
+                  std::string storage;
+                  storage += char(0x21);
+                  storage += dateTimeStorage;
+              	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
+                  std::string expected = "+" + expectedDateTimeString; 
+                  BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
+              }
+              {
+                  std::string storage;
+                  storage += char(0x22);
+                  storage += dateTimeStorage;
+              	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
+                  std::string expected = "-" + expectedDateTimeString; 
+                  BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
+              }
 
-            //typeDesignator
-            dateTimeStorage += 'Z'; 
-            {
-                std::string storage;
-                storage += char(0x24);
-                storage += dateTimeStorage;
-            	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
-                std::string expected = " " + expectedDateTimeString + "Z"; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
-            }
-            {
-                std::string storage;
-                storage += char(0x25);
-                storage += dateTimeStorage;
-            	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
-                std::string expected = "+" + expectedDateTimeString + "Z"; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
-            }
-            {
-                std::string storage;
-                storage += char(0x26);
-                storage += dateTimeStorage;
-            	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
-                std::string expected = "-" + expectedDateTimeString + "Z"; 
-                BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
-            }
+              //typeDesignator
+              dateTimeStorage += 'Z'; 
+              {
+                  std::string storage;
+                  storage += char(0x24);
+                  storage += dateTimeStorage;
+              	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
+                  std::string expected = " " + expectedDateTimeString + "Z"; 
+                  BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
+              }
+              {
+                  std::string storage;
+                  storage += char(0x25);
+                  storage += dateTimeStorage;
+              	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
+                  std::string expected = "+" + expectedDateTimeString + "Z"; 
+                  BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
+              }
+              {
+                  std::string storage;
+                  storage += char(0x26);
+                  storage += dateTimeStorage;
+              	fipa::acl::DateTime time = testGrammar<fab::BinDateTime, fipa::acl::DateTime>(storage);
+                  std::string expected = "-" + expectedDateTimeString + "Z"; 
+                  BOOST_REQUIRE_MESSAGE(time.toString() == expected, "BinDateTime is '" << time.toString() << "' expected '" << expected << "'");
+              }
         }
         // StringLiteral
         {
@@ -452,25 +422,26 @@ BOOST_AUTO_TEST_CASE(grammar_test)
         }
 }
 
+
 BOOST_AUTO_TEST_CASE(message_test)
 {
     using namespace fipa::acl;
-
+  
     ACLMessage msg("inform");
     AgentID origin("proxy");
-    AgentID receiver("crex_0_CREXCORE");
-
+    AgentID receiver("receiver");
+  
     AgentID resolver0("resolver0");
     AgentID resolver1("resolver1");
-
+  
     receiver.addResolver(resolver0);
     receiver.addResolver(resolver1);
-
+  
     msg.setSender(origin);
     msg.addReceiver(receiver);
     msg.addReplyTo(origin);
     msg.setPerformative(ACLMessage::REQUEST);
-    msg.setProtocol(std::string("RIMRES"));
+    msg.setProtocol(std::string("test-protocol"));
     msg.setLanguage(std::string("test language"));
     msg.setEncoding(std::string("test encoding"));
     msg.setOntology(std::string("test ontology"));
@@ -480,26 +451,26 @@ BOOST_AUTO_TEST_CASE(message_test)
     BOOST_CHECK_MESSAGE(true, "Setting time " << time.toString());
     msg.setConversationID(std::string("test conversationID"));
     msg.setContent("test content");
-
+  
     std::vector<AgentID> agents = msg.getAllReceivers();
     BOOST_CHECK_MESSAGE(agents.size() == 1, "Original msg: receiver agent size is one");
-
+  
     std::string encodedMsg = MessageGenerator::create(msg, representation::BITEFFICIENT);
-
+  
     MessageParser inputParser;
     ACLMessage outputMsg;
-
+  
     BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg), "Parsing of message");
-
+  
     BOOST_REQUIRE_MESSAGE(outputMsg.getPerformative() == PerformativeTxt[ACLMessage::REQUEST], "Performative '" << outputMsg.getPerformative() << "' vs. input '" << PerformativeTxt[ACLMessage::REQUEST] << "'");
     BOOST_REQUIRE_MESSAGE(outputMsg.getSender() == msg.getSender(), "Sender '" << outputMsg.getSender().getName() << "' vs. input '" << msg.getSender().getName() << "'");
-
-
+  
+  
     BOOST_ASSERT(outputMsg.getAllReceivers() == msg.getAllReceivers());
     agents = outputMsg.getAllReceivers();
     BOOST_ASSERT(agents.size() == 1);
     BOOST_ASSERT(agents[0].getResolvers().size() == 2);
-
+  
     std::vector<AgentID>::iterator it = agents.begin();
     for(; it != agents.end(); ++it)
     {
@@ -514,8 +485,8 @@ BOOST_AUTO_TEST_CASE(message_test)
     BOOST_REQUIRE_MESSAGE(outputMsg.getReplyBy() == msg.getReplyBy(), "ReplyBy '" << outputMsg.getReplyBy().toString() << "' vs. msg " << msg.getReplyBy().toString());
     BOOST_REQUIRE_MESSAGE(outputMsg.getConversationID() == msg.getConversationID(), "ConversationID '" << outputMsg.getConversationID() << "' vs. input '" << msg.getConversationID() << "'");
     BOOST_REQUIRE_MESSAGE(outputMsg.getContent() == msg.getContent(), "Content '" << outputMsg.getContent() << "' vs. input '" << msg.getContent() << "'");
-}
-
+}  
+  
 
 BOOST_AUTO_TEST_CASE(binary_message_content)
 {
