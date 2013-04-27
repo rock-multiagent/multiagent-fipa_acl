@@ -8,7 +8,7 @@
 namespace fipa {
 namespace acl {
 
-std::map<representation::Type, EnvelopeFormatPtr > MessageGenerator::msFormats = boost::assign::map_list_of
+std::map<representation::Type, EnvelopeFormatPtr > EnvelopeGenerator::msFormats = boost::assign::map_list_of
     (representation::BITEFFICIENT, boost::shared_ptr<EnvelopeFormat>(new BitefficientEnvelopeFormat()) );
 
 std::string EnvelopeGenerator::create(const ACLEnvelope& envelope, const representation::Type& type)

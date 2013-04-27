@@ -1,6 +1,9 @@
 #ifndef FIPA_ACL_ENVELOPE_GENERATOR_H
 #define FIPA_ACL_ENVELOPE_GENERATOR_H
 
+#include <fipa_acl/message_generator/envelope_format.h>
+#include <fipa_acl/message_generator/types.h>
+
 namespace fipa {
 namespace acl {
 
