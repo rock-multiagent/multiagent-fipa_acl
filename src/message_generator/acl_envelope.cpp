@@ -1,6 +1,7 @@
 #include "acl_envelope.h"
 
 #include <algorithm>
+#include <sstream>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <base/logging.h>
@@ -15,6 +16,8 @@ using namespace fipa::acl::envelope;
 
 namespace fipa {
 namespace acl {
+
+uint32_t ACLEnvelope::mStampCounter = 0;
 
 ACLBaseEnvelope::ACLBaseEnvelope()
     : mParameters(NONE)
@@ -292,6 +295,8 @@ void ACLEnvelope::stamp(const fipa::acl::AgentID& id)
     receivedObject.setBy(id.getName());
     receivedObject.setDate(base::Time::now());
 
+    receivedObject.setId(createLocalId());
+
     ACLBaseEnvelope extraEnvelope;
     extraEnvelope.stamp(receivedObject);
 
@@ -314,6 +319,13 @@ bool ACLEnvelope::hasStamp(const fipa::acl::AgentID id) const
     return false;
 }
 
+ID ACLEnvelope::createLocalId()
+{
+    std::stringstream ss;
+    ss << ++mStampCounter;
+    ss << ":" << base::Time::now().toString();
+    return ss.str();
+}
 
 } // end namespace acl
 } // end namespace fipa

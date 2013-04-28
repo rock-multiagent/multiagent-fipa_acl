@@ -355,6 +355,17 @@ class ACLEnvelope
     // The payload data that is transported within this envelope
     std::string mPayload;
 
+    /**
+     * Count of stamps
+     */
+    static uint32_t mStampCounter;
+
+    /**
+     * Create an id for the received object
+     * <counter>:<timstamp>
+     */
+    static ID createLocalId();
+
 public:
 
     /**
@@ -448,7 +459,8 @@ public:
      * This creates a new received object and attaches it to 
      * an extra envelope
      *
-     * Only the mandatory fields 'by' and 'date' are set.
+     * The mandatory fields 'by' and 'date' are set.
+     * The optional field 'id' is set.
      */
     void stamp(const fipa::acl::AgentID& id);
 
