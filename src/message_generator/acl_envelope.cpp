@@ -237,7 +237,20 @@ ACLEnvelope::ACLEnvelope(const fipa::acl::ACLMessage& message, const fipa::acl::
 {
     using namespace fipa::acl;
     mPayload = MessageGenerator::create(message, representation);
+
+    // infer fields from message
+    mBaseEnvelope.setTo(message.getAllReceivers());
+    mBaseEnvelope.setFrom(message.getSender());
+    // comments have to be set explicitly, so not done here
     mBaseEnvelope.setACLRepresentation(representation);
+    mBaseEnvelope.setPayloadLength(mPayload.size());
+    mBaseEnvelope.setPayloadEncoding(message.getEncoding());
+    mBaseEnvelope.setDate(base::Time::now());
+
+    // intended receivers, received object and transport behaviour 
+    // will not be set here but have to be either explicitly 
+    // or by stamping the message
+}
 
 AgentIDList ACLEnvelope::getDeliveryPath() const
 {
