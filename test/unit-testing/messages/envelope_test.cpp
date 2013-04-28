@@ -21,6 +21,47 @@
         BOOST_REQUIRE_MESSAGE(envelope.contains(envelope::DATE), "Envelope contains(envelope::DATE)");
     }
 
+    BOOST_AUTO_TEST_CASE(envelope_stamping_test)
+    {
+        using namespace fipa::acl;
+
+        std::vector<std::string> hops;
+        hops.push_back("mts-0");
+        hops.push_back("mts-1");
+        hops.push_back("mts-2");
+
+        AgentID sender("test-sender");
+        AgentID receiver("test-receiver");
+        ACLMessage msg(ACLMessage::REQUEST);
+        msg.setContent("test-content");
+
+        msg.setSender(sender);
+        msg.addReceiver(receiver);
+        ACLEnvelope envelope(msg, representation::BITEFFICIENT);
+
+        std::vector<std::string>::const_iterator it = hops.begin();
+        for(; it != hops.end(); ++it)
+        {
+            AgentID agent(*it);
+            envelope.stamp(agent);
+        }
+
+        AgentIDList deliveryPath = envelope.getDeliveryPath();
+        for(size_t i = 0; i < hops.size(); ++i)
+        {
+            BOOST_REQUIRE_MESSAGE(deliveryPath[i].getName() == hops[i], "Hop is " << hops[i]);
+        }
+
+        ACLBaseEnvelopeList envelopes = envelope.getExtraEnvelopes();
+        BOOST_REQUIRE(envelopes.size() == hops.size());
+        ACLBaseEnvelopeList::const_iterator eit = envelopes.begin();
+        for(; eit != envelopes.end(); ++eit)
+        {
+            ReceivedObject ro = eit->getReceivedObject();
+            BOOST_REQUIRE_MESSAGE(!ro.getId().empty(), "ReceivedObject id: " << ro.getId());
+        }
+    }
+
     BOOST_AUTO_TEST_CASE(grammar_test)
     {
         using namespace fipa::acl;
