@@ -435,6 +435,13 @@ public:
     AgentIDList getDeliveryPath() const;
 
     /**
+     * Retrieve the delivery path as a comma separated list
+     * of agent names in time order
+     * \return String representiong the delivery path
+     */
+    std::string getDeliveryPathString() const;
+
+    /**
      * Set the payload which is wrapped by this envelope as byte get
      * If you are using this function, make sure to set the corresponding encoding of the payload
      * \param payload representing an acl message

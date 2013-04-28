@@ -278,6 +278,22 @@ AgentIDList ACLEnvelope::getDeliveryPath() const
     return deliveryPath;
 }
 
+std::string ACLEnvelope::getDeliveryPathString() const
+{
+    std::string pathString;
+    AgentIDList deliveryPath = getDeliveryPath();
+    AgentIDList::const_iterator cit = deliveryPath.begin();
+    for(; cit != deliveryPath.end();)
+    {
+        pathString += cit->getName();
+        if(++cit != deliveryPath.end())
+        {
+            pathString += ",";
+        }
+    }
+    return pathString;
+}
+
 fipa::acl::ACLMessage ACLEnvelope::getACLMessage() const
 {
     using namespace fipa::acl;
