@@ -415,6 +415,15 @@ public:
     ACLBaseEnvelope flattened() const { return mBaseEnvelope.flatten(mExtraEnvelopes); }
 
     /**
+     * Retrieve the delivery path from the 
+     * received object in base and extra envelopes, i.e.
+     * will not include the current hop (unless stamped)
+     *
+     * \return List of agents id representing the delivery path, in time order, i.e. oldest first to this agent
+     */
+    AgentIDList getDeliveryPath() const;
+
+    /**
      * Set the payload which is wrapped by this envelope as byte get
      * If you are using this function, make sure to set the corresponding encoding of the payload
      * \param payload representing an acl message
