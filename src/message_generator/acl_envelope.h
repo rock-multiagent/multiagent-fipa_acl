@@ -21,6 +21,8 @@ typedef std::vector<ACLBaseEnvelope> ACLBaseEnvelopeList;
 
 namespace envelope {
 
+    // Parameter id to allow checking whether certain field in an envelope
+    // have been set
     enum ParameterId { NONE = 0x00, TO = 0x01, FROM = 0x02, COMMENTS = 0x04,
 ACL_REPRESENTATION = 0x08, PAYLOAD_LENGTH = 0x10, PAYLOAD_ENCODING = 0x20, DATE = 0x40, INTENDED_RECEIVERS = 0x80, RECEIVED_OBJECT = 0x0100, TRANSPORT_BEHAVIOUR = 0x0200, USERDEFINED_PARAMETERS = 0x0400, PARAMETER_END = 0x0800};
 }
@@ -363,41 +365,59 @@ public:
     /**
      * Creates and envelope for a acl message.
      * Note the the acl message will be encoded according to the given representation format
+     *
+     * Note, that the fields to,from, acl-representation, payload-lenght, payload-encoding and date are set. All others have to be set explicitly (also see stamp)
+     * \param msg ACLMessage will shall be wrapped by this envelope
+     * \param format The message format this message will be encoded in for transport
      */
     ACLEnvelope(const ACLMessage& msg, const fipa::acl::representation::Type& format);
 
     /**
-     * Get all extra envelopes
+     * Get all extra envelopes.
+     * Extra envelope represent an overlay to the base envelope,
+     * This overlay mechanism is used, since information must not be discarded.
+     *
+     * \return extra envelopes
      */
     const ACLBaseEnvelopeList& getExtraEnvelopes() const { return mExtraEnvelopes; }
 
     /**
      * Add an extra envelope to overwrite existing parameters
+     * Append the most recent extra envelope
      */
     void addExtraEnvelope(const ACLBaseEnvelope& envelope)  { mExtraEnvelopes.push_back(envelope); }
 
     /**
      * Set all extra envelopes
+     * Overwrites the existing set of extra envelopes
+     * \oaram List of base envelopes
      */
     void setExtraEnvelopes(const ACLBaseEnvelopeList& envelopes) { mExtraEnvelopes = envelopes; }
 
     /**
      * Get the base envelope
+     * \return base envelope
      */
     const ACLBaseEnvelope& getBaseEnvelope() const { return mBaseEnvelope; }
 
     /**
      * Set the base envelope
+     * \param envelope Base envelope to set
      */
     void setBaseEnvelope(const ACLBaseEnvelope& envelope) { mBaseEnvelope = envelope; }
 
     /**
      * Retrieve the fully merged envelope
+     * Starting with the base envelope each extra envelope is applied 
+     * as an overlay
+     * \return the envelope representing the most recent combination of information in base and extra envelopes
      */
     ACLBaseEnvelope flattened() const { return mBaseEnvelope.flatten(mExtraEnvelopes); }
 
     /**
      * Set the payload which is wrapped by this envelope as byte get
+     * If you are using this function, make sure to set the corresponding encoding of the payload
+     * \param payload representing an acl message
      */
     void setPayload(const std::string& payload) { mPayload = payload; }
 
@@ -409,17 +429,24 @@ public:
 
     /**
      * Retrieve the contained message if possible. 
+     * \return decoded payload
      * \throws std::runtime_error if the acl message could not be extracted
      */
     fipa::acl::ACLMessage getACLMessage() const;
 
     /**
      * Stamp a letter with a given agent id
+     * This creates a new received object and attaches it to 
+     * an extra envelope
+     *
+     * Only the mandatory fields 'by' and 'date' are set.
      */
     void stamp(const fipa::acl::AgentID& id);
 
     /**
      * Check whether the letter has already been stamped 
+     * Iterates over all received objects for testing
+     * \return True, if the agent id is set in one of the received objects, false otherwise
      */
     bool hasStamp(fipa::acl::AgentID id) const;
 };
