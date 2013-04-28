@@ -1,6 +1,6 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <fipa_acl/bitefficient_message.h>
-#include <fipa_acl/message_parser/bitefficient/grammar_bitefficient.h>
+#include <fipa_acl/message_parser/grammar/grammar_bitefficient.h>
 #include <fipa_acl/message_generator/format/bitefficient_message_format.h>
 #include <fipa_acl/message_generator/format/bitefficient_format.h>
 #include <string>

@@ -12,7 +12,7 @@
 
 #include <fipa_acl/message_generator/message_generator.h>
 
-#include <fipa_acl/message_parser/bitefficient/grammar_bitefficient.h>
+#include <fipa_acl/message_parser/grammar/grammar_bitefficient.h>
 #include <fipa_acl/message_parser/message_printer.h>
 
 std::map<std::string, std::string> options;
