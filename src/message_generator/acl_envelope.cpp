@@ -267,12 +267,11 @@ AgentIDList ACLEnvelope::getDeliveryPath() const
     ACLBaseEnvelopeList::const_iterator cit = mExtraEnvelopes.begin();
     for(; cit != mExtraEnvelopes.end();++cit)
     {
-        if(!cit->contains(envelope::RECEIVED_OBJECT))
+        if(cit->contains(envelope::RECEIVED_OBJECT))
         {
-            throw std::runtime_error("ACLEnvelope: missing received object to infer delivery path");
+            std::string hop = cit->getReceivedObject().getBy();
+            deliveryPath.push_back(AgentID(hop));
         }
-        std::string hop = cit->getReceivedObject().getBy();
-        deliveryPath.push_back(AgentID(hop));
     }
 
     return deliveryPath;
