@@ -21,7 +21,7 @@ SerializedLetter::SerializedLetter(const fipa::acl::Letter& letter, fipa::acl::r
 }
 
 
-fipa::acl::Letter SerializedLetter::getLetter() const
+fipa::acl::Letter SerializedLetter::deserialize() const
 {
     fipa::acl::EnvelopeParser ep;
     fipa::acl::Letter letter;
@@ -32,7 +32,7 @@ fipa::acl::Letter SerializedLetter::getLetter() const
         return letter;
     }
 
-    throw std::runtime_error("SerializedLetter: could not parse data correctly");
+    throw std::runtime_error("SerializedLetter: could not deserialize data correctly");
 }
 
 void SerializedLetter::setData(const std::string& msg)

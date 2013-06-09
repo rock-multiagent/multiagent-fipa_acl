@@ -180,7 +180,7 @@ std::string BitefficientFormat::getACLRepresentation(const representation::Type&
     {
         case representation::BITEFFICIENT: 
             msg += char(0x10); break;
-        case representation::STRING:
+        case representation::STRING_REP:
             msg += char(0x11); break;
         case representation::XML:
             msg += char(0x12); break;

@@ -296,7 +296,7 @@ struct Envelope : qi::grammar<Iterator, fipa::acl::ACLEnvelope() , qi::locals< s
 
         aclRepresentation = userDefinedACLRepresentation
             | byte_(0x10) [ label::_val = representation::TypeTxt[representation::BITEFFICIENT] ] // [FIPA00069]
-            | byte_(0x11) [ label::_val = representation::TypeTxt[representation::STRING] ]// [FIPA00070]
+            | byte_(0x11) [ label::_val = representation::TypeTxt[representation::STRING_REP] ]// [FIPA00070]
             | byte_(0x12) [ label::_val = representation::TypeTxt[representation::XML] ] // [FIPA00071]
         ;
 

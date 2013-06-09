@@ -49,7 +49,7 @@ struct SerializedLetter
     /**
      * Retrieve decoded letter
      */
-    fipa::acl::Letter getLetter() const;
+    fipa::acl::Letter deserialize() const;
 
     fipa::acl::representation::Type representation;
     std::vector<uint8_t> data;
