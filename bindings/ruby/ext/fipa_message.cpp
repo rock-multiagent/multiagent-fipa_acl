@@ -2,12 +2,14 @@
 #include "rice/Constructor.hpp"
 #include "rice/String.hpp"
 #include "rice/Array.hpp"
+#include "rice/Enum.hpp"
 
 #include <stdint.h>
 #include <vector>
 #include <iostream>
-#include <fipa_acl/message_generator/message_generator.h>
-#include <fipa_acl/message_parser/message_parser.h>
+#include <fipa_acl/fipa_acl.h>
+#include <fipa_acl/message_generator/envelope_generator.h>
+#include <fipa_acl/message_parser/envelope_parser.h>
 
 using namespace Rice;
 
@@ -21,9 +23,12 @@ Data_Type<AgentIDVector> aidVector;
 Data_Type<ParameterVector> parameterVector;
 Data_Type<ByteVector> byteVector;
 
+Data_Type<fipa::acl::ACLEnvelope> rb_cFipaEnvelope;
 Data_Type<fipa::acl::ACLMessage> rb_cFipaMessage;
 Data_Type<fipa::acl::AgentID> rb_cAgentID;
 Data_Type<fipa::acl::UserdefParam> rb_cUserDefinedParameters;
+
+Enum<fipa::acl::representation::Type> rb_eRepresentationType;
 
 static Module rb_mFIPA;
 
@@ -230,6 +235,71 @@ Symbol wrap_getPerformative(Object self)
 	return Symbol(performative);
 }
 
+Object wrap_getACLMessage(Object self)
+{
+    Data_Object<fipa::acl::ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+    fipa::acl::ACLMessage msg = envelope->getACLMessage();
+    Data_Object<fipa::acl::ACLMessage> message(new fipa::acl::ACLMessage(msg), rb_cFipaMessage);
+
+    return message;
+}
+
+Array wrap_getDeliveryPath(Object self)
+{
+    Data_Object<fipa::acl::ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+
+    Array deliveryPath;
+    std::vector<fipa::acl::AgentID> path = envelope->getDeliveryPath();
+    deliveryPath = to_ruby<AgentIDVector>(path);
+    return deliveryPath;
+}
+
+
+Array wrap_envelopeToByteVector(Object self)
+{
+
+   Data_Object<fipa::acl::ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+
+   std::string bitefficientEnvelope = fipa::acl::EnvelopeGenerator::create(*envelope, fipa::acl::representation::BITEFFICIENT);
+
+   int size = bitefficientEnvelope.size();
+
+   std::vector<uint8_t> bytes;
+   for(int i = 0; i < size; i++)
+   {
+	bytes.push_back(bitefficientEnvelope[i]);
+   } 
+
+   return to_ruby<ByteVector>(bytes); 
+}
+
+
+/**
+* Conversion of a string, that contains an array of bytes as core data into a FIPA::ACLEnvelope
+* The array of bytes will be parsed in the envelope object
+* throw an exception if the parsing step fails
+*/
+Object wrap_envelopeFromByteString(Object self, String byteString)
+{
+	Data_Object<fipa::acl::ACLEnvelope> envelope(self, rb_cFipaEnvelope);	
+
+	std::string data; 
+	int size = byteString.length();
+
+	for(int i=0; i < size; i++)
+	{
+		data += (char) byteString[i];
+	}
+
+	fipa::acl::EnvelopeParser parser;
+	if(!parser.parseData(data, *envelope, fipa::acl::representation::BITEFFICIENT))
+	{
+		throw Exception(rb_eRuntimeError, "FIPA::ACLEnvelope: data could not be parsed");
+	}
+
+	return self;
+}
+
 
 
 /*
@@ -299,6 +369,22 @@ void Init_fipamessage_ruby()
    .define_method("deleteResolver", &fipa::acl::AgentID::deleteResolver, (Arg("agentid") ))
    .define_method("addUserDefinedParameter", &fipa::acl::AgentID::addUserdefParam, (Arg("param")))
    .define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters);
+
+ rb_eRepresentationType = define_enum<fipa::acl::representation::Type>("FIPARepresentation")
+     .define_value("UNKNOWN",fipa::acl::representation::BITEFFICIENT)
+     .define_value("BITEFFICIENT",fipa::acl::representation::BITEFFICIENT)
+     .define_value("STRING",fipa::acl::representation::STRING_REP)
+     .define_value("XML", fipa::acl::representation::XML)
+     ;
+
+ rb_cFipaEnvelope = define_class_under<fipa::acl::ACLEnvelope>(rb_mFIPA, "ACLEnvelope")
+   .define_constructor(Constructor<fipa::acl::ACLEnvelope>())
+   .define_constructor(Constructor<fipa::acl::ACLEnvelope, const fipa::acl::ACLMessage&, const::fipa::acl::representation::Type&>())
+   .define_method("getDeliveryPath", &wrap_getDeliveryPath)
+   .define_method("getACLMessage", &wrap_getACLMessage)
+   .define_method("to_byte_array", &wrap_envelopeToByteVector)
+   .define_method("from_byte_string", &wrap_envelopeFromByteString)
+   ;
 
  rb_cFipaMessage = define_class_under<fipa::acl::ACLMessage>(rb_mFIPA, "ACLMessage")
    .define_constructor(Constructor<fipa::acl::ACLMessage>())
