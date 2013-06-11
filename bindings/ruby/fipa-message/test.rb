@@ -64,9 +64,9 @@ class FipaMessageTest < Test::Unit::TestCase
 	    msg.setProtocol protocol
 	    msg.setPerformative performative
 
-	    data = Utils.serialize(msg)
+	    data = Utils.serialize_message(msg)
 
-	    msg_deserialized = Utils.deserialize(data)
+	    msg_deserialized = Utils.deserialize_message(data)
 
 	    assert_equal(msg_deserialized.getProtocol, protocol)
 	    assert_equal(msg_deserialized.getPerformative, performative)
@@ -75,7 +75,7 @@ class FipaMessageTest < Test::Unit::TestCase
 	def test_Deserialization
 	    array = Array.new
 	    data = IO.read(File.join(File.dirname(__FILE__),"inform"))
-	    msg = Utils.deserialize(data, false)
+	    msg = Utils.deserialize_message(data, false)
 
 	    assert_equal(msg.getPerformative, :inform)
 	end
