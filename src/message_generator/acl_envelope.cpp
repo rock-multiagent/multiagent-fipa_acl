@@ -37,7 +37,7 @@ void ACLBaseEnvelope::addTo(const AgentID& agentId)
 
 void ACLBaseEnvelope::setTo(const AgentIDList& receivers)
 {
-    mParameters = TO;
+    mParameters = (ParameterId) (mParameters | TO);
     mTo = receivers;
 }
 
