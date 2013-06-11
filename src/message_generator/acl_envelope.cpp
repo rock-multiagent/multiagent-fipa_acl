@@ -238,6 +238,11 @@ ACLEnvelope::ACLEnvelope()
 
 ACLEnvelope::ACLEnvelope(const fipa::acl::ACLMessage& message, const fipa::acl::representation::Type& representation)
 {
+    insert(message,representation);
+}
+
+void ACLEnvelope::insert(const fipa::acl::ACLMessage& message, const fipa::acl::representation::Type& representation)
+{
     using namespace fipa::acl;
     mPayload = MessageGenerator::create(message, representation);
 

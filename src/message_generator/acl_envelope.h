@@ -384,6 +384,14 @@ public:
     ACLEnvelope(const ACLMessage& msg, const fipa::acl::representation::Type& format);
 
     /**
+     * Insert a message to this envelope using a specific representation
+     * Existing settings will be overwritten
+     * \param msg Message to be set
+     * \param format Format to be applied to the message
+     */
+    void insert(const ACLMessage& msg, const fipa::acl::representation::Type& format);
+
+    /**
      * Get all extra envelopes.
      * Extra envelope represent an overlay to the base envelope,
      * This overlay mechanism is used, since information must not be discarded.
