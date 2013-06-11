@@ -126,23 +126,25 @@
             envelope.addExtraEnvelope(inExtraEnvelope);
 
         storage = EnvelopeGenerator::create(envelope, representation::BITEFFICIENT);
-        fipa::acl::EnvelopeParser ep;
-        BOOST_REQUIRE(ep.parseData(storage, envelope, representation::BITEFFICIENT));
 
-        ACLBaseEnvelope outBaseEnvelope = envelope.getBaseEnvelope();
-        BOOST_REQUIRE_MESSAGE(outBaseEnvelope.getFrom() == inSender, "From '" << outBaseEnvelope.getFrom().getName() << "' vs '" << inSender.getName());
-        BOOST_REQUIRE_MESSAGE(outBaseEnvelope.getDate() == inBaseEnvelope.getDate(), "Date '" << outBaseEnvelope.getDate().toString() << "' vs '" << inBaseEnvelope.getDate().toString());
+        fipa::acl::EnvelopeParser ep;
+        ACLEnvelope decodedEnvelope;
+        BOOST_REQUIRE(ep.parseData(storage, decodedEnvelope, representation::BITEFFICIENT));
+
+        ACLBaseEnvelope outBaseEnvelope = decodedEnvelope.getBaseEnvelope();
+        BOOST_REQUIRE_MESSAGE(outBaseEnvelope.getFrom() == inSender, "From '" << outBaseEnvelope.getFrom().getName() << "' vs '" << inSender.getName() << "'");
+        BOOST_REQUIRE_MESSAGE(outBaseEnvelope.getDate().toString(base::Time::Milliseconds) == inBaseEnvelope.getDate().toString(base::Time::Milliseconds), "Date '" << outBaseEnvelope.getDate().toString(base::Time::Milliseconds) << "' vs '" << inBaseEnvelope.getDate().toString(base::Time::Milliseconds));
         BOOST_REQUIRE_MESSAGE(outBaseEnvelope.getTransportBehaviour() == inTransportBehaviour, "TransportBehaviour '" << outBaseEnvelope.getTransportBehaviour() << "' vs '" << inTransportBehaviour);
         BOOST_REQUIRE(outBaseEnvelope.getACLRepresentation() == representation::BITEFFICIENT);
         BOOST_REQUIRE_MESSAGE(outBaseEnvelope.getComments() == inComments, "Comments '" << outBaseEnvelope.getComments() << "' vs '" << inComments);
         BOOST_REQUIRE_MESSAGE(outBaseEnvelope.getIntendedReceivers() == inIntendedReceivers, "IntendedReceivers '" << outBaseEnvelope.getIntendedReceivers()[0].getName() << "' vs '" << inIntendedReceiver.getName());
         BOOST_REQUIRE(outBaseEnvelope.getReceivedObject() == inReceivedObject);
 
-        std::vector<ACLBaseEnvelope> outExtra = envelope.getExtraEnvelopes();
-        BOOST_REQUIRE(outExtra.size() == 1);
+        std::vector<ACLBaseEnvelope> outExtra = decodedEnvelope.getExtraEnvelopes();
+        BOOST_REQUIRE_MESSAGE(outExtra.size() == 1, "'" << outExtra.size() << "' extra envelopes available, expected 1");
         BOOST_REQUIRE_MESSAGE(outExtra[0].getTo() == inExtraTos, "Extra to: '" << outExtra[0].getTo()[0].getName() << "' vs '" << inExtraTo.getName() << "'");
 
-        ACLBaseEnvelope outFlattenedEnvelope = envelope.flattened();
+        ACLBaseEnvelope outFlattenedEnvelope = decodedEnvelope.flattened();
         BOOST_REQUIRE(outFlattenedEnvelope.getTo() == inExtraTos);
     }
 }

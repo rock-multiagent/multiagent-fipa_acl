@@ -27,7 +27,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 FIPA_ACL_FUSION_ADAPT(
     fipa::acl::ACLEnvelope,
     (const fipa::acl::ACLBaseEnvelope&, const fipa::acl::ACLBaseEnvelope&, obj.getBaseEnvelope(), obj.setBaseEnvelope(val))
-    (const fipa::acl::ACLBaseEnvelopeList&, const fipa::acl::ACLBaseEnvelopeList&, obj.getExtraEnvelopes(), obj.setExtraEnvelopes(val))
+    (const fipa::acl::ACLBaseEnvelopeList&, const fipa::acl::ACLBaseEnvelopeList&, obj.getExtraEnvelopes(), obj.addExtraEnvelope(val))
     (const std::string&, const std::string&, obj.getPayload(), obj.setPayload(val))
 );
 
@@ -223,26 +223,27 @@ struct ReceivedObject : qi::grammar<Iterator, fipa::acl::ReceivedObject()>
 
 
 template <typename Iterator>
-struct Envelope : qi::grammar<Iterator, fipa::acl::ACLEnvelope() , qi::locals< std::vector<fipa::acl::ACLBaseEnvelope> > >
+struct Envelope : qi::grammar<Iterator, fipa::acl::ACLEnvelope()>
 {
     Envelope() : Envelope::base_type(message_envelope_rule, "Envelope-bitefficient_grammar")
     {
         using qi::byte_;
         namespace label = qi::labels;
 
-        message_envelope_rule = *extEnvelope [ phoenix::push_back(label::_a, label::_1) ]
-            >> baseEnvelope  [ phoenix::at_c<0>(label::_val) = label::_1 , phoenix::at_c<1>(label::_val) = label::_a ]
-            >> payload [ phoenix::at_c<2>(label::_val) = label::_1 ]
+        message_envelope_rule = *extEnvelope [ phoenix::at_c<1>(label::_val) = label::_1 ]
+            >> baseEnvelope                  [ phoenix::at_c<0>(label::_val) = label::_1 ]
+            >> payload                       [ phoenix::at_c<2>(label::_val) = label::_1]
+
         ;
 
-        baseEnvelope = baseEnvelopeHeader [ label::_val = label::_1 ]
-            >> *parameter 		  [ label::_val = mergeBaseEnvelope(label::_val, label::_1) ]
-            >> endOfEnvelope
+        baseEnvelope = baseEnvelopeHeader [ label::_a = label::_1 ]
+            >> *parameter 		          [ label::_a = mergeBaseEnvelope(label::_a, label::_1)]
+            >> endOfEnvelope              [ label::_val = label::_a ]
         ;
 
-        extEnvelope = extEnvelopeHeader [ label::_val = label::_1 ]
-            >> *parameter               [ label::_val = mergeBaseEnvelope(label::_val, label::_1) ]
-            >> endOfEnvelope
+        extEnvelope = extEnvelopeHeader [ label::_a = label::_1 ]
+            >> *parameter               [ label::_a = mergeBaseEnvelope(label::_a, label::_1)]
+            >> endOfEnvelope            [ label::_val = label::_a ]
         ;
 
         baseEnvelopeHeader = baseMsgId    
@@ -314,11 +315,11 @@ struct Envelope : qi::grammar<Iterator, fipa::acl::ACLEnvelope() , qi::locals< s
     qi::rule<Iterator, fipa::acl::ACLBaseEnvelope() > predefinedParameter;
     qi::rule<Iterator, fipa::acl::UserdefinedParameterList() > customParameterList;
 
-    qi::rule<Iterator, fipa::acl::ACLEnvelope(), qi::locals< std::vector<fipa::acl::ACLBaseEnvelope> > > message_envelope_rule;
-    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope()> extEnvelope;
+    qi::rule<Iterator, fipa::acl::ACLEnvelope()> message_envelope_rule;
+    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope(), qi::locals<fipa::acl::ACLBaseEnvelope> > extEnvelope;
     qi::rule<Iterator, fipa::acl::ACLBaseEnvelope()> extEnvelopeHeader;
     qi::rule<Iterator, fipa::acl::ACLBaseEnvelope()> baseEnvelopeHeader;
-    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope()> baseEnvelope;
+    qi::rule<Iterator, fipa::acl::ACLBaseEnvelope(), qi::locals<fipa::acl::ACLBaseEnvelope> > baseEnvelope;
     qi::rule<Iterator, fipa::acl::ACLBaseEnvelope()> parameter;
     EndOfCollection<Iterator> endOfEnvelope;
     EndOfCollection<Iterator> endOfCollection;
