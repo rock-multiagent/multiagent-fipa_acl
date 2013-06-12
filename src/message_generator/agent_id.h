@@ -10,6 +10,8 @@
 #include <fipa_acl/message_generator/userdef_param.h>
 #include <string>
 #include <vector>
+#include <iosfwd>
+#include <utility>
 
 namespace fipa {
 
@@ -175,6 +177,19 @@ public:
 
 };
 
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const AgentIDList& agents)
+{
+    AgentIDList::const_iterator cit = agents.begin();
+    out << "[";
+    for(; cit != agents.end(); ++cit)
+    {
+        out << "AgentID<" << cit->getName() << ">";
+    }
+    out << "]";
+    return out;
+}
+
 /**
  * Null Object for AgentID class
  */
@@ -188,4 +203,5 @@ public:
 }//end of acl namespace
 
 }// end of fipa namespace
+
 #endif
