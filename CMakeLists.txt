@@ -15,5 +15,3 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 rock_standard_layout()
 
-add_subdirectory(bindings/ruby)
-
