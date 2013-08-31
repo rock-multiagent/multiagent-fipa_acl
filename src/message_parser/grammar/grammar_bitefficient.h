@@ -349,7 +349,7 @@ namespace fipa
 			unsigned int hexNumber = atoi(arg.c_str());
 			
 			char buffer[512];
-			sprintf(buffer,"%#x",hexNumber);
+			snprintf(buffer,512,"%#x",hexNumber);
 
 			return std::string(buffer);
 		}

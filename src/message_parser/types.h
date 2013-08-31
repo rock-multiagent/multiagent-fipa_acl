@@ -37,7 +37,7 @@ struct Header
         std::string toString() const
         {
                 char tmp[100];
-                sprintf(tmp, "Header<id=%x, version=%x>", id, version);
+                snprintf(tmp,100, "Header<id=%x, version=%x>", id, version);
                 return std::string(tmp);
         }
 
