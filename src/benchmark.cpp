@@ -63,7 +63,12 @@ int main(int argc, char** argv)
     msg.setConversationID(std::string("test conversationID"));
 
     uint32_t BUFFER_MAX = atoi(argv[1]);
-    char buffer[BUFFER_MAX+1];
+    char* buffer = (char*) calloc(1,BUFFER_MAX+1);
+    if(!buffer)
+    {
+        fprintf(stderr, "Allocation of memory for test message failed\n");
+        exit(0);
+    }
     memset(buffer, 1, BUFFER_MAX);
     buffer[BUFFER_MAX] = '\0';
     msg.setContent(buffer);
@@ -125,5 +130,6 @@ int main(int argc, char** argv)
 
     printf("%d %d %.6f %.6f %.6f %d\n", BUFFER_MAX, (int) encodedMsg.size(), overheadInPercent, encodingMsPerMsg, decodingMsPerMsg, epochs);
 
+    delete buffer;
     return 0;
 }
