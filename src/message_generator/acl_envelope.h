@@ -374,7 +374,7 @@ public:
     ACLEnvelope();
 
     /**
-     * Creates and envelope for a acl message.
+     * Creates an envelope for an acl message.
      * Note the the acl message will be encoded according to the given representation format
      *
      * Note, that the fields to,from, acl-representation, payload-lenght, payload-encoding and date are set. All others have to be set explicitly (also see stamp)
