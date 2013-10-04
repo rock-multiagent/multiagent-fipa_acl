@@ -5,8 +5,7 @@
 #include <cstring>
 #include <base/logging.h>
 
-#include <tinyxml/tinyxml.h>
-#include <tinyxml/tinystr.h>
+#include <tinyxml.h>
 
 #include "transition.h"
 
