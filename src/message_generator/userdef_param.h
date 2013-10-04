@@ -9,6 +9,7 @@
 #define FIPA_ACL_USERDEF_MESSAGEPARAM_H
 
 #include <string>
+#include <vector>
 
 namespace fipa {
 
@@ -60,7 +61,7 @@ public:
      * Get value of the userdefined parameter
      * \return value of the userdefined parameter
      */
-    std::string getValue() const { return mValue; }
+    const std::string& getValue() const { return mValue; }
     
     /**
      * Set the value associated with the userdefined parameter
@@ -72,16 +73,18 @@ public:
      * Get the name of the userdefined parameter
      * \return name
      */
-    std::string getName() const { return mName; }
+    const std::string& getName() const { return mName; }
 
     /**
      * \brief the method checks whether the passed name string is a word or not(according to the fipa spec)
      * \param name Name to set for the userdefined parameter
-     * \return true if successful and false otherwise(name is un-alterred)
+     * \throws std::runtime_error if name is not valid
      */
-    bool setName(const std::string& name);
+    void setName(const std::string& name);
 
 };
+
+typedef std::vector<UserdefParam> UserdefinedParameterList;
 
 }//end of acl namespace
 }// end of fipa namespace

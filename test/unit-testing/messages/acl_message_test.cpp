@@ -198,7 +198,7 @@ void printAgentID( AgentID &agent)
     if (!(agent.getAddresses().empty()))
     {
         cout<<"\t\taddresses:\t\n";
-        vector<string>::iterator it = agent.getAddresses().begin();
+        vector<string>::const_iterator it = agent.getAddresses().begin();
         for(; it != (agent.getAddresses().end()); ++it)
 	  cout<<"\t\t\t"<<*it<<endl;
     }

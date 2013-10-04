@@ -10,6 +10,8 @@
 #include <fipa_acl/message_generator/userdef_param.h>
 #include <string>
 #include <vector>
+#include <iosfwd>
+#include <utility>
 
 namespace fipa {
 
@@ -21,6 +23,9 @@ class AgentID;
 // standard containers (though it will work for gcc) 
 // switch to using boost::container in future
 typedef std::vector<AgentID> AgentIDList;
+
+typedef AgentIDList Resolvers;
+typedef std::vector<std::string> Addresses;
 
 /**
     \class AgentID
@@ -81,7 +86,7 @@ public:
     \brief setter and getter methods for all fields; they do not result in deep-copies assignments/retreivals, 
     but this can be easily changed if needed through the overloaded operator which do
     */
-    std::string getName() const { return mName; }
+    const std::string& getName() const { return mName; }
     
     /**
     \brief the method checks whether the passed name string is a word or not(according to the fipa spec)
@@ -101,7 +106,12 @@ public:
     * \brief Retrieve list of addresses
     * \return List of addresses
     */
-    std::vector<std::string> getAddresses() const { return mAddresses; }
+    const std::vector<std::string>& getAddresses() const { return mAddresses; }
+
+    /**
+     * \brief Set list of addresses -- overwrites existing list of addresses
+     */
+    void setAddresses(const std::vector<std::string>& addresses) { mAddresses = addresses; }
     
     /**
     * \brief Add resolver
@@ -113,7 +123,12 @@ public:
     * \brief Get list of resolvers
     * \return list of resolvers, i.e. agentids
     */
-    std::vector<AgentID> getResolvers() const { return mResolvers; }
+    const Resolvers& getResolvers() const { return mResolvers; }
+
+    /**
+     * \brief Set list of resolvers
+     */
+    void setResolvers(const Resolvers& resolvers) { mResolvers = resolvers; }
     
     /**
     * \brief Delete a resolver
@@ -131,7 +146,12 @@ public:
     * \brief Get the all userdefined parameter
     * \return List of userdefined parameters
     */
-    std::vector<UserdefParam> getUserdefParams() const { return mParameters; }
+    const std::vector<UserdefParam>& getUserdefParams() const { return mParameters; }
+
+    /**
+     * Set all userdefined parameters
+     */
+    void setUserdefParams(const std::vector<UserdefParam>& params) { mParameters = params; }
     
     //static void setResCompDepth(int);
     //static int getResCompDepth();
@@ -157,6 +177,19 @@ public:
 
 };
 
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const AgentIDList& agents)
+{
+    AgentIDList::const_iterator cit = agents.begin();
+    out << "[";
+    for(; cit != agents.end(); ++cit)
+    {
+        out << "AgentID<" << cit->getName() << ">";
+    }
+    out << "]";
+    return out;
+}
+
 /**
  * Null Object for AgentID class
  */
@@ -170,4 +203,5 @@ public:
 }//end of acl namespace
 
 }// end of fipa namespace
+
 #endif

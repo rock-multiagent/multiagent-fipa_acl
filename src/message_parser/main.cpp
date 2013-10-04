@@ -116,9 +116,8 @@ bool parseInteractive()
 	//scanf(buffer, "%s");
 	msg.setContent("");
 	
-	fipa::acl::ACLMessageOutputParser mop;
-	mop.setMessage(msg);
-	std::string bitefficientMessage = mop.getBitMessage();
+	fipa::acl::MessageGenerator generator;
+	std::string bitefficientMessage = generator.create(msg, fipa::acl::representation::BITEFFICIENT);
 	
 	return parseMsg(bitefficientMessage);
 }

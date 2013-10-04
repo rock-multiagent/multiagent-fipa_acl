@@ -9,9 +9,8 @@
 #include <iterator>
 #include <string>
 #include <cstring>
-#include "acl_message_output_parser.h"
-
 #include <fipa_acl/message_parser/message_parser.h>
+#include <fipa_acl/message_generator/message_generator.h>
 
 
 
@@ -88,10 +87,7 @@ int main(int argc, char** argv)
         fipa::acl::AgentID *receiver = new fipa::acl::AgentID(std::string("moduleD"));
         testmessage->addReceiver(receiver);
 
-        fipa::acl::ACLMessageOutputParser testparser = fipa::acl::ACLMessageOutputParser();
-        testparser.setMessage(testmessage);
-
-        std::string received = testparser.getBitMessage();
+        std::string received = fipa::acl::MessageGenerator::create(testmessage, fipa::acl::message_format::BITEFFICIENT);
 
 
         MessageParser parser = MessageParser();

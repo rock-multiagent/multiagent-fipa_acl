@@ -207,8 +207,6 @@ void ACLMessage::setProtocol(const std::string& str)
     mProtocol = str; 
 }
 
-std::string* ACLMessage::getContentPtr() { return &mContent; }
-
 bool ACLMessage::hasBinaryContent() const 
 {
     // Check on the existance of 0x00 in the content
@@ -227,21 +225,6 @@ void ACLMessage::setUserdefParams(const std::vector<UserdefParam>& p)
 {
     mParameters.clear();
     mParameters.insert(mParameters.begin(),p.begin(),p.end());
-}
-
-
-std::string ACLMessage::getReplyByString(bool formatted) const
-{
-    std::string time = mReplyBy.toString(base::Time::Milliseconds);
-
-    if (!formatted)
-    {
-        // Input format should be "%Y%m%d-%H:%M:%S"
-        // Strip ':' and '-' to allow from_iso_string to work
-        boost::erase_all(time,":");
-        boost::erase_all(time,"-");
-    } 
-    return time;
 }
 
 bool ACLMessage::operator==(const ACLMessage& other) const

@@ -5,7 +5,9 @@
 #include <fipa_acl/message_parser/byte_sequence.h>
 #include <fipa_acl/message_parser/agent_id.h>
 
-namespace fipa { namespace acl {
+namespace fipa {
+namespace acl {
+namespace message {
 
 typedef boost::variant<std::string, fipa::acl::AgentIdentifier, std::vector<fipa::acl::AgentIdentifier>, fipa::acl::ByteSequence, fipa::acl::DateTime, fipa::acl::ByteString > ParameterValue;
 
@@ -45,6 +47,14 @@ class ParameterPrinter : public boost::static_visitor<std::string>
 
 };
 
-}}
+} // end namespace message
 
+namespace envelope {
+
+typedef std::string ParameterValue;
+
+} // end namespace envelope
+
+} // end namespace acl
+} // end namespace fipa
 #endif

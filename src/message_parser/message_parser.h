@@ -61,24 +61,24 @@ class MessageParser
                 /**
                  * Fill the content field from message parameter object
                  */
-                void buildContent(const MessageParameter& param,ACLMessage &msg);
+                void buildContent(const message::Parameter& param,ACLMessage &msg);
 		
  		/**
                  *  Since the parser relies heavily on customized data structures,
                  *  we require to apply conversion functions
                  */
-		void buildParameters(const std::vector<MessageParameter>& parsedParams,ACLMessage &msg);
+		void buildParameters(const std::vector<message::Parameter>& parsedParams,ACLMessage &msg);
 
                 /**
                  * Build predefined message parameters
                  * \throw std::runtime_error if message parameter is unknown
                  */
-		void buildPredefMessageParameters(const MessageParameter& param, ACLMessage &msg);
+		void buildPredefMessageParameters(const message::Parameter& param, ACLMessage &msg);
 
                 /**
                  * Build sender from message parameter
                  */
-		void buildSender(const MessageParameter& param, ACLMessage &msg);
+		void buildSender(const message::Parameter& param, ACLMessage &msg);
 
                 /**
                  * Build agent id from agent identifier
@@ -103,22 +103,22 @@ class MessageParser
                  /**
                   * Build userdefined parameter from message parameter
                   */
-		UserdefParam buildUserdefParameter(const MessageParameter& param);
+		UserdefParam buildUserdefParameter(const message::Parameter& param);
 
                 /**
                  * Build receiver from message parameter
                  */
-		void buildReceiver(const MessageParameter& param, ACLMessage &msg);
+		void buildReceiver(const message::Parameter& param, ACLMessage &msg);
 
                 /**
                  * Build reply by from message parameter
                  */
-		void buildReplyBy(const MessageParameter& param, ACLMessage &msg);
+		void buildReplyBy(const message::Parameter& param, ACLMessage &msg);
 
                 /**
                  * Build reply to from message parameter
                  */
-		void buildReplyTo(const MessageParameter& param, ACLMessage &msg);
+		void buildReplyTo(const message::Parameter& param, ACLMessage &msg);
 };
 
 

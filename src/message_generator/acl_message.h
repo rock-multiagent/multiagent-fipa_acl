@@ -54,7 +54,7 @@ namespace acl {
 */
 class ACLMessage {
 
-    friend class ACLMessageOutputParser;
+    friend class MessageFormat;
 
 public:
     /**
@@ -94,13 +94,6 @@ private:
     std::vector<UserdefParam> mParameters;
     /** string representing the content of the message */
     std::string mContent;
-
-protected:
-
-    /**
-     * Get reference to content object in order to avoid unnecessary content copies
-     */
-    std::string* getContentPtr();
 
 public:  
 
@@ -277,6 +270,11 @@ public:
     std::string getContent() const { return mContent; }
 
     /**
+     * Get reference to content object in order to avoid unnecessary content copies
+     */
+    const std::string* getContentPtr() const { return &mContent; }
+
+    /**
      * Set the sender of this message
      * \param sender Sender's AgentID
      */
@@ -305,14 +303,6 @@ public:
      * Overwrites an already existing parameter list
      */
     void setUserdefParams(const std::vector<UserdefParam>& p);
-
-    /**
-     * Allow to retrieve the ReplyBy time either formatted or unformatted. 
-     * Unformatted: YYYYmmddHHMMSSsss
-     * Formatted: default time format YYYYmmdd-HH:MM:SS:sss
-       \param formatted option to get the parameter as it is stored or formated. default is formatted,call with false to get unformatted
-    */
-    std::string getReplyByString(bool formatted) const;
 
     /**
      * Return reply by as time object

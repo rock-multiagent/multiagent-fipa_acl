@@ -9,6 +9,7 @@
 
 #include "userdef_param.h"
 #include "acl_message.h"
+#include <stdexcept>
 
 namespace fipa {
 namespace acl {
@@ -41,15 +42,13 @@ bool UserdefParam::operator==(const UserdefParam& other) const
     return mName == other.mName && mValue == other.mValue;
 }
 
-bool UserdefParam::setName(const std::string& name) 
+void UserdefParam::setName(const std::string& name) 
 {
     if ( (name.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(name.c_str()[0]) != std::string::npos) )
     {
-        return false;
-    } else {
-        mName = name;
-        return true;
+        throw std::runtime_error("Illegal name for userdefined-parameter");
     }
+    mName = name;
 }
 
 }//end of acl namespace

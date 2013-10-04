@@ -2,18 +2,21 @@
 #include "rice/Constructor.hpp"
 #include "rice/String.hpp"
 #include "rice/Array.hpp"
+#include "rice/Enum.hpp"
 
 #include <stdint.h>
 #include <vector>
 #include <iostream>
-#include <fipa_acl/message_generator/message_generator.h>
-#include <fipa_acl/message_parser/message_parser.h>
+#include <fipa_acl/fipa_acl.h>
+#include <fipa_acl/message_generator/envelope_generator.h>
+#include <fipa_acl/message_parser/envelope_parser.h>
 
 using namespace Rice;
+using namespace fipa::acl;
 
 typedef std::vector< std::string > StringVector;
-typedef std::vector< fipa::acl::AgentID > AgentIDVector;
-typedef std::vector< fipa::acl::UserdefParam > ParameterVector;
+typedef std::vector< AgentID > AgentIDVector;
+typedef std::vector< UserdefParam > ParameterVector;
 typedef std::vector< uint8_t > ByteVector;
 
 Data_Type<StringVector> stringVector;
@@ -21,9 +24,13 @@ Data_Type<AgentIDVector> aidVector;
 Data_Type<ParameterVector> parameterVector;
 Data_Type<ByteVector> byteVector;
 
-Data_Type<fipa::acl::ACLMessage> rb_cFipaMessage;
-Data_Type<fipa::acl::AgentID> rb_cAgentID;
-Data_Type<fipa::acl::UserdefParam> rb_cUserDefinedParameters;
+Data_Type<ACLEnvelope> rb_cFipaEnvelope;
+Data_Type<ACLBaseEnvelope> rb_cFipaBaseEnvelope;
+Data_Type<ACLMessage> rb_cFipaMessage;
+Data_Type<AgentID> rb_cAgentID;
+Data_Type<UserdefParam> rb_cUserDefinedParameters;
+
+Enum<representation::Type> rb_eRepresentationType;
 
 static Module rb_mFIPA;
 
@@ -62,7 +69,7 @@ Object to_ruby< AgentIDVector >(const AgentIDVector& v)
 	AgentIDVector::const_iterator it;
 	for( it = v.begin(); it != v.end(); it++)
 	{
-		ids.push(Data_Object<fipa::acl::AgentID>(new fipa::acl::AgentID(*it) ));
+		ids.push(Data_Object<AgentID>(new AgentID(*it) ));
 	}
 
 	return ids;
@@ -82,7 +89,7 @@ Object to_ruby< ParameterVector >(const ParameterVector& v)
 	ParameterVector::const_iterator it;
 	for( it = v.begin(); it != v.end(); it++)
 	{
-		params.push(Data_Object<fipa::acl::UserdefParam>(new fipa::acl::UserdefParam(*it) ));
+		params.push(Data_Object<UserdefParam>(new UserdefParam(*it) ));
 	}
 
 	return params;
@@ -113,7 +120,7 @@ ByteVector from_ruby< ByteVector >(Object obj)
 Array wrap_getAddresses(Object aid)
 {
    // the self
-   Data_Object<fipa::acl::AgentID> id(aid, rb_cAgentID);
+   Data_Object<AgentID> id(aid, rb_cAgentID);
 
    //Array list of agents
    Array agents;
@@ -127,7 +134,7 @@ Array wrap_getAddresses(Object aid)
 Array wrap_getResolvers(Object aid)
 {
    // the self
-   Data_Object<fipa::acl::AgentID> id(aid, rb_cAgentID);
+   Data_Object<AgentID> id(aid, rb_cAgentID);
    Array resolvers;
    AgentIDVector aids = id->getResolvers();
    resolvers = to_ruby<AgentIDVector>(aids);
@@ -138,7 +145,7 @@ Array wrap_getResolvers(Object aid)
 Array wrap_getUserDefinedParameters(Object aid)
 {
    // the self
-   Data_Object<fipa::acl::AgentID> id(aid, rb_cAgentID);
+   Data_Object<AgentID> id(aid, rb_cAgentID);
    Array paramArray;
    ParameterVector params = id->getUserdefParams();
    paramArray = to_ruby<ParameterVector>(params);
@@ -150,18 +157,15 @@ Array wrap_getUserDefinedParameters(Object aid)
 Array wrap_toByteVector(Object message)
 {
 
-   Data_Object<fipa::acl::ACLMessage> msg(message, rb_cFipaMessage);
+   Data_Object<ACLMessage> msg(message, rb_cFipaMessage);
 
-   fipa::acl::ACLMessageOutputParser mop;
-   mop.setMessage(*msg);
-   
-   std::string bitefficientMsg = mop.getBitMessage();
+   std::string bitefficientMsg = MessageGenerator::create(*msg, representation::BITEFFICIENT);
    int size = bitefficientMsg.size();
 
    std::vector<uint8_t> bytes;
    for(int i = 0; i < size; i++)
    {
-	bytes.push_back(bitefficientMsg[i]);
+       bytes.push_back(bitefficientMsg[i]);
    } 
 
    return to_ruby<ByteVector>(bytes); 
@@ -175,7 +179,7 @@ Array wrap_toByteVector(Object message)
 */
 Object wrap_fromByteString(Object self, String byteString)
 {
-	Data_Object<fipa::acl::ACLMessage> msg(self, rb_cFipaMessage);	
+	Data_Object<ACLMessage> msg(self, rb_cFipaMessage);	
 
 	std::string data; 
 	int size = byteString.length();
@@ -185,18 +189,18 @@ Object wrap_fromByteString(Object self, String byteString)
 		data += (char) byteString[i];
 	}
 
-	fipa::acl::MessageParser parser;
+	MessageParser parser;
 	if(!parser.parseData(data, *msg))
 	{
 		throw Exception(rb_eRuntimeError, "FIPA::ACLMessage: data could not be parsed");
 	}
 
-	return self;
+	return msg;
 }
 
 Object wrap_setPerformative(Object self, Symbol performative)
 {
-	Data_Object<fipa::acl::ACLMessage> msg(self, rb_cFipaMessage);
+	Data_Object<ACLMessage> msg(self, rb_cFipaMessage);
 
 	// Replace underscore with dash to convert symbols to performative label
 	std::string performativeString = performative.str();
@@ -217,7 +221,7 @@ Object wrap_setPerformative(Object self, Symbol performative)
 
 Symbol wrap_getPerformative(Object self)
 {
-	Data_Object<fipa::acl::ACLMessage> msg(self, rb_cFipaMessage);
+	Data_Object<ACLMessage> msg(self, rb_cFipaMessage);
 	std::string performative = msg->getPerformative();
 
 	std::string::iterator it;
@@ -231,6 +235,73 @@ Symbol wrap_getPerformative(Object self)
 	}
 
 	return Symbol(performative);
+}
+
+/**
+ * ACLEnvelope methods
+ */
+Array wrap_envelope_getTo(Object self)
+{
+    Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+    ACLBaseEnvelope baseEnvelope = envelope->flattened();
+    AgentIDList agents = baseEnvelope.getTo();
+
+    return to_ruby<AgentIDList>(agents);
+}
+
+Object wrap_envelope_getFrom(Object self)
+{
+    Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+    ACLBaseEnvelope baseEnvelope = envelope->flattened();
+    AgentID agent = baseEnvelope.getFrom();
+    
+    Data_Object<AgentID> rubyAgent(new AgentID(agent), rb_cAgentID);
+    return rubyAgent;
+}
+
+Array wrap_envelope_toByteVector(Object self)
+{
+
+   Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+
+   std::string bitefficientEnvelope = EnvelopeGenerator::create(*envelope, representation::BITEFFICIENT);
+
+   int size = bitefficientEnvelope.size();
+
+   std::vector<uint8_t> bytes;
+   for(int i = 0; i < size; i++)
+   {
+       bytes.push_back(bitefficientEnvelope[i]);
+   } 
+
+   return to_ruby<ByteVector>(bytes); 
+}
+
+
+/**
+* Conversion of a string, that contains an array of bytes as core data into a FIPA::ACLEnvelope
+* The array of bytes will be parsed in the envelope object
+* throw an exception if the parsing step fails
+*/
+Object wrap_envelope_fromByteString(Object self, String byteString)
+{
+	Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);	
+
+	std::string data; 
+	int size = byteString.length();
+
+	for(int i=0; i < size; i++)
+	{
+		data += (char) byteString[i];
+	}
+
+	EnvelopeParser parser;
+	if(!parser.parseData(data, *envelope, representation::BITEFFICIENT))
+	{
+		throw Exception(rb_eRuntimeError, "FIPA::ACLEnvelope: data could not be parsed");
+	}
+
+	return envelope;
 }
 
 
@@ -284,55 +355,91 @@ void Init_fipamessage_ruby()
  // Define module FIPA
  rb_mFIPA = define_module("FIPA");
 
- rb_cUserDefinedParameters = define_class_under<fipa::acl::UserdefParam>(rb_mFIPA, "UserDefinedParameter")
-   .define_constructor(Constructor<fipa::acl::UserdefParam, const std::string&>(), Arg("name"))
-   .define_constructor(Constructor<fipa::acl::UserdefParam>())
-   .define_method("getName", &fipa::acl::UserdefParam::getName)
-   .define_method("setName", &fipa::acl::UserdefParam::setName, (Arg("name")) )
-   .define_method("getValue", &fipa::acl::UserdefParam::getValue, (Arg("name") ) )
-   .define_method("setValue", &fipa::acl::UserdefParam::setValue, Arg("value") );
+ rb_cUserDefinedParameters = define_class_under<UserdefParam>(rb_mFIPA, "UserDefinedParameter")
+   .define_constructor(Constructor<UserdefParam, const std::string&>(), Arg("name"))
+   .define_constructor(Constructor<UserdefParam>())
+   .define_method("getName", &UserdefParam::getName)
+   .define_method("setName", &UserdefParam::setName, (Arg("name")) )
+   .define_method("getValue", &UserdefParam::getValue, (Arg("name") ) )
+   .define_method("setValue", &UserdefParam::setValue, Arg("value") );
 
- rb_cAgentID = define_class_under<fipa::acl::AgentID>(rb_mFIPA,"AgentId")
-   .define_constructor(Constructor<fipa::acl::AgentID, const std::string&>() )
-   .define_method("getName", &fipa::acl::AgentID::getName)
-   .define_method("addAddress", &fipa::acl::AgentID::addAddress, (Arg("address")))
+ rb_cAgentID = define_class_under<AgentID>(rb_mFIPA,"AgentId")
+   .define_constructor(Constructor<AgentID, const std::string&>() )
+   .define_method("getName", &AgentID::getName)
+   .define_method("addAddress", &AgentID::addAddress, (Arg("address")))
    .define_method("getAddresses", &wrap_getAddresses)
-   .define_method("addResolver", &fipa::acl::AgentID::addResolver, (Arg("agentid")))
+   .define_method("addResolver", &AgentID::addResolver, (Arg("agentid")))
    .define_method("getResolvers", &wrap_getResolvers)
-   .define_method("deleteResolver", &fipa::acl::AgentID::deleteResolver, (Arg("agentid") ))
-   .define_method("addUserDefinedParameter", &fipa::acl::AgentID::addUserdefParam, (Arg("param")))
+   .define_method("deleteResolver", &AgentID::deleteResolver, (Arg("agentid") ))
+   .define_method("addUserDefinedParameter", &AgentID::addUserdefParam, (Arg("param")))
    .define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters);
 
- rb_cFipaMessage = define_class_under<fipa::acl::ACLMessage>(rb_mFIPA, "ACLMessage")
-   .define_constructor(Constructor<fipa::acl::ACLMessage>())
+ rb_eRepresentationType = define_enum<representation::Type>("FIPARepresentation")
+     .define_value("UNKNOWN",representation::BITEFFICIENT)
+     .define_value("BITEFFICIENT",representation::BITEFFICIENT)
+     .define_value("STRING",representation::STRING_REP)
+     .define_value("XML", representation::XML)
+     ;
+
+ rb_cFipaBaseEnvelope = define_class_under<ACLBaseEnvelope>(rb_mFIPA, "ACLBaseEnvelope")
+   .define_constructor(Constructor<ACLBaseEnvelope>())
+   .define_method("getTo", &ACLBaseEnvelope::getTo)
+   .define_method("getFrom", &ACLBaseEnvelope::getFrom)
+   .define_method("getComments", &ACLBaseEnvelope::getComments)
+   .define_method("getACLRepresentation", &ACLBaseEnvelope::getACLRepresentation)
+   .define_method("getPayloadLength", &ACLBaseEnvelope::getPayloadLength)
+   .define_method("getDate",&ACLBaseEnvelope::getDate)
+   .define_method("getIntendedReceivers", &ACLBaseEnvelope::getIntendedReceivers)
+   .define_method("getTransportBehaviour", &ACLBaseEnvelope::getTransportBehaviour)
+   ;
+
+
+ rb_cFipaEnvelope = define_class_under<ACLEnvelope>(rb_mFIPA, "ACLEnvelope")
+   .define_constructor(Constructor<ACLEnvelope>())
+   // RICE has a limitation of one constructor only, thus we use the insert method
+   //.define_constructor(Constructor<ACLEnvelope, const ACLMessage&, const representation::Type&>())
+   .define_method("insert", &ACLEnvelope::insert, (Arg("message"), Arg("representation")))
+   .define_method("getDeliveryPath", &ACLEnvelope::getDeliveryPath)
+   .define_method("getBaseEnvelope", &ACLEnvelope::getBaseEnvelope)
+   .define_method("getExtraEnvelopes", &ACLEnvelope::getExtraEnvelopes)
+   .define_method("getACLMessage", &ACLEnvelope::getACLMessage)
+   .define_method("getTo", &wrap_envelope_getTo)
+   .define_method("getFrom", &wrap_envelope_getFrom)
+   .define_method("flattened", &ACLEnvelope::flattened)
+   .define_method("to_byte_array", &wrap_envelope_toByteVector)
+   .define_method("from_byte_string", &wrap_envelope_fromByteString)
+   ;
+
+ rb_cFipaMessage = define_class_under<ACLMessage>(rb_mFIPA, "ACLMessage")
+   .define_constructor(Constructor<ACLMessage>())
    .define_method("setPerformative", &wrap_setPerformative)
    .define_method("getPerformative", &wrap_getPerformative)
-   .define_method("addReceiver", &fipa::acl::ACLMessage::addReceiver, Arg("receiver"))
-   .define_method("clearReceivers", &fipa::acl::ACLMessage::clearReceivers)
-   .define_method("getReceivers", &fipa::acl::ACLMessage::getAllReceivers)
-   .define_method("setProtocol", &fipa::acl::ACLMessage::setProtocol, Arg("protocol_name"))
-   .define_method("getProtocol", &fipa::acl::ACLMessage::getProtocol)
-   .define_method("setOntology", &fipa::acl::ACLMessage::setOntology, Arg("ontology_name"))
-   .define_method("getOntology", &fipa::acl::ACLMessage::getOntology)
-   .define_method("setEncoding", &fipa::acl::ACLMessage::setEncoding, Arg("encoding_name"))
-   .define_method("getEncoding", &fipa::acl::ACLMessage::getEncoding)
-   .define_method("setLanguage", &fipa::acl::ACLMessage::setLanguage, Arg("language_name"))
-   .define_method("getLanguage", &fipa::acl::ACLMessage::getLanguage)
-   .define_method("setContent", &fipa::acl::ACLMessage::setContent, Arg("content_string"))
-   .define_method("getContent", &fipa::acl::ACLMessage::getContent)
-   .define_method("setSender", &fipa::acl::ACLMessage::setSender, Arg("sender_name"))
-   .define_method("getSender", &fipa::acl::ACLMessage::getSender)
-   .define_method("addReplyTo", &fipa::acl::ACLMessage::addReplyTo, Arg("agent_id"))
-   .define_method("setInReplyTo", &fipa::acl::ACLMessage::setInReplyTo, Arg("reply_to"))
-   .define_method("getInReplyTo", &fipa::acl::ACLMessage::getInReplyTo)
-   .define_method("setReplyWith", &fipa::acl::ACLMessage::setReplyWith, Arg("reply_with"))
-   .define_method("getReplyWith", &fipa::acl::ACLMessage::getReplyWith)
-   .define_method("setConversationID", &fipa::acl::ACLMessage::setConversationID, Arg("conversation_id"))
-   .define_method("getConversationID", &fipa::acl::ACLMessage::getConversationID)
+   .define_method("addReceiver", &ACLMessage::addReceiver, Arg("receiver"))
+   .define_method("clearReceivers", &ACLMessage::clearReceivers)
+   .define_method("getReceivers", &ACLMessage::getAllReceivers)
+   .define_method("setProtocol", &ACLMessage::setProtocol, Arg("protocol_name"))
+   .define_method("getProtocol", &ACLMessage::getProtocol)
+   .define_method("setOntology", &ACLMessage::setOntology, Arg("ontology_name"))
+   .define_method("getOntology", &ACLMessage::getOntology)
+   .define_method("setEncoding", &ACLMessage::setEncoding, Arg("encoding_name"))
+   .define_method("getEncoding", &ACLMessage::getEncoding)
+   .define_method("setLanguage", &ACLMessage::setLanguage, Arg("language_name"))
+   .define_method("getLanguage", &ACLMessage::getLanguage)
+   .define_method("setContent", &ACLMessage::setContent, Arg("content_string"))
+   .define_method("getContent", &ACLMessage::getContent)
+   .define_method("setSender", &ACLMessage::setSender, Arg("sender_name"))
+   .define_method("getSender", &ACLMessage::getSender)
+   .define_method("addReplyTo", &ACLMessage::addReplyTo, Arg("agent_id"))
+   .define_method("setInReplyTo", &ACLMessage::setInReplyTo, Arg("reply_to"))
+   .define_method("getInReplyTo", &ACLMessage::getInReplyTo)
+   .define_method("setReplyWith", &ACLMessage::setReplyWith, Arg("reply_with"))
+   .define_method("getReplyWith", &ACLMessage::getReplyWith)
+   .define_method("setConversationID", &ACLMessage::setConversationID, Arg("conversation_id"))
+   .define_method("getConversationID", &ACLMessage::getConversationID)
    .define_method("to_byte_array", &wrap_toByteVector)
    .define_method("from_byte_string", &wrap_fromByteString)
    //.define_method("setReplyBy", 
-   //.define_method("addUserDefinedParameter", &fipa::acl::ACLMessage::addUserdefParam)
+   //.define_method("addUserDefinedParameter", &ACLMessage::addUserdefParam)
    //.define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters)
    ;
 }
