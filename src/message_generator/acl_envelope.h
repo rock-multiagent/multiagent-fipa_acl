@@ -362,7 +362,7 @@ class ACLEnvelope
 
     /**
      * Create an id for the received object
-     * <counter>:<timstamp>
+     * <counter>:<timestamp>
      */
     static ID createLocalId();
 
