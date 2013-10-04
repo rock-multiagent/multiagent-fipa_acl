@@ -44,6 +44,7 @@ set(HEADERS
     message_generator/acl_message.h
     message_generator/acl_envelope.h
     message_generator/envelope_generator.h
+    message_generator/envelope_format.h
     message_generator/format/bitefficient_format.h
     message_generator/format/bitefficient_envelope_format.h
     message_generator/format/bitefficient_message_format.h
