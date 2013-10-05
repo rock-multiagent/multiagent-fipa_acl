@@ -377,7 +377,8 @@ public:
      * Creates an envelope for an acl message.
      * Note the the acl message will be encoded according to the given representation format
      *
-     * Note, that the fields to,from, acl-representation, payload-lenght, payload-encoding and date are set. All others have to be set explicitly (also see stamp)
+     * Note, that the fields to, from, intended-receivers, acl-representation, payload-length, payload-encoding and date are set. All others have to be set explicitly (also see stamp).
+     * Intended-receivers is initially same as 'to' and should only be modified by a transport service to organize message delivery
      * \param msg ACLMessage will shall be wrapped by this envelope
      * \param format The message format this message will be encoded in for transport
      */

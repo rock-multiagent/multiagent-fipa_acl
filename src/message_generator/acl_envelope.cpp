@@ -248,6 +248,10 @@ void ACLEnvelope::insert(const fipa::acl::ACLMessage& message, const fipa::acl::
 
     // infer fields from message
     mBaseEnvelope.setTo(message.getAllReceivers());
+    // By default set the intended receivers
+    // Can be overriden by the user when creating the base envelope,
+    // however that should be avoided and only done by the transport service
+    mBaseEnvelope.setIntendedReceivers(mBaseEnvelope.getTo());
     mBaseEnvelope.setFrom(message.getSender());
     // comments have to be set explicitly, so not done here
     mBaseEnvelope.setACLRepresentation(representation);
