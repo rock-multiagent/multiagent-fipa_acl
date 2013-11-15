@@ -12,6 +12,14 @@
 
 namespace fipa {
 namespace acl {
+
+namespace MessageField
+{
+    enum Type { SENDER, RECEIVER, CONTENT, REPLY_WITH, REPLY_BY, IN_REPLY_TO, LANGUAGE, ENCODING, ONTOLOGY, PROTOCOL, CONVERSATION_ID, MESSAGE_FIELD_END};
+
+    extern std::map<MessageField::Type, std::string> MessageFieldTxt;
+}
+
     
 /**
 * \class MessageFormat
@@ -44,6 +52,7 @@ private:
     int mResolverDepth;
     
 public:
+
     /**
      * Default construction
      */
