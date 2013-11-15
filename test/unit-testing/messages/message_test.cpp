@@ -13,6 +13,7 @@ BOOST_AUTO_TEST_SUITE(fipa_message_test_suite)
 BOOST_AUTO_TEST_CASE(grammar_test)
 {
         namespace fab = fipa::acl::bitefficient;
+        namespace fag = fipa::acl::grammar;
 
         // Generator
         fipa::acl::BitefficientMessageFormat bitefficientFormat;
@@ -53,14 +54,14 @@ BOOST_AUTO_TEST_CASE(grammar_test)
         {
             std::string storage;
             storage += char(0x0a);
-            uint32_t number = testGrammar<fab::Index,uint_least16_t>(storage);
+            uint32_t number = testGrammar<fag::Index,uint_least16_t>(storage);
             BOOST_REQUIRE_MESSAGE(number == 10, "Number is " << number);
         }
         {
             std::string storage;
             storage += char(0x10);
             storage += char(0x00);
-            uint32_t number = testGrammar<fab::Index,uint_least16_t>(storage);
+            uint32_t number = testGrammar<fag::Index,uint_least16_t>(storage);
             BOOST_REQUIRE_MESSAGE(number == 4096, "Number is " << number);
         }
 
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
         {
             std::string storage;
             storage += char(0x0a);
-            uint32_t number = testGrammar<fab::Len8,uint_least8_t>(storage);
+            uint32_t number = testGrammar<fag::Len8,uint_least8_t>(storage);
             BOOST_REQUIRE_MESSAGE(number == 10, "Number is " << number);
         }
 
@@ -77,7 +78,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             std::string storage;
             storage += char(0x10);
             storage += char(0x00);
-            uint32_t number = testGrammar<fab::Len16,uint_least16_t>(storage);
+            uint32_t number = testGrammar<fag::Len16,uint_least16_t>(storage);
             BOOST_REQUIRE_MESSAGE(number == 4096, "Number is " << number);
         }
 
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0x00);
             storage += char(0x00);
             storage += char(0x00);
-            uint32_t number = testGrammar<fab::Len32,uint_least32_t>(storage);
+            uint32_t number = testGrammar<fag::Len32,uint_least32_t>(storage);
            BOOST_REQUIRE_MESSAGE(number == 268435456, "Number is " << number);
         }
 
@@ -105,7 +106,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                     } else {
 		        storage += char(i+1) << 4;
                     }
-		    std::string token = testGrammar<fab::CodedNumber, std::string>(storage);
+		    std::string token = testGrammar<fag::CodedNumber, std::string>(storage);
 		    BOOST_REQUIRE_MESSAGE( token == tokens[i], "CodedNumber is <" << token << "> expected <" << tokens[i] << ">"); 
             std::string generated = fipa::acl::BitefficientFormat::getCodedNumber(token);
             BOOST_REQUIRE_MESSAGE(  generated == storage, "CodedNumberGenerator is <" << generated << "> expected <" << storage << ">" );
@@ -117,7 +118,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0b01000100);
             // Requires padding due to even number of digits
             storage += char(0x00);
-            std::string number = testGrammar<fab::Digits,std::string>(storage);
+            std::string number = testGrammar<fag::Digits,std::string>(storage);
            BOOST_REQUIRE_MESSAGE(number == "33", "Number is " << number << " expected 33");
            std::string generated = fipa::acl::BitefficientFormat::getDigits(number);
             BOOST_REQUIRE_MESSAGE( generated == storage, "NumberGenerator is <" << generated << "> expected <" << storage << ">" );
@@ -127,7 +128,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             std::string storage;
             storage += char(0b01000000);
             // Requires padding within byte due to odd number of digits
-            std::string number = testGrammar<fab::Digits,std::string>(storage);
+            std::string number = testGrammar<fag::Digits,std::string>(storage);
            BOOST_REQUIRE_MESSAGE(number == "3", "Number is " << number << " expected 3");
         }
 
@@ -138,7 +139,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0b11101101);
             storage += char(0b10000011);
             storage += char(0x00);
-            std::string number = testGrammar<fab::Digits,std::string>(storage);
+            std::string number = testGrammar<fag::Digits,std::string>(storage);
            BOOST_REQUIRE_MESSAGE(number == "30.2-E72", "Number is " << number << " expected 30.2-E72");
         }
         {
@@ -147,7 +148,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0b11110011);
             storage += char(0b11101101);
             storage += char(0b10000011);
-            testFailGrammar<fab::Digits,std::string>(storage);
+            testFailGrammar<fag::Digits,std::string>(storage);
         }
 
         // BinNumber
@@ -186,7 +187,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             storage += char(0b00010001); // 00
             storage += char(0b00110001); // 20
 
-            fipa::acl::Time time = testGrammar<fab::DateTime, fipa::acl::Time>(storage);
+            fipa::acl::Time time = testGrammar<fag::DateTime, fipa::acl::Time>(storage);
             BOOST_REQUIRE_MESSAGE(time.tm_msec == 20, "Milliseconds are " << time.tm_msec << " expected 20");
             BOOST_REQUIRE_MESSAGE(time.tm_sec == 59, "Seconds are " << time.tm_sec << " expected 59");
             BOOST_REQUIRE_MESSAGE(time.tm_min == 59, "Minutes are " << time.tm_min << " expected 59");
@@ -270,7 +271,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
         {
             std::string storage = "\"\\\"ABC_0123456789\"";
             std::string expected = "\"ABC_0123456789";
-            fipa::acl::ByteSequence stringLiteral = testGrammar<fab::StringLiteral, fipa::acl::ByteSequence>(storage);
+            fipa::acl::ByteSequence stringLiteral = testGrammar<fag::StringLiteral, fipa::acl::ByteSequence>(storage);
             BOOST_REQUIRE_MESSAGE(stringLiteral.toRawDataString() == expected, "String is '" << stringLiteral.toRawDataString() << "' expected '" << expected << "'");
         }
         // StringLiteralTerminated
@@ -278,7 +279,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             std::string storage = "\"\\\"ABC_0123456789\"";
             storage += char(0x00);
             std::string expected = "\"ABC_0123456789";
-            fipa::acl::ByteSequence stringLiteral = testGrammar<fab::StringLiteralTerminated, fipa::acl::ByteSequence>(storage);
+            fipa::acl::ByteSequence stringLiteral = testGrammar<fag::StringLiteralTerminated, fipa::acl::ByteSequence>(storage);
             BOOST_REQUIRE_MESSAGE(stringLiteral.toRawDataString() == expected, "String is '" << stringLiteral.toRawDataString() << "' expected '" << expected << "'");
         }
 
@@ -288,7 +289,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             std::string storage = "#14\"ABC_0123456789";
             storage += char(0x00);
             std::string expected = "ABC_0123456789";
-            fipa::acl::ByteSequence stringLiteral = testGrammar<fab::ByteLengthEncodedStringTerminated, fipa::acl::ByteSequence>(storage);
+            fipa::acl::ByteSequence stringLiteral = testGrammar<fag::ByteLengthEncodedStringTerminated, fipa::acl::ByteSequence>(storage);
             BOOST_REQUIRE_MESSAGE(stringLiteral.toRawDataString() == expected, "ByteLengthEncodedStringTerminated is '" << stringLiteral.toRawDataString() << "' expected '" << expected << "'");
         }
         // BinStringNoCodetable
@@ -373,7 +374,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             {
             	std::string storage;
             	storage += falseToken[i];
-                std::string stringLiteral = testGrammar<fab::Word, std::string>(storage, false);
+                std::string stringLiteral = testGrammar<fag::Word, std::string>(storage, false);
             }
 
             for(uint32_t i = 0; i < 3; ++i)
@@ -383,7 +384,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
                 storage += expected;
                 // will read only till it finds a false token
             	storage += falseToken[i];
-                std::string stringLiteral = testGrammar<fab::Word, std::string>(storage, true);
+                std::string stringLiteral = testGrammar<fag::Word, std::string>(storage, true);
                 BOOST_REQUIRE_MESSAGE(stringLiteral == expected, "StringLiteral is '" << stringLiteral << "', but expected '" << expected << "'");
 
             }
@@ -394,7 +395,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             {
             	std::string storage;
             	storage += falseStartToken[i];
-                std::string stringLiteral = testGrammar<fab::Word, std::string>(storage, false);
+                std::string stringLiteral = testGrammar<fag::Word, std::string>(storage, false);
             }
 
             // skip the first 
@@ -403,7 +404,7 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             	std::string storage;
                 storage += "abcdefg";
             	storage += falseStartToken[i];
-                std::string stringLiteral = testGrammar<fab::Word, std::string>(storage, true);
+                std::string stringLiteral = testGrammar<fag::Word, std::string>(storage, true);
                 BOOST_REQUIRE_MESSAGE(stringLiteral == storage, "StringLiteral is '" << stringLiteral << "', but expected '" << storage << "'");
             }
         }
