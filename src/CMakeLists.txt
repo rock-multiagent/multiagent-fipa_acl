@@ -4,6 +4,7 @@ set(SOURCES
     message_parser/message_printer.cpp
     message_parser/message_parser.cpp
     message_parser/envelope_parser.cpp
+    message_parser/grammar/grammar_common.cpp
     message_parser/grammar/grammar_bitefficient.cpp
     message_parser/grammar/grammar_bitefficient_envelope.cpp
     message_generator/acl_message.cpp
@@ -57,6 +58,7 @@ set(HEADERS
     message_parser/date_time.h
     message_parser/debug.h
     message_parser/envelope_parser.h
+    message_parser/grammar/grammar_common.h
     message_parser/grammar/grammar_bitefficient.h
     message_parser/grammar/grammar_bitefficient_envelope.h
     message_parser/message_parser.h
