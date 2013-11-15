@@ -32,6 +32,11 @@ AgentID::AgentID(const std::string& name)
     }
 }
 
+bool AgentID::isValid() const
+{
+    return mName != AgentID::UNDEFINED && !empty();
+}
+
 bool AgentID::setName(const std::string& name) 
 {
     if ( (name.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(name.c_str()[0]) != std::string::npos) )

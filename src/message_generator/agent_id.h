@@ -65,9 +65,10 @@ public:
     static int msResolverComparisonDepth;
 
     /**
-     * Retrieve an undefined agent instance
+     * Test if this is a valid agent, i.e. is neither an 
+     * instance of an undefined agent nor has it an empty name field
      */
-    static const AgentID undefined();
+    bool isValid() const;
     
     /**
     * \brief Default constructor
