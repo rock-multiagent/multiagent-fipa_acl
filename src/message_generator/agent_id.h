@@ -160,7 +160,7 @@ public:
     * \brief Check if AgentId is empty, i.e. does not contain a name
     * \return True, if empty, False otherwise
     */
-    bool empty();
+    bool empty() const;
 
     /**
     * \brief overloaded equality operator for AgentID; the signature of the function was intentionally changed from the normal operator== (const type&, const type&)

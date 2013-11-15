@@ -206,7 +206,7 @@ bool AgentID::compareEqual(const AgentID& a, const AgentID& b, int depth)
     return false;
 }
 
-bool AgentID::empty()
+bool AgentID::empty() const
 {
     return mName.empty();
 }
