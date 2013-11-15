@@ -1,4 +1,5 @@
 #include "message_format.h"
+#include <boost/assign/list_of.hpp>
 
 namespace fipa {
 namespace acl {
