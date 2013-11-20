@@ -3,6 +3,9 @@
 #include <fipa_acl/message_parser/grammar/grammar_bitefficient.h>
 #include <fipa_acl/message_generator/format/bitefficient_message_format.h>
 #include <fipa_acl/message_generator/format/bitefficient_format.h>
+
+#include <fipa_acl/message_parser/grammar/grammar_string_message.h>
+
 #include <string>
 #include <limits>
 
@@ -421,6 +424,14 @@ BOOST_AUTO_TEST_CASE(grammar_test)
             fipa::acl::AgentIdentifier agent = testGrammar<fab::AgentIdentifier, fipa::acl::AgentIdentifier>(storage, true);
             BOOST_REQUIRE_MESSAGE( agent.name == agentName, "AgentName is '" << agent.name << "' , but expected '" << agentName);
         }
+
+        // String -- using string literal
+        {
+            std::string string_literal = "test_string_literal";
+            std::string storage = "\"" + string_literal + "\"";
+            std::string string_content = testGrammar<fag::String, std::string>(storage, true);
+            BOOST_REQUIRE_MESSAGE( string_content == string_literal, "String is '" << string_content << "' , but expected '" << string_literal);
+        }
 }
 
 
@@ -573,6 +584,40 @@ BOOST_AUTO_TEST_CASE(binary_message_content)
         ACLMessage msgCopy = msg;
         BOOST_REQUIRE(msgCopy == msg);
     }
+}
+
+
+BOOST_AUTO_TEST_CASE(string_grammar_test)
+{
+
+    using namespace fipa::acl;
+
+    ACLMessage msg("inform");
+    AgentID origin("proxy");
+    AgentID receiver("crex_0_CREXCORE");
+
+    MessageParser inputParser;
+
+    std::string expectedContent = "TESTCONTENT";
+    std::string expectedAgentName = "AGENTNAME";
+    std::string encodedMsg = "(:sender(agent-identifier:name" + expectedAgentName + "):content\"" + expectedContent + "\")";
+
+    ACLMessage outputMsg;
+
+    BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg, fipa::acl::representation::STRING_REP), "Parse string content");
+    BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
+    BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
+
+
+   // AgentIdentifier
+   {
+       std::string agentName = "test_agent_name";
+       std::string storage = "(agent-identifier:name" + agentName + ")";
+       fipa::acl::AgentID agent = testGrammar<fipa::acl::grammar::string::AgentIdentifier, fipa::acl::AgentID>(storage, true);
+       BOOST_REQUIRE_MESSAGE( agent.getName() == agentName, "AgentName is '" << agent.getName() << "' , but expected '" << agentName);
+   }
+
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
