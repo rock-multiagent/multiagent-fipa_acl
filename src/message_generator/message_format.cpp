@@ -19,6 +19,7 @@ std::map<MessageField::Type, std::string> MessageField::MessageFieldTxt = boost:
     (MessageField::REPLY_WITH, "reply-with")
     (MessageField::REPLY_BY, "reply-by")
     (MessageField::IN_REPLY_TO, "in-reply-to")
+    (MessageField::REPLY_TO, "reply-to")
     (MessageField::LANGUAGE, "language")
     (MessageField::ENCODING, "encoding")
     (MessageField::ONTOLOGY, "ontology")
