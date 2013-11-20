@@ -19,10 +19,10 @@
 
 #include <base/logging.h>
 
-#include <fipa_acl/message_parser/types.h>
-#include <fipa_acl/message_generator/agent_id.h>
+#include <fipa_acl/message_generator/acl_message.h>
 
-//#define BOOST_SPIRIT_DEBUG
+#include <fipa_acl/message_parser/types.h>
+#define BOOST_SPIRIT_DEBUG
 #ifdef BOOST_SPIRIT_DEBUG
 // include stream operators
 #include <fipa_acl/message_parser/debug.h>
@@ -46,12 +46,35 @@
 #define FIPA_ACL_FUSION_ADAPT BOOST_FUSION_ADAPT_ADT
 #endif
 
-//FIPA_ACL_FUSION_ADAPT(
-//        fipa::acl::ACLMessage, 
-//        (fipa::acl::AgentID, fipa::acl::AgentID, obj.getSender(), obj.setSender(val))
-//        (fipa::acl::AgentIDList, fipa::acl::AgentID, obj.getAllReceivers(), obj.addReceiver(obj))
-//        (std::string, std::string, obj.getContent(), obj.setContent(obj))
-//);
+FIPA_ACL_FUSION_ADAPT(
+    fipa::acl::AgentID,
+    (const std::string&, const std::string&, obj.getName(), obj.setName(val))
+    (const std::vector<std::string>&, const std::vector<std::string>&, obj.getAddresses(), obj.setAddresses(val))
+    (const std::vector<fipa::acl::AgentID>&, const std::vector<fipa::acl::AgentID>&, obj.getResolvers(), obj.setResolvers(val))
+    (const std::vector<fipa::acl::UserdefParam>&, const std::vector<fipa::acl::UserdefParam>&, obj.getUserdefParams(), obj.setUserdefParams(val))
+    );
+
+FIPA_ACL_FUSION_ADAPT(
+    fipa::acl::UserdefParam,
+    (const std::string&, const std::string&, obj.getName(), obj.setName(val))
+    (const std::string&, const std::string&, obj.getValue(), obj.setValue(val))
+    );
+
+FIPA_ACL_FUSION_ADAPT(
+        fipa::acl::ACLMessage, 
+        /* 0 */  (fipa::acl::AgentID, fipa::acl::AgentID, obj.getSender(), obj.setSender(val))
+        /* 1 */  (fipa::acl::AgentIDList, fipa::acl::AgentIDList, obj.getAllReceivers(), obj.setAllReceivers(val))
+        /* 2 */  (std::string, std::string, obj.getContent(), obj.setContent(val))
+        /* 3 */  (std::string, std::string, obj.getReplyWith(), obj.setReplyWith(val))
+        /* 4 */  (base::Time, base::Time, obj.getReplyBy(), obj.setReplyBy(val))
+        /* 5 */  (std::string, std::string, obj.getInReplyTo(), obj.setInReplyTo(val))
+        /* 6 */  (fipa::acl::AgentIDList, fipa::acl::AgentIDList, obj.getAllReplyTo(), obj.setAllReplyTo(val))
+        /* 7 */  (std::string, std::string, obj.getLanguage(), obj.setLanguage(val))
+        /* 8 */  (std::string, std::string, obj.getEncoding(), obj.setEncoding(val))
+        /* 8 */  (std::string, std::string, obj.getOntology(), obj.setOntology(val))
+        /*10 */  (std::string, std::string, obj.getProtocol(), obj.setProtocol(val))
+        /*11 */  (std::string, std::string, obj.getConversationID(), obj.setConversationID(val))
+);
 
 namespace fusion = boost::fusion;
 namespace phoenix = boost::phoenix;
@@ -572,6 +595,31 @@ struct StringLiteralTerminated : qi::grammar<Iterator, fipa::acl::ByteSequence()
 };
 
 template<typename Iterator>
+struct ByteLengthEncodedString : qi::grammar<Iterator, fipa::acl::ByteSequence(), qi::locals<uint32_t> >
+{
+    ByteLengthEncodedString() : ByteLengthEncodedString::base_type(byte_length_encoded_string_rule, "ByteLengthEncodedString-common_grammar")
+    {
+        using qi::byte_;
+        using encoding::char_;
+	using encoding::digit;
+
+	byte_length_encoded_string_rule = byteLengthEncodedStringHeader 	[ label::_a = convertStringToNumber(label::_1) ]
+					>> qi::repeat(label::_a)[byte_]			[ phoenix::at_c<2>(label::_val) = convertToCharVector(label::_1) ]
+					;
+
+	byteLengthEncodedStringHeader = char_('#')
+				      >> + digit 	[ label::_val += label::_1 ]
+				      >> char_('"')
+				      ;
+
+	FIPA_DEBUG_RULE(byte_length_encoded_string_rule);
+    }
+
+    qi::rule<Iterator, std::string() > byteLengthEncodedStringHeader;
+    qi::rule<Iterator, fipa::acl::ByteSequence(), qi::locals<uint32_t> > byte_length_encoded_string_rule;
+};
+
+template<typename Iterator>
 struct ByteLengthEncodedStringTerminated : qi::grammar<Iterator, fipa::acl::ByteSequence(), qi::locals<std::string> >
 {
     ByteLengthEncodedStringTerminated() : ByteLengthEncodedStringTerminated::base_type(byte_length_encoded_string_terminated_rule, "ByteLengthEncodedStringTerminated-bitefficient_grammar")
@@ -657,7 +705,7 @@ struct Digits : qi::grammar<Iterator, std::string(), qi::locals<std::string> >
     {
         // store the last byte to validate the padding
 	digits_rule = *((qi::byte_ - qi::byte_(0x00)) [ label::_val += convertToNumberToken(label::_1)]) [ label::_a = label::_1]
-                    >> qi::repeat(digitPaddingBytes(label::_a))[qi::byte_(0x00)]
+                    >> qi::repeat(digitPaddingBytes(label::_a))[qi::byte_(0x00)];
         // padding bytes should only apply if the last codedNumber does not have 00 in the lowerbyte
 
 	FIPA_DEBUG_RULE(digits_rule);
@@ -730,6 +778,23 @@ struct DateTime : qi::grammar<Iterator, fipa::acl::Time(), qi::locals<std::strin
     CodedNumber<Iterator> second;
     qi::rule<Iterator, std::string() > millisecond;
 
+};
+
+template<typename Iterator>
+struct String : qi::grammar<Iterator, std::string()>
+{
+    String() : String::base_type(string_rule, "String-common_grammar")
+    {
+	string_rule = stringLiteral     [ label::_val = convertToString(label::_1) ]
+            | byteLengthEncodedString   [ label::_val = convertToString(label::_1) ] 
+        ;
+
+	FIPA_DEBUG_RULE(string_rule);
+    }
+
+    StringLiteral<Iterator> stringLiteral;
+    ByteLengthEncodedString<Iterator> byteLengthEncodedString; 
+    qi::rule<Iterator, std::string()> string_rule; 
 };
 
 } // end namespace grammar

@@ -31,14 +31,6 @@ FIPA_ACL_FUSION_ADAPT(
     (const fipa::acl::UserdefinedParameterList&, const fipa::acl::UserdefinedParameterList&, obj.getUserdefinedParameters(), obj.setUserdefinedParameters(val))
 );
 
-FIPA_ACL_FUSION_ADAPT(
-    fipa::acl::AgentID,
-    (const std::string&, const std::string&, obj.getName(), obj.setName(val))
-    (const std::vector<std::string>&, const std::vector<std::string>&, obj.getAddresses(), obj.setAddresses(val))
-    (const std::vector<fipa::acl::AgentID>&, const std::vector<fipa::acl::AgentID>&, obj.getResolvers(), obj.setResolvers(val))
-    (const std::vector<fipa::acl::UserdefParam>&, const std::vector<fipa::acl::UserdefParam>&, obj.getUserdefParams(), obj.setUserdefParams(val))
-    );
-
 
 FIPA_ACL_FUSION_ADAPT(
     fipa::acl::ReceivedObject,
@@ -49,12 +41,6 @@ FIPA_ACL_FUSION_ADAPT(
     (const fipa::acl::Via&, const fipa::acl::Via&, obj.getVia(), obj.setVia(val))
     (const fipa::acl::UserdefinedParameterList&, const fipa::acl::UserdefinedParameterList&, obj.getUserdefinedParameters(), obj.setUserdefinedParameters(val))
 );
-
-FIPA_ACL_FUSION_ADAPT(
-    fipa::acl::UserdefParam,
-    (const std::string&, const std::string&, obj.getName(), obj.setName(val))
-    (const std::string&, const std::string&, obj.getValue(), obj.setValue(val))
-    );
 
 
 namespace fipa {
