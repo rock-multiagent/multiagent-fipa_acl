@@ -155,8 +155,14 @@ public:
 
     /**
      * Retrieve list of all receivers
+     * \return List of all receivers
      */
     AgentIDList getAllReceivers() const { return mReceivers; }
+
+    /**
+     * Set list of all receivers
+     */
+    void setAllReceivers(const AgentIDList& receivers) { mReceivers = receivers; }
 
     /**
      * Add agent id to reply to list
@@ -178,6 +184,11 @@ public:
      * \return reply to list
      */
     AgentIDList getAllReplyTo() const { return mReplyTo; }
+
+    /**
+     * Set reply to list
+     */
+    void setAllReplyTo(const AgentIDList& replyTo) { mReplyTo = replyTo; }
 
     /**
      * Set reply to
