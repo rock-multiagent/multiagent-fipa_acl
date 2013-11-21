@@ -608,6 +608,37 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
     BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
     BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
 
+   // DateTime including DateTimeToken
+   {
+       std::string time = "+20131128T200107123Z";
+       std::string expectedTime = "20131128-20:01:07:123";
+       base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
+       BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
+   }
+   {
+       std::string time = "-20131128T200107123Z";
+       std::string expectedTime = "20131128-20:01:07:123";
+       base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
+       BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
+   }
+   {
+       std::string time = "20131128T200107123";
+       std::string expectedTime = "20131128-20:01:07:123";
+       base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
+       BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
+   }
+
+   // Number
+   {
+       std::string expectedNumbers[] = {"+1234","-1234","123456789","+1.","-1.","+1.1","+.12","+12e+1234","-12E-45", "-12E4"};
+
+       for(size_t i = 0; i < 10; ++i)
+       {
+           std::string expectedNumber = expectedNumbers[i];
+           std::string number = testGrammar<fipa::acl::grammar::string::Number, std::string>(expectedNumber, true);
+           BOOST_REQUIRE_MESSAGE(expectedNumber == number, "Number is '" << number << "', but expected '" << expectedNumber << "'");
+       }
+   }
 
    // AgentIdentifier
    {

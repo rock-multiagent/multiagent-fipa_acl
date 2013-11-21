@@ -483,6 +483,32 @@ namespace fipa {
 		{
 			return arg.toTime();
 		}
+
+                base::Time operator()(std::string arg) const
+                {
+                    std::string time = arg;
+                    if ( arg.data()[0] == '-' || arg.data()[0] == '+')
+                    {
+                        time.erase(0,1);
+                    }
+                    std::string format = "%Y%m%dT%H%M%S";
+
+                    size_t end = time.find_last_of("0123456789", time.size() -1);
+                    if( end < time.size() - 1)
+                    {
+                        // the type designator is present
+                        format += "%Z";
+                    }
+
+                    // Shift millisecond so that base::Time understands
+                    // the format
+                    std::string milliseconds = time.substr(end-2,3);
+                    time.erase(end-2,3);
+                    time += ":" + milliseconds;
+
+                    return base::Time::fromString(time, base::Time::Milliseconds, format);
+
+                }
 	};
 	
 	extern phoenix::function<convertToBaseTimeImpl> convertToBaseTime;
