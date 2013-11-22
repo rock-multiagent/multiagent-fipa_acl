@@ -1,6 +1,9 @@
 #include "string_message_format.h"
 #include "string_format.h"
 
+#include <sstream>
+#include <boost/algorithm/string.hpp>
+
 namespace fipa {
 namespace acl {
 
@@ -10,8 +13,7 @@ std::string StringMessageFormat::apply(const ACLMessage& aclMsg) const
     using namespace MessageField;
 
     std::string msg = "(";
-//    msg += getMessageType();
-//    msg += getMessageParameter();
+    msg += aclMsg.getPerformative();
 
     const AgentID& sender = aclMsg.getSender();
     if(sender.isValid())
@@ -27,7 +29,11 @@ std::string StringMessageFormat::apply(const ACLMessage& aclMsg) const
 
     if(!aclMsg.getContentPtr()->empty())
     {
-        msg += ":" + MessageFieldTxt[CONTENT] + *aclMsg.getContentPtr();
+        size_t size = aclMsg.getContentPtr()->size();
+        std::stringstream ss;
+        ss << size;
+
+        msg += ":" + MessageFieldTxt[CONTENT] + "#" + ss.str() + "\"" + *aclMsg.getContentPtr();
     }
 
     const std::string& replyWith = aclMsg.getReplyWith();
@@ -37,16 +43,25 @@ std::string StringMessageFormat::apply(const ACLMessage& aclMsg) const
     }
 
 
-    //base::Time replyBy = aclMsg.getReplyBy();
-    //if(!replyBy.isNull())
-    //{
-    //    msg += ":" + MessageFieldTxt[REPLY_WITH + " " + replyWith + " ";
-    //}
+    base::Time replyBy = aclMsg.getReplyBy();
+    if(!replyBy.isNull())
+    {
+        std::string replyByString = replyBy.toString(base::Time::Milliseconds, "%Y%m%dT%H%M%S");
+        boost::erase_all(replyByString,":");
+
+        msg += ":" + MessageFieldTxt[REPLY_BY] + replyByString;
+    }
+
+    const std::string& inReplyTo = aclMsg.getInReplyTo();
+    if(!inReplyTo.empty())
+    {
+        msg += ":" + MessageFieldTxt[IN_REPLY_TO] + StringFormat::getExpression(inReplyTo);
+    }
 
     const AgentIDList& replyTo = aclMsg.getAllReplyTo();
     if(!replyTo.empty())
     {
-        msg += ":" + MessageFieldTxt[IN_REPLY_TO] + StringFormat::getAgentIdentifierSet(replyTo);
+        msg += ":" + MessageFieldTxt[REPLY_TO] + StringFormat::getAgentIdentifierSet(replyTo);
     }
 
     const std::string& language = aclMsg.getLanguage();

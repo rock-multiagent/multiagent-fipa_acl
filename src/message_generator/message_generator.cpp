@@ -4,12 +4,14 @@
 #include <base/logging.h>
 
 #include "format/bitefficient_message_format.h"
+#include "format/string_message_format.h"
 
 namespace fipa {
 namespace acl {
 
 std::map<representation::Type, MessageFormatPtr > MessageGenerator::msFormats = boost::assign::map_list_of
-    (representation::BITEFFICIENT, boost::shared_ptr<MessageFormat>(new BitefficientMessageFormat()) );
+    (representation::BITEFFICIENT, boost::shared_ptr<MessageFormat>(new BitefficientMessageFormat()) )
+    (representation::STRING_REP, boost::shared_ptr<MessageFormat>(new StringMessageFormat()));
 
 std::string MessageGenerator::create(const ACLMessage& msg, const representation::Type& type)
 {

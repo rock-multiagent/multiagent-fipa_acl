@@ -22,6 +22,7 @@ std::string StringFormat::getAgentIdentifier(const AgentID& agent)
         agentTxt += getUserdefinedParameter(cit->getName());
         agentTxt += getExpression(cit->getValue());
     }
+    agentTxt += ")";
 
     return agentTxt;
 }
