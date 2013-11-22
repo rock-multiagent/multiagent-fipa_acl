@@ -600,7 +600,7 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
 
     std::string expectedContent = "TESTCONTENT";
     std::string expectedAgentName = "AGENTNAME";
-    std::string encodedMsg = "(:sender(agent-identifier:name" + expectedAgentName + "):content\"" + expectedContent + "\")";
+    std::string encodedMsg = "(inform:sender(agent-identifier:name" + expectedAgentName + "):content\"" + expectedContent + "\")";
 
     ACLMessage outputMsg;
 
@@ -608,45 +608,77 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
     BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
     BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
 
-   // DateTime including DateTimeToken
-   {
-       std::string time = "+20131128T200107123Z";
-       std::string expectedTime = "20131128-20:01:07:123";
-       base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
-       BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
-   }
-   {
-       std::string time = "-20131128T200107123Z";
-       std::string expectedTime = "20131128-20:01:07:123";
-       base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
-       BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
-   }
-   {
-       std::string time = "20131128T200107123";
-       std::string expectedTime = "20131128-20:01:07:123";
-       base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
-       BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
-   }
+    // DateTime including DateTimeToken
+    {
+        std::string time = "+20131128T200107123Z";
+        std::string expectedTime = "20131128-20:01:07:123";
+        base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
+        BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
+    }
+    {
+        std::string time = "-20131128T200107123Z";
+        std::string expectedTime = "20131128-20:01:07:123";
+        base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
+        BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
+    }
+    {
+        std::string time = "20131128T200107123";
+        std::string expectedTime = "20131128-20:01:07:123";
+        base::Time dateTime = testGrammar<fipa::acl::grammar::string::DateTime, base::Time>(time, true);
+        BOOST_REQUIRE_MESSAGE(dateTime.toString(base::Time::Milliseconds) == expectedTime, "Time is '" << dateTime << "', but expected '" << expectedTime);
+    }
 
-   // Number
-   {
-       std::string expectedNumbers[] = {"+1234","-1234","123456789","+1.","-1.","+1.1","+.12","+12e+1234","-12E-45", "-12E4"};
+    // Number
+    {
+        std::string expectedNumbers[] = {"+1234","-1234","123456789","+1.","-1.","+1.1","+.12","+12e+1234","-12E-45", "-12E4"};
 
-       for(size_t i = 0; i < 10; ++i)
-       {
-           std::string expectedNumber = expectedNumbers[i];
-           std::string number = testGrammar<fipa::acl::grammar::string::Number, std::string>(expectedNumber, true);
-           BOOST_REQUIRE_MESSAGE(expectedNumber == number, "Number is '" << number << "', but expected '" << expectedNumber << "'");
-       }
-   }
+        for(size_t i = 0; i < 10; ++i)
+        {
+            std::string expectedNumber = expectedNumbers[i];
+            std::string number = testGrammar<fipa::acl::grammar::string::Number, std::string>(expectedNumber, true);
+            BOOST_REQUIRE_MESSAGE(expectedNumber == number, "Number is '" << number << "', but expected '" << expectedNumber << "'");
+        }
+    }
 
-   // AgentIdentifier
-   {
-       std::string agentName = "test_agent_name";
-       std::string storage = "(agent-identifier:name" + agentName + ")";
-       fipa::acl::AgentID agent = testGrammar<fipa::acl::grammar::string::AgentIdentifier, fipa::acl::AgentID>(storage, true);
-       BOOST_REQUIRE_MESSAGE( agent.getName() == agentName, "AgentName is '" << agent.getName() << "' , but expected '" << agentName);
-   }
+    // AgentIdentifier
+    {
+        std::string agentName = "test_agent_name";
+        std::string storage = "(agent-identifier:name" + agentName + ")";
+        fipa::acl::AgentID agent = testGrammar<fipa::acl::grammar::string::AgentIdentifier, fipa::acl::AgentID>(storage, true);
+        BOOST_REQUIRE_MESSAGE( agent.getName() == agentName, "AgentName is '" << agent.getName() << "' , but expected '" << agentName);
+    }
+
+  
+    {
+        using namespace fipa::acl;
+
+        ACLMessage origMsg;
+        origMsg.setPerformative(ACLMessage::REQUEST_WHEN);
+        origMsg.setContent("random");
+        origMsg.setReplyBy(base::Time::now());
+
+        //origMsg.addReceiver( AgentID("receiver-0"));
+        //origMsg.addReceiver( AgentID("receiver-1"));
+        //origMsg.setSender( AgentID("sender"));
+        std::string encodedMsg = MessageGenerator::create(origMsg, fipa::acl::representation::STRING_REP);
+
+
+        MessageParser mp;
+        ACLMessage decodedMsg;
+
+        BOOST_REQUIRE_MESSAGE( mp.parseData(encodedMsg, decodedMsg, fipa::acl::representation::STRING_REP), "Decoding string representation: '" << encodedMsg << "'");
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getPerformative() == origMsg.getPerformative(), "Performative is '" << decodedMsg.getPerformative() << "' but expected '" << origMsg.getPerformative());
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getContent() == origMsg.getContent(), "Content is '" << decodedMsg.getContent() << "' but expected '" << origMsg.getContent());
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getSender() == origMsg.getSender(), "Sender is '" << decodedMsg.getSender().getName() << "' but expected '" << origMsg.getSender().getName());
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getAllReceivers() == origMsg.getAllReceivers(), "First in  all receivers is '" << decodedMsg.getAllReceivers()[0].getName() << "' but expected '" << origMsg.getAllReceivers()[0].getName());
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getReplyBy().toString(base::Time::Milliseconds) == origMsg.getReplyBy().toString(base::Time::Milliseconds), "ReplyBy is '" << decodedMsg.getReplyBy().toString() << "' but expected '" << origMsg.getReplyBy().toString());
+
+    }
 
 
 }

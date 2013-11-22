@@ -62,18 +62,19 @@ FIPA_ACL_FUSION_ADAPT(
 
 FIPA_ACL_FUSION_ADAPT(
         fipa::acl::ACLMessage, 
-        /* 0 */  (fipa::acl::AgentID, fipa::acl::AgentID, obj.getSender(), obj.setSender(val))
-        /* 1 */  (fipa::acl::AgentIDList, fipa::acl::AgentIDList, obj.getAllReceivers(), obj.setAllReceivers(val))
-        /* 2 */  (std::string, std::string, obj.getContent(), obj.setContent(val))
-        /* 3 */  (std::string, std::string, obj.getReplyWith(), obj.setReplyWith(val))
-        /* 4 */  (base::Time, base::Time, obj.getReplyBy(), obj.setReplyBy(val))
-        /* 5 */  (std::string, std::string, obj.getInReplyTo(), obj.setInReplyTo(val))
-        /* 6 */  (fipa::acl::AgentIDList, fipa::acl::AgentIDList, obj.getAllReplyTo(), obj.setAllReplyTo(val))
-        /* 7 */  (std::string, std::string, obj.getLanguage(), obj.setLanguage(val))
-        /* 8 */  (std::string, std::string, obj.getEncoding(), obj.setEncoding(val))
-        /* 8 */  (std::string, std::string, obj.getOntology(), obj.setOntology(val))
-        /*10 */  (std::string, std::string, obj.getProtocol(), obj.setProtocol(val))
-        /*11 */  (std::string, std::string, obj.getConversationID(), obj.setConversationID(val))
+        /* 0 */  (std::string, std::string, obj.getPerformative(), obj.setPerformative(val))
+        /* 1 */  (fipa::acl::AgentID, fipa::acl::AgentID, obj.getSender(), obj.setSender(val))
+        /* 2 */  (fipa::acl::AgentIDList, fipa::acl::AgentIDList, obj.getAllReceivers(), obj.setAllReceivers(val))
+        /* 3 */  (std::string, std::string, obj.getContent(), obj.setContent(val))
+        /* 4 */  (std::string, std::string, obj.getReplyWith(), obj.setReplyWith(val))
+        /* 5 */  (base::Time, base::Time, obj.getReplyBy(), obj.setReplyBy(val))
+        /* 6 */  (std::string, std::string, obj.getInReplyTo(), obj.setInReplyTo(val))
+        /* 7 */  (fipa::acl::AgentIDList, fipa::acl::AgentIDList, obj.getAllReplyTo(), obj.setAllReplyTo(val))
+        /* 8 */  (std::string, std::string, obj.getLanguage(), obj.setLanguage(val))
+        /* 9 */  (std::string, std::string, obj.getEncoding(), obj.setEncoding(val))
+        /*10 */  (std::string, std::string, obj.getOntology(), obj.setOntology(val))
+        /*11 */  (std::string, std::string, obj.getProtocol(), obj.setProtocol(val))
+        /*12 */  (std::string, std::string, obj.getConversationID(), obj.setConversationID(val))
 );
 
 namespace fusion = boost::fusion;
