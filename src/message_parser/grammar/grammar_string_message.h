@@ -277,122 +277,158 @@ struct Expression : qi::grammar<Iterator, std::string(), Skipper>
 };
 
 template<typename Iterator>
-struct Resolver : qi::grammar<Iterator, fipa::acl::AgentID()>
+struct UserdefinedParameter : qi::grammar<Iterator, fipa::acl::UserdefParam(), qi::locals<std::string, std::string> >
+{
+
+    UserdefinedParameter() : UserdefinedParameter::base_type(param, "userdefined_parameter-string_grammar")
+    {
+        using phoenix::construct;
+        using phoenix::val;
+
+        using namespace fipa::acl;
+        namespace label = qi::labels;
+
+        param = (paramLabel             [ label::_a = label::_1 ]
+                >> expression           [ label::_b = label::_1 ]
+                )                       [ label::_val = phoenix::construct<fipa::acl::UserdefParam>(label::_a, label::_b)]
+        ;
+
+        paramLabel = qi::lit(":X-")
+                // Todo: keyword list needs to be dynamically updated or previously known,
+                // otherwise parsing will greedly consume the following parameter expression
+                // For now expression should be provided with parentheses to handle this
+                >> wordWithoutKeyword   [ label::_val = label::_1 ]
+        ;
+    }
+
+    qi::rule<Iterator, std::string()> paramLabel;
+    Expression<Iterator> expression;
+    WordWithoutKeyword<Iterator> wordWithoutKeyword;
+    qi::rule<Iterator, fipa::acl::UserdefParam(), qi::locals<std::string,std::string> > param;
+};
+
+template<typename Iterator>
+struct UserdefinedParameterList : qi::grammar<Iterator, std::vector<fipa::acl::UserdefParam>()>
+{
+
+    UserdefinedParameterList() : UserdefinedParameterList::base_type(param_list, "userdefined_parameter_list-string_grammar")
+    {
+        using namespace fipa::acl;
+        namespace label = qi::labels;
+
+        param_list = +userdefinedParam       [ phoenix::push_back(label::_val, label::_1)]
+        ;
+    }
+
+    UserdefinedParameter<Iterator> userdefinedParam;
+    qi::rule<Iterator, std::vector<fipa::acl::UserdefParam>() > param_list;
+};
+
+template<typename Iterator, typename Skipper = qi::unused_type>
+struct Resolver : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
 {
 
     Resolver() : Resolver::base_type(agentId, "resolver-string_grammar")
     {
-	using phoenix::construct;
-	using phoenix::val;
-
         using namespace fipa::acl;
-	namespace label = qi::labels;
+        namespace label = qi::labels;
 
         agentId = qi::lit("(agent-identifier")
             >> qi::lit(":name") >> word                           [ phoenix::at_c<0>(label::_val) = label::_1 ]
             >> - (":addresses" >> urlSequence                     [ phoenix::at_c<1>(label::_val) = label::_1 ])
             // Leaving out additional resolvers !!! to break recursion
-            //>> *( userDefinedParam 
-            //        >> expression )
+            >> - (userdefinedParameterList                        [ phoenix::at_c<3>(label::_val) = label::_1 ])
             >> ")";
 
-        FIPA_DEBUG_RULE(agentId);
+        //FIPA_DEBUG_RULE(agentId);
     }
 
-    Word<Iterator> userDefinedParam;
+    UserdefinedParameterList<Iterator> userdefinedParameterList;
     Expression<Iterator> expression;
     grammar::Word<Iterator> word;
     UrlSequence<Iterator> urlSequence;
-    qi::rule<Iterator, fipa::acl::AgentID()> agentId;
+    qi::rule<Iterator, fipa::acl::AgentID(), Skipper> agentId;
 };
 
-template<typename Iterator>
-struct AgentIdentifierSequence : qi::grammar<Iterator,AgentIDList() >
+template<typename Iterator, typename Skipper = qi::unused_type>
+struct AgentIdentifierSequence : qi::grammar<Iterator,AgentIDList(), Skipper>
 {
 
     AgentIdentifierSequence() : AgentIdentifierSequence::base_type(agentIdList, "agent_identifier_sequence-string_grammar")
     {
-	using phoenix::construct;
-	using phoenix::val;
-
         using namespace fipa::acl;
-	namespace label = qi::labels;
+        namespace label = qi::labels;
 
         agentIdList = qi::lit("(sequence")
             >> * agentIdentifier [ phoenix::push_back(label::_val, label::_1) ]
             >> ")";
 
-        FIPA_DEBUG_RULE(agentIdList);
+        //FIPA_DEBUG_RULE(agentIdList);
     }
 
-    Resolver<Iterator> agentIdentifier;
-    qi::rule<Iterator, fipa::acl::AgentIDList()> agentIdList;
+    Resolver<Iterator, Skipper> agentIdentifier;
+    qi::rule<Iterator, fipa::acl::AgentIDList(), Skipper> agentIdList;
 };
 
-template<typename Iterator>
-struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentID()>
+
+template<typename Iterator, typename Skipper = qi::unused_type>
+struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
 {
 
     AgentIdentifier() : AgentIdentifier::base_type(agentId, "agentidentifier-string_grammar")
     {
-	using phoenix::construct;
-	using phoenix::val;
-
         using namespace fipa::acl;
-	namespace label = qi::labels;
+        namespace label = qi::labels;
 
         agentId = qi::lit("(agent-identifier")
             >> qi::lit(":name") >> word                           [ phoenix::at_c<0>(label::_val) = label::_1 ]
-            //-( >> ":addresses" >> urlSequence )
+            >> -( ":addresses" >> urlSequence                     [ phoenix::at_c<1>(label::_val) = label::_1 ])
             >> -( ":resolvers" >> agentIdSequence                 [ phoenix::at_c<2>(label::_val) = label::_1 ])
-            //*( << userDefinedParam << expression )
+            >> - (userdefinedParameterList                        [ phoenix::at_c<3>(label::_val) = label::_1 ])
             >> ")";
 
-        FIPA_DEBUG_RULE(agentId);
+        //FIPA_DEBUG_RULE(agentId);
     }
 
     grammar::Word<Iterator> word;
-    AgentIdentifierSequence<Iterator> agentIdSequence;
-    qi::rule<Iterator, fipa::acl::AgentID()> agentId;
+    UrlSequence<Iterator> urlSequence;
+    AgentIdentifierSequence<Iterator, Skipper> agentIdSequence;
+    UserdefinedParameterList<Iterator> userdefinedParameterList;
+    qi::rule<Iterator, fipa::acl::AgentID(), Skipper> agentId;
 
 };
 
-template<typename Iterator>
-struct AgentIdentifierSet : qi::grammar<Iterator,AgentIDList() >
+template<typename Iterator, typename Skipper = qi::unused_type>
+struct AgentIdentifierSet : qi::grammar<Iterator,AgentIDList(),Skipper >
 {
 
     AgentIdentifierSet() : AgentIdentifierSet::base_type(agentIdList, "agent_identifier_set-string_grammar")
     {
-	using phoenix::construct;
-	using phoenix::val;
-
         using namespace fipa::acl;
-	namespace label = qi::labels;
+        namespace label = qi::labels;
 
         agentIdList = qi::lit("(set")
             >> * agentIdentifier [ phoenix::push_back(label::_val, label::_1) ]
             >> ")";
 
-        FIPA_DEBUG_RULE(agentIdList);
+        //FIPA_DEBUG_RULE(agentIdList);
     }
 
-    AgentIdentifier<Iterator> agentIdentifier;
-    qi::rule<Iterator, fipa::acl::AgentIDList()> agentIdList;
+    AgentIdentifier<Iterator, Skipper> agentIdentifier;
+    qi::rule<Iterator, fipa::acl::AgentIDList(), Skipper> agentIdList;
 };
 
-template<typename Iterator>
-struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage()>
+
+template<typename Iterator, typename Skipper = qi::unused_type >
+struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage(), Skipper>
 {
     Message() : Message::base_type(aclCommunicativeAct, "message-string_grammar")
     {
-	using phoenix::construct;
-	using phoenix::val;
-
         using namespace fipa::acl;
         using namespace MessageField;
 
-	// To avoid namespace clashes with boost::bind
-	namespace label = qi::labels;
+        // To avoid namespace clashes with boost::bind
+        namespace label = qi::labels;
 
         aclCommunicativeAct = "("
             >> messageType                                                    [ phoenix::at_c<0>(label::_val) = label::_1 ]
@@ -408,6 +444,7 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage()>
             | qi::lit(":" + MessageFieldTxt[ONTOLOGY]) >> expression          [ phoenix::at_c<10>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[PROTOCOL]) >> wordWithoutKeyword  [ phoenix::at_c<11>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[CONVERSATION_ID]) >> expression   [ phoenix::at_c<12>(label::_val) = label::_1 ]
+            | userdefinedParam                                                [ phoenix::at_c<13>(label::_val) = label::_1 ]
             )
             >> ")";
 
@@ -434,18 +471,18 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage()>
             ;
 
         FIPA_DEBUG_RULE(messageType);
-        FIPA_DEBUG_RULE(aclCommunicativeAct);
     }
 
 
-    AgentIdentifier<Iterator> agentId;
-    AgentIdentifierSet<Iterator> agentIdList;
+    AgentIdentifier<Iterator, Skipper> agentId;
+    AgentIdentifierSet<Iterator, Skipper> agentIdList;
     grammar::String<Iterator> content;
     grammar::Word<Iterator> word;
     DateTime<Iterator> dateTime;
-    Expression<Iterator> expression;
+    Expression<Iterator, Skipper> expression;
     qi::rule<Iterator, std::string()> messageType;
-    qi::rule<Iterator, fipa::acl::ACLMessage()> aclCommunicativeAct;
+    qi::rule<Iterator, fipa::acl::ACLMessage(), Skipper> aclCommunicativeAct;
+    UserdefinedParameter<Iterator> userdefinedParam;
     WordWithoutKeyword<Iterator> wordWithoutKeyword;
 
 };

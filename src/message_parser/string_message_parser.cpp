@@ -8,12 +8,12 @@ namespace acl {
 
 bool StringMessageParser::parseData(const std::string& storage, ACLMessage& msg)
 {
-    typedef fipa::acl::grammar::string::Message<std::string::const_iterator> string_message_grammar;
+    typedef fipa::acl::grammar::string::Message<std::string::const_iterator, qi::space_type> string_message_grammar;
     string_message_grammar grammar;
 
     std::string::const_iterator iter = storage.begin();
     std::string::const_iterator end = storage.end();
-    return parse(iter, end, grammar, msg);
+    return phrase_parse(iter, end, grammar, qi::space, msg);
 }
 
 } // end namespace acl
