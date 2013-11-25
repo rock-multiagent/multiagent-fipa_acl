@@ -252,8 +252,6 @@ struct Expression : qi::grammar<Iterator, std::string(), Skipper>
 
         using namespace fipa::acl;
 	namespace label = qi::labels;
-        namespace rep = boost::spirit::repository;
-
 
         expression = (expression_base)     [ label::_val = label::_1 ]
             | ( "(" >> *expression         [ label::_val += label::_1 ]
