@@ -95,7 +95,32 @@ template< typename C, typename E>
 std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::Resolver& r)
 {
                 fipa::acl::AgentIdentifier agentId = r.get();
-                return out << "Resolver<" << agentId.name << ">"; 
+                return out << "Resolver<" << agentId.name << ">";
+}
+
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::AgentID& agentId)
+{
+                return out << "AgentID<" << agentId.getName() << ">";
+}
+
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::AgentIDList& agentIdList)
+{
+                fipa::acl::AgentIDList::const_iterator cit = agentIdList.begin();
+                out << "AgentIDList<";
+                for(; cit != agentIdList.end(); ++cit)
+                {
+                    out << cit->getName() << ",";
+                }
+                out << ">";
+                return out;
+}
+
+template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const fipa::acl::ACLMessage& msg)
+{
+                return out << "ACLMessage<" << msg.toString() << ">";
 }
 
 }

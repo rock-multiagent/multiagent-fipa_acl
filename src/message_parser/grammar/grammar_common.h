@@ -1,6 +1,8 @@
 #ifndef FIPA_ACL_GRAMMAR_COMMON_H
 #define FIPA_ACL_GRAMMAR_COMMON_H
 
+//#define BOOST_SPIRIT_DEBUG
+
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_repeat.hpp>
@@ -22,7 +24,6 @@
 #include <fipa_acl/message_generator/acl_message.h>
 
 #include <fipa_acl/message_parser/types.h>
-#define BOOST_SPIRIT_DEBUG
 #ifdef BOOST_SPIRIT_DEBUG
 // include stream operators
 #include <fipa_acl/message_parser/debug.h>
