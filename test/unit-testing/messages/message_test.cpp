@@ -592,22 +592,6 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
 
     using namespace fipa::acl;
 
-    ACLMessage msg("inform");
-    AgentID origin("proxy");
-    AgentID receiver("crex_0_CREXCORE");
-
-    MessageParser inputParser;
-
-    std::string expectedContent = "TESTCONTENT";
-    std::string expectedAgentName = "AGENTNAME";
-    std::string encodedMsg = "(inform:sender(agent-identifier:name" + expectedAgentName + "):content\"" + expectedContent + "\")";
-
-    ACLMessage outputMsg;
-
-    BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg, fipa::acl::representation::STRING_REP), "Parse string content");
-    BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
-    BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
-
     // DateTime including DateTimeToken
     {
         std::string time = "+20131128T200107123Z";
@@ -644,8 +628,76 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
     {
         std::string agentName = "test_agent_name";
         std::string storage = "(agent-identifier:name" + agentName + ")";
-        fipa::acl::AgentID agent = testGrammar<fipa::acl::grammar::string::AgentIdentifier, fipa::acl::AgentID>(storage, true);
+        fipa::acl::AgentID agent = testGrammarWithSkipper< grammar::string::AgentIdentifier, AgentID>(storage, true);
         BOOST_REQUIRE_MESSAGE( agent.getName() == agentName, "AgentName is '" << agent.getName() << "' , but expected '" << agentName);
+    }
+
+    // Word
+    {
+        std::string expectedWord = "word";
+        std::string word = testGrammar<grammar::Word, std::string>(expectedWord, true);
+        BOOST_REQUIRE_MESSAGE( word == expectedWord, "Word is '" << word << "' , but expected '" << expectedWord);
+    }
+    {
+        std::string expectedWord = "(word";
+        testFailGrammar<grammar::Word, std::string>(expectedWord);
+    }
+    {
+        std::string expectedWord = "(word)";
+        testFailGrammar<grammar::Word, std::string>(expectedWord);
+    }
+
+    // Expression
+    {
+        std::string expectedWord = "word";
+        std::string word = testGrammarWithSkipper<grammar::string::Expression, std::string>(expectedWord, true);
+        BOOST_REQUIRE_MESSAGE( word == expectedWord, "Expression is '" << word << "' , but expected '" << expectedWord);
+    }
+    {
+        std::string expectedWord = "word";
+        std::string word = testGrammarWithSkipper<grammar::string::Expression, std::string>("(" + expectedWord + ")", true);
+        BOOST_REQUIRE_MESSAGE( word == expectedWord, "Expression is '" << word << "' , but expected '" << expectedWord);
+    }
+
+    // UserdefinedParam
+    {
+        fipa::acl::UserdefParam expectedParam("userdefinedParam","parameter-value");
+        std::string encodedParam = ":X-" + expectedParam.getName() + "(" + expectedParam.getValue() + ")";
+        fipa::acl::UserdefParam decodedParam = testGrammar<grammar::string::UserdefinedParameter, fipa::acl::UserdefParam>(encodedParam, true);
+        BOOST_REQUIRE_MESSAGE( expectedParam.getName() == decodedParam.getName(), "UserdefinedParam label is '" << decodedParam.getName() << "' , but expected '" << expectedParam.getName());
+        BOOST_REQUIRE_MESSAGE( expectedParam.getValue() == decodedParam.getValue(), "UserdefinedParam value is '" << decodedParam.getValue() << "' , but expected '" << expectedParam.getValue());
+    }
+
+
+    {
+        ACLMessage msg("inform");
+        AgentID origin("proxy");
+        AgentID receiver("crex_0_CREXCORE");
+
+        MessageParser inputParser;
+
+        std::string expectedContent = "TESTCONTENT";
+        std::string expectedAgentName = "AGENTNAME";
+
+        {
+            std::string encodedMsg = "(inform:sender(agent-identifier:name" + expectedAgentName + "):content\"" + expectedContent + "\")";
+
+            ACLMessage outputMsg;
+
+            BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg, fipa::acl::representation::STRING_REP), "Parse string content: '" << encodedMsg << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
+        }
+
+        {
+            std::string encodedMsg = "(inform\n\t:sender\n\t\t(agent-identifier\n\t\t\t:name " + expectedAgentName + ")\n\t:content \"" + expectedContent + "\":encoding(custom_encoding))";
+
+            ACLMessage outputMsg;
+
+            BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg, fipa::acl::representation::STRING_REP), "Parse string content with space skipping: '" << encodedMsg << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
+        }
     }
 
   
@@ -656,10 +708,21 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
         origMsg.setPerformative(ACLMessage::REQUEST_WHEN);
         origMsg.setContent("random");
         origMsg.setReplyBy(base::Time::now());
+        origMsg.addReplyTo(AgentID("reply-to-0"));
+        origMsg.addReplyTo(AgentID("reply-to-1"));
+        origMsg.setInReplyTo("in-reply-to");
 
-        //origMsg.addReceiver( AgentID("receiver-0"));
-        //origMsg.addReceiver( AgentID("receiver-1"));
-        //origMsg.setSender( AgentID("sender"));
+        origMsg.addReceiver( AgentID("receiver-0"));
+        origMsg.addReceiver( AgentID("receiver-1"));
+        origMsg.setSender( AgentID("sender"));
+        origMsg.setOntology("ontology");
+        origMsg.setLanguage("language");
+        origMsg.setConversationID("conversation-id");
+        origMsg.setProtocol("protocol");
+        origMsg.setEncoding("encoding");
+        UserdefParam param("test-param","test-value");
+        origMsg.addUserdefParam(param);
+
         std::string encodedMsg = MessageGenerator::create(origMsg, fipa::acl::representation::STRING_REP);
 
 
@@ -668,16 +731,29 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
 
         BOOST_REQUIRE_MESSAGE( mp.parseData(encodedMsg, decodedMsg, fipa::acl::representation::STRING_REP), "Decoding string representation: '" << encodedMsg << "'");
 
-        BOOST_REQUIRE_MESSAGE( decodedMsg.getPerformative() == origMsg.getPerformative(), "Performative is '" << decodedMsg.getPerformative() << "' but expected '" << origMsg.getPerformative());
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getPerformative() == origMsg.getPerformative(), "Performative is '" << decodedMsg.getPerformative() << "' but expected '" << origMsg.getPerformative() << "'");
 
-        BOOST_REQUIRE_MESSAGE( decodedMsg.getContent() == origMsg.getContent(), "Content is '" << decodedMsg.getContent() << "' but expected '" << origMsg.getContent());
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getContent() == origMsg.getContent(), "Content is '" << decodedMsg.getContent() << "' but expected '" << origMsg.getContent() << "'");
 
-        BOOST_REQUIRE_MESSAGE( decodedMsg.getSender() == origMsg.getSender(), "Sender is '" << decodedMsg.getSender().getName() << "' but expected '" << origMsg.getSender().getName());
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getSender() == origMsg.getSender(), "Sender is '" << decodedMsg.getSender().getName() << "' but expected '" << origMsg.getSender().getName() << "'");
 
-        BOOST_REQUIRE_MESSAGE( decodedMsg.getAllReceivers() == origMsg.getAllReceivers(), "First in  all receivers is '" << decodedMsg.getAllReceivers()[0].getName() << "' but expected '" << origMsg.getAllReceivers()[0].getName());
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getAllReceivers() == origMsg.getAllReceivers(), "First in  all receivers is '" << decodedMsg.getAllReceivers()[0].getName() << "' but expected '" << origMsg.getAllReceivers()[0].getName() << "'");
 
-        BOOST_REQUIRE_MESSAGE( decodedMsg.getReplyBy().toString(base::Time::Milliseconds) == origMsg.getReplyBy().toString(base::Time::Milliseconds), "ReplyBy is '" << decodedMsg.getReplyBy().toString() << "' but expected '" << origMsg.getReplyBy().toString());
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getAllReplyTo() == origMsg.getAllReplyTo(), "First in  all reply-to is '" << decodedMsg.getAllReplyTo()[0].getName() << "' but expected '" << origMsg.getAllReplyTo()[0].getName() << "'");
 
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getReplyBy().toString(base::Time::Milliseconds) == origMsg.getReplyBy().toString(base::Time::Milliseconds), "ReplyBy is '" << decodedMsg.getReplyBy().toString() << "' but expected '" << origMsg.getReplyBy().toString() << "'");
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getInReplyTo() == origMsg.getInReplyTo(), "InReplyTo is '" << decodedMsg.getInReplyTo() << "' but expected '" << origMsg.getInReplyTo() << "'");
+
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getConversationID() == origMsg.getConversationID(), "ConversationID is '" << decodedMsg.getConversationID() << "' but expected '" << origMsg.getConversationID() << "'");
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getEncoding() == origMsg.getEncoding(), "Encoding is '" << decodedMsg.getEncoding() << "' but expected '" << origMsg.getEncoding() << "'");
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getProtocol() == origMsg.getProtocol(), "Protocol is '" << decodedMsg.getProtocol() << "' but expected '" << origMsg.getProtocol() << "'");
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getOntology() == origMsg.getOntology(), "Ontology is '" << decodedMsg.getOntology() << "' but expected '" << origMsg.getOntology() << "' msg: " << encodedMsg);
+
+        BOOST_REQUIRE_MESSAGE( decodedMsg.getUserdefParams()[0].getName() == origMsg.getUserdefParams()[0].getName(), "UserdefParam is '" << decodedMsg.getUserdefParams()[0].getName() << "' but expected '" << origMsg.getUserdefParams()[0].getName() << "' msg: " << encodedMsg);
     }
 
 
