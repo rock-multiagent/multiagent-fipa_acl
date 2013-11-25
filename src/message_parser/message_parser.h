@@ -4,6 +4,7 @@
 #include <map>
 #include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/message_generator/types.h>
+#include <boost/shared_ptr.hpp>
 
 namespace fipa { 
 namespace acl {
@@ -13,6 +14,8 @@ class MessageParserImplementation
     public:
         virtual bool parseData(const std::string& storage, ACLMessage& msg) { throw std::runtime_error("Parser not implemented"); }
 };
+
+typedef boost::shared_ptr<MessageParserImplementation> MessageParserImplementationPtr;
 
 /**
 * \class MessageParser
@@ -24,10 +27,6 @@ class MessageParserImplementation
 class MessageParser
 {
     public: 
-        MessageParser();
-
-        ~MessageParser();
-
         /**
           \brief parses a correctly encoded message according to grammar_bitefficient.h and creates a Message object for internal use
         * \param storage Array of bytes that represent the bitefficient FIPA encoded message
@@ -35,10 +34,10 @@ class MessageParser
         * \param representation the representation to decode the incoming message
         * \return The decoded ACLMessage object
         */	
-	bool parseData(const std::string& storage, ACLMessage &msg, fipa::acl::representation::Type representation = fipa::acl::representation::BITEFFICIENT);
+	static bool parseData(const std::string& storage, ACLMessage &msg, fipa::acl::representation::Type representation = fipa::acl::representation::BITEFFICIENT);
 
     private:
-        std::map<fipa::acl::representation::Type, MessageParserImplementation*> mParsers;
+        static std::map<fipa::acl::representation::Type, fipa::acl::MessageParserImplementationPtr> msParsers;
 };
 
 

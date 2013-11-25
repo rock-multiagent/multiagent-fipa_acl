@@ -11,7 +11,7 @@ class EnvelopeParser
 {
 
 public: 
-    bool parseData(const std::string& storage, ACLEnvelope& envelope, representation::Type type);
+    static bool parseData(const std::string& storage, ACLEnvelope& envelope, representation::Type type);
 
 };
 

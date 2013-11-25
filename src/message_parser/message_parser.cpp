@@ -1,29 +1,20 @@
 #include "bitefficient_message_parser.h"
 #include "string_message_parser.h"
 
+#include <boost/assign/list_of.hpp>
+
 
 namespace fipa { 
 namespace acl {
 
-MessageParser::MessageParser()
-{
-    mParsers[representation::BITEFFICIENT] = new BitefficientMessageParser();
-    mParsers[representation::STRING_REP] = new StringMessageParser();
-}
+std::map<representation::Type, MessageParserImplementationPtr > MessageParser::msParsers = boost::assign::map_list_of
+            (representation::BITEFFICIENT, boost::shared_ptr<MessageParserImplementation>(new BitefficientMessageParser()) )
+            (representation::STRING_REP, boost::shared_ptr<MessageParserImplementation>(new StringMessageParser()) );
 
-MessageParser::~MessageParser()
-{
-    std::map<representation::Type, MessageParserImplementation*>::iterator it = mParsers.begin();
-    for(; it != mParsers.end(); ++it)
-    {
-        delete it->second;
-        it->second = NULL;
-    }
-}
 
 bool MessageParser::parseData(const std::string& storage, ACLMessage &msg, fipa::acl::representation::Type representation)
 {
-    MessageParserImplementation* messageParser = mParsers[representation];
+    MessageParserImplementationPtr messageParser = msParsers[representation];
     if(messageParser)
     {
         return messageParser->parseData(storage, msg);
