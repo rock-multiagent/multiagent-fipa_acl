@@ -104,7 +104,7 @@ public:
     
     /**
        \brief constructor of an ACLMessage with a predefined performative
-       \param perf a predefined fipa performative(represented by its index in the perfs vector)
+       \param performative a predefined fipa performative(represented by its index in the perfs vector)
     */
     ACLMessage(Performative performative);
 

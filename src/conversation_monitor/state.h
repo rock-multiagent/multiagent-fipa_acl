@@ -55,7 +55,7 @@ private:
     StateId mId;
 
     /**
-    * \var final bool; flag to indicate whether the state is a valid final state
+    * Flag to indicate whether the state is a valid final state
     */
     bool mIsFinal;
     
@@ -65,9 +65,10 @@ private:
     std::vector<Transition> mTransitions;
 
     /** 
-    * \var subSM { (= "sub state machine"); implements the subprotocol concept from the fipa speciffication as a state machine
-    * belonging to the state from which the subprotocol starts; a state machine cannot exit a state in a valid 
-    * manner until all the sub-protocols of that state are in a valid final state}
+    * Embedded statemachines implement the subprotocol concept from the fipa speciffication as a state machine.
+    * Each embedded state machine belongs to the state from which the subprotocol starts;
+    * a state machine cannot exit a state in a valid
+    * manner until all the sub-protocols of that state are in a valid final state
     */
     std::vector<StateMachine> mEmbeddedStateMachines;
 
@@ -99,7 +100,7 @@ public:
 
     /**
     *  \brief constructor taking the unique name(id) of the state as arguement
-    *  \param _uid intended id for the state
+    *  \param id intended id for the state
     */
     State(const StateId& id);
 

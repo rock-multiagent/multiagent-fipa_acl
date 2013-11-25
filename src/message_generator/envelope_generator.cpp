@@ -21,7 +21,7 @@ std::string EnvelopeGenerator::create(const ACLEnvelope& envelope, const represe
     } else
     {
         char buffer[512];
-        snprintf(buffer, 512, "Message format of type '%s' is unknown", representation::TypeTxt[type].c_str());
+        snprintf(buffer, 512, "fipa::acl::EnvelopeGenerator: envelope format of type '%s' is unknown", representation::TypeTxt[type].c_str());
         LOG_ERROR("%s", buffer);
         throw std::runtime_error(buffer);
     }

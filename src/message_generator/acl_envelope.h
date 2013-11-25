@@ -314,7 +314,7 @@ public:
     /**
      * Flatten the current envelope plus the extra envelopes
      * (the most current/latest has to be at the end of the list
-     * \param list of overlay envelopes
+     * \param extraEnvelopes list of overlay envelopes
      * \return the most current ACLBaseEnvelope representation 
      */
     ACLBaseEnvelope flatten(const ACLBaseEnvelopeList& extraEnvelopes) const;
@@ -410,7 +410,7 @@ public:
     /**
      * Set all extra envelopes
      * Overwrites the existing set of extra envelopes
-     * \oaram List of base envelopes
+     * \param envelopes List of base envelopes
      */
     void setExtraEnvelopes(const ACLBaseEnvelopeList& envelopes) { mExtraEnvelopes = envelopes; }
 

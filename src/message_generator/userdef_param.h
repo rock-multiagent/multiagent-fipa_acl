@@ -66,7 +66,7 @@ public:
     
     /**
      * Set the value associated with the userdefined parameter
-     * \param val Value of the userdefined parameter
+     * \param value Value of the userdefined parameter
      */
     void setValue(const std::string& value) { mValue = value; }
 

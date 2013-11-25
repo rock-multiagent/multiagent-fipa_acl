@@ -47,7 +47,6 @@ class BitefficientMessageParser : public MessageParserImplementation
 		  \brief parses a correctly encoded message according to grammar_bitefficient.h and creates a Message object for internal use
 		* \param storage Array of bytes that represent the bitefficient FIPA encoded message
 		* \param msg The message extracted from the data
-                * \param representation the representation to decode the incoming message
 		* \return The decoded ACLMessage object
 		*/	
 		bool parseData(const std::string& storage, ACLMessage &msg);

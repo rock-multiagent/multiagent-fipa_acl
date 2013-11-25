@@ -93,7 +93,7 @@ protected:
     /**
      * Update the role mapping
      * \param msg Message
-     * \param state State that was successfully left
+     * \param transition Transition which is associated with the given message
      */
     void updateRoleMapping(const ACLMessage& msg, const Transition& transition);
 
@@ -119,7 +119,6 @@ public:
      * Consume a message
      * If this is the first message it will initialize the roles for the first state
      * \param msg Message which should be consumed
-     * \param agent that is self
      * \throws std::runtime_error if message could not be consumed
      */
     void consumeMessage(const ACLMessage& msg);

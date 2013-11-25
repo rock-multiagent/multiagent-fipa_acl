@@ -1,10 +1,3 @@
-/**
-*
-* \file format.h
-* \author Mircea Cretu Stancu
-* \brief Encodes a given ACLMessage according to the fipa Bit-Efficent encoding speciffication(FIPA at http://www.fipa.org).
-*/
-
 #ifndef FIPA_ACL_ACLMESSAGE_MESSAGE_FORMAT_H
 #define FIPA_ACL_ACLMESSAGE_MESSAGE_FORMAT_H
 #include <fipa_acl/message_generator/acl_message.h>

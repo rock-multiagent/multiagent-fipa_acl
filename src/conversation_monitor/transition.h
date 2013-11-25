@@ -58,6 +58,7 @@ class Transition
           of the transition
 	  \param msg message to process
           \param initiatingMsg message that initiated the conversation or represents the direct predecessor of the current one
+          \param roleMapping Current role mapping
 	  \return true if message triggers this transition, false otherwise
         */
         bool triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping) const;
@@ -65,6 +66,9 @@ class Transition
         /**
 	  \brief method that validates all parameters of a message
 	  \param msg message passed as parameter to be checked
+          \param validatorMsg To validate conversation id, protocol, encoding, language, ontology and in_reply_to the validatorMsg is referred to
+          \param roleMapping Current role mapping
+          \param flags Flag which shall be considered during validation
 	  \return true if message is valid false otherwise
         */
         bool validateMessage(const ACLMessage &msg, const ACLMessage& validatorMsg, const RoleMapping& roleMapping, validation::Flags flags = validation::ALL) const;
