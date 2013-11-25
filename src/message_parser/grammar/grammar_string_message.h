@@ -10,6 +10,33 @@ namespace grammar {
 namespace string {
 
 template<typename Iterator>
+struct Keyword : qi::grammar<Iterator, std::string()>
+{
+    Keyword() : Keyword::base_type(keyword, "keyword-string_grammar")
+    {
+        using namespace fipa::acl::MessageField;
+
+        keyword = qi::lit(":" + MessageFieldTxt[SENDER])
+            | qi::lit(":" + MessageFieldTxt[RECEIVER])
+            | qi::lit(":" + MessageFieldTxt[CONTENT])
+            | qi::lit(":" + MessageFieldTxt[REPLY_WITH])
+            | qi::lit(":" + MessageFieldTxt[REPLY_BY])
+            | qi::lit(":" + MessageFieldTxt[IN_REPLY_TO])
+            | qi::lit(":" + MessageFieldTxt[REPLY_TO])
+            | qi::lit(":" + MessageFieldTxt[LANGUAGE])
+            | qi::lit(":" + MessageFieldTxt[ENCODING])
+            | qi::lit(":" + MessageFieldTxt[ONTOLOGY])
+            | qi::lit(":" + MessageFieldTxt[PROTOCOL])
+            | qi::lit(":" + MessageFieldTxt[CONVERSATION_ID])
+            ;
+
+        //FIPA_DEBUG_RULE(keyword);
+    }
+
+    qi::rule<Iterator, std::string()> keyword;
+};
+
+template<typename Iterator>
 struct Url : qi::grammar<Iterator, std::string()>
 {
     Url() : Url::base_type(url, "url-string_grammar")
@@ -182,38 +209,70 @@ struct DateTime : qi::grammar<Iterator, base::Time() >
     qi::rule<Iterator, base::Time()> date_time;
 };
 
-
 template<typename Iterator>
-struct Expression : qi::grammar<Iterator,std::string() >
+struct WordWithoutKeyword : qi::grammar<Iterator, std::string()>
+{
+    WordWithoutKeyword() : WordWithoutKeyword::base_type(word_rule, "word_without_keyword-string_grammar")
+    {
+        using encoding::char_;
+
+        word_rule = (char_ - wordExceptionsStart )                     [ label::_val += label::_1 ]
+                     >> *(!keyword >> (char_ - wordExceptionsGeneral)  [ label::_val += label::_1 ])
+        ;
+
+        wordExceptionsStart %= wordExceptionsGeneral
+                        | char_('#')
+                        | char_('0','9')
+                        | char_('-')
+                        | char_('@')
+        ;
+        wordExceptionsGeneral %= char_(0x00,0x20)
+                        | char_('(')
+                        | char_(')')
+        ;
+    }
+
+    Keyword<Iterator> keyword;
+
+    qi::rule<Iterator, std::string()> word_rule;
+    qi::rule<Iterator> wordExceptionsStart;
+    qi::rule<Iterator> wordExceptionsGeneral;
+};
+
+
+template<typename Iterator, typename Skipper = qi::unused_type>
+struct Expression : qi::grammar<Iterator, std::string(), Skipper>
 {
 
     Expression() : Expression::base_type(expression, "expression-string_grammar")
     {
-	using phoenix::construct;
-	using phoenix::val;
+        using phoenix::construct;
+        using phoenix::val;
+        using encoding::char_;
 
         using namespace fipa::acl;
 	namespace label = qi::labels;
+        namespace rep = boost::spirit::repository;
 
 
-        expression = expression_base            [ label::_val = label::_1 ]
-            | ( "(" >> *expression              [ label::_val += label::_1 ]
-                    >> ")" ) 
+        expression = (expression_base)     [ label::_val = label::_1 ]
+            | ( "(" >> *expression         [ label::_val += label::_1 ]
+                    >> ")" )
         ;
 
-        expression_base = word
+        expression_base = wordWithoutKeyword
             | string
             | number
             | dateTime
         ;
     }
 
-    grammar::Word<Iterator> word;
     grammar::String<Iterator> string;
     Number<Iterator> number;
     DateTimeToken<Iterator> dateTime;
+    WordWithoutKeyword<Iterator> wordWithoutKeyword;
 
-    qi::rule<Iterator, std::string()> expression;
+    qi::rule<Iterator, std::string(), Skipper> expression;
     qi::rule<Iterator, std::string()> expression_base;
 };
 
@@ -347,7 +406,7 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage()>
             | qi::lit(":" + MessageFieldTxt[LANGUAGE]) >> expression          [ phoenix::at_c<8>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[ENCODING]) >> expression          [ phoenix::at_c<9>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[ONTOLOGY]) >> expression          [ phoenix::at_c<10>(label::_val) = label::_1 ]
-            | qi::lit(":" + MessageFieldTxt[PROTOCOL]) >> word                [ phoenix::at_c<11>(label::_val) = label::_1 ]
+            | qi::lit(":" + MessageFieldTxt[PROTOCOL]) >> wordWithoutKeyword  [ phoenix::at_c<11>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[CONVERSATION_ID]) >> expression   [ phoenix::at_c<12>(label::_val) = label::_1 ]
             )
             >> ")";
@@ -387,6 +446,7 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage()>
     Expression<Iterator> expression;
     qi::rule<Iterator, std::string()> messageType;
     qi::rule<Iterator, fipa::acl::ACLMessage()> aclCommunicativeAct;
+    WordWithoutKeyword<Iterator> wordWithoutKeyword;
 
 };
 

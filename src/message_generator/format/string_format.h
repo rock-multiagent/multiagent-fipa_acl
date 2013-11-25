@@ -25,7 +25,13 @@ public:
      */
     static std::string getAgentIdentifierList(const AgentIDList& agentList);
 
-    static std::string getExpression(const std::string& txt) { return txt; }
+    /**
+     * Get Expression
+     * Expression is wrapped using parentheses to facilitate parsing, i.e. to account for too greedy parser behaviour,
+     * especially when using userdefined parameters
+     *
+     */
+    static std::string getExpression(const std::string& txt) { return "(" + txt + ")"; }
 
     static std::string getWord(const std::string& txt) { return txt; }
 
