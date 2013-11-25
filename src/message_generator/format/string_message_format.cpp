@@ -93,6 +93,13 @@ std::string StringMessageFormat::apply(const ACLMessage& aclMsg) const
     {
         msg += ":" + MessageFieldTxt[CONVERSATION_ID] + StringFormat::getExpression(conversationId);
     }
+
+    const std::vector<fipa::acl::UserdefParam>& parameters = aclMsg.getUserdefParams();
+    std::vector<fipa::acl::UserdefParam>::const_iterator cit = parameters.begin();
+    for(; cit != parameters.end(); ++cit)
+    {
+        msg += ":X-" + cit->getName() + StringFormat::getExpression(cit->getValue());
+    }
     msg += ")";
 
     return msg;

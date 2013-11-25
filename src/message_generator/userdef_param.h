@@ -43,8 +43,9 @@ public:
     /**
      * Constructor for a userdefined parameter of a given name
      * \param name Name of the userdefined parameter
+     * \param value Value of the userdefined parameter
      */
-    UserdefParam(const std::string& name);
+    UserdefParam(const std::string& name, const std::string& value = "");
 
     /**
      * Assignment operator

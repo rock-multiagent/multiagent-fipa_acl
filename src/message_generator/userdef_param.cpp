@@ -20,9 +20,9 @@ UserdefParam::UserdefParam()
 {
 }
 
-UserdefParam::UserdefParam(const std::string& name) 
+UserdefParam::UserdefParam(const std::string& name, const std::string& value)
     : mName(name)
-    , mValue()
+    , mValue(value)
 {
 }
 

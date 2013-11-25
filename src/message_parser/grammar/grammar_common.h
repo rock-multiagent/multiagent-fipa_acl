@@ -75,6 +75,7 @@ FIPA_ACL_FUSION_ADAPT(
         /*10 */  (std::string, std::string, obj.getOntology(), obj.setOntology(val))
         /*11 */  (std::string, std::string, obj.getProtocol(), obj.setProtocol(val))
         /*12 */  (std::string, std::string, obj.getConversationID(), obj.setConversationID(val))
+        /*13 */  (void, void, /*no getter used*/, obj.addUserdefParam(val))
 );
 
 namespace fusion = boost::fusion;
