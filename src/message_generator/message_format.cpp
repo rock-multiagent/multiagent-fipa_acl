@@ -7,7 +7,7 @@ namespace acl {
 MessageFormat::MessageFormat()
     : mUseCodeTables(false)
     , mUpdateCodeTables(true)
-    , mVersion("1.3")
+    , mVersion("1.4")
     , mResolverDepth(1)
 {
 }

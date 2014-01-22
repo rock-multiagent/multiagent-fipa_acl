@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 find_package(Rock)
-rock_init(fipa_acl 1.3)
+rock_init(fipa_acl 1.4)
 set(PROJECT_DESCRIPTION "Library for FIPA Agent Communication Language and handling bit-efficient FIPA Messages")
 add_definitions(-g0)
 add_definitions(-DTIXML_USE_STL=1)
