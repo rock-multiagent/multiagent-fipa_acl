@@ -329,6 +329,7 @@ public:
      * \return true if the sender has already stamped this message
      */
     bool hasStamp(const ReceivedObject& receivedObject) const { return hasReceivedObject(receivedObject); }
+
 };
 
 
@@ -486,6 +487,13 @@ public:
      * \return True, if the agent id is set in one of the received objects, false otherwise
      */
     bool hasStamp(fipa::acl::AgentID id) const;
+
+    /**
+     * Create a dedicated letter, i.e. where the intended-receivers field contains only
+     * a single receiver
+     * \return ACLEnvelope with an extra ACLBaseEnvelope witha single receiver
+     */
+    ACLEnvelope createDedicatedEnvelope(const AgentID& receiverId) const;
 };
 
 // We also define a letter to be the envelope and the payload

@@ -351,5 +351,17 @@ ID ACLEnvelope::createLocalId()
     return ss.str();
 }
 
+ACLEnvelope ACLEnvelope::createDedicatedEnvelope(const AgentID& receiverId) const
+{
+    fipa::acl::Letter updatedLetter = *this;
+    fipa::acl::ACLBaseEnvelope extraEnvelope;
+    AgentIDList intendedReceivers;
+    intendedReceivers.push_back(receiverId);
+    extraEnvelope.setIntendedReceivers(intendedReceivers);
+    updatedLetter.addExtraEnvelope(extraEnvelope);
+
+    return updatedLetter;
+}
+
 } // end namespace acl
 } // end namespace fipa
