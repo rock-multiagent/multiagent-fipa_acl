@@ -3,6 +3,7 @@ namespace fipa {
 
 phoenix::function<extractFromCodetableImpl> extractFromCodetable;
 phoenix::function<buildStringImpl> buildString;
+phoenix::function<concatStringsWithSeparatorImpl> concatStringsWithSeparator;
 phoenix::function<printImpl> print;
 
 phoenix::function<convertDigitsToHexImpl> convertDigitsToHex;

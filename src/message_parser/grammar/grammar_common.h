@@ -163,6 +163,30 @@ namespace fipa {
 	};
 	extern phoenix::function<buildStringImpl> buildString;
 
+	/** Concatenation of two strings as 'lazy' implementation for boost spirit using a dedicated separation character*/
+	struct concatStringsWithSeparatorImpl
+	{
+		template <typename T, typename U, typename V>
+		struct result
+		{
+			typedef std::string type;
+		};
+
+		template <typename T, typename U, typename V>
+		std::string operator()(T arg0, U arg1, V arg2) const
+		{
+                    if(arg0.empty())
+                    {
+                        return arg1;
+                    } else {
+			arg0 += arg2;
+			arg0 += arg1;
+			return arg0;
+                    }
+		}
+	};
+	extern phoenix::function<concatStringsWithSeparatorImpl> concatStringsWithSeparator;
+
 	/** Debug output */
 	struct printImpl
 	{

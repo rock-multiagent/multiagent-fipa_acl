@@ -253,9 +253,11 @@ struct Expression : qi::grammar<Iterator, std::string(), Skipper>
         using namespace fipa::acl;
 	namespace label = qi::labels;
 
-        expression = (expression_base)     [ label::_val = label::_1 ]
-            | ( "(" >> *expression         [ label::_val += label::_1 ]
-                    >> ")" )
+        expression = expression_base    [ label::_val = label::_1 ]
+            | ( char_("(")
+                >> *expression          [ label::_val = concatStringsWithSeparator(label::_val,label::_1," ") ]
+                >> char_(")")
+            )
         ;
 
         expression_base = wordWithoutKeyword
