@@ -8,7 +8,7 @@
 namespace qi = boost::spirit::qi;
 
 template< template<class> class TIn, typename TOut>
-TOut testGrammar(const std::string& storage, bool expectedSuccess = true)
+TOut testGrammar(const std::string& storage, bool expectedSuccess = true, const std::string& name = "unknown")
 {
     typedef TIn<std::string::const_iterator> grammar_type;
     grammar_type grammar;
@@ -19,15 +19,15 @@ TOut testGrammar(const std::string& storage, bool expectedSuccess = true)
     bool r = parse(iter, end, grammar, parseTree);
     if(expectedSuccess)
     {
-        BOOST_REQUIRE_MESSAGE(r, "Test Grammar with string of size: " << storage.size());
+        BOOST_REQUIRE_MESSAGE(r, "Test grammar '" << name << "' with string of size: " << storage.size());
     } else {
-        BOOST_REQUIRE_MESSAGE(!r, "Test Grammar with string of size: " << storage.size());
+        BOOST_REQUIRE_MESSAGE(!r, "Test grammar '" << name << "' with string of size: " << storage.size());
     }
     return parseTree;
 }
 
 template< template<class> class TIn, typename TOut>
-void testFailGrammar(const std::string& storage)
+void testFailGrammar(const std::string& storage, const std::string& name = "unknown")
 {
     typedef TIn<std::string::const_iterator> grammar_type;
     grammar_type grammar;
@@ -37,11 +37,11 @@ void testFailGrammar(const std::string& storage)
     std::string::const_iterator end = storage.end();
     bool r = parse(iter, end, grammar, parseTree);
 
-    BOOST_REQUIRE(!r);
+    BOOST_REQUIRE_MESSAGE(!r, "TestFailGrammar '" << name << "'");
 }
 
 template< template<class Iterator, class Skipper> class TIn, typename TOut>
-TOut testGrammarWithSkipper(const std::string& storage, bool expectedSuccess = true)
+TOut testGrammarWithSkipper(const std::string& storage, bool expectedSuccess = true, const std::string& name = "unknown")
 {
     typedef TIn<std::string::const_iterator, qi::unused_type> grammar_type;
     grammar_type grammar;
@@ -52,15 +52,15 @@ TOut testGrammarWithSkipper(const std::string& storage, bool expectedSuccess = t
     bool r = parse(iter, end, grammar, parseTree);
     if(expectedSuccess)
     {
-        BOOST_REQUIRE_MESSAGE(r, "Test Grammar with string of size: " << storage.size());
+        BOOST_REQUIRE_MESSAGE(r, "Test grammar with skipper '" << name << "' with string of size: " << storage.size());
     } else {
-        BOOST_REQUIRE_MESSAGE(!r, "Test Grammar with string of size: " << storage.size());
+        BOOST_REQUIRE_MESSAGE(!r, "Test grammar with skipper'" << name << "' with string of size: " << storage.size());
     }
     return parseTree;
 }
 
 template< template<class Iterator, class Skipper> class TIn, typename TOut>
-void testFailGrammarWithSkipper(const std::string& storage)
+void testFailGrammarWithSkipper(const std::string& storage, const std::string& name = "unknown")
 {
     typedef TIn<std::string::const_iterator, qi::unused_type> grammar_type;
     grammar_type grammar;
@@ -70,6 +70,6 @@ void testFailGrammarWithSkipper(const std::string& storage)
     std::string::const_iterator end = storage.end();
     bool r = parse(iter, end, grammar, parseTree);
 
-    BOOST_REQUIRE(!r);
+    BOOST_REQUIRE_MESSAGE(!r, "TestFailGrammarWithSkipper '" << name << "'");
 }
 #endif // FIPA_ACL_TEST_UTILS_H

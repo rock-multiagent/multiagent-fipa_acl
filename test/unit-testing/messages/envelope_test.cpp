@@ -79,14 +79,51 @@
         {
             AgentID inAgentID("test-agent");
             storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
-            fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage);
+            fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- simple");
+
+        }
+
+        {
+            AgentID inAgentID("test-agent");
+            AgentID resolver0("test-resolver0");
+            AgentID resolver1("test-resolver1");
+            inAgentID.addResolver(resolver0);
+            inAgentID.addResolver(resolver1);
+            storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
+
+            //std::string::const_iterator cit = storage.begin();
+            //for(; cit != storage.end(); ++cit)
+            //{
+            //    printf("%c --> %x\n", *cit, *cit);
+            //}
+            fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- resolvers");
+
+        }
+        {
+            AgentID inAgentID("test-agent");
+            AgentID resolver0("test-resolver0");
+            AgentID resolver1("test-resolver1");
+            inAgentID.addAddress("test-address0");
+            inAgentID.addAddress("test-address1");
+            inAgentID.addResolver(resolver0);
+            inAgentID.addResolver(resolver1);
+            inAgentID.addUserdefParam(UserdefParam("test-userparam0","setting0"));
+            inAgentID.addUserdefParam(UserdefParam("test-userparam1","setting1"));
+            storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
+
+            //std::string::const_iterator cit = storage.begin();
+            //for(; cit != storage.end(); ++cit)
+            //{
+            //    printf("%c --> %x\n", *cit, *cit);
+            //}
+            fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- resolvers, addresses, user params");
 
         }
 
         {
             ReceivedObject inReceivedObject;
             storage = fipa::acl::BitefficientFormat::getReceivedObject(inReceivedObject);
-            fipa::acl::ReceivedObject outReceivedObject = testGrammar<fipa::acl::bitefficient::ReceivedObject, fipa::acl::ReceivedObject>(storage);
+            fipa::acl::ReceivedObject outReceivedObject = testGrammar<fipa::acl::bitefficient::ReceivedObject, fipa::acl::ReceivedObject>(storage, true, "Envelope: receivedObject");
         }
 
         { 
@@ -175,19 +212,32 @@ BOOST_AUTO_TEST_CASE(envelope_test)
     base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
     msg.setReplyBy(time);
     msg.setConversationID(std::string("test conversationID"));
-    msg.setContent("test content");
+    msg.setContent("test-content");
 
     representation::Type representationType = representation::BITEFFICIENT;
-    ACLEnvelope envelope(msg, representationType);
+    ACLEnvelope envelope(msg, representation::BITEFFICIENT);
 
-    std::string encodedMsg = MessageGenerator::create(msg, representation::BITEFFICIENT);
+    std::string encodedEnvelope = EnvelopeGenerator::create(envelope, representationType);
+    BOOST_TEST_MESSAGE("Encoded envelope " << encodedEnvelope);
+    //std::string::const_iterator cit = encodedEnvelope.begin();
+    //for(; cit != encodedEnvelope.end(); ++cit)
+    //{
+    //    printf("%c --> %x\n", *cit, *cit);
+    //}
+
+    EnvelopeParser ep;
+    ACLEnvelope decodedEnvelope;
+    BOOST_REQUIRE_MESSAGE( ep.parseData(encodedEnvelope, decodedEnvelope, representationType), "Decoding ACLEnvelope " << encodedEnvelope);
     // Check embedding acl message in envelope
-    ACLMessage outMsg = envelope.getACLMessage();
+    ACLMessage outMsg = decodedEnvelope.getACLMessage();
 
     BOOST_REQUIRE_MESSAGE( msg.getPerformative() == outMsg.getPerformative(), "ACL Message in envelope performative: '" << outMsg.getPerformative() << "' vs '" << msg.getPerformative() << "'");
     BOOST_REQUIRE_MESSAGE( msg.getContent() == outMsg.getContent(), "ACL Message in envelope content: '" << outMsg.getContent() << "' vs '" << msg.getContent() << "'");
     BOOST_CHECK_MESSAGE( msg.getReplyBy() == outMsg.getReplyBy(), "ACL Message in envelope reply by (Fails when BOOST_SPIRIT_DEBUG is defined): '" << outMsg.getReplyBy().toString() << "' vs '" << msg.getReplyBy().toString() << "'");
-    BOOST_REQUIRE_MESSAGE( msg == outMsg, "ACL Message in envelope content: '" << outMsg.getContent() << "' vs '" << msg.getContent() << "'");
+    BOOST_CHECK_MESSAGE( msg.getLanguage() == outMsg.getLanguage(), "ACL Message in envelope language: '" << outMsg.getLanguage() << "' vs '" << msg.getLanguage() << "'");
+    BOOST_CHECK_MESSAGE( msg.getEncoding() == outMsg.getEncoding(), "ACL Message in envelope encoding: '" << outMsg.getEncoding() << "' vs '" << msg.getEncoding() << "'");
+    BOOST_CHECK_MESSAGE( msg.getOntology() == outMsg.getOntology(), "ACL Message in envelope ontology: '" << outMsg.getOntology() << "' vs '" << msg.getOntology() << "'");
+    BOOST_REQUIRE_MESSAGE( msg == outMsg, "Full message comparisons '" << outMsg.toString() << "' vs '" << msg.toString() << "'");
 
 }
 
