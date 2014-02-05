@@ -22,14 +22,9 @@ AgentID::AgentID()
     setName(AgentID::UNDEFINED);
 }
 
-AgentID::AgentID(const std::string& name) 
-    : mName(name)
+AgentID::AgentID(const std::string& name)
 {
-    if(!setName(name))
-    {
-        LOG_ERROR("AgentID: name '%s' contains invalid characters - defaulting to empty name", name.c_str());
-        mName = "";
-    }
+    setName(name);
 }
 
 bool AgentID::isValid() const
@@ -37,40 +32,40 @@ bool AgentID::isValid() const
     return mName != AgentID::UNDEFINED && !empty();
 }
 
-bool AgentID::setName(const std::string& name) 
+void AgentID::setName(const std::string& name)
 {
     if ( (name.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(name.c_str()[0]) != std::string::npos) )
     {
-        LOG_WARN("AgentID: name '%s' contains invalid characters", name.c_str());
-        return false;
-    } else {
-        mName = name;
-        return true;
+        char buffer[128];
+        snprintf(buffer, 128, "fipa::acl::AgentID: name '%s' contains invalid characters", name.c_str());
+        throw std::runtime_error(buffer);
     }
+
+    mName = name;
 }
 
-bool AgentID::addAddress(const std::string& address) 
+void AgentID::addAddress(const std::string& address)
 {
     if ( (address.find_first_of(illegalWordChars) != std::string::npos) || (illegalWordStart.find_first_of(address.c_str()[0]) != std::string::npos) )
     {
-        return false;
-    } else {
-        mAddresses.push_back(address);
-        return true;
+        char buffer[128];
+        snprintf(buffer, 128, "fipa::acl::AgentID: address '%s' contains invalid characters", address.c_str());
+        throw std::runtime_error(buffer);
     }
+    mAddresses.push_back(address);
 }
 
-void AgentID::addResolver(const AgentID& aid) 
+void AgentID::addResolver(const AgentID& aid)
 {
     // prevent entering duplicates
     // NOTE: this function searches for the resolver and uses the overloaded == op not the compareEqual()
     if ( find(mResolvers.begin(), mResolvers.end(),aid) == mResolvers.end() )
     {
-        mResolvers.push_back(aid); 
+        mResolvers.push_back(aid);
     }
 }
 
-void AgentID::deleteResolver(const AgentID& aid) 
+void AgentID::deleteResolver(const AgentID& aid)
 {
     std::vector<AgentID>::iterator it  = find(mResolvers.begin(), mResolvers.end(),aid);
     // prevent entering duplicates
@@ -81,9 +76,9 @@ void AgentID::deleteResolver(const AgentID& aid)
     }
 }
 
-void AgentID::addUserdefParam(const UserdefParam& p) 
+void AgentID::addUserdefParam(const UserdefParam& p)
 {
-    mParameters.push_back(p); 
+    mParameters.push_back(p);
 }
 
 bool AgentID::operator==(const AgentID& other) const

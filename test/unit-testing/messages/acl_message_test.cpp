@@ -63,11 +63,12 @@ void setupTest()
     a1.addUserdefParam(p3);
     
     
-    BOOST_REQUIRE(!a3.setName(string("agent3 5")));
-    BOOST_REQUIRE(a4.setName(string("agent4")));
-    BOOST_REQUIRE(!a5.setName(string("agent3 5")));
+    BOOST_REQUIRE_THROW(a3.setName("agent3 5"), std::runtime_error);
+    BOOST_REQUIRE_NO_THROW(a4.setName("agent4"));
+    BOOST_REQUIRE_THROW(a5.setName("agent3 5"), std::runtime_error);
     
     a3.addAddress(addr1);
+    BOOST_REQUIRE_THROW(a3.addAddress("agent3 5"), std::runtime_error);
     a4.addAddress(addr1);
     a5.addAddress(addr1);
     

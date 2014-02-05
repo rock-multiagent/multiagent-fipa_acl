@@ -92,16 +92,16 @@ public:
     /**
     \brief the method checks whether the passed name string is a word or not(according to the fipa spec)
     \param name Name
-    \return true if successful and false otherwise(name is un-alterred)
+    \throws if name contains invalid characters
     */
-    bool setName(const std::string& name);
+    void setName(const std::string& name);
     
     /**
     \brief the method checks whether the passed address string is a word or not(according to the fipa spec)
     \param adr Address
-    \return true if successful and false otherwise(address is not inserted)
+    \throws if address contains invalid characters
     */
-    bool addAddress(const std::string &adr);
+    void addAddress(const std::string &adr);
     
     /**
     * \brief Retrieve list of addresses
