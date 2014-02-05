@@ -453,9 +453,9 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage(), Skipper>
             | qi::string(PerformativeTxt[ACLMessage::CONFIRM])                   [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::DISCONFIRM])                [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::FAILURE])                   [ label::_val = label::_1 ]
-            | qi::string(PerformativeTxt[ACLMessage::INFORM])                    [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::INFORM_IF])                 [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::INFORM_REF])                [ label::_val = label::_1 ]
+            | qi::string(PerformativeTxt[ACLMessage::INFORM])                    [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD])            [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::PROPAGATE])                 [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::PROPOSE])                   [ label::_val = label::_1 ]
@@ -463,8 +463,11 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage(), Skipper>
             | qi::string(PerformativeTxt[ACLMessage::QUERY_IF])                  [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::QUERY_REF])                 [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::REFUSE])                    [ label::_val = label::_1 ]
-            | qi::string(PerformativeTxt[ACLMessage::REQUEST_WHEN])              [ label::_val = label::_1 ]
+            | qi::string(PerformativeTxt[ACLMessage::REJECT_PROPOSAL])           [ label::_val = label::_1 ]
+            // order from most specific to least specific, to avoid early parsing success
             | qi::string(PerformativeTxt[ACLMessage::REQUEST_WHENEVER])          [ label::_val = label::_1 ]
+            | qi::string(PerformativeTxt[ACLMessage::REQUEST_WHEN])              [ label::_val = label::_1 ]
+            | qi::string(PerformativeTxt[ACLMessage::REQUEST])                   [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::SUBSCRIBE])                 [ label::_val = label::_1 ]
             ;
 
