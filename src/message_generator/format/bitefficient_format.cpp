@@ -242,6 +242,7 @@ std::string BitefficientFormat::getAgentID(const AgentID& agentId)
             {
                 agentIdString +=  getNullTerminatedString(*cit);
             }
+            agentIdString += getEOFCollection();
         }
     }
     // resolvers(optional)
@@ -255,6 +256,7 @@ std::string BitefficientFormat::getAgentID(const AgentID& agentId)
             {
                 agentIdString += getAgentID(*cit);
             }
+            agentIdString += getEOFCollection();
         }
     }
     // userdefined parameters
@@ -263,9 +265,9 @@ std::string BitefficientFormat::getAgentID(const AgentID& agentId)
         if(!userdefParams.empty())
         {
             UserdefinedParameterList::const_iterator cit = userdefParams.begin();
-            agentIdString += char(0x05);
             for(; cit != userdefParams.end(); ++cit)
             {
+                agentIdString += char(0x05);
                 agentIdString += getNullTerminatedString(cit->getName());
                 agentIdString += getBinStringNoCodetable(cit->getValue());
             }

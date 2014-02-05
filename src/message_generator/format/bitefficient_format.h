@@ -93,7 +93,7 @@ public:
     static std::string getReceivedObject(const ReceivedObject& object);
 
     /**
-     * Retrieve encoded agent id
+     * Retrieve encoded agent id for envelopes
      */
     static std::string getAgentID(const AgentID& agentId);
 
