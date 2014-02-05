@@ -258,7 +258,7 @@ struct Envelope : qi::grammar<Iterator, fipa::acl::ACLEnvelope()>
             | byte_(0x03) >> agentIdentifier        [ phoenix::at_c<1>(label::_val) = label::_1 ]
             | byte_(0x04) >> aclRepresentation      [ phoenix::at_c<2>(label::_val) = label::_1 ]
             | byte_(0x05) >> comments               [ phoenix::at_c<3>(label::_val) = convertToString(label::_1) ]
-            | byte_(0x06) >> byte_(0x12) >> payloadLength  [ phoenix::at_c<4>(label::_val) = convertStringToNumber(label::_1) ]
+            | byte_(0x06) >> payloadLength          [ phoenix::at_c<4>(label::_val) = convertStringToNumber(label::_1) ]
             | byte_(0x07) >> payloadEncoding        [ phoenix::at_c<5>(label::_val) = convertToString(label::_1) ]
         //    // date is not set here
             | byte_(0x09) >> intendedReceiver       [ phoenix::at_c<7>(label::_val) = label::_1 ]
@@ -303,7 +303,7 @@ struct Envelope : qi::grammar<Iterator, fipa::acl::ACLEnvelope()>
     qi::rule<Iterator, std::string()> parameterValue;
 
     NullTerminatedString<Iterator> comments;
-    Digits<Iterator> payloadLength;
+    BinNumber<Iterator> payloadLength;
     NullTerminatedString<Iterator> payloadEncoding;
     Any<Iterator> transportBehaviour;
 

@@ -728,19 +728,32 @@ struct Word : qi::grammar<Iterator, std::string()>
 };
 
 template<typename Iterator>
-struct Digits : qi::grammar<Iterator, std::string(), qi::locals<std::string> >
+struct Digits : qi::grammar<Iterator, std::string(), qi::locals<boost::uint_least8_t> >
 {
     Digits() : Digits::base_type(digits_rule, "Digits-bitefficient_grammar")
     {
-        // store the last byte to validate the padding
-	digits_rule = *((qi::byte_ - qi::byte_(0x00)) [ label::_val += convertToNumberToken(label::_1)]) [ label::_a = label::_1]
-                    >> qi::repeat(digitPaddingBytes(label::_a))[qi::byte_(0x00)];
+        using encoding::char_;
+        digits_rule = lower_bits_padding                [ label::_val += convertToNumberToken(label::_1) ]
+                   | (+(qi::byte_ - end_padding_marker) [ label::_val += convertToNumberToken(label::_1) ]
+                      >> end_padding_marker             [ label::_val += convertToNumberToken(label::_1) ]
+                     )
+                   ;
+
         // padding bytes should only apply if the last codedNumber does not have 00 in the lowerbyte
+        end_padding_marker = char_(0x00) | lower_bits_padding;
+        lower_bits_padding = qi::byte_     [ label::_val = label::_1 ]
+                           >> qi::eps( !(label::_val & 0x0f) )
+                           ;
 
 	FIPA_DEBUG_RULE(digits_rule);
+        FIPA_DEBUG_RULE(end_padding_marker);
+        FIPA_DEBUG_RULE(lower_bits_padding);
+
     }
 
-    qi::rule<Iterator, std::string(), qi::locals<std::string> > digits_rule; 
+    qi::rule<Iterator, std::string(), qi::locals<boost::uint_least8_t> > digits_rule;
+    qi::rule<Iterator, boost::uint_least8_t()> end_padding_marker;
+    qi::rule<Iterator, boost::uint_least8_t()> lower_bits_padding;
 };
 
 
