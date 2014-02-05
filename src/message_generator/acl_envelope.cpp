@@ -307,7 +307,12 @@ fipa::acl::ACLMessage ACLEnvelope::getACLMessage() const
     using namespace fipa::acl;
     ACLMessage msg;
     MessageParser mp;
-    mp.parseData(mPayload, msg);
+    representation::Type aclRepresentation = mBaseEnvelope.getACLRepresentation();
+    LOG_DEBUG_S << "getACLMessage from payload: " << mPayload << " with representation: " << representation::TypeTxt[aclRepresentation];
+    if( !mp.parseData(mPayload, msg, aclRepresentation ))
+    {
+        throw std::runtime_error("ACLEnvelope::getACLMessage failed for representation '" + std::string(representation::TypeTxt[aclRepresentation]));
+    }
     return msg;
 }
 
