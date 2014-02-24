@@ -98,11 +98,7 @@ void StateMachine::generateDefaultTransitions()
     std::map<StateId, State>::iterator it = mStates.begin();
     for(; it != mStates.end(); ++it)
     {
-        // applying not-understood and cancel make only sense after having started a conversation
-        if(it->first != mInitialStateId)
-        {
-            it->second.generateDefaultTransitions();
-        }
+        it->second.generateDefaultTransitions();
     }
 }
 
