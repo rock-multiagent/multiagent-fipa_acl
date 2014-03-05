@@ -74,6 +74,10 @@
 
  ...
  ACLEnvelope decodedEnvelope;
+ // either access the message directly
+ ACLMessage msg = decodedEnvelope.getACLMessage();
+
+ // or decode more explicitely to access further envelope information
  EnvelopeParser::parseData(envelopeAndMsgData, decodedEnvelope, representation::BITEFFICIENT);
 
  // Changes to an envelope are added as overlay while being transported across message
