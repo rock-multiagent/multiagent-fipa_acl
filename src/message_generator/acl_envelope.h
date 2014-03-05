@@ -27,7 +27,12 @@ namespace envelope {
 ACL_REPRESENTATION = 0x08, PAYLOAD_LENGTH = 0x10, PAYLOAD_ENCODING = 0x20, DATE = 0x40, INTENDED_RECEIVERS = 0x80, RECEIVED_OBJECT = 0x0100, TRANSPORT_BEHAVIOUR = 0x0200, USERDEFINED_PARAMETERS = 0x0400, PARAMETER_END = 0x0800};
 }
 
-
+/**
+ * \class ACLBaseEnvelope
+ * \brief The ACLBaseEnvelope defines the layout for an envelope with which ACLMessage data can be wrapped. Multiple ACLBaseEnvelopes are part of the ACLEnvelope in order to implement 
+ * the basic functionality of the Agent Communication Channel (ACC)
+ * \see http://www.fipa.org/specs/fipa00067/SC00067F.html
+ */
 class ACLBaseEnvelope
 {
 private:
@@ -335,8 +340,11 @@ public:
 
 class EnvelopeFormat;
 /**
- * Message envelope includes the base envelope and updated fields, along with the actual payload
+ * \class ACLEnvelope
+ * \brief ACLMessage envelope (also typed as fipa::acl::Letter) includes the base envelope and updated fields, along with the actual payload
  * data that is wrapped by this envelope
+ * \see fipa::acl::Letter
+ * \see http://www.fipa.org/specs/fipa00067/SC00067F.html
  */
 class ACLEnvelope
 {
@@ -496,7 +504,10 @@ public:
     ACLEnvelope createDedicatedEnvelope(const AgentID& receiverId) const;
 };
 
-// We also define a letter to be the envelope and the payload
+/**
+ * \var typedef ACLEnvelope Letter
+ * \brief Define a letter to be the envelope including the payload
+ */
 typedef ACLEnvelope Letter;
 
 } // end namespace acl
