@@ -20,7 +20,7 @@
  *
  * \subsection A Creating messages
  * \verbatim
- #include <fipa_acl/fipa_acl.hpp>
+ #include <fipa_acl/fipa_acl.h>
 
  using namespace fipa::acl;
 
@@ -43,7 +43,7 @@
  * \subsection A Generate messages in a specific representation type
  * \verbatim
 
- #include <fipa_acl/fipa_acl.hpp>
+ #include <fipa_acl/fipa_acl.h>
  using namespace fipa::acl;
 
  ACLMessage message;
@@ -60,7 +60,7 @@
  * \subsection A Generation and parsing of an envelope
  * \verbatim
 
- #include <fipa_acl/fipa_acl.hpp>
+ #include <fipa_acl/fipa_acl.h>
 
  using namespace fipa::acl;
 
