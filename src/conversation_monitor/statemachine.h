@@ -99,9 +99,11 @@ protected:
 
 public:
     /**
-     * Set the current state
-     * \param stateId State to which the state machine should be set
+     * Get the states mapping
+     * \return states container
      */
+    std::map<StateId, State> getStates() const { return mStates; }
+
     void setCurrentStateId(const StateId& stateId) { mCurrentStateId = stateId; }
 
     /**
@@ -109,6 +111,13 @@ public:
      * \return state id
      */
     StateId getCurrentStateId() const { return mCurrentStateId; }
+
+    /**
+     * Get the id initial state
+     * \return id of the initial state
+     */
+    StateId getInitialStateId() const { return mInitialStateId; }
+
 
     /**
      * Set self agents id -- can only be called once per state machine
