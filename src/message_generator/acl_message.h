@@ -134,9 +134,15 @@ public:
 
     /**
      * Get Performative
-     * \return performative
+     * \return performative as string
      */
     std::string getPerformative() const { return mPerformative; }
+
+    /**
+     * Get Performative
+     * \return performative as enum
+     */
+    Performative getPerformativeAsEnum() const { return performativeFromString(mPerformative); }
 
     /**
      * Add an agent id to the list of receivers
