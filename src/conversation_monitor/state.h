@@ -73,9 +73,17 @@ private:
     std::vector<StateMachine> mEmbeddedStateMachines;
 
 protected:
-
     /**
-     * Internal states
+      \brief setter method for the final field of the class
+      When changing the final state flag make sure you either remove existing transitions or create
+      the default transition if needed
+      \param final Change status of state
+    */
+    void setFinal(bool final) { mIsFinal = final; }
+
+public:
+    /**
+     * Default states
      */
     const static StateId UNDEFINED_ID;
     const static StateId NOT_UNDERSTOOD;
@@ -84,15 +92,6 @@ protected:
     const static StateId CONVERSATION_CANCEL_FAILURE;
     const static StateId GENERAL_FAILURE_STATE;
 
-    /**
-      \brief setter method for the final field of the class
-      When changing the final state flag make sure you either remove existing transitions or create
-      the default transition if needed
-      \param final Change status of state  
-    */
-    void setFinal(bool final) { mIsFinal = final; }
-
-public:
     /**
     * \brief empty constructor initializes default fields
     */
