@@ -240,6 +240,47 @@ BOOST_AUTO_TEST_CASE(statemachine_reader_test)
 
 }
 
+BOOST_AUTO_TEST_CASE(iterate_through_conversation_monitor_statemachine)
+{
+    using namespace fipa::acl;
+    // calling the parser method
+    fipa::acl::StateMachineReader reader;
+    std::string configurationPath = getProtocolPath();
+    fipa::acl::StateMachine myMachine = reader.loadSpecification(configurationPath + "/brokering");
+
+    std::string root = myMachine.getInitialStateId();
+    // adding all other nodes
+    std::map<fipa::acl::StateId, fipa::acl::State>theStates = myMachine.getStates();
+
+    // adding all edges
+    for(std::map<fipa::acl::StateId, fipa::acl::State>::iterator it = theStates.begin(); it != theStates.end(); it++)
+    {
+
+        // debug
+        std::cout << "Transitions vector size: " << it->second.getTransitions().size() << '\n';
+
+        std::vector<fipa::acl::Transition>::const_iterator start = it->second.getTransitions().begin();
+        std::vector<fipa::acl::Transition>::const_iterator stop = it->second.getTransitions().end();
+
+        // adding all transitions of state (given by it->second)
+        for(std::vector<fipa::acl::Transition>::const_iterator edge = start; edge != stop; edge++)
+        {
+            // debug
+            // adding transition
+            std::string source =  edge->getSourceStateId();
+            std::string dest = edge->getTargetStateId();
+            std::string event = PerformativeTxt[ edge->getPerformative() ];
+            if(source != dest)
+            {
+                // got another edge-> acknowledging it
+                BOOST_TEST_MESSAGE("found new edge, going from: " << source << ", via event: " << event << ", to dest: "<< dest);
+            } else {
+                BOOST_TEST_MESSAGE("found new self-edge, going around: " << source << ", via event: " << event);
+            }
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(statemachine_test)
 {
     using namespace fipa::acl;
