@@ -29,7 +29,7 @@ Transition::Transition(const Role& senderRole, const Role& receiverRole, const A
 {
 }
 
-bool Transition::triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping) const
+bool Transition::triggers(const ACLMessage& msg, const ACLMessage& initiatingMsg, const RoleMapping& roleMapping) const
 {
     // Set the standard validation flags
     validation::Flags flags = (validation::Flags) (validation::PERFORMATIVE | validation::SENDER | validation::RECEIVERS | validation::CONVERSATION_ID | validation::PROTOCOL);
@@ -42,7 +42,7 @@ bool Transition::triggers(const ACLMessage &msg, const ACLMessage& initiatingMsg
     return false;
 }
 
-bool Transition::validateMessage(const ACLMessage &msg, const ACLMessage& validatorMsg, const RoleMapping& roleMapping, validation::Flags flags) const
+bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& validatorMsg, const RoleMapping& roleMapping, validation::Flags flags) const
 {
     if( flags == validation::NONE)
     {
