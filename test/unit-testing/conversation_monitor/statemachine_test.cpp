@@ -297,16 +297,16 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             ACLMessage msg(ACLMessage::REFUSE);
             msg.setSender(other);
             msg.addReceiver(self);
-            msg.setLanguage("language");
+            msg.setProtocol("other-protocol");
             BOOST_REQUIRE_THROW(request.consumeMessage(msg), std::runtime_error);
             BOOST_REQUIRE(request.getCurrentStateId() == "2");
             BOOST_REQUIRE(!request.inFailureState());
+            msg.setProtocol("");
         }
 
         {
             ACLMessage msg(ACLMessage::REFUSE);
             msg.setSender(self);
-            msg.addReceiver(other);
             BOOST_REQUIRE_THROW(request.consumeMessage(msg), std::runtime_error);
             BOOST_REQUIRE(request.getCurrentStateId() == "2");
             BOOST_REQUIRE(!request.inFailureState());
@@ -316,6 +316,7 @@ BOOST_AUTO_TEST_CASE(statemachine_test)
             ACLMessage msg(ACLMessage::REFUSE);
             msg.setSender(other);
             msg.addReceiver(self);
+            msg.setLanguage("language");
             BOOST_REQUIRE_NO_THROW(request.consumeMessage(msg));
             BOOST_REQUIRE(request.getCurrentStateId() == "3");
             BOOST_REQUIRE(request.inFinalState());
