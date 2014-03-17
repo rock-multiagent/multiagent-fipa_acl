@@ -55,7 +55,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if( ACLMessage::performativeFromString(msg.getPerformative()) != mPerformative)
         {
-            LOG_DEBUG("Performative validation failed"); 
+            LOG_DEBUG("Performative validation failed: was '%s' but expected: '%s'", msg.getPerformative().c_str(), fipa::acl::PerformativeTxt[mPerformative].c_str()); 
             return false;
         }
     }
@@ -83,7 +83,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if (msg.getConversationID() != validatorMsg.getConversationID())
         { 
-            LOG_DEBUG("ConversationID validation failed"); 
+            LOG_DEBUG("ConversationID validation failed: was '%s' but expected: '%s'", msg.getConversationID().c_str(), validatorMsg.getConversationID().c_str()); 
             return false; 
         }
     }
@@ -92,7 +92,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if (msg.getProtocol() != validatorMsg.getProtocol())
         { 
-            LOG_DEBUG("Protocol validation failed");
+            LOG_DEBUG("Protocol validation failed: was '%s' but expected: '%s'", msg.getProtocol().c_str(), validatorMsg.getProtocol().c_str());
             return false;
         }
     }
@@ -101,7 +101,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if (msg.getEncoding() != validatorMsg.getEncoding())
         { 
-            LOG_DEBUG("Encoding validation failed"); 
+            LOG_DEBUG("Encoding validation failed: was '%s' but expected: '%s'", msg.getEncoding().c_str(), validatorMsg.getEncoding().c_str()); 
             return false; 
         }
     }
@@ -110,7 +110,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if (msg.getLanguage() != validatorMsg.getLanguage())
         {
-            LOG_DEBUG("Language validation failed");
+            LOG_DEBUG("Language validation failed: was '%s' but expected: '%s'", msg.getLanguage().c_str(), validatorMsg.getLanguage().c_str());
             return false;
         }
     }
@@ -119,7 +119,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if (msg.getOntology() != validatorMsg.getOntology())
         {
-            LOG_DEBUG("Ontology validation failed");
+            LOG_DEBUG("Ontology validation failed: was '%s' but expected: '%s'", msg.getOntology().c_str(), validatorMsg.getOntology().c_str());
             return false;
         }
     }
@@ -128,7 +128,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if (msg.getInReplyTo() != validatorMsg.getInReplyTo())
         {
-            LOG_DEBUG("InReplyTo validation failed");
+            LOG_DEBUG("InReplyTo validation failed: was '%s' but expected: '%s'", msg.getInReplyTo().c_str(), validatorMsg.getInReplyTo().c_str());
             return false;
         }
     }
