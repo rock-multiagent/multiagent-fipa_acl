@@ -22,6 +22,8 @@ set(SOURCES
     message_generator/message_generator.cpp
     message_generator/userdef_param.cpp
     message_generator/serialized_letter.cpp
+    conversation_monitor/conversation.cpp
+    conversation_monitor/conversation_monitor.cpp
     conversation_monitor/message_archive.cpp
     conversation_monitor/role.cpp
     conversation_monitor/state.cpp
@@ -34,6 +36,8 @@ set(SOURCES
 set(HEADERS
     bitefficient_message.h
     conversation_monitor.h
+    conversation_monitor/conversation.h
+    conversation_monitor/conversation_monitor.h
     conversation_monitor/message_archive.h
     conversation_monitor/role.h
     conversation_monitor/state.h
@@ -78,7 +82,7 @@ set(HEADERS
 rock_library(${PROJECT_NAME} 
         SOURCES ${SOURCES}
         HEADERS ${HEADERS}
-        DEPS_PKGCONFIG base-lib base-types tinyxml
+        DEPS_PKGCONFIG base-lib base-types tinyxml uuid
         )
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 	

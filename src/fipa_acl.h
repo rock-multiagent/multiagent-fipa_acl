@@ -3,6 +3,7 @@
 #include <fipa_acl/bitefficient_message.h>
 #include <fipa_acl/message_generator/acl_envelope.h>
 #include <fipa_acl/message_generator/serialized_letter.h>
+#include <fipa_acl/conversation_monitor/conversation_monitor.h>
 
 /*! \mainpage FIPA ACL Library
  * This class provides a representation of a message conforming to the FIPA specifications hosted at http://www.fipa.org

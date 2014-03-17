@@ -6,18 +6,9 @@
 #include <iostream>
 #include <fipa_acl/fipa_acl.h>
 #include <fipa_acl/conversation_monitor.h>
-BOOST_AUTO_TEST_SUITE(conversation_monitor_suite)
+#include "utils.h"
 
-std::string getProtocolPath()
-{
-    char buffer[1024];
-    BOOST_REQUIRE_MESSAGE( readlink("/proc/self/exe", buffer, 1024) != -1, "Retrieving current execution path");
-    std::string str(buffer);
-    std::string executionDir = str.substr(0, str.rfind('/'));
-    // Assuming we have do a build into build/ parallel to src/ 
-    std::string configurationPath = executionDir + "/../../../../configuration/protocols";
-    return configurationPath;
-}
+BOOST_AUTO_TEST_SUITE(conversation_monitor_suite)
 
 BOOST_AUTO_TEST_CASE(transition_test)
 {

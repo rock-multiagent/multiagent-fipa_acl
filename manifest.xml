@@ -11,6 +11,7 @@
   <depend package="boost" />
   <depend package="rice" />
   <depend package="ruby" />
+  <depend package="uid" />
   <depend package="external/tinyxml" />
   <versioncontrol type="git" url="" />
   <export>

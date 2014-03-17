@@ -9,7 +9,7 @@ add_definitions(-g0)
 add_definitions(-DTIXML_USE_STL=1)
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
-find_package(Boost REQUIRED filesystem unit_test_framework regex)
+find_package(Boost REQUIRED filesystem unit_test_framework regex thread)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
