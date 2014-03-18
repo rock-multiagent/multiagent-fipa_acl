@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <stdexcept>
+#include <unistd.h>
 
 std::string getProtocolPath()
 {
