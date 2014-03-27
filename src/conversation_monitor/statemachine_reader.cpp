@@ -23,12 +23,23 @@ const std::string StateMachineReader::initial = std::string("initial");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
 {
+    {
+        FILE* file = fopen(protocolSpec.c_str(), "r");
+        if(file)
+        {
+            fclose(file);
+        } else {
+            LOG_ERROR("error loading the spec file: '%s'. File does not exist.", protocolSpec.c_str());
+            throw std::runtime_error("Error loading the specification file: '" + protocolSpec + "' -- file does not exist");
+        }
+    }
+
     TiXmlDocument file = TiXmlDocument(protocolSpec.c_str());
     
     if (!file.LoadFile())
     {
-        LOG_ERROR("error loading the spec file: %s. Please use setProtocolResourceDir(const std::string&) to specify the location of your protocol files", protocolSpec.c_str());
-        throw std::runtime_error("Error loading the specification file");
+        LOG_ERROR("error loading the spec file: '%s'. Please use setProtocolResourceDir(const std::string&) instead to specify the location of your protocol files", protocolSpec.c_str());
+        throw std::runtime_error("Error loading the specification file: '" + protocolSpec + "' -- tinyxml failed to load the file");
     }
 
     LOG_DEBUG("loadSpecification: specification file '%s'", protocolSpec.c_str());
