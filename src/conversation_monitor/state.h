@@ -72,6 +72,8 @@ private:
     */
     std::vector<StateMachine> mEmbeddedStateMachines;
 
+    static std::vector<StateId> msDefaultStates;
+
 protected:
     /**
       \brief setter method for the final field of the class
@@ -129,7 +131,12 @@ public:
       \return true if state is final, false otherwise
     */
     bool isFinal() const { return mIsFinal; }
-    
+
+    /**
+     * \brief Test if state belongs to the default state or not
+     * \return true if state is default, false otherwise
+     */
+    bool isDefaultState() const;
     
     /**
       \brief setter method for the uid field of the state NOTE: maybe should be taken out and name only be allowed to be set on

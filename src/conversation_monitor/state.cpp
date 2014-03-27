@@ -4,10 +4,11 @@
 #include "message_archive.h"
 #include "statemachine.h"
 
+#include <boost/assign/list_of.hpp>
 #include <iostream>
 #include <stdexcept>
-#include <base/logging.h>
 #include <sstream>
+#include <base/logging.h>
 
 namespace fipa {
 namespace acl {
@@ -18,6 +19,15 @@ const StateId State::CONVERSATION_CANCEL_SUCCESS = "__internal_state:conversatio
 const StateId State::CONVERSATION_CANCEL_FAILURE = "__internal_state:conversation_cancel_failure__";
 const StateId State::UNDEFINED_ID = "__undefined__";
 const StateId State::GENERAL_FAILURE_STATE = "__internal_state:general_failure__";
+
+std::vector<StateId> State::msDefaultStates = boost::assign::list_of
+    (State::NOT_UNDERSTOOD)
+    (State::CONVERSATION_CANCELLING)
+    (State::CONVERSATION_CANCEL_SUCCESS)
+    (State::CONVERSATION_CANCEL_FAILURE)
+    (State::UNDEFINED_ID)
+    (State::GENERAL_FAILURE_STATE)
+    ;
 
 State::State() 
     : mId(State::UNDEFINED_ID)
@@ -98,6 +108,12 @@ void State::generateDefaultTransitions()
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
     }
+}
+
+bool State::isDefaultState() const
+{
+    std::vector<StateId>::const_iterator cit = std::find(msDefaultStates.begin(), msDefaultStates.end(), mId);
+    return cit != msDefaultStates.end();
 }
 
 const Transition& State::getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const
