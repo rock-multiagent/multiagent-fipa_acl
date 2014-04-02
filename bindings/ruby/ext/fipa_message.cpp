@@ -438,6 +438,7 @@ void Init_fipamessage_ruby()
    .define_method("getConversationID", &ACLMessage::getConversationID)
    .define_method("to_byte_array", &wrap_toByteVector)
    .define_method("from_byte_string", &wrap_fromByteString)
+   .define_method("to_s", &ACLMessage::toString)
    //.define_method("setReplyBy", 
    //.define_method("addUserDefinedParameter", &ACLMessage::addUserdefParam)
    //.define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters)
