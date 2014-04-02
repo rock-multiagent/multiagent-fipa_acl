@@ -133,7 +133,7 @@ std::string Conversation::getContentLanguage() const
 void Conversation::update(const fipa::acl::ACLMessage& msg)
 {
     boost::unique_lock<boost::mutex> lock(mMutex);
-   
+
     LOG_INFO("Update conversation: id '%s'", msg.getConversationID().c_str());
     LOG_INFO("Update message: performative: '%s' content: '%s'", msg.getPerformative().c_str(), msg.getContent().c_str());
 
@@ -171,7 +171,13 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
         {
             LOG_ERROR("Conversation: message with different protocol being inserted: current '%s' - to be inserted '%s'", mProtocol.c_str(), msg.getProtocol().c_str());
             throw conversation::ProtocolException("Conversation: message with wrong protocol being inserted");
-        } else if( mContentLanguage != msg.getLanguage())  
+        } else if( msg.getProtocol().empty())
+        {
+            LOG_WARN("Conversation: received message has no protocol being set. Current conversation using '%s'", mProtocol.c_str());
+        } else if( msg.getLanguage().empty())
+        {
+            LOG_WARN("Conversation: received message has not language being set. Current conversation using '%s'", mContentLanguage.c_str());
+        } else if(mContentLanguage != msg.getLanguage())
         {
             LOG_ERROR("Conversation: message with different content language being inserted: current '%s' - to be inserted '%s'", mContentLanguage.c_str(), msg.getLanguage().c_str());
             throw std::runtime_error("Conversation: conversation with multiple content language are not supported");
@@ -233,13 +239,13 @@ bool Conversation::hasEnded() const
         LOG_DEBUG("Conversation ended");
         return true;
     }
-    
+
     LOG_DEBUG("Conversation did not end");
     return false;
 }
 
 bool Conversation::hasMessages() const
-{ 
+{
     boost::unique_lock<boost::mutex> lock(mMutex);
     return !mMessages.empty();
 }
@@ -256,7 +262,7 @@ fipa::acl::ConversationID Conversation::generateConversationID(const std::string
 
     char conversationId[37];
     uuid_unparse(uuid, conversationId);
-    return std::string(conversationId) + "--" + topic + "--" + base::Time::now().toString(); 
+    return std::string(conversationId) + "--" + topic + "--" + base::Time::now().toString();
 }
 
 ConversationObservable::ConversationObservable()
@@ -304,7 +310,7 @@ void ConversationObservable::notify(const fipa::acl::ACLMessage& msg, conversati
 {
     boost::unique_lock<boost::mutex> lock(mObserverMutex);
     LOG_INFO("notify: message event: '%s', message content: '%s'", conversation::EventTypeTxt[eventType].c_str(), msg.getContent().c_str());
-    ConversationObserverList::iterator it = mObservers.begin(); 
+    ConversationObserverList::iterator it = mObservers.begin();
     for(; it != mObservers.end(); ++it)
     {
         (*it)->update( conversation::Event(msg, eventType) );
@@ -331,9 +337,9 @@ void ConversationObservable::notify(const fipa::acl::ACLMessage& msg, conversati
 
 }
 
-conversation::Status ConversationObservable::getStatus() const 
-{ 
-    return mStatus; 
+conversation::Status ConversationObservable::getStatus() const
+{
+    return mStatus;
 }
 
 void ConversationObservable::detachObservers()
