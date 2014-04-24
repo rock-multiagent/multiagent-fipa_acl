@@ -1,4 +1,5 @@
 #include "string_format.h"
+#include <sstream>
 
 namespace fipa {
 namespace acl {
@@ -64,6 +65,15 @@ std::string StringFormat::getUrlSequence(const Addresses& addresses)
     }
     sequence += ")";
     return sequence;
+}
+
+std::string StringFormat::getString(const std::string& txt)
+{
+    size_t size = txt.size();
+    std::stringstream ss;
+    ss << "#" << size << "\"" << txt;
+
+    return ss.str();
 }
 
 

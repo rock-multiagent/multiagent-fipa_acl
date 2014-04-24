@@ -33,7 +33,7 @@ std::string StringMessageFormat::apply(const ACLMessage& aclMsg) const
         std::stringstream ss;
         ss << size;
 
-        msg += ":" + MessageFieldTxt[CONTENT] + "#" + ss.str() + "\"" + *aclMsg.getContentPtr();
+        msg += ":" + MessageFieldTxt[CONTENT] + StringFormat::getString(*aclMsg.getContentPtr());
     }
 
     const std::string& replyWith = aclMsg.getReplyWith();
@@ -98,7 +98,9 @@ std::string StringMessageFormat::apply(const ACLMessage& aclMsg) const
     std::vector<fipa::acl::UserdefParam>::const_iterator cit = parameters.begin();
     for(; cit != parameters.end(); ++cit)
     {
-        msg += ":X-" + cit->getName() + StringFormat::getExpression(cit->getValue());
+        // As user defined parameters are Words, they can contain spaces and it is not clear,
+        // where the actual parameter starts. Therefore, we use parentheses around the expression.
+        msg += ":X-" + cit->getName() + "(" + StringFormat::getExpression(cit->getValue()) + ")";
     }
     msg += ")";
 
