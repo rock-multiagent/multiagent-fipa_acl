@@ -16,7 +16,8 @@ struct Keyword : qi::grammar<Iterator, std::string()>
     {
         using namespace fipa::acl::MessageField;
 
-        keyword = qi::lit(":" + MessageFieldTxt[SENDER])
+        keyword = qi::no_case[
+              qi::lit(":" + MessageFieldTxt[SENDER])
             | qi::lit(":" + MessageFieldTxt[RECEIVER])
             | qi::lit(":" + MessageFieldTxt[CONTENT])
             | qi::lit(":" + MessageFieldTxt[REPLY_WITH])
@@ -28,7 +29,7 @@ struct Keyword : qi::grammar<Iterator, std::string()>
             | qi::lit(":" + MessageFieldTxt[ONTOLOGY])
             | qi::lit(":" + MessageFieldTxt[PROTOCOL])
             | qi::lit(":" + MessageFieldTxt[CONVERSATION_ID])
-            ;
+            ];
 
         //FIPA_DEBUG_RULE(keyword);
     }
@@ -260,10 +261,10 @@ struct Expression : qi::grammar<Iterator, std::string(), Skipper>
             )
         ;
 
-        expression_base = wordWithoutKeyword
-            | string
+        expression_base = string
             | number
             | dateTime
+            | wordWithoutKeyword
         ;
     }
 
@@ -333,11 +334,12 @@ struct Resolver : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
         using namespace fipa::acl;
         namespace label = qi::labels;
 
-        agentId = qi::lit("(agent-identifier")
-            >> qi::lit(":name") >> word                           [ phoenix::at_c<0>(label::_val) = label::_1 ]
-            >> - (":addresses" >> urlSequence                     [ phoenix::at_c<1>(label::_val) = label::_1 ])
+        agentId = qi::lit("(")
+            >> qi::no_case[qi::lit("agent-identifier")]
+            >> qi::no_case[qi::lit(":name")] >> word                           [ phoenix::at_c<0>(label::_val) = label::_1 ]
+            >> - (qi::no_case[qi::lit(":addresses")] >> urlSequence            [ phoenix::at_c<1>(label::_val) = label::_1 ])
             // Leaving out additional resolvers !!! to break recursion
-            >> - (userdefinedParameterList                        [ phoenix::at_c<3>(label::_val) = label::_1 ])
+            >> - (userdefinedParameterList                                     [ phoenix::at_c<3>(label::_val) = label::_1 ])
             >> ")";
 
         //FIPA_DEBUG_RULE(agentId);
@@ -359,7 +361,8 @@ struct AgentIdentifierSequence : qi::grammar<Iterator,AgentIDList(), Skipper>
         using namespace fipa::acl;
         namespace label = qi::labels;
 
-        agentIdList = qi::lit("(sequence")
+        agentIdList = qi::lit("(")
+            >> qi::no_case[qi::lit("sequence")]
             >> * agentIdentifier [ phoenix::push_back(label::_val, label::_1) ]
             >> ")";
 
@@ -380,11 +383,12 @@ struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
         using namespace fipa::acl;
         namespace label = qi::labels;
 
-        agentId = qi::lit("(agent-identifier")
-            >> qi::lit(":name") >> word                           [ phoenix::at_c<0>(label::_val) = label::_1 ]
-            >> -( ":addresses" >> urlSequence                     [ phoenix::at_c<1>(label::_val) = label::_1 ])
-            >> -( ":resolvers" >> agentIdSequence                 [ phoenix::at_c<2>(label::_val) = label::_1 ])
-            >> - (userdefinedParameterList                        [ phoenix::at_c<3>(label::_val) = label::_1 ])
+        agentId = qi::lit("(")
+            >> qi::no_case[qi::lit("agent-identifier")]
+            >> qi::no_case[qi::lit(":name")] >> word                           [ phoenix::at_c<0>(label::_val) = label::_1 ]
+            >> -( qi::no_case[qi::lit(":addresses")] >> urlSequence            [ phoenix::at_c<1>(label::_val) = label::_1 ])
+            >> -( qi::no_case[qi::lit(":resolvers")] >> agentIdSequence        [ phoenix::at_c<2>(label::_val) = label::_1 ])
+            >> - (userdefinedParameterList                                     [ phoenix::at_c<3>(label::_val) = label::_1 ])
             >> ")";
 
         //FIPA_DEBUG_RULE(agentId);
@@ -407,7 +411,8 @@ struct AgentIdentifierSet : qi::grammar<Iterator,AgentIDList(),Skipper >
         using namespace fipa::acl;
         namespace label = qi::labels;
 
-        agentIdList = qi::lit("(set")
+        agentIdList = qi::lit("(")
+            >> qi::no_case[qi::lit("set")]
             >> * agentIdentifier [ phoenix::push_back(label::_val, label::_1) ]
             >> ")";
 
@@ -432,7 +437,8 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage(), Skipper>
 
         aclCommunicativeAct = "("
             >> messageType                                                    [ phoenix::at_c<0>(label::_val) = label::_1 ]
-            >> *( qi::lit(":" + MessageFieldTxt[SENDER]) >> agentId           [ phoenix::at_c<1>(label::_val) = label::_1 ]
+            >> *( qi::no_case[
+              qi::lit(":" + MessageFieldTxt[SENDER]) >> agentId               [ phoenix::at_c<1>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[RECEIVER]) >> agentIdList         [ phoenix::at_c<2>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[CONTENT]) >> content              [ phoenix::at_c<3>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[REPLY_WITH]) >> expression        [ phoenix::at_c<4>(label::_val) = label::_1 ]
@@ -445,10 +451,11 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage(), Skipper>
             | qi::lit(":" + MessageFieldTxt[PROTOCOL]) >> wordWithoutKeyword  [ phoenix::at_c<11>(label::_val) = label::_1 ]
             | qi::lit(":" + MessageFieldTxt[CONVERSATION_ID]) >> expression   [ phoenix::at_c<12>(label::_val) = label::_1 ]
             | userdefinedParam                                                [ phoenix::at_c<13>(label::_val) = label::_1 ]
-            )
+            ])
             >> ")";
 
-        messageType = qi::string(PerformativeTxt[ACLMessage::ACCEPT_PROPOSAL])   [ label::_val = label::_1 ]
+        messageType = qi::no_case[
+              qi::string(PerformativeTxt[ACLMessage::ACCEPT_PROPOSAL])           [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::AGREE])                     [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::CANCEL])                    [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::CALL_FOR_PROPOSAL])         [ label::_val = label::_1 ]
@@ -471,7 +478,7 @@ struct Message : qi::grammar<Iterator, fipa::acl::ACLMessage(), Skipper>
             | qi::string(PerformativeTxt[ACLMessage::REQUEST_WHEN])              [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::REQUEST])                   [ label::_val = label::_1 ]
             | qi::string(PerformativeTxt[ACLMessage::SUBSCRIBE])                 [ label::_val = label::_1 ]
-            ;
+            ];
 
         FIPA_DEBUG_RULE(messageType);
     }

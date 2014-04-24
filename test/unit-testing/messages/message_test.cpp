@@ -710,6 +710,21 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
             BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
             BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
         }
+        
+        {
+            std::string expectedReceiverName = "AGENTNAME2";
+            std::string encodedMsg = "(INFORM\n :SENDER ( AGENT-IDENTIFIER  :NAME "
+                + expectedAgentName + " )\n :receiver (SET ( agent-identifier  :name "
+                + expectedReceiverName + " ) )\n :content  \""
+                + expectedContent + "\")";
+
+            ACLMessage outputMsg;
+
+            BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg, fipa::acl::representation::STRING_REP), "Parse string content with more space skipping and UPPERCASE: '" << encodedMsg << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected sender is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getAllReceivers()[0].getName() == expectedReceiverName, "Expected receiver is: '" << expectedReceiverName << "' - contained: '" << outputMsg.getAllReceivers()[0].getName() << "'");
+        }
     }
 
   
