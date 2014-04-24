@@ -7,7 +7,8 @@ namespace acl {
 MessageFormat::MessageFormat()
     : mUseCodeTables(false)
     , mUpdateCodeTables(true)
-    , mVersion("1.4")
+    // FIPA defines version 1.0
+    , mVersion("1.0")
     , mResolverDepth(1)
 {
 }
