@@ -18,6 +18,8 @@ set(SOURCES
     message_generator/format/bitefficient_message_format.cpp
     message_generator/format/string_format.cpp
     message_generator/format/string_message_format.cpp
+    message_generator/format/xml_envelope_format.cpp
+    message_generator/format/xml_format.cpp
     message_generator/message_format.cpp
     message_generator/message_generator.cpp
     message_generator/userdef_param.cpp
@@ -59,6 +61,8 @@ set(HEADERS
     message_generator/format/bitefficient_message_format.h
     message_generator/format/string_format.h
     message_generator/format/string_message_format.h
+    message_generator/format/xml_envelope_format.h
+    message_generator/format/xml_format.h
     message_generator/message_format.h
     message_generator/message_generator.h
     message_generator/received_object.h
