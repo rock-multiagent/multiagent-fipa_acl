@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     using namespace fipa::acl;
 
     // TODO include every single field
-    ACLMessage msg("inform");
+    ACLMessage msg(ACLMessage::REQUEST);
     AgentID origin("proxy");
     AgentID receiver("receiver");
 
@@ -257,22 +257,68 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
 
     receiver.addResolver(resolver0);
     receiver.addResolver(resolver1);
+    receiver.addAddress("htt://test.address");
 
     msg.setSender(origin);
     msg.addReceiver(receiver);
     msg.addReplyTo(origin);
-    msg.setPerformative(ACLMessage::REQUEST);
-    msg.setProtocol(std::string("test-protocol"));
-    msg.setLanguage(std::string("test language"));
-    msg.setEncoding(std::string("test encoding"));
-    msg.setOntology(std::string("test ontology"));
-    msg.setReplyWith(std::string("test reply_with"));
+    msg.setProtocol("test-protocol");
+    msg.setLanguage("test language");
+    msg.setEncoding("test encoding");
+    msg.setOntology("test ontology");
+    msg.setReplyWith("test reply_with");
     base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
     msg.setReplyBy(time);
     msg.setConversationID(std::string("test conversationID"));
     msg.setContent("test-content");
+    msg.setInReplyTo("test in_reply_to");
+    
+    UserdefParam userdefMessageParam("userdef0","test value");
+    msg.addUserdefParam(userdefMessageParam);
 
     ACLEnvelope envelope(msg, representation::XML);
+    ACLBaseEnvelope inBaseEnvelope;
+    // BEGIN Base envelope
+    base::Time now = base::Time::now();
+    TransportBehaviour inTransportBehaviour = "CUSTOM";
+    Comments inComments = "COMMENTS";
+    
+    std::vector<AgentID> inIntendedReceivers;
+    AgentID inSender("sender");
+    AgentID inIntendedReceiver("intended-receiver");
+    inIntendedReceivers.push_back(inIntendedReceiver);
+    ReceivedObject inReceivedObject;
+    inReceivedObject.setBy("http://by.here");
+    inReceivedObject.setFrom("http://from.here");
+    inReceivedObject.setDate(base::Time::now());
+    inReceivedObject.setId("recv_id");
+    inReceivedObject.setVia("recv_via");
+    UserdefParam userdefEnvelopeParam ("userdef1", "test value");
+    std::vector<UserdefParam> params;
+    params.push_back(userdefEnvelopeParam);
+
+    inBaseEnvelope.setDate(now);
+    inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
+    inBaseEnvelope.setComments(inComments);
+    // TODO: where to set what kind of representation!?!?
+    // leaving the following out will lead to problems TESSTTT
+    inBaseEnvelope.setACLRepresentation(representation::XML);
+    inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
+    inBaseEnvelope.setFrom(inSender);
+    inBaseEnvelope.setIntendedReceivers(inIntendedReceivers);
+    inBaseEnvelope.setReceivedObject(inReceivedObject);
+    inBaseEnvelope.setUserdefinedParameters(params);
+
+    // END Base envelope
+    envelope.setBaseEnvelope(inBaseEnvelope);
+    // BEGIN Extra envelope
+    ACLBaseEnvelope inExtraEnvelope;
+    AgentID inExtraTo("extra-receiver");
+    AgentIDList inExtraTos;
+    inExtraTos.push_back(inExtraTo);
+    inExtraEnvelope.setTo(inExtraTos);
+    // END Extra envelope
+    envelope.addExtraEnvelope(inExtraEnvelope);
     
     representation::Type envRepresentationType = representation::XML;
     std::string encodedEnvelope = EnvelopeGenerator::create(envelope, envRepresentationType);

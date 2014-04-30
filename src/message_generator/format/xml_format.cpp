@@ -143,6 +143,7 @@ TiXmlElement* XMLFormat::getReceivedObject(const ReceivedObject& receivedObject)
     return recvElem;
 }
 
+// FIXME this is probably _not_ what FIPA defines.
 std::vector< TiXmlElement* > XMLFormat::getUserdefinedParameters(const UserdefinedParameterList& params)
 {
     std::vector<TiXmlElement*> vec;
