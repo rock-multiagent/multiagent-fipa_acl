@@ -28,7 +28,7 @@ private:
 
     TiXmlElement* getReceivedObject(const ReceivedObject& receivedObject) const;
     TiXmlElement* getDate(const base::Time& date) const;
-    const std::string& dateToStr(const base::Time& date) const;
+    const std::string dateToStr(const base::Time& date) const;
     TiXmlElement* getAgentID(const AgentID& aid) const;
     std::vector< TiXmlElement* > getAgentIDSequence(const AgentIDList& aidl) const;
     std::vector< TiXmlElement* > getUserdefinedParameters(const UserdefinedParameterList& params) const;

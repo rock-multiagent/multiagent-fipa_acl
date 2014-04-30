@@ -1,9 +1,11 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <fipa_acl/fipa_acl.h>
 #include <fipa_acl/message_generator/envelope_generator.h>
-#include <fipa_acl/message_parser/envelope_parser.h>
 #include <fipa_acl/message_generator/format/bitefficient_format.h>
 #include <fipa_acl/message_generator/format/bitefficient_envelope_format.h>
+#include <fipa_acl/message_generator/format/xml_format.h>
+#include <fipa_acl/message_generator/format/xml_envelope_format.h>
+#include <fipa_acl/message_parser/envelope_parser.h>
 #include <fipa_acl/message_parser/grammar/grammar_bitefficient_envelope.h>
 #include "test_utils.h"
 
@@ -186,7 +188,7 @@
     }
 }
 
-BOOST_AUTO_TEST_CASE(envelope_test)
+BOOST_AUTO_TEST_CASE(envelope_bitefficient_test)
 {
     using namespace fipa::acl;
 
@@ -239,6 +241,46 @@ BOOST_AUTO_TEST_CASE(envelope_test)
     BOOST_CHECK_MESSAGE( msg.getOntology() == outMsg.getOntology(), "ACL Message in envelope ontology: '" << outMsg.getOntology() << "' vs '" << msg.getOntology() << "'");
     BOOST_REQUIRE_MESSAGE( msg == outMsg, "Full message comparisons '" << outMsg.toString() << "' vs '" << msg.toString() << "'");
 
+}
+
+BOOST_AUTO_TEST_CASE(envelope_xml_test)
+{
+    std::cout << "Starting XML envelope test." << std::endl;
+    using namespace fipa::acl;
+
+    ACLMessage msg("inform");
+    AgentID origin("proxy");
+    AgentID receiver("receiver");
+
+    AgentID resolver0("resolver0");
+    AgentID resolver1("resolver1");
+
+    receiver.addResolver(resolver0);
+    receiver.addResolver(resolver1);
+
+    msg.setSender(origin);
+    msg.addReceiver(receiver);
+    msg.addReplyTo(origin);
+    msg.setPerformative(ACLMessage::REQUEST);
+    msg.setProtocol(std::string("test-protocol"));
+    msg.setLanguage(std::string("test language"));
+    msg.setEncoding(std::string("test encoding"));
+    msg.setOntology(std::string("test ontology"));
+    msg.setReplyWith(std::string("test reply_with"));
+    base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
+    msg.setReplyBy(time);
+    msg.setConversationID(std::string("test conversationID"));
+    msg.setContent("test-content");
+
+    std::cout << "Creating envelope." << std::endl;
+    ACLEnvelope envelope(msg, representation::STRING_REP);
+    
+    std::cout << "Encoding envelope." << std::endl;
+    representation::Type envRepresentationType = representation::XML;
+    std::string encodedEnvelope = EnvelopeGenerator::create(envelope, envRepresentationType);
+    std::cout << "XML Encoded envelope:" << std::endl << encodedEnvelope << std::endl;
+    
+    // TODO ...
 }
 
 BOOST_AUTO_TEST_SUITE_END()

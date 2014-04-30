@@ -89,28 +89,28 @@ std::vector<TiXmlElement*> XMLEnvelopeFormat::getParameters(const ACLBaseEnvelop
     if(envelope.contains(envelope::COMMENTS))
     {
         TiXmlElement* comments = new TiXmlElement("comments");
-        comments->SetValue(envelope.getComments());
+        comments->LinkEndChild(new TiXmlText(envelope.getComments()));
         vec.push_back(comments);
     }
     
     if(envelope.contains(envelope::ACL_REPRESENTATION))
     {
         TiXmlElement* aclRep = new TiXmlElement("acl-representation");
-        aclRep->SetValue(envelope.getACLRepresentationString());
+        aclRep->LinkEndChild(new TiXmlText(envelope.getACLRepresentationString()));
         vec.push_back(aclRep);
     }
 
     if(envelope.contains(envelope::PAYLOAD_LENGTH))
     {
         TiXmlElement* payloadLength = new TiXmlElement("payload-length");
-        payloadLength->SetValue(boost::lexical_cast<std::string>(envelope.getPayloadLength()));
+        payloadLength->LinkEndChild(new TiXmlText(boost::lexical_cast<std::string>(envelope.getPayloadLength())));
         vec.push_back(payloadLength);
     }
 
     if(envelope.contains(envelope::PAYLOAD_ENCODING))
     {
         TiXmlElement* payloadEncoding= new TiXmlElement("payload-encoding");
-        payloadEncoding->SetValue(envelope.getPayloadEncoding());
+        payloadEncoding->LinkEndChild(new TiXmlText(envelope.getPayloadEncoding()));
         vec.push_back(payloadEncoding);
     }
     
@@ -150,13 +150,13 @@ std::vector<TiXmlElement*> XMLEnvelopeFormat::getParameters(const ACLBaseEnvelop
 TiXmlElement* XMLEnvelopeFormat::getDate(const base::Time& date) const
 {
     TiXmlElement* dateElem = new TiXmlElement("date");
-    dateElem->SetValue(dateToStr(date));
+    dateElem->LinkEndChild(new TiXmlText(dateToStr(date)));
     return dateElem;
 }
 
-const std::string& XMLEnvelopeFormat::dateToStr(const base::Time& date) const
+const std::string XMLEnvelopeFormat::dateToStr(const base::Time& date) const
 {
-    return date.toString(base::Time::Milliseconds, "%Y%m%dT%H%M%S"); // TODO test
+    return date.toString(base::Time::Milliseconds, "%Y%m%dT%H%M%S"); // FIXME this includes a colon between s and ms
 }
 
 
@@ -175,25 +175,32 @@ TiXmlElement* XMLEnvelopeFormat::getAgentID(const AgentID& aid) const
     TiXmlElement* aidElem = new TiXmlElement("agent-identifier");
     
     TiXmlElement* nameElem = new TiXmlElement("name");
-    nameElem->SetValue(aid.getName());
+    nameElem->LinkEndChild(new TiXmlText(aid.getName()));
     aidElem->LinkEndChild(nameElem);
     
-    // TODO optional add, res
-    TiXmlElement* addressesElem = new TiXmlElement("addresses");
-    BOOST_FOREACH(std::string address, aid.getAddresses())
+    std::vector<std::string> addresses = aid.getAddresses();
+    if(!addresses.empty())
     {
-        TiXmlElement* urlElem = new TiXmlElement("url");
-        urlElem->SetValue(address);
-        addressesElem->LinkEndChild(urlElem);
+        TiXmlElement* addressesElem = new TiXmlElement("addresses");
+        BOOST_FOREACH(std::string address, addresses)
+        {
+            TiXmlElement* urlElem = new TiXmlElement("url");
+            urlElem->LinkEndChild(new TiXmlText(address));
+            addressesElem->LinkEndChild(urlElem);
+        }
+        aidElem->LinkEndChild(addressesElem);
     }
-    aidElem->LinkEndChild(addressesElem);
     
-    TiXmlElement* resolversElem = new TiXmlElement("resolvers");
-    BOOST_FOREACH(TiXmlElement* resolverElem, getAgentIDSequence(aid.getResolvers()))
+    Resolvers resolvers = aid.getResolvers();
+    if(!resolvers.empty())
     {
-        resolversElem->LinkEndChild(resolverElem);
+        TiXmlElement* resolversElem = new TiXmlElement("resolvers");
+        BOOST_FOREACH(TiXmlElement* resolverElem, getAgentIDSequence(resolvers))
+        {
+            resolversElem->LinkEndChild(resolverElem);
+        }
+        aidElem->LinkEndChild(resolversElem);
     }
-    aidElem->LinkEndChild(resolversElem);
     
     BOOST_FOREACH(TiXmlElement* elem, getUserdefinedParameters(aid.getUserdefParams()))
     {
@@ -205,24 +212,18 @@ TiXmlElement* XMLEnvelopeFormat::getAgentID(const AgentID& aid) const
 
 TiXmlElement* XMLEnvelopeFormat::getReceivedObject(const ReceivedObject& receivedObject) const
 {
-//     ( received-by,
-//         received-from?,
-//         received-date,
-//         received-id?,
-//         received-via?,
-//         user-defined* )
     // TODO by/from definition uses value, example uses attribute "value"
     
     TiXmlElement* recvElem = new TiXmlElement( "received" );
     
     TiXmlElement* recvByElem = new TiXmlElement("received-by");
-    recvByElem->SetValue(receivedObject.getBy());
+    recvByElem->LinkEndChild(new TiXmlText(receivedObject.getBy()));
     recvElem->LinkEndChild(recvByElem);
     
     if(receivedObject.getFrom() != "")
     {
         TiXmlElement* recvFromElem = new TiXmlElement("received-from");
-        recvFromElem->SetValue(receivedObject.getFrom());
+        recvFromElem->LinkEndChild(new TiXmlText(receivedObject.getFrom()));
         recvElem->LinkEndChild(recvFromElem);
     }
     
@@ -254,8 +255,13 @@ TiXmlElement* XMLEnvelopeFormat::getReceivedObject(const ReceivedObject& receive
 
 std::vector< TiXmlElement* > XMLEnvelopeFormat::getUserdefinedParameters(const UserdefinedParameterList& params) const
 {
-    // TODO
     std::vector<TiXmlElement*> vec;
+    BOOST_FOREACH(UserdefParam userdefParam, params)
+    {
+        TiXmlElement* userdefParamElem = new TiXmlElement("X-" + userdefParam.getName());
+        userdefParamElem->LinkEndChild(new TiXmlText(userdefParam.getValue()));
+        vec.push_back(userdefParamElem);
+    }
     return vec;
 }
 
