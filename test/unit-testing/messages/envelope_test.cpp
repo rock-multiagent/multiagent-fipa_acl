@@ -245,9 +245,9 @@ BOOST_AUTO_TEST_CASE(envelope_bitefficient_test)
 
 BOOST_AUTO_TEST_CASE(envelope_xml_test)
 {
-    std::cout << "Starting XML envelope test." << std::endl;
     using namespace fipa::acl;
 
+    // TODO include every single field
     ACLMessage msg("inform");
     AgentID origin("proxy");
     AgentID receiver("receiver");
@@ -272,10 +272,8 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     msg.setConversationID(std::string("test conversationID"));
     msg.setContent("test-content");
 
-    std::cout << "Creating envelope." << std::endl;
-    ACLEnvelope envelope(msg, representation::STRING_REP);
+    ACLEnvelope envelope(msg, representation::XML);
     
-    std::cout << "Encoding envelope." << std::endl;
     representation::Type envRepresentationType = representation::XML;
     std::string encodedEnvelope = EnvelopeGenerator::create(envelope, envRepresentationType);
     std::cout << "XML Encoded envelope:" << std::endl << encodedEnvelope << std::endl;

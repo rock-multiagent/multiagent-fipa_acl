@@ -11,7 +11,6 @@ class XMLEnvelopeFormat : public EnvelopeFormat
 {
 
 private:
-    // TODO constanize
     /**
      * Encode all external envelopes
      */
@@ -24,14 +23,6 @@ private:
      * Encode envelope parameters
      */
     std::vector< TiXmlElement* > getParameters(const ACLBaseEnvelope& envelope) const;
-
-
-    TiXmlElement* getReceivedObject(const ReceivedObject& receivedObject) const;
-    TiXmlElement* getDate(const base::Time& date) const;
-    const std::string dateToStr(const base::Time& date) const;
-    TiXmlElement* getAgentID(const AgentID& aid) const;
-    std::vector< TiXmlElement* > getAgentIDSequence(const AgentIDList& aidl) const;
-    std::vector< TiXmlElement* > getUserdefinedParameters(const UserdefinedParameterList& params) const;
 public:
     /**
      * Applies the format to the envelope
