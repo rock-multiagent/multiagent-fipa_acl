@@ -1,23 +1,27 @@
 #include "envelope_parser.h"
-#include "grammar/grammar_bitefficient_envelope.h"
+#include "bitefficient_envelope_parser.h"
+#include "xml_envelope_parser.h"
+
+#include <boost/assign/list_of.hpp>
 
 namespace fipa {
 namespace acl {
+    
+std::map<representation::Type, EnvelopeParserImplementationPtr > EnvelopeParser::msParsers = boost::assign::map_list_of
+        (representation::BITEFFICIENT, boost::shared_ptr<EnvelopeParserImplementation>(new BitefficientEnvelopeParser()) )
+        (representation::XML, boost::shared_ptr<EnvelopeParserImplementation>(new XMLEnvelopeParser()) );
+
 
 bool EnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envelope, representation::Type type)
 {
-    typedef fipa::acl::bitefficient::Envelope<std::string::const_iterator> bitefficient_envelope_grammar;
-    bitefficient_envelope_grammar grammar;
-
-    std::string::const_iterator iter = storage.begin(); 
-    std::string::const_iterator end = storage.end(); 
-    bool r = parse(iter, end, grammar, envelope);
-
-    if(r && iter == end)
+    EnvelopeParserImplementationPtr messageParser = msParsers[type];
+    if(messageParser)
     {
-        return true;
+        return messageParser->parseData(storage, envelope);
+    } else {
+        std::string msg = "EnvelopeParser: there is no parser registered for " + representation::TypeTxt[type];
+        throw std::runtime_error(msg);
     }
-    return false;
 }
 
 } // end namespace acl

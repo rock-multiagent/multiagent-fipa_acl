@@ -4,8 +4,6 @@
 
 namespace fipa {
 namespace acl {
-
-    // TODO use getUrl
     
 TiXmlElement* XMLFormat::getDate(const base::Time& date)
 {
@@ -16,6 +14,7 @@ TiXmlElement* XMLFormat::getDate(const base::Time& date)
 
 const std::string XMLFormat::dateToStr(const base::Time& date)
 {
+    // TODO when parsing also accept 'Z' instead pf 'T'. Jade -.-
     std::string dateStr = date.toString(base::Time::Milliseconds, "%Y%m%dT%H%M%S");
     boost::erase_all(dateStr, ":"); // Erase the colon
     return dateStr;
@@ -100,20 +99,21 @@ TiXmlElement* XMLFormat::getAgentID(const AgentID& aid, bool useNameId, bool use
 
 TiXmlElement* XMLFormat::getReceivedObject(const ReceivedObject& receivedObject)
 {
-    // TODO by/from definition uses url, example uses attribute "value"
+    // by/from definition uses url, example uses attribute "value"
+    // Jade also uses example spec, not ACTUAL spec!
     
     TiXmlElement* recvElem = new TiXmlElement( "received" );
     
     // As received objects are only used by envelopes, which have URLs without
     // href attribute, getURL must be called with useHref=false
     TiXmlElement* recvByElem = new TiXmlElement("received-by");
-    recvByElem->LinkEndChild(getURL(receivedObject.getBy(), false));
+    recvByElem->SetAttribute("value", receivedObject.getBy());
     recvElem->LinkEndChild(recvByElem);
     
     if(receivedObject.getFrom() != "")
     {
         TiXmlElement* recvFromElem = new TiXmlElement("received-from");
-        recvFromElem->LinkEndChild(getURL(receivedObject.getFrom(), false));
+        recvFromElem->SetAttribute("value", receivedObject.getFrom());
         recvElem->LinkEndChild(recvFromElem);
     }
     
@@ -143,13 +143,14 @@ TiXmlElement* XMLFormat::getReceivedObject(const ReceivedObject& receivedObject)
     return recvElem;
 }
 
-// FIXME this is probably _not_ what FIPA defines.
 std::vector< TiXmlElement* > XMLFormat::getUserdefinedParameters(const UserdefinedParameterList& params)
 {
     std::vector<TiXmlElement*> vec;
     BOOST_FOREACH(UserdefParam userdefParam, params)
     {
-        TiXmlElement* userdefParamElem = new TiXmlElement("X-" + userdefParam.getName());
+        TiXmlElement* userdefParamElem = new TiXmlElement("user-defined");
+        userdefParamElem->SetAttribute("href", "X-" + userdefParam.getName());
+        userdefParamElem->SetAttribute("type", "string");
         userdefParamElem->LinkEndChild(new TiXmlText(userdefParam.getValue()));
         vec.push_back(userdefParamElem);
     }

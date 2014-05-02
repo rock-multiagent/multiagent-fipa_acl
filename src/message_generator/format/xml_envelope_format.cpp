@@ -15,6 +15,7 @@ std::string XMLEnvelopeFormat::apply(const ACLEnvelope& envelope) const
     TiXmlElement * envelopeElem = new TiXmlElement( "envelope" );
     doc.LinkEndChild( envelopeElem );
     
+    // FIXME wrong base/extra envelopes order?
     // Index for the params
     int index = 1;
     // Append all extra envelopes
