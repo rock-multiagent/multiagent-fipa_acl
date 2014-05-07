@@ -2,13 +2,21 @@
 #define FIPAACL_XML_MESSAGE_PARSER_H
 
 #include <fipa_acl/message_parser/message_parser.h>
+#include "tinyxml.h"
 
 namespace fipa {
 namespace acl {
 
 class XMLMessageParser : public MessageParserImplementation
 {
-    bool parseData(const std::string& storage, ACLMessage& msg); 
+private:
+    /**
+     * Parse message parameter
+     */
+    bool parseParameter(ACLMessage& aclMsg, const TiXmlElement* elem) const;
+    
+public:
+    bool parseData(const std::string& storage, ACLMessage& msg) const; 
 };
 
 } // end namespace acl

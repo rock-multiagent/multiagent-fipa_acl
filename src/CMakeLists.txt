@@ -12,6 +12,7 @@ set(SOURCES
     message_parser/string_message_parser.cpp
     message_parser/xml_envelope_parser.cpp
     message_parser/xml_message_parser.cpp
+    message_parser/xml_parser.cpp
     message_generator/acl_message.cpp
     message_generator/acl_envelope.cpp
     message_generator/agent_id.cpp
@@ -89,6 +90,7 @@ set(HEADERS
     message_parser/types.h
     message_parser/xml_envelope_parser.h
     message_parser/xml_message_parser.h
+    message_parser/xml_parser.h
 )
 
 rock_library(${PROJECT_NAME} 

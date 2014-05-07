@@ -12,7 +12,7 @@ class XMLMessageFormat : public MessageFormat
 {
 private:
     /**
-     * Encode envelope parameters
+     * Encode message parameters
      */
     std::vector< TiXmlElement* > getParameters(const ACLMessage& aclMsg) const;
 

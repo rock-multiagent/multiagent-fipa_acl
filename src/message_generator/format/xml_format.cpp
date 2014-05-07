@@ -14,7 +14,6 @@ TiXmlElement* XMLFormat::getDate(const base::Time& date)
 
 const std::string XMLFormat::dateToStr(const base::Time& date)
 {
-    // TODO when parsing also accept 'Z' instead pf 'T'. Jade -.-
     std::string dateStr = date.toString(base::Time::Milliseconds, "%Y%m%dT%H%M%S");
     boost::erase_all(dateStr, ":"); // Erase the colon
     return dateStr;
@@ -39,7 +38,7 @@ TiXmlElement* XMLFormat::getName(const std::string& name, bool useId)
     TiXmlElement* nameElem = new TiXmlElement("name");
     if(useId)
     {
-        // TODO what is the difference between id and refid
+        // XXX What is the difference between id and refid
         nameElem->SetAttribute("id", name);
     }
     else
