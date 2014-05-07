@@ -9,160 +9,160 @@
 #include <fipa_acl/message_parser/grammar/grammar_bitefficient_envelope.h>
 #include "test_utils.h"
 
-    BOOST_AUTO_TEST_SUITE(fipa_envelope_test_suite)
+BOOST_AUTO_TEST_SUITE(fipa_envelope_test_suite)
 
-    BOOST_AUTO_TEST_CASE(envelope_interface_test)
+BOOST_AUTO_TEST_CASE(envelope_interface_test)
+{
+    using namespace fipa::acl;
+
+    ACLBaseEnvelope envelope;
+    base::Time now = base::Time::now();
+    envelope.setDate(now);
+    BOOST_REQUIRE_MESSAGE(envelope.contains(envelope::DATE), "Envelope contains data");
+    BOOST_REQUIRE_MESSAGE(now == envelope.getDate(), "Envelope.getDate()");
+    BOOST_REQUIRE_MESSAGE(envelope.contains(envelope::DATE), "Envelope contains(envelope::DATE)");
+}
+
+BOOST_AUTO_TEST_CASE(envelope_stamping_test)
+{
+    using namespace fipa::acl;
+
+    std::vector<std::string> hops;
+    hops.push_back("mts-0");
+    hops.push_back("mts-1");
+    hops.push_back("mts-2");
+
+    AgentID sender("test-sender");
+    AgentID receiver("test-receiver");
+    ACLMessage msg(ACLMessage::REQUEST);
+    msg.setContent("test-content");
+
+    msg.setSender(sender);
+    msg.addReceiver(receiver);
+    ACLEnvelope envelope(msg, representation::BITEFFICIENT);
+
+    std::vector<std::string>::const_iterator it = hops.begin();
+    for(; it != hops.end(); ++it)
     {
-        using namespace fipa::acl;
-
-        ACLBaseEnvelope envelope;
-        base::Time now = base::Time::now();
-        envelope.setDate(now);
-        BOOST_REQUIRE_MESSAGE(envelope.contains(envelope::DATE), "Envelope contains data");
-        BOOST_REQUIRE_MESSAGE(now == envelope.getDate(), "Envelope.getDate()");
-        BOOST_REQUIRE_MESSAGE(envelope.contains(envelope::DATE), "Envelope contains(envelope::DATE)");
+        AgentID agent(*it);
+        envelope.stamp(agent);
     }
 
-    BOOST_AUTO_TEST_CASE(envelope_stamping_test)
+    AgentIDList deliveryPath = envelope.getDeliveryPath();
+    for(size_t i = 0; i < hops.size(); ++i)
     {
-        using namespace fipa::acl;
+        BOOST_REQUIRE_MESSAGE(deliveryPath[i].getName() == hops[i], "Hop is " << hops[i]);
+    }
 
-        std::vector<std::string> hops;
-        hops.push_back("mts-0");
-        hops.push_back("mts-1");
-        hops.push_back("mts-2");
+    ACLBaseEnvelopeList envelopes = envelope.getExtraEnvelopes();
+    BOOST_REQUIRE(envelopes.size() == hops.size());
+    ACLBaseEnvelopeList::const_iterator eit = envelopes.begin();
+    for(; eit != envelopes.end(); ++eit)
+    {
+        ReceivedObject ro = eit->getReceivedObject();
+        BOOST_REQUIRE_MESSAGE(!ro.getId().empty(), "ReceivedObject id: " << ro.getId());
+    }
+}
 
-        AgentID sender("test-sender");
-        AgentID receiver("test-receiver");
-        ACLMessage msg(ACLMessage::REQUEST);
-        msg.setContent("test-content");
+BOOST_AUTO_TEST_CASE(grammar_test)
+{
+    using namespace fipa::acl;
+    std::string storage;
+    {
+        storage = char(0x14) + fipa::acl::BitefficientFormat::getNullTerminatedString("ANY");
+        std::string any = testGrammar<fipa::acl::bitefficient::Any, std::string>(storage);
+    }
 
-        msg.setSender(sender);
-        msg.addReceiver(receiver);
+    {
+        storage = fipa::acl::BitefficientFormat::getNullTerminatedString("http://www.rock-robotics.org");
+        std::string url = testGrammar<fipa::acl::bitefficient::Url, std::string>(storage);
+    }
+
+    {
+        AgentID inAgentID("test-agent");
+        storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
+        fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- simple");
+
+    }
+
+    {
+        AgentID inAgentID("test-agent");
+        AgentID resolver0("test-resolver0");
+        AgentID resolver1("test-resolver1");
+        inAgentID.addResolver(resolver0);
+        inAgentID.addResolver(resolver1);
+        storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
+
+        //std::string::const_iterator cit = storage.begin();
+        //for(; cit != storage.end(); ++cit)
+        //{
+        //    printf("%c --> %x\n", *cit, *cit);
+        //}
+        fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- resolvers");
+
+    }
+    {
+        AgentID inAgentID("test-agent");
+        AgentID resolver0("test-resolver0");
+        AgentID resolver1("test-resolver1");
+        inAgentID.addAddress("test-address0");
+        inAgentID.addAddress("test-address1");
+        inAgentID.addResolver(resolver0);
+        inAgentID.addResolver(resolver1);
+        inAgentID.addUserdefParam(UserdefParam("test-userparam0","setting0"));
+        inAgentID.addUserdefParam(UserdefParam("test-userparam1","setting1"));
+        storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
+
+        //std::string::const_iterator cit = storage.begin();
+        //for(; cit != storage.end(); ++cit)
+        //{
+        //    printf("%c --> %x\n", *cit, *cit);
+        //}
+        fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- resolvers, addresses, user params");
+
+    }
+
+    {
+        ReceivedObject inReceivedObject;
+        storage = fipa::acl::BitefficientFormat::getReceivedObject(inReceivedObject);
+        fipa::acl::ReceivedObject outReceivedObject = testGrammar<fipa::acl::bitefficient::ReceivedObject, fipa::acl::ReceivedObject>(storage, true, "Envelope: receivedObject");
+    }
+
+    { 
+        ACLMessage msg;
         ACLEnvelope envelope(msg, representation::BITEFFICIENT);
+        ACLBaseEnvelope inBaseEnvelope;
+        // BEGIN Base envelope
+        base::Time now = base::Time::now();
+        TransportBehaviour inTransportBehaviour = "CUSTOM";
+        Comments inComments = "COMMENTS";
+        std::vector<AgentID> inIntendedReceivers;
+        AgentID inSender("sender");
+        AgentID inIntendedReceiver("intended-receiver");
+        inIntendedReceivers.push_back(inIntendedReceiver);
+        ReceivedObject inReceivedObject;
 
-        std::vector<std::string>::const_iterator it = hops.begin();
-        for(; it != hops.end(); ++it)
-        {
-            AgentID agent(*it);
-            envelope.stamp(agent);
-        }
+        inBaseEnvelope.setDate(now);
+        inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
+        inBaseEnvelope.setComments(inComments);
+        // TODO: where to set what kind of representation!?!?
+        // leaving the following out will lead to problems
+        inBaseEnvelope.setACLRepresentation(representation::BITEFFICIENT);
+        inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
+        inBaseEnvelope.setFrom(inSender);
+        inBaseEnvelope.setIntendedReceivers(inIntendedReceivers);
+        inBaseEnvelope.setReceivedObject(inReceivedObject);
 
-        AgentIDList deliveryPath = envelope.getDeliveryPath();
-        for(size_t i = 0; i < hops.size(); ++i)
-        {
-            BOOST_REQUIRE_MESSAGE(deliveryPath[i].getName() == hops[i], "Hop is " << hops[i]);
-        }
-
-        ACLBaseEnvelopeList envelopes = envelope.getExtraEnvelopes();
-        BOOST_REQUIRE(envelopes.size() == hops.size());
-        ACLBaseEnvelopeList::const_iterator eit = envelopes.begin();
-        for(; eit != envelopes.end(); ++eit)
-        {
-            ReceivedObject ro = eit->getReceivedObject();
-            BOOST_REQUIRE_MESSAGE(!ro.getId().empty(), "ReceivedObject id: " << ro.getId());
-        }
-    }
-
-    BOOST_AUTO_TEST_CASE(grammar_test)
-    {
-        using namespace fipa::acl;
-        std::string storage;
-        {
-            storage = char(0x14) + fipa::acl::BitefficientFormat::getNullTerminatedString("ANY");
-            std::string any = testGrammar<fipa::acl::bitefficient::Any, std::string>(storage);
-        }
-
-        {
-            storage = fipa::acl::BitefficientFormat::getNullTerminatedString("http://www.rock-robotics.org");
-            std::string url = testGrammar<fipa::acl::bitefficient::Url, std::string>(storage);
-        }
-
-        {
-            AgentID inAgentID("test-agent");
-            storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
-            fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- simple");
-
-        }
-
-        {
-            AgentID inAgentID("test-agent");
-            AgentID resolver0("test-resolver0");
-            AgentID resolver1("test-resolver1");
-            inAgentID.addResolver(resolver0);
-            inAgentID.addResolver(resolver1);
-            storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
-
-            //std::string::const_iterator cit = storage.begin();
-            //for(; cit != storage.end(); ++cit)
-            //{
-            //    printf("%c --> %x\n", *cit, *cit);
-            //}
-            fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- resolvers");
-
-        }
-        {
-            AgentID inAgentID("test-agent");
-            AgentID resolver0("test-resolver0");
-            AgentID resolver1("test-resolver1");
-            inAgentID.addAddress("test-address0");
-            inAgentID.addAddress("test-address1");
-            inAgentID.addResolver(resolver0);
-            inAgentID.addResolver(resolver1);
-            inAgentID.addUserdefParam(UserdefParam("test-userparam0","setting0"));
-            inAgentID.addUserdefParam(UserdefParam("test-userparam1","setting1"));
-            storage = fipa::acl::BitefficientFormat::getAgentID(inAgentID);
-
-            //std::string::const_iterator cit = storage.begin();
-            //for(; cit != storage.end(); ++cit)
-            //{
-            //    printf("%c --> %x\n", *cit, *cit);
-            //}
-            fipa::acl::AgentID outAgentID = testGrammar<fipa::acl::bitefficient::EnvelopeAgentIdentifier, fipa::acl::AgentID>(storage, true, "Envelope: AgentID -- resolvers, addresses, user params");
-
-        }
-
-        {
-            ReceivedObject inReceivedObject;
-            storage = fipa::acl::BitefficientFormat::getReceivedObject(inReceivedObject);
-            fipa::acl::ReceivedObject outReceivedObject = testGrammar<fipa::acl::bitefficient::ReceivedObject, fipa::acl::ReceivedObject>(storage, true, "Envelope: receivedObject");
-        }
-
-        { 
-            ACLMessage msg;
-            ACLEnvelope envelope(msg, representation::BITEFFICIENT);
-            ACLBaseEnvelope inBaseEnvelope;
-            // BEGIN Base envelope
-            base::Time now = base::Time::now();
-            TransportBehaviour inTransportBehaviour = "CUSTOM";
-            Comments inComments = "COMMENTS";
-            std::vector<AgentID> inIntendedReceivers;
-            AgentID inSender("sender");
-            AgentID inIntendedReceiver("intended-receiver");
-            inIntendedReceivers.push_back(inIntendedReceiver);
-            ReceivedObject inReceivedObject;
-
-            inBaseEnvelope.setDate(now);
-            inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
-            inBaseEnvelope.setComments(inComments);
-            // TODO: where to set what kind of representation!?!?
-            // leaving the following out will lead to problems
-            inBaseEnvelope.setACLRepresentation(representation::BITEFFICIENT);
-            inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
-            inBaseEnvelope.setFrom(inSender);
-            inBaseEnvelope.setIntendedReceivers(inIntendedReceivers);
-            inBaseEnvelope.setReceivedObject(inReceivedObject);
-
-            // END Base envelope
-            envelope.setBaseEnvelope(inBaseEnvelope);
-            // BEGIN Extra envelope
-            ACLBaseEnvelope inExtraEnvelope;
-            AgentID inExtraTo("extra-receiver");
-            AgentIDList inExtraTos;
-            inExtraTos.push_back(inExtraTo);
-            inExtraEnvelope.setTo(inExtraTos);
-            // END Extra envelope
-            envelope.addExtraEnvelope(inExtraEnvelope);
+        // END Base envelope
+        envelope.setBaseEnvelope(inBaseEnvelope);
+        // BEGIN Extra envelope
+        ACLBaseEnvelope inExtraEnvelope;
+        AgentID inExtraTo("extra-receiver");
+        AgentIDList inExtraTos;
+        inExtraTos.push_back(inExtraTo);
+        inExtraEnvelope.setTo(inExtraTos);
+        // END Extra envelope
+        envelope.addExtraEnvelope(inExtraEnvelope);
 
         storage = EnvelopeGenerator::create(envelope, representation::BITEFFICIENT);
 
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
     inBaseEnvelope.setComments(inComments);
     // TODO: where to set what kind of representation!?!?
-    // leaving the following out will lead to problems TESSTTT
+    // leaving the following out will lead to problems TEST
     inBaseEnvelope.setACLRepresentation(representation::XML);
     inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
     inBaseEnvelope.setFrom(inSender);
@@ -325,6 +325,11 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     std::cout << "XML Encoded envelope:" << std::endl << encodedEnvelope << std::endl;
     
     // TODO ...
+    
+    // Parse back
+    EnvelopeParser ep;
+    ACLEnvelope decodedEnvelope;
+    BOOST_REQUIRE_MESSAGE( ep.parseData(encodedEnvelope, decodedEnvelope, envRepresentationType), "Decoding ACLEnvelope " << encodedEnvelope);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

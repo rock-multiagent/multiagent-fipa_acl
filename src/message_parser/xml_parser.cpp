@@ -15,12 +15,7 @@ const AgentID XMLParser::parseAgentID(const TiXmlElement* aidElem)
     for ( pChild = pChild->NextSiblingElement(); pChild != 0; pChild = pChild->NextSiblingElement()) 
     {
         // The remaining childs can be resolvers, addresses, or user-defined parameters
-        const char* text_c = pChild->GetText();
-        if(text_c == NULL)
-        {
-            throw std::runtime_error("ill-formed agent id element");
-        }
-        std::string text (text_c);
+        const std::string& text = pChild->ValueStr();
         if(text == "addresses")
         {
             // Each child element is an URL
@@ -110,12 +105,7 @@ const ReceivedObject XMLParser::parseReceivedObject(const TiXmlElement* received
     for ( pChild = pChild->NextSiblingElement(); pChild != 0; pChild = pChild->NextSiblingElement()) 
     {
         // The remaining childs can be received-from, received-date, received-id, received-via, and user-defined
-        const char* text_c = pChild->GetText();
-        if(text_c == NULL)
-        {
-            throw std::runtime_error("ill-formed agent id element");
-        }
-        std::string text (text_c);
+        const std::string& text = pChild->ValueStr();
         if(text == "received-from")
         {
             const std::string* fromValue = pChild->Attribute(std::string("value"));

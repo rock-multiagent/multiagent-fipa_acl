@@ -15,19 +15,18 @@ std::string XMLEnvelopeFormat::apply(const ACLEnvelope& envelope) const
     TiXmlElement * envelopeElem = new TiXmlElement( "envelope" );
     doc.LinkEndChild( envelopeElem );
     
-    // FIXME wrong base/extra envelopes order?
     // Index for the params
     int index = 1;
-    // Append all extra envelopes
+    // Append base envelope
+    TiXmlElement* elem = getBaseEnvelope(envelope.getBaseEnvelope());
+    elem->SetAttribute("index", index++);
+    envelopeElem->LinkEndChild(elem);
+    // And all extra envelopes
     BOOST_FOREACH(TiXmlElement* elem, getAllExternalEnvelopes(envelope))
     {
         elem->SetAttribute("index", index++);
         envelopeElem->LinkEndChild(elem);
     }
-    // And base envelope
-    TiXmlElement* elem = getBaseEnvelope(envelope.getBaseEnvelope());
-    elem->SetAttribute("index", index++);
-    envelopeElem->LinkEndChild(elem);
     
     TiXmlPrinter printer;
     // TODO no line break and no indentation for compact result

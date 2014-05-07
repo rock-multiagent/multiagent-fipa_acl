@@ -12,7 +12,7 @@ bool XMLMessageParser::parseData(const std::string& storage, ACLMessage& msg) co
     TiXmlDocument doc;
     
     // Load the string into XML doc
-    const char* parseResult = doc.Parse(storage.c_str(), 0);  // FIXME encoding?
+    const char* parseResult = doc.Parse(storage.c_str());
     if(parseResult != NULL)
     {
         // non-null means error
@@ -56,14 +56,7 @@ bool XMLMessageParser::parseData(const std::string& storage, ACLMessage& msg) co
 bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* elem) const
 {
     using namespace MessageField;
-    
-    const char* nameP = elem->GetText();
-    if(nameP == NULL)
-    {
-        // not FIPA compliant
-        return false;
-    }
-    const std::string name (nameP);
+    const std::string& name = elem->ValueStr();
     
     if(name == MessageFieldTxt[RECEIVER])
     {
