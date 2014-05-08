@@ -8,6 +8,7 @@
 #include <fipa_acl/message_parser/envelope_parser.h>
 #include <fipa_acl/message_parser/grammar/grammar_bitefficient_envelope.h>
 #include "test_utils.h"
+#include "../../../../../install/include/base/Time.hpp"
 
 BOOST_AUTO_TEST_SUITE(fipa_envelope_test_suite)
 
@@ -247,7 +248,6 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
 {
     using namespace fipa::acl;
 
-    // TODO include every single field
     ACLMessage msg(ACLMessage::REQUEST);
     AgentID origin("proxy");
     AgentID receiver("receiver");
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
 
     receiver.addResolver(resolver0);
     receiver.addResolver(resolver1);
-    receiver.addAddress("htt://test.address");
+    receiver.addAddress("http://test.address");
 
     msg.setSender(origin);
     msg.addReceiver(receiver);
@@ -318,15 +318,28 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     
     representation::Type envRepresentationType = representation::XML;
     std::string encodedEnvelope = EnvelopeGenerator::create(envelope, envRepresentationType);
-    std::cout << "XML Encoded envelope:" << std::endl << encodedEnvelope << std::endl;
     
     // Parse back
     EnvelopeParser ep;
     ACLEnvelope decodedEnvelope;
     BOOST_REQUIRE_MESSAGE( ep.parseData(encodedEnvelope, decodedEnvelope, envRepresentationType), "Decoding ACLEnvelope " << encodedEnvelope);
     
-    std::cout << "Parsing payload: " << std::endl << encodedEnvelope.substr(encodedEnvelope.length() - decodedEnvelope.flattened().getPayloadLength()) << std::endl;
+    // Also parse the message, to test correct payload detection, but don't use it further.
     ACLMessage decodedMessage = decodedEnvelope.getACLMessage();
+    
+    // Check that some envelope values are as expected
+    BOOST_REQUIRE( envelope.getBaseEnvelope().getTo() == decodedEnvelope.getBaseEnvelope().getTo());
+    BOOST_REQUIRE( envelope.getBaseEnvelope().getFrom() == decodedEnvelope.getBaseEnvelope().getFrom());
+    BOOST_REQUIRE( envelope.getBaseEnvelope().getACLRepresentation() == decodedEnvelope.getBaseEnvelope().getACLRepresentation());
+    BOOST_REQUIRE( envelope.getBaseEnvelope().getPayloadLength() == decodedEnvelope.getBaseEnvelope().getPayloadLength());
+    // Dates differ as XML resoltion is "only" milliseconds
+    //BOOST_REQUIRE_MESSAGE( envelope.getBaseEnvelope().getDate() == decodedEnvelope.getBaseEnvelope().getDate(),
+    //                       "Dates differ: " << envelope.getBaseEnvelope().getDate().toString() << " and " << decodedEnvelope.getBaseEnvelope().getDate().toString());
+    
+    BOOST_REQUIRE( envelope.getExtraEnvelopes()[0].getComments() == decodedEnvelope.getExtraEnvelopes()[0].getComments());
+    BOOST_REQUIRE( envelope.getExtraEnvelopes()[0].getIntendedReceivers() == decodedEnvelope.getExtraEnvelopes()[0].getIntendedReceivers());
+    BOOST_REQUIRE( envelope.getExtraEnvelopes()[0].getUserdefinedParameters() == decodedEnvelope.getExtraEnvelopes()[0].getUserdefinedParameters());
+    BOOST_REQUIRE( envelope.getExtraEnvelopes()[0].getReceivedObject() == decodedEnvelope.getExtraEnvelopes()[0].getReceivedObject());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

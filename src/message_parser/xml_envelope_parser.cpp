@@ -12,15 +12,13 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     TiXmlDocument doc;
     
     // Load the string into XML doc
-    // FIXME this will also load the payload and fail!
     const char* parseResult = doc.Parse(storage.c_str());
-    // A non-null parseResult usually indicated an error, but we seem to get that every time.
+    // A non-null parseResult usually indicates an error, but we seem to get that every time.
     if(parseResult != NULL)
     {
-        // non-null means error
-        std::cout << "Parsing envelope XML failed: " << parseResult << std::endl;
-        LOG_WARN_S << "Parsing envelope XML failed: " << parseResult;
-        //return false;
+        // non-null means some error
+        std::cout << "Parsing envelope XML failed for (probably the payload): " << parseResult << std::endl;
+        LOG_WARN_S << "Parsing envelope XML failed for (probably the payload): " << parseResult;
     }
     
     // The main node (envelope)
@@ -146,9 +144,13 @@ const ACLBaseEnvelope XMLEnvelopeParser::parseParameters(const TiXmlElement* par
         {
             envelope.setReceivedObject(XMLParser::parseReceivedObject(pChild));
         }
-        else if(name.substr(0, 2) == "X-")
+        else if(name == "user-defined")
         {
             params.push_back(XMLParser::parseUserdefinedParameter(pChild));
+        }
+        else
+        {
+            throw std::runtime_error("Parsing error: unknown node: " + name);
         }
     }
     envelope.setUserdefinedParameters(params);

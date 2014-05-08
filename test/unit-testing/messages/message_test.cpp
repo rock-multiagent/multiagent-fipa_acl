@@ -795,5 +795,51 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
 
 }
 
+BOOST_AUTO_TEST_CASE(message_xml_test)
+{
+    using namespace fipa::acl;
+
+    ACLMessage msg(ACLMessage::REQUEST);
+    AgentID origin("proxy");
+    AgentID receiver("receiver");
+
+    AgentID resolver0("resolver0");
+    AgentID resolver1("resolver1");
+
+    receiver.addResolver(resolver0);
+    receiver.addResolver(resolver1);
+    receiver.addAddress("http://test.address");
+
+    msg.setSender(origin);
+    msg.addReceiver(receiver);
+    msg.addReplyTo(origin);
+    msg.setProtocol("test-protocol");
+    msg.setLanguage("test language");
+    msg.setEncoding("test encoding");
+    msg.setOntology("test ontology");
+    msg.setReplyWith("test reply_with");
+    base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
+    msg.setReplyBy(time);
+    msg.setConversationID(std::string("test conversationID"));
+    msg.setContent("test-content");
+    msg.setInReplyTo("test in_reply_to");
+    
+    UserdefParam userdefMessageParam("userdef0","test value");
+    msg.addUserdefParam(userdefMessageParam);
+
+    
+    
+    representation::Type msgRepresentationType = representation::XML;
+    std::string encodedMessage = MessageGenerator::create(msg, msgRepresentationType);
+    
+    // Parse back
+    MessageParser mp;
+    ACLMessage decodedMsg;
+    BOOST_REQUIRE_MESSAGE( mp.parseData(encodedMessage, decodedMsg, msgRepresentationType), "Decoding Message " << encodedMessage);
+        
+    // Check that some messages are identical
+    BOOST_REQUIRE( msg == decodedMsg );
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 

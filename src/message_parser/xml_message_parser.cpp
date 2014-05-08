@@ -14,7 +14,13 @@ bool XMLMessageParser::parseData(const std::string& storage, ACLMessage& msg)
     
     // Load the string into XML doc
     const char* parseResult = doc.Parse(storage.c_str());
-    // A non-null parseResult usually indicated an error, but we seem to get that every time.
+    // A non-null parseResult usually indicates an error, but we seem to get that every time.
+    if(parseResult != NULL)
+    {
+        // non-null means some error
+        std::cout << "Parsing message XML failed for: " << parseResult << std::endl;
+        LOG_WARN_S << "Parsing message XML failed for: " << parseResult;
+    }
     
     // The main node (fipa-message)
     const TiXmlElement* messageElem = doc.FirstChildElement();
@@ -239,7 +245,7 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         aclMsg.setConversationID(std::string(value));
         return true;
     }
-    else if(name.substr(0, 2) == "X-")
+    else if(name == "user-defined")
     {
         // It's a user defined parameter
         try
@@ -252,6 +258,12 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
             LOG_WARN_S << "Parsing error user_def_param: " << e.what();
             return false;
         }
+    }
+    else
+    {
+        std::cout << "Parsing error: unknown node: " << name << std::endl;
+        LOG_WARN_S << "Parsing error: unknown node: " << name;
+        return false;
     }
     
     return true;

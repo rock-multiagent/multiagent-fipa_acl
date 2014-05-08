@@ -84,14 +84,14 @@ std::vector<TiXmlElement*> XMLEnvelopeFormat::getParameters(const ACLBaseEnvelop
         vec.push_back(from);
     }
 
-    if(envelope.contains(envelope::COMMENTS))
+    if(envelope.contains(envelope::COMMENTS) && envelope.getComments() != "")
     {
         TiXmlElement* comments = new TiXmlElement("comments");
         comments->LinkEndChild(new TiXmlText(envelope.getComments()));
         vec.push_back(comments);
     }
     
-    if(envelope.contains(envelope::ACL_REPRESENTATION))
+    if(envelope.contains(envelope::ACL_REPRESENTATION) && envelope.getACLRepresentationString() != "")
     {
         TiXmlElement* aclRep = new TiXmlElement("acl-representation");
         aclRep->LinkEndChild(new TiXmlText(envelope.getACLRepresentationString()));
@@ -105,7 +105,7 @@ std::vector<TiXmlElement*> XMLEnvelopeFormat::getParameters(const ACLBaseEnvelop
         vec.push_back(payloadLength);
     }
 
-    if(envelope.contains(envelope::PAYLOAD_ENCODING))
+    if(envelope.contains(envelope::PAYLOAD_ENCODING) && envelope.getPayloadEncoding() != "")
     {
         TiXmlElement* payloadEncoding= new TiXmlElement("payload-encoding");
         payloadEncoding->LinkEndChild(new TiXmlText(envelope.getPayloadEncoding()));

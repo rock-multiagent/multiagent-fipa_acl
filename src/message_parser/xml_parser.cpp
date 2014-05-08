@@ -158,7 +158,7 @@ const ReceivedObject XMLParser::parseReceivedObject(const TiXmlElement* received
             }
             ro.setId(*via);
         }
-        else if(text.substr(0, 2) == "X-")
+        else if(text == "user-defined")
         {
             params.push_back(parseUserdefinedParameter(pChild));
         }
@@ -195,7 +195,7 @@ const UserdefParam XMLParser::parseUserdefinedParameter(const TiXmlElement* para
         throw std::runtime_error("ill-formed user defined parameter");
     }
     // cut "X-"
-    return UserdefParam(std::string(href).substr(0, 2), std::string(value));
+    return UserdefParam(std::string(href).substr(2), std::string(value));
     
 }
 
