@@ -29,6 +29,9 @@ struct Keyword : qi::grammar<Iterator, std::string()>
             | qi::lit(":" + MessageFieldTxt[ONTOLOGY])
             | qi::lit(":" + MessageFieldTxt[PROTOCOL])
             | qi::lit(":" + MessageFieldTxt[CONVERSATION_ID])
+            // These are possible inside an agent-identifier
+            | qi::lit(":resolvers")
+            | qi::lit(":addresses")
             ];
 
         //FIPA_DEBUG_RULE(keyword);
@@ -38,18 +41,51 @@ struct Keyword : qi::grammar<Iterator, std::string()>
 };
 
 template<typename Iterator>
+struct WordWithoutKeyword : qi::grammar<Iterator, std::string()>
+{
+    WordWithoutKeyword() : WordWithoutKeyword::base_type(word_rule, "word_without_keyword-string_grammar")
+    {
+        using encoding::char_;
+
+        word_rule = (char_ - wordExceptionsStart )                     [ label::_val += label::_1 ]
+                     >> *(!keyword >> (char_ - wordExceptionsGeneral)  [ label::_val += label::_1 ])
+        ;
+
+        wordExceptionsStart %= wordExceptionsGeneral
+                        | char_('#')
+                        | char_('0','9')
+                        | char_('-')
+                        | char_('@')
+        ;
+        wordExceptionsGeneral %= char_(0x00,0x20)
+                        | char_('(')
+                        | char_(')')
+        ;
+    }
+
+    Keyword<Iterator> keyword;
+
+    qi::rule<Iterator, std::string()> word_rule;
+    qi::rule<Iterator> wordExceptionsStart;
+    qi::rule<Iterator> wordExceptionsGeneral;
+};
+
+template<typename Iterator>
 struct Url : qi::grammar<Iterator, std::string()>
 {
     Url() : Url::base_type(url, "url-string_grammar")
     {
         using encoding::char_;
 
-        // TODO: proper URI parsing
-        url = *char_;
+        // TODO: proper URI parsing.
+        // At the moment just a word without keyword
+        url = wordWithoutKeyword [ label::_val += label::_1 ]
+        ;
 
-        FIPA_DEBUG_RULE(url);
+        // FIPA_DEBUG_RULE(url);
     }
-
+    
+    WordWithoutKeyword<Iterator> wordWithoutKeyword;
     qi::rule<Iterator, std::string()> url;
 };
 
@@ -58,8 +94,13 @@ struct UrlSequence : qi::grammar<Iterator, std::vector<std::string>()>
 {
     UrlSequence() : UrlSequence::base_type(urlSequence, "url_sequence-string_grammar")
     {
-        urlSequence = *url                  [ phoenix::push_back(label::_val, label::_1) ]
-        ; 
+        //urlSequence = *url                  [ phoenix::push_back(label::_val, label::_1) ]
+        //; 
+        
+        urlSequence = qi::lit("(")
+            >> qi::no_case[qi::lit("sequence")]
+            >> * url [ phoenix::push_back(label::_val, label::_1) ]
+            >> ")";
 
         FIPA_DEBUG_RULE(urlSequence);
     }
@@ -210,36 +251,6 @@ struct DateTime : qi::grammar<Iterator, base::Time() >
     qi::rule<Iterator, base::Time()> date_time;
 };
 
-template<typename Iterator>
-struct WordWithoutKeyword : qi::grammar<Iterator, std::string()>
-{
-    WordWithoutKeyword() : WordWithoutKeyword::base_type(word_rule, "word_without_keyword-string_grammar")
-    {
-        using encoding::char_;
-
-        word_rule = (char_ - wordExceptionsStart )                     [ label::_val += label::_1 ]
-                     >> *(!keyword >> (char_ - wordExceptionsGeneral)  [ label::_val += label::_1 ])
-        ;
-
-        wordExceptionsStart %= wordExceptionsGeneral
-                        | char_('#')
-                        | char_('0','9')
-                        | char_('-')
-                        | char_('@')
-        ;
-        wordExceptionsGeneral %= char_(0x00,0x20)
-                        | char_('(')
-                        | char_(')')
-        ;
-    }
-
-    Keyword<Iterator> keyword;
-
-    qi::rule<Iterator, std::string()> word_rule;
-    qi::rule<Iterator> wordExceptionsStart;
-    qi::rule<Iterator> wordExceptionsGeneral;
-};
-
 
 template<typename Iterator, typename Skipper = qi::unused_type>
 struct Expression : qi::grammar<Iterator, std::string(), Skipper>
@@ -295,7 +306,7 @@ struct UserdefinedParameter : qi::grammar<Iterator, fipa::acl::UserdefParam(), q
         ;
 
         paramLabel = qi::lit(":X-")
-                // Todo: keyword list needs to be dynamically updated or previously known,
+                // TODO: keyword list needs to be dynamically updated or previously known,
                 // otherwise parsing will greedly consume the following parameter expression
                 // For now expression should be provided with parentheses to handle this
                 >> wordWithoutKeyword   [ label::_val = label::_1 ]
@@ -347,7 +358,7 @@ struct Resolver : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
 
     UserdefinedParameterList<Iterator> userdefinedParameterList;
     Expression<Iterator> expression;
-    grammar::Word<Iterator> word;
+    WordWithoutKeyword<Iterator> word;
     UrlSequence<Iterator> urlSequence;
     qi::rule<Iterator, fipa::acl::AgentID(), Skipper> agentId;
 };
@@ -394,7 +405,7 @@ struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
         //FIPA_DEBUG_RULE(agentId);
     }
 
-    grammar::Word<Iterator> word;
+    WordWithoutKeyword<Iterator> word;
     UrlSequence<Iterator> urlSequence;
     AgentIdentifierSequence<Iterator, Skipper> agentIdSequence;
     UserdefinedParameterList<Iterator> userdefinedParameterList;
@@ -418,7 +429,7 @@ struct AgentIdentifierSet : qi::grammar<Iterator,AgentIDList(),Skipper >
 
         //FIPA_DEBUG_RULE(agentIdList);
     }
-
+    
     AgentIdentifier<Iterator, Skipper> agentIdentifier;
     qi::rule<Iterator, fipa::acl::AgentIDList(), Skipper> agentIdList;
 };

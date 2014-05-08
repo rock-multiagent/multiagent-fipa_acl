@@ -740,8 +740,15 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
         origMsg.addReplyTo(AgentID("reply-to-0"));
         origMsg.addReplyTo(AgentID("reply-to-1"));
         origMsg.setInReplyTo("in-reply-to");
+        
+        AgentID receiver("receiver-0");
+        AgentID resolver0("resolver0");
+        receiver.addResolver(resolver0);
+        // Multiple addresses would be merged to one, as there is no proper URL parsing
+        // Therefore, we add just one
+        receiver.addAddress("http://test.address");
 
-        origMsg.addReceiver( AgentID("receiver-0"));
+        origMsg.addReceiver( receiver );
         origMsg.addReceiver( AgentID("receiver-1"));
         origMsg.setSender( AgentID("sender"));
         origMsg.setOntology("test ontology");
