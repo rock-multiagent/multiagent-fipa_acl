@@ -16,7 +16,7 @@ private:
     bool parseParameter(ACLMessage& aclMsg, const TiXmlElement* elem) const;
     
 public:
-    bool parseData(const std::string& storage, ACLMessage& msg) const; 
+    bool parseData(const std::string& storage, ACLMessage& msg); 
 };
 
 } // end namespace acl

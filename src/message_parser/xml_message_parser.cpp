@@ -8,19 +8,13 @@
 namespace fipa {
 namespace acl {
 
-bool XMLMessageParser::parseData(const std::string& storage, ACLMessage& msg) const
+bool XMLMessageParser::parseData(const std::string& storage, ACLMessage& msg)
 {
     TiXmlDocument doc;
     
     // Load the string into XML doc
     const char* parseResult = doc.Parse(storage.c_str());
-    if(parseResult != NULL)
-    {
-        // non-null means error
-        std::cout << "Parsing message XML failed: " << parseResult << std::endl;
-        LOG_WARN_S << "Parsing message XML failed: " << parseResult;
-        return false;
-    }
+    // A non-null parseResult usually indicated an error, but we seem to get that every time.
     
     // The main node (fipa-message)
     const TiXmlElement* messageElem = doc.FirstChildElement();
@@ -92,10 +86,19 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
     }
     else if(name == MessageFieldTxt[SENDER])
     {
+        // There must be one child: the aid element
+        const TiXmlElement* aid = elem->FirstChildElement();
+        if(aid == NULL)
+        {
+            std::cout << "Parsing error: sender has no first child" << std::endl;
+            LOG_WARN_S << "Parsing error: sender has no first child";
+            return false;
+        }
+        
         // AgentID
         try
         {
-            aclMsg.setSender(XMLParser::parseAgentID(elem));
+            aclMsg.setSender(XMLParser::parseAgentID(aid));
         }
         catch(std::exception& e)
         {
@@ -236,7 +239,7 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         aclMsg.setConversationID(std::string(value));
         return true;
     }
-    else if(name.substr(2) == "X-")
+    else if(name.substr(0, 2) == "X-")
     {
         // It's a user defined parameter
         try

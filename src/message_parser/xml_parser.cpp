@@ -1,4 +1,5 @@
 #include "xml_parser.h"
+#include "../../../../install/include/base/Time.hpp"
 #include <stdexcept>
 
 namespace fipa {
@@ -35,7 +36,7 @@ const AgentID XMLParser::parseAgentID(const TiXmlElement* aidElem)
             // It's a list of agent ids
             aid.setResolvers(parseAgentIDSequence(pChild));
         }
-        else if(text.substr(2) == "X-")
+        else if(text.substr(0, 2) == "X-")
         {
             aid.addUserdefParam(parseUserdefinedParameter(pChild));
         }
@@ -157,7 +158,7 @@ const ReceivedObject XMLParser::parseReceivedObject(const TiXmlElement* received
             }
             ro.setId(*via);
         }
-        else if(text.substr(2) == "X-")
+        else if(text.substr(0, 2) == "X-")
         {
             params.push_back(parseUserdefinedParameter(pChild));
         }
@@ -194,21 +195,24 @@ const UserdefParam XMLParser::parseUserdefinedParameter(const TiXmlElement* para
         throw std::runtime_error("ill-formed user defined parameter");
     }
     // cut "X-"
-    return UserdefParam(std::string(href).substr(2), std::string(value));
+    return UserdefParam(std::string(href).substr(0, 2), std::string(value));
     
 }
 
 const base::Time XMLParser::strToDate(const std::string& dateStr)
 {
     // XXX this does not parse relative times (+/- as first char), or UTC Z at the end.
+    
+    // Put a colon back after seconds
+    const std::string modDateStr = dateStr.substr(0, 15) + ":" + dateStr.substr(15);
     try
     {
-        return base::Time::fromString(dateStr, base::Time::Milliseconds, "%Y%m%dT%H%M%S");
+        return base::Time::fromString(modDateStr, base::Time::Milliseconds, "%Y%m%dT%H%M%S");
     }
     catch(std::exception& e)
     {
         // Maybe JADE's "Z"?
-        return base::Time::fromString(dateStr, base::Time::Milliseconds, "%Y%m%dZ%H%M%S");
+        return base::Time::fromString(modDateStr, base::Time::Milliseconds, "%Y%m%dZ%H%M%S");
     }
 }
 

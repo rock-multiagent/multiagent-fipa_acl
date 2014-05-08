@@ -14,6 +14,7 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     // Load the string into XML doc
     // FIXME this will also load the payload and fail!
     const char* parseResult = doc.Parse(storage.c_str());
+    // A non-null parseResult usually indicated an error, but we seem to get that every time.
     if(parseResult != NULL)
     {
         // non-null means error
@@ -36,6 +37,7 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     const TiXmlElement* pChild = envelopeElem->FirstChildElement();
     
     // We assume the params have raising indices, starting with one.
+    
     
     int paramsIndex = 1;
     // The first params is the Base envelope
@@ -64,7 +66,16 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
             return false;
         }
     }
-    // TODO parse the payload.
+    // Parse the payload.
+    // Get the latest values for payload-length
+    PayloadLength len =  envelope.flattened().getPayloadLength();
+    if(len > storage.length())
+    {
+        std::cout << "Parsing error: payload length (" << len << ") bigger than storage length (" << storage.length() << ")" << std::endl;
+        LOG_WARN_S << "Parsing error: payload length (" << len << ") bigger than storage length (" << storage.length() << ")";
+        return false;
+    }
+    envelope.setPayload(storage.substr(storage.length() - len));
     
     return true;
 }
@@ -97,7 +108,14 @@ const ACLBaseEnvelope XMLEnvelopeParser::parseParameters(const TiXmlElement* par
         }
         else if(name == "from")
         {
-            envelope.setFrom(XMLParser::parseAgentID(pChild));
+            // There must be one child: the aid element
+            const TiXmlElement* aid = pChild->FirstChildElement();
+            if(aid == NULL)
+            {
+                throw std::runtime_error("Parsing error: from has no first child");
+            }
+            
+            envelope.setFrom(XMLParser::parseAgentID(aid));
         }
         else if(name == "comments")
         {
@@ -128,7 +146,7 @@ const ACLBaseEnvelope XMLEnvelopeParser::parseParameters(const TiXmlElement* par
         {
             envelope.setReceivedObject(XMLParser::parseReceivedObject(pChild));
         }
-        else if(name.substr(2) == "X-")
+        else if(name.substr(0, 2) == "X-")
         {
             params.push_back(XMLParser::parseUserdefinedParameter(pChild));
         }

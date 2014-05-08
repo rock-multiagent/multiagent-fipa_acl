@@ -276,9 +276,12 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     UserdefParam userdefMessageParam("userdef0","test value");
     msg.addUserdefParam(userdefMessageParam);
 
-    ACLEnvelope envelope(msg, representation::XML);
-    ACLBaseEnvelope inBaseEnvelope;
-    // BEGIN Base envelope
+    // The message should be string encoded. The message XML encoding has its own test.
+    ACLEnvelope envelope(msg, representation::STRING_REP);
+    
+    // BEGIN Extra envelope
+    ACLBaseEnvelope inExtraEnvelope;
+    
     base::Time now = base::Time::now();
     TransportBehaviour inTransportBehaviour = "CUSTOM";
     Comments inComments = "COMMENTS";
@@ -297,22 +300,15 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     std::vector<UserdefParam> params;
     params.push_back(userdefEnvelopeParam);
 
-    inBaseEnvelope.setDate(now);
-    inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
-    inBaseEnvelope.setComments(inComments);
-    // TODO: where to set what kind of representation!?!?
-    // leaving the following out will lead to problems TEST
-    inBaseEnvelope.setACLRepresentation(representation::XML);
-    inBaseEnvelope.setTransportBehaviour(inTransportBehaviour);
-    inBaseEnvelope.setFrom(inSender);
-    inBaseEnvelope.setIntendedReceivers(inIntendedReceivers);
-    inBaseEnvelope.setReceivedObject(inReceivedObject);
-    inBaseEnvelope.setUserdefinedParameters(params);
-
-    // END Base envelope
-    envelope.setBaseEnvelope(inBaseEnvelope);
-    // BEGIN Extra envelope
-    ACLBaseEnvelope inExtraEnvelope;
+    inExtraEnvelope.setDate(now);
+    inExtraEnvelope.setTransportBehaviour(inTransportBehaviour);
+    inExtraEnvelope.setComments(inComments);
+    inExtraEnvelope.setTransportBehaviour(inTransportBehaviour);
+    inExtraEnvelope.setFrom(inSender);
+    inExtraEnvelope.setIntendedReceivers(inIntendedReceivers);
+    inExtraEnvelope.setReceivedObject(inReceivedObject);
+    inExtraEnvelope.setUserdefinedParameters(params);
+    
     AgentID inExtraTo("extra-receiver");
     AgentIDList inExtraTos;
     inExtraTos.push_back(inExtraTo);
@@ -324,12 +320,13 @@ BOOST_AUTO_TEST_CASE(envelope_xml_test)
     std::string encodedEnvelope = EnvelopeGenerator::create(envelope, envRepresentationType);
     std::cout << "XML Encoded envelope:" << std::endl << encodedEnvelope << std::endl;
     
-    // TODO ...
-    
     // Parse back
     EnvelopeParser ep;
     ACLEnvelope decodedEnvelope;
     BOOST_REQUIRE_MESSAGE( ep.parseData(encodedEnvelope, decodedEnvelope, envRepresentationType), "Decoding ACLEnvelope " << encodedEnvelope);
+    
+    std::cout << "Parsing payload: " << std::endl << encodedEnvelope.substr(encodedEnvelope.length() - decodedEnvelope.flattened().getPayloadLength()) << std::endl;
+    ACLMessage decodedMessage = decodedEnvelope.getACLMessage();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
