@@ -1,6 +1,7 @@
 #include "xml_message_parser.h"
 #include "xml_parser.h"
 #include <fipa_acl/message_generator/message_format.h>
+#include <base/Logging.hpp>
 
 #include <boost/foreach.hpp>
 
@@ -16,11 +17,20 @@ bool XMLMessageParser::parseData(const std::string& storage, ACLMessage& msg) co
     if(parseResult != NULL)
     {
         // non-null means error
+        std::cout << "Parsing message XML failed: " << parseResult << std::endl;
+        LOG_WARN_S << "Parsing message XML failed: " << parseResult;
         return false;
     }
     
     // The main node (fipa-message)
     const TiXmlElement* messageElem = doc.FirstChildElement();
+    
+    if(messageElem->ValueStr() != "fipa-message")
+    {
+        std::cout << "Parsing error: XML main node not named 'fipa-message' but " << messageElem->ValueStr() << std::endl;
+        LOG_WARN_S << "Parsing error: XML main node not named 'fipa-message' but " << messageElem->ValueStr();
+        return false;
+    }
     
     // Load communicative act attribute
     try
@@ -30,6 +40,8 @@ bool XMLMessageParser::parseData(const std::string& storage, ACLMessage& msg) co
     catch(const std::exception& e)
     {
         // This indicates the performative is unknown
+        std::cout << "Parsing error performative: " << e.what() << std::endl;
+        LOG_WARN_S << "Parsing error performative: " << e.what();
         return false;
     }
     
@@ -73,6 +85,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         }
         catch(std::exception& e)
         {
+            std::cout << "Parsing error receivers: " << e.what() << std::endl;
+            LOG_WARN_S << "Parsing error receivers: " << e.what();
             return false;
         }
     }
@@ -85,6 +99,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         }
         catch(std::exception& e)
         {
+            std::cout << "Parsing error sender: " << e.what() << std::endl;
+            LOG_WARN_S << "Parsing error sender: " << e.what();
             return false;
         }
     }
@@ -93,6 +109,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: content is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: content is set but invalid";
             return false;
         }
         aclMsg.setContent(std::string(value));
@@ -103,6 +121,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: language is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: language is set but invalid";
             return false;
         }
         aclMsg.setLanguage(std::string(value));
@@ -113,6 +133,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: encoding is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: encoding is set but invalid";
             return false;
         }
         aclMsg.setEncoding(std::string(value));
@@ -123,6 +145,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: ontology is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: ontology is set but invalid";
             return false;
         }
         aclMsg.setOntology(std::string(value));
@@ -133,6 +157,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: protocol is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: protocol is set but invalid";
             return false;
         }
         aclMsg.setProtocol(std::string(value));
@@ -143,6 +169,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: reply_with is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: reply_with is set but invalid";
             return false;
         }
         aclMsg.setReplyWith(std::string(value));
@@ -153,6 +181,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: in_reply_to is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: in_reply_to is set but invalid";
             return false;
         }
         aclMsg.setInReplyTo(std::string(value));
@@ -164,6 +194,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = elem->Attribute("time");
         if(value == NULL)
         {
+            std::cout << "Parsing error: reply_by is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: reply_by is set but invalid";
             return false;
         }
         try
@@ -172,6 +204,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         }
         catch(std::exception& e)
         {
+            std::cout << "Parsing error reply_by: " << e.what() << std::endl;
+            LOG_WARN_S << "Parsing error reply_by: " << e.what();
             return false;
         }
     }
@@ -184,6 +218,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         }
         catch(std::exception& e)
         {
+            std::cout << "Parsing error reply_to: " << e.what() << std::endl;
+            LOG_WARN_S << "Parsing error reply_to: " << e.what();
             return false;
         }
     }
@@ -193,6 +229,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         const char* value = XMLParser::extractContentOrAttribute(elem);
         if(value == NULL)
         {
+            std::cout << "Parsing error: conversation_id is set but invalid" << std::endl;
+            LOG_WARN_S << "Parsing error: conversation_id is set but invalid";
             return false;
         }
         aclMsg.setConversationID(std::string(value));
@@ -207,6 +245,8 @@ bool XMLMessageParser::parseParameter(ACLMessage& aclMsg, const TiXmlElement* el
         }
         catch(std::exception& e)
         {
+            std::cout << "Parsing error user_def_param: " << e.what() << std::endl;
+            LOG_WARN_S << "Parsing error user_def_param: " << e.what();
             return false;
         }
     }

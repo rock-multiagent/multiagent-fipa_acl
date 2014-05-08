@@ -6,6 +6,11 @@ namespace acl {
 
 const AgentID XMLParser::parseAgentID(const TiXmlElement* aidElem)
 {
+    if(aidElem->ValueStr() != "agent-identifier")
+    {
+        throw std::runtime_error("Parsing error: node not named 'agent-identifier' but " + aidElem->ValueStr());
+    }
+    
     AgentID aid;
     
     const TiXmlElement * pChild = aidElem->FirstChildElement();
@@ -62,6 +67,11 @@ const base::Time XMLParser::parseDate(const TiXmlElement* dateElem)
 
 const std::string XMLParser::parseName(const TiXmlElement* nameElem)
 {
+    if(nameElem->ValueStr() != "name")
+    {
+        throw std::runtime_error("Parsing error: node not named 'name' but " + nameElem->ValueStr());
+    }
+    
     // Name can be the value or in an "id" or "refid" attribute
     const char* p = nameElem->GetText();
     if(p != NULL)
@@ -160,6 +170,11 @@ const ReceivedObject XMLParser::parseReceivedObject(const TiXmlElement* received
 
 const std::string XMLParser::parseURL(const TiXmlElement* urlElem)
 {
+    if(urlElem->ValueStr() != "url")
+    {
+        throw std::runtime_error("Parsing error: node not named 'url' but " + urlElem->ValueStr());
+    }
+    
     // URL can be the value or in an href attribute
     const char* url = extractContentOrAttribute(urlElem);
     if(url == NULL)

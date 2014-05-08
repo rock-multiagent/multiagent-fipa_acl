@@ -1,6 +1,8 @@
 #include "xml_envelope_parser.h"
 #include "xml_parser.h"
 #include <boost/lexical_cast.hpp>
+#include <base/Logging.hpp>
+#include <stdexcept>
 
 namespace fipa {
 namespace acl {
@@ -9,35 +11,42 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
 {
     TiXmlDocument doc;
     
-    // TODO in 3 classes: also check xml names everywhere
-    
     // Load the string into XML doc
     // FIXME this will also load the payload and fail!
     const char* parseResult = doc.Parse(storage.c_str());
     if(parseResult != NULL)
     {
         // non-null means error
-        std::cout << "xml parser failed: " << parseResult << std::endl;
+        std::cout << "Parsing envelope XML failed: " << parseResult << std::endl;
+        LOG_WARN_S << "Parsing envelope XML failed: " << parseResult;
         //return false;
     }
     
     // The main node (envelope)
     const TiXmlElement* envelopeElem = doc.FirstChildElement();
     
+    if(envelopeElem->ValueStr() != "envelope")
+    {
+        std::cout << "Parsing error: XML main node not named 'fipa-message' but " << envelopeElem->ValueStr() << std::endl;
+        LOG_WARN_S << "Parsing error: XML main node not named 'fipa-message' but " << envelopeElem->ValueStr();
+        return false;
+    }
+    
     // Parse all child elements
     const TiXmlElement* pChild = envelopeElem->FirstChildElement();
     
-    // XXX We assume the params have raising indices, starting with one.
-    // This is actually not necesarily true.
+    // We assume the params have raising indices, starting with one.
     
+    int paramsIndex = 1;
     // The first params is the Base envelope
     try
     {
-        envelope.setBaseEnvelope(parseParameters(pChild));
+        envelope.setBaseEnvelope(parseParameters(pChild, paramsIndex++));
     }
     catch(std::exception& e)
     {
-        std::cout << "base envelope parser failed: " << e.what() << std::endl;
+        std::cout << "Parsing error base envelope: " << e.what() << std::endl;
+        LOG_WARN_S << "Parsing error base envelope: " << e.what();
         return false;
     }
     
@@ -46,11 +55,12 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     {
         try
         {
-            envelope.addExtraEnvelope(parseParameters(pChild));
+            envelope.addExtraEnvelope(parseParameters(pChild, paramsIndex++));
         }
         catch(std::exception& e)
         {
-            std::cout << "extra envelope parser failed: " << e.what() << std::endl;
+            std::cout << "Parsing error extra envelope: " << e.what() << std::endl;
+            LOG_WARN_S << "Parsing error extra envelope: " << e.what();
             return false;
         }
     }
@@ -59,8 +69,18 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     return true;
 }
 
-const ACLBaseEnvelope XMLEnvelopeParser::parseParameters(const TiXmlElement* paramsElem) const
+const ACLBaseEnvelope XMLEnvelopeParser::parseParameters(const TiXmlElement* paramsElem, int paramsIndex) const
 {
+    if(paramsElem->ValueStr() != "params")
+    {
+        throw std::runtime_error("Parsing error: params node not named 'params' but " + paramsElem->ValueStr());
+    }
+    if(*(paramsElem->Attribute(std::string("index"))) != boost::lexical_cast<std::string>(paramsIndex))
+    {
+        throw std::runtime_error("Parsing error: params index attribute should be " +
+            boost::lexical_cast<std::string>(paramsIndex) + " but is " + paramsElem->Attribute("index"));
+    }
+    
     ACLBaseEnvelope envelope;
     UserdefinedParameterList params;
     

@@ -17,7 +17,7 @@ private:
      * Creates an ACLBaseEnvelope from the informations given in the params element.
      * Throws an exception, if invalid data is contained.
      */
-    const ACLBaseEnvelope parseParameters(const TiXmlElement* paramsElem) const;
+    const ACLBaseEnvelope parseParameters(const TiXmlElement* paramsElem, int paramsIndex) const;
 
 public: 
     bool parseData(const std::string& storage, ACLEnvelope& envelope);
