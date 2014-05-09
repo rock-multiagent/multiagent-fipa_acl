@@ -61,7 +61,8 @@ std::string StringFormat::getUrlSequence(const Addresses& addresses)
     Addresses::const_iterator cit = addresses.begin();
     for(; cit != addresses.end(); ++cit)
     {
-        sequence += getUrl(*cit);
+         // For ease of parsing, separate URLs with a space
+        sequence += getUrl(*cit) + " ";
     }
     sequence += ")";
     return sequence;

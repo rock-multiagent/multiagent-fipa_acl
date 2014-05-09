@@ -744,9 +744,8 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
         AgentID receiver("receiver-0");
         AgentID resolver0("resolver0");
         receiver.addResolver(resolver0);
-        // Multiple addresses would be merged to one, as there is no proper URL parsing
-        // Therefore, we add just one
-        receiver.addAddress("http://test.address");
+        receiver.addAddress("http://Fritzmobil:7778/acc");
+        receiver.addAddress("tcp://134.102.70.35:6789");
 
         origMsg.addReceiver( receiver );
         origMsg.addReceiver( AgentID("receiver-1"));
@@ -792,7 +791,6 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
         BOOST_REQUIRE_MESSAGE( decodedMsg.getUserdefParams()[0].getName() == origMsg.getUserdefParams()[0].getName(), "UserdefParam is '" << decodedMsg.getUserdefParams()[0].getName() << "' but expected '" << origMsg.getUserdefParams()[0].getName() << "' msg: " << encodedMsg);
     }
 
-
 }
 
 BOOST_AUTO_TEST_CASE(message_xml_test)
@@ -800,7 +798,7 @@ BOOST_AUTO_TEST_CASE(message_xml_test)
     using namespace fipa::acl;
 
     ACLMessage msg(ACLMessage::REQUEST);
-    AgentID origin("proxy");
+    AgentID origin("da0@134.102.70.35:1099/JADE");
     AgentID receiver("receiver");
 
     AgentID resolver0("resolver0");
@@ -817,11 +815,11 @@ BOOST_AUTO_TEST_CASE(message_xml_test)
     msg.setLanguage("test language");
     msg.setEncoding("test encoding");
     msg.setOntology("test ontology");
-    msg.setReplyWith("test reply_with");
+    msg.setReplyWith("rock_agent1399557540471");
     base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
     msg.setReplyBy(time);
-    msg.setConversationID(std::string("test conversationID"));
-    msg.setContent("test-content");
+    msg.setConversationID("rock_agent_cid");
+    msg.setContent("test-content going nowhere");
     msg.setInReplyTo("test in_reply_to");
     
     UserdefParam userdefMessageParam("userdef0","test value");
@@ -837,7 +835,7 @@ BOOST_AUTO_TEST_CASE(message_xml_test)
     ACLMessage decodedMsg;
     BOOST_REQUIRE_MESSAGE( mp.parseData(encodedMessage, decodedMsg, msgRepresentationType), "Decoding Message " << encodedMessage);
         
-    // Check that some messages are identical
+    // Check that the messages are identical
     BOOST_REQUIRE( msg == decodedMsg );
 }
 

@@ -8,7 +8,7 @@
 #include <fipa_acl/message_parser/envelope_parser.h>
 #include <fipa_acl/message_parser/grammar/grammar_bitefficient_envelope.h>
 #include "test_utils.h"
-#include "../../../../../install/include/base/Time.hpp"
+#include <base/Time.hpp>
 
 BOOST_AUTO_TEST_SUITE(fipa_envelope_test_suite)
 

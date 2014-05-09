@@ -89,24 +89,22 @@ struct Url : qi::grammar<Iterator, std::string()>
     qi::rule<Iterator, std::string()> url;
 };
 
-template<typename Iterator>
-struct UrlSequence : qi::grammar<Iterator, std::vector<std::string>()>
+template<typename Iterator, typename Skipper = qi::unused_type>
+struct UrlSequence : qi::grammar<Iterator, std::vector<std::string>(), Skipper>
 {
     UrlSequence() : UrlSequence::base_type(urlSequence, "url_sequence-string_grammar")
     {
-        //urlSequence = *url                  [ phoenix::push_back(label::_val, label::_1) ]
-        //; 
         
         urlSequence = qi::lit("(")
             >> qi::no_case[qi::lit("sequence")]
             >> * url [ phoenix::push_back(label::_val, label::_1) ]
             >> ")";
 
-        FIPA_DEBUG_RULE(urlSequence);
+        // FIPA_DEBUG_RULE(urlSequence);
     }
 
     Url<Iterator> url;
-    qi::rule<Iterator, std::vector<std::string>()> urlSequence;
+    qi::rule<Iterator, std::vector<std::string>(), Skipper> urlSequence;
 
 };
 
@@ -359,7 +357,7 @@ struct Resolver : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
     UserdefinedParameterList<Iterator> userdefinedParameterList;
     Expression<Iterator> expression;
     WordWithoutKeyword<Iterator> word;
-    UrlSequence<Iterator> urlSequence;
+    UrlSequence<Iterator, Skipper> urlSequence;
     qi::rule<Iterator, fipa::acl::AgentID(), Skipper> agentId;
 };
 
@@ -406,7 +404,7 @@ struct AgentIdentifier : qi::grammar<Iterator, fipa::acl::AgentID(), Skipper>
     }
 
     WordWithoutKeyword<Iterator> word;
-    UrlSequence<Iterator> urlSequence;
+    UrlSequence<Iterator, Skipper> urlSequence;
     AgentIdentifierSequence<Iterator, Skipper> agentIdSequence;
     UserdefinedParameterList<Iterator> userdefinedParameterList;
     qi::rule<Iterator, fipa::acl::AgentID(), Skipper> agentId;
