@@ -17,7 +17,6 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     if(parseResult != NULL)
     {
         // non-null means some error
-        std::cout << "Parsing envelope XML failed for (probably the payload): " << parseResult << std::endl;
         LOG_WARN_S << "Parsing envelope XML failed for (probably the payload): " << parseResult;
     }
     
@@ -26,7 +25,6 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     
     if(envelopeElem->ValueStr() != "envelope")
     {
-        std::cout << "Parsing error: XML main node not named 'fipa-message' but " << envelopeElem->ValueStr() << std::endl;
         LOG_WARN_S << "Parsing error: XML main node not named 'fipa-message' but " << envelopeElem->ValueStr();
         return false;
     }
@@ -45,7 +43,6 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     }
     catch(std::exception& e)
     {
-        std::cout << "Parsing error base envelope: " << e.what() << std::endl;
         LOG_WARN_S << "Parsing error base envelope: " << e.what();
         return false;
     }
@@ -59,7 +56,6 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
         }
         catch(std::exception& e)
         {
-            std::cout << "Parsing error extra envelope: " << e.what() << std::endl;
             LOG_WARN_S << "Parsing error extra envelope: " << e.what();
             return false;
         }
@@ -69,7 +65,6 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     PayloadLength len =  envelope.flattened().getPayloadLength();
     if(len > storage.length())
     {
-        std::cout << "Parsing error: payload length (" << len << ") bigger than storage length (" << storage.length() << ")" << std::endl;
         LOG_WARN_S << "Parsing error: payload length (" << len << ") bigger than storage length (" << storage.length() << ")";
         return false;
     }
