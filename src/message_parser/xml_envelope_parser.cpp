@@ -120,7 +120,6 @@ const ACLBaseEnvelope XMLEnvelopeParser::parseParameters(const TiXmlElement* par
         }
         else if(name == "payload-length")
         {
-            // TODO does this work?
             envelope.setPayloadLength(boost::lexical_cast<PayloadLength>(std::string(pChild->GetText())));
         }
         else if(name == "payload-encoding")

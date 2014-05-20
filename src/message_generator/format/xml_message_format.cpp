@@ -25,7 +25,8 @@ std::string XMLMessageFormat::apply(const ACLMessage& aclMsg) const
     }
     
     TiXmlPrinter printer;
-    // TODO no line break and no indentation for compact result
+    printer.SetIndent("");
+    printer.SetLineBreak("");
 
     doc.Accept( &printer );
     

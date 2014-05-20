@@ -29,7 +29,10 @@ std::string XMLEnvelopeFormat::apply(const ACLEnvelope& envelope) const
     }
     
     TiXmlPrinter printer;
-    // TODO no line break and no indentation for compact result
+    printer.SetIndent("");
+    printer.SetLineBreak("");
+    // When using a line break (for debugging), make sure to remove the last line break,
+    // so that the payload starts immediately after the last '>'.
 
     doc.Accept( &printer );
     return printer.Str() + envelope.getPayload();
