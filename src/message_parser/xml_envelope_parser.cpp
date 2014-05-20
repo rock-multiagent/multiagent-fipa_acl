@@ -65,10 +65,12 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     PayloadLength len =  envelope.flattened().getPayloadLength();
     if(len > storage.length())
     {
-        LOG_WARN_S << "Parsing error: payload length (" << len << ") bigger than storage length (" << storage.length() << ")";
-        return false;
+        LOG_WARN_S << "Parsing error: payload length (" << len << ") bigger than storage length (" << storage.length() << "). Payload must still be set.";
     }
-    envelope.setPayload(storage.substr(storage.length() - len));
+    else
+    {
+        envelope.setPayload(storage.substr(storage.length() - len));
+    }
     
     return true;
 }
