@@ -4,12 +4,14 @@
 #include <base/logging.h>
 
 #include "format/bitefficient_envelope_format.h"
+#include "format/xml_envelope_format.h"
 
 namespace fipa {
 namespace acl {
 
 std::map<representation::Type, EnvelopeFormatPtr > EnvelopeGenerator::msFormats = boost::assign::map_list_of
-    (representation::BITEFFICIENT, boost::shared_ptr<EnvelopeFormat>(new BitefficientEnvelopeFormat()) );
+    (representation::BITEFFICIENT, boost::shared_ptr<EnvelopeFormat>(new BitefficientEnvelopeFormat()) )
+    (representation::XML, boost::shared_ptr<EnvelopeFormat>(new XMLEnvelopeFormat()) );
 
 std::string EnvelopeGenerator::create(const ACLEnvelope& envelope, const representation::Type& type)
 {

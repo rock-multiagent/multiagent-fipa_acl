@@ -1,5 +1,6 @@
 #include "bitefficient_message_parser.h"
 #include "string_message_parser.h"
+#include "xml_message_parser.h"
 
 #include <boost/assign/list_of.hpp>
 
@@ -9,6 +10,7 @@ namespace acl {
 
 std::map<representation::Type, MessageParserImplementationPtr > MessageParser::msParsers = boost::assign::map_list_of
             (representation::BITEFFICIENT, boost::shared_ptr<MessageParserImplementation>(new BitefficientMessageParser()) )
+            (representation::XML, boost::shared_ptr<MessageParserImplementation>(new XMLMessageParser()))
             (representation::STRING_REP, boost::shared_ptr<MessageParserImplementation>(new StringMessageParser()) );
 
 

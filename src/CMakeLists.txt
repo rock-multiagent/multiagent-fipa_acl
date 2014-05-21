@@ -1,5 +1,6 @@
 set(SOURCES
     message_parser/agent_id.cpp
+    message_parser/bitefficient_envelope_parser.cpp
     message_parser/bitefficient_message_parser.cpp
     message_parser/date_time.cpp
     message_parser/envelope_parser.cpp
@@ -9,6 +10,9 @@ set(SOURCES
     message_parser/message_printer.cpp
     message_parser/message_parser.cpp
     message_parser/string_message_parser.cpp
+    message_parser/xml_envelope_parser.cpp
+    message_parser/xml_message_parser.cpp
+    message_parser/xml_parser.cpp
     message_generator/acl_message.cpp
     message_generator/acl_envelope.cpp
     message_generator/agent_id.cpp
@@ -18,6 +22,9 @@ set(SOURCES
     message_generator/format/bitefficient_message_format.cpp
     message_generator/format/string_format.cpp
     message_generator/format/string_message_format.cpp
+    message_generator/format/xml_envelope_format.cpp
+    message_generator/format/xml_format.cpp
+    message_generator/format/xml_message_format.cpp
     message_generator/message_format.cpp
     message_generator/message_generator.cpp
     message_generator/userdef_param.cpp
@@ -59,12 +66,16 @@ set(HEADERS
     message_generator/format/bitefficient_message_format.h
     message_generator/format/string_format.h
     message_generator/format/string_message_format.h
+    message_generator/format/xml_envelope_format.h
+    message_generator/format/xml_format.h
+    message_generator/format/xml_message_format.h
     message_generator/message_format.h
     message_generator/message_generator.h
     message_generator/received_object.h
     message_generator/serialized_letter.h
     message_parser/agent_id.h
     message_parser/byte_sequence.h
+    message_parser/bitefficient_envelope_parser.h
     message_parser/bitefficient_message_parser.h
     message_parser/date_time.h
     message_parser/debug.h
@@ -77,6 +88,9 @@ set(HEADERS
     message_parser/parameter.h
     message_parser/string_message_parser.h
     message_parser/types.h
+    message_parser/xml_envelope_parser.h
+    message_parser/xml_message_parser.h
+    message_parser/xml_parser.h
 )
 
 rock_library(${PROJECT_NAME} 

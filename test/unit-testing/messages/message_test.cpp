@@ -710,6 +710,23 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
             BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
             BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected content is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
         }
+        
+        {
+            std::string expectedReceiverName = "AGENTNAME2";
+            std::string conversationID = "convid"; // XXX 6 hardcoded below
+            std::string encodedMsg = "(INFORM\n :SENDER ( AGENT-IDENTIFIER  :NAME "
+                + expectedAgentName + " )\n :receiver (SET ( agent-identifier  :name "
+                + expectedReceiverName + " ) )\n :content  \""
+                + expectedContent + "\":conversation-id #6\"" + conversationID + ")";
+
+            ACLMessage outputMsg;
+
+            BOOST_REQUIRE_MESSAGE( inputParser.parseData(encodedMsg, outputMsg, fipa::acl::representation::STRING_REP), "Parse string content with more space skipping, UPPERCASE: '" << encodedMsg << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getContent() == expectedContent, "Expected content is: '" << expectedContent << "' - contained: '" << outputMsg.getContent() << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getSender().getName() == expectedAgentName, "Expected sender is: '" << expectedAgentName << "' - contained: '" << outputMsg.getSender().getName() << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getAllReceivers()[0].getName() == expectedReceiverName, "Expected receiver is: '" << expectedReceiverName << "' - contained: '" << outputMsg.getAllReceivers()[0].getName() << "'");
+            BOOST_REQUIRE_MESSAGE( outputMsg.getConversationID() == conversationID, "ConversationID is '" << outputMsg.getConversationID() << "' but expected '" << conversationID << "'");
+        }
     }
 
   
@@ -723,8 +740,14 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
         origMsg.addReplyTo(AgentID("reply-to-0"));
         origMsg.addReplyTo(AgentID("reply-to-1"));
         origMsg.setInReplyTo("in-reply-to");
+        
+        AgentID receiver("receiver-0");
+        AgentID resolver0("resolver0");
+        receiver.addResolver(resolver0);
+        receiver.addAddress("http://Fritzmobil:7778/acc");
+        receiver.addAddress("tcp://134.102.70.35:6789");
 
-        origMsg.addReceiver( AgentID("receiver-0"));
+        origMsg.addReceiver( receiver );
         origMsg.addReceiver( AgentID("receiver-1"));
         origMsg.setSender( AgentID("sender"));
         origMsg.setOntology("test ontology");
@@ -768,7 +791,52 @@ BOOST_AUTO_TEST_CASE(string_grammar_test)
         BOOST_REQUIRE_MESSAGE( decodedMsg.getUserdefParams()[0].getName() == origMsg.getUserdefParams()[0].getName(), "UserdefParam is '" << decodedMsg.getUserdefParams()[0].getName() << "' but expected '" << origMsg.getUserdefParams()[0].getName() << "' msg: " << encodedMsg);
     }
 
+}
 
+BOOST_AUTO_TEST_CASE(message_xml_test)
+{
+    using namespace fipa::acl;
+
+    ACLMessage msg(ACLMessage::REQUEST);
+    AgentID origin("da0@134.102.70.35:1099/JADE");
+    AgentID receiver("receiver");
+
+    AgentID resolver0("resolver0");
+    AgentID resolver1("resolver1");
+
+    receiver.addResolver(resolver0);
+    receiver.addResolver(resolver1);
+    receiver.addAddress("http://test.address");
+
+    msg.setSender(origin);
+    msg.addReceiver(receiver);
+    msg.addReplyTo(origin);
+    msg.setProtocol("test-protocol");
+    msg.setLanguage("test language");
+    msg.setEncoding("test encoding");
+    msg.setOntology("test ontology");
+    msg.setReplyWith("rock_agent1399557540471");
+    base::Time time = base::Time::fromString("20101223-12:00:37", base::Time::Seconds);
+    msg.setReplyBy(time);
+    msg.setConversationID("rock_agent_cid");
+    msg.setContent("test-content going nowhere");
+    msg.setInReplyTo("test in_reply_to");
+    
+    UserdefParam userdefMessageParam("userdef0","test value");
+    msg.addUserdefParam(userdefMessageParam);
+
+    
+    
+    representation::Type msgRepresentationType = representation::XML;
+    std::string encodedMessage = MessageGenerator::create(msg, msgRepresentationType);
+    
+    // Parse back
+    MessageParser mp;
+    ACLMessage decodedMsg;
+    BOOST_REQUIRE_MESSAGE( mp.parseData(encodedMessage, decodedMsg, msgRepresentationType), "Decoding Message " << encodedMessage);
+        
+    // Check that the messages are identical
+    BOOST_REQUIRE( msg == decodedMsg );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

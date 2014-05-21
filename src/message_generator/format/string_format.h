@@ -24,16 +24,19 @@ public:
      * Get encoded agent identifier list
      */
     static std::string getAgentIdentifierList(const AgentIDList& agentList);
+    
+    /**
+     * Byte-length encoded string format.
+     */
+    static std::string getString(const std::string& txt);
 
     /**
      * Get Expression
-     * Expression is wrapped using parentheses to facilitate parsing, i.e. to account for too greedy parser behaviour,
-     * especially when using userdefined parameters
-     *
+     * Expression is encoded as a byte-length encoded string.
      */
-    static std::string getExpression(const std::string& txt) { return "(" + txt + ")"; }
+    static std::string getExpression(const std::string& txt) { return getString(txt); }
 
-    static std::string getWord(const std::string& txt) { return txt; }
+    static std::string getWord(const std::string& txt) { return txt; }    
 
     static std::string getUrlSequence(const Addresses& addresses);
 
