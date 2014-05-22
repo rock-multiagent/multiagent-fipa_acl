@@ -307,10 +307,12 @@ fipa::acl::ACLMessage ACLEnvelope::getACLMessage() const
     using namespace fipa::acl;
     ACLMessage msg;
     MessageParser mp;
-    representation::Type aclRepresentation = mBaseEnvelope.getACLRepresentation();
+    // Get the LATEST representation (from flattened), not from base envelope!
+    representation::Type aclRepresentation = flattened().getACLRepresentation();
     LOG_DEBUG_S << "getACLMessage from payload: " << mPayload << " with representation: " << representation::TypeTxt[aclRepresentation];
     if( !mp.parseData(mPayload, msg, aclRepresentation ))
     {
+        // TODO This makes the process crash, only if someone decides to send us a malformed message. Not so good...
         throw std::runtime_error("ACLEnvelope::getACLMessage failed for representation '" + std::string(representation::TypeTxt[aclRepresentation]));
     }
     return msg;
