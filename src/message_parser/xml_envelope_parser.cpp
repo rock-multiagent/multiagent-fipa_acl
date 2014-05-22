@@ -10,6 +10,7 @@ namespace acl {
 bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envelope)
 {
     TiXmlDocument doc;
+    LOG_INFO_S << "XMLEnvelopeParser: starting to parse: " << storage;
     
     // Load the string into XML doc
     const char* parseResult = doc.Parse(storage.c_str());
@@ -19,9 +20,16 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
         // non-null means some error
         LOG_WARN_S << "Parsing envelope XML failed for (probably the payload): " << parseResult;
     }
+    LOG_INFO_S << "XMLEnvelopeParser: basic XML parsing complete.";
     
     // The main node (envelope)
     const TiXmlElement* envelopeElem = doc.FirstChildElement();
+    
+    if(envelopeElem == NULL)
+    {
+        LOG_WARN_S << "Parsing error: XML main node not found.";
+        return false;
+    }
     
     if(envelopeElem->ValueStr() != "envelope")
     {
@@ -32,9 +40,13 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
     // Parse all child elements
     const TiXmlElement* pChild = envelopeElem->FirstChildElement();
     
+    if(pChild == NULL)
+    {
+        LOG_WARN_S << "Parsing error: XML first params node not found.";
+        return false;
+    }
+    
     // We assume the params have raising indices, starting with one.
-    
-    
     int paramsIndex = 1;
     // The first params is the Base envelope
     try
