@@ -2,7 +2,7 @@
 #define FIPAACL_XML_MESSAGE_PARSER_H
 
 #include <fipa_acl/message_parser/message_parser.h>
-#include "tinyxml.h"
+#include <tinyxml.h>
 
 namespace fipa {
 namespace acl {

@@ -5,7 +5,7 @@
 #include <fipa_acl/message_generator/acl_envelope.h>
 #include <fipa_acl/message_generator/types.h>
 #include <fipa_acl/message_parser/envelope_parser.h>
-#include "tinyxml.h"
+#include <tinyxml.h>
 
 namespace fipa {
 namespace acl {

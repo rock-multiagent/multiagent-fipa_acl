@@ -1,9 +1,9 @@
 #ifndef FIPAACL_XML_PARSER_H
 #define FIPAACL_XML_PARSER_H
 
-#include "tinyxml.h"
 #include <string>
-#include <base/time.h>
+#include <tinyxml.h>
+#include <base/Time.hpp>
 #include <fipa_acl/message_generator/acl_envelope.h>
 #include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/message_generator/types.h>

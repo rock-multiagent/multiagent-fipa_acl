@@ -1,5 +1,5 @@
 #include "xml_parser.h"
-#include "../../../../install/include/base/Time.hpp"
+#include <base/Time.hpp>
 #include <stdexcept>
 
 namespace fipa {
