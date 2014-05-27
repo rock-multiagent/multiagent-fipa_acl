@@ -157,14 +157,18 @@ void State::addEmbeddedStateMachine(EmbeddedStateMachine embeddedStateMachine)
 
 std::string State::toString() const
 {
-    // TODO: consider embedded statemachines
     std::stringstream state;
     state << "state id: '" << mId << "', final: '" << mIsFinal << "'\n";
-    std::vector<Transition>::const_iterator it = mTransitions.begin();
-    for(; it != mTransitions.end(); ++it)
+    for(std::vector<Transition>::const_iterator it = mTransitions.begin(); it != mTransitions.end(); ++it)
     {
         state << "\t" << it->toString() << "\n";
     }
+    
+    for(std::vector<EmbeddedStateMachine>::const_iterator it = mEmbeddedStateMachines.begin(); it != mEmbeddedStateMachines.end(); ++it)
+    {
+        state << "\t" << it->toString() << "\n";
+    }
+    
     return state.str();
 }
 

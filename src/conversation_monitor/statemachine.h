@@ -165,6 +165,10 @@ struct EmbeddedProtocolMapping
 {
     std::string from;
     std::string to;
+    /**
+     * Convert to string
+     */
+    std::string toString() const;
 };
 
 /**
@@ -175,7 +179,10 @@ struct EmbeddedStateMachine
 {
     StateMachine stateMachine;
     std::vector<EmbeddedProtocolMapping> mappings;
-    // TODO  std::string toString() const;
+    /**
+     * Convert to string
+     */
+    std::string toString() const;
 };
 
 } // end of acl

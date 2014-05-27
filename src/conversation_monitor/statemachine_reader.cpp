@@ -150,15 +150,15 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
         esm.stateMachine = sm;
         // Parse all mappings
         TiXmlHandle handleSubProtocol = TiXmlHandle(subProtocolElement);
-        TiXmlElement *mappingElement = handleState.FirstChildElement(StateMachineReader::mapping).ToElement();
+        TiXmlElement *mappingElement = handleSubProtocol.FirstChildElement(StateMachineReader::mapping).ToElement();
         for (; mappingElement != NULL; mappingElement = mappingElement->NextSiblingElement(StateMachineReader::mapping) )
         {
             EmbeddedProtocolMapping mapping = parseEmbeddedProtocolMapping(mappingElement);
             esm.mappings.push_back(mapping);
         }
         
-        //state.addEmbeddedStateMachine(sm);
-        LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> subprotocol added:\n" << sm.toString();
+        state.addEmbeddedStateMachine(esm);
+        LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> subprotocol added:\n" << esm.toString();
     }
     
     return state;
