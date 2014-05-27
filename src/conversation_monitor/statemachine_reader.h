@@ -25,6 +25,7 @@ class StateMachineReader {
         
     public:
         // node attribute names used in the spec standard; most general ones such as "state", "transition" are hard-implement
+        static const std::string transition;
         static const std::string from;
         static const std::string to;
         static const std::string target;
@@ -32,18 +33,28 @@ class StateMachineReader {
         static const std::string final;
         static const std::string performative;
         static const std::string initial;
+        static const std::string subprotocol;
+        static const std::string master;
+        static const std::string resident;
+        static const std::string file;
 
         /**
          * Read the xml structure defining a statemachine
 	 * \param statemachineElement the element describing the stateMachine
+         * \param protocolSpec name of the file containing the specification for the
+         * statemachine
+         * \return the parsed state machine
          */
-        StateMachine parseStateMachineNode(TiXmlElement* statemachineElement);
+        StateMachine parseStateMachineNode(TiXmlElement* statemachineElement, const std::string& protocolSpec);
         
         /**
 	  \brief method that parses the <state> element of the spec. file
 	  \param stateElement
+	  \param protocolSpec name of the file containing the specification for the
+           statemachine
+           \return the parsed state
         */
-        State parseStateNode(TiXmlElement* stateElement);
+        State parseStateNode(TiXmlElement* stateElement, const std::string& protocolSpec);
         
         /**
 	  \brief method that parses <transition> element of the spec. file
@@ -52,6 +63,15 @@ class StateMachineReader {
         */
         Transition parseTransitionNode(TiXmlElement* transitionElement);
 
+        /**
+         * \brief method that parses <subprotocol> element of the spec. file
+         * \param subProtocolElement
+         * \param protocolSpec name of the file containing the specification for the
+         * statemachine
+         * \return the sub-stateMachine
+         */
+        StateMachine parseSubProtocol(TiXmlElement* subProtocolElement, const std::string& protocolSpec);
+        
 public:
         /**
          * Load the specification and return the corresponding state

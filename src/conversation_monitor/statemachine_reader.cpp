@@ -6,6 +6,7 @@
 #include <base/logging.h>
 
 #include <tinyxml.h>
+#include <boost/filesystem/path.hpp>
 
 #include "transition.h"
 
@@ -13,6 +14,7 @@
 namespace fipa {
 namespace acl {
 
+const std::string StateMachineReader::transition = std::string("transition");    
 const std::string StateMachineReader::from = std::string("from");
 const std::string StateMachineReader::to = std::string("to");
 const std::string StateMachineReader::target =	std::string("target");
@@ -20,9 +22,14 @@ const std::string StateMachineReader::id = std::string("id");
 const std::string StateMachineReader::final = std::string("final");
 const std::string StateMachineReader::performative = std::string("performative");
 const std::string StateMachineReader::initial = std::string("initial");
+const std::string StateMachineReader::subprotocol = std::string("subprotocol");
+const std::string StateMachineReader::master = std::string("master");
+const std::string StateMachineReader::resident = std::string("resident");
+const std::string StateMachineReader::file = std::string("file");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
 {
+    LOG_DEBUG("loadSpecification: opening file: %s", protocolSpec.c_str());
     {
         FILE* file = fopen(protocolSpec.c_str(), "r");
         if(file)
@@ -45,7 +52,7 @@ StateMachine StateMachineReader::loadSpecification(const std::string& protocolSp
     LOG_DEBUG("loadSpecification: specification file '%s'", protocolSpec.c_str());
     TiXmlElement* statemachineElement = file.RootElement();
 
-    StateMachine statemachine = parseStateMachineNode(statemachineElement);
+    StateMachine statemachine = parseStateMachineNode(statemachineElement, protocolSpec);
     statemachine.generateDefaultTransitions();
     statemachine.generateDefaultStates();
     statemachine.updateRoles();
@@ -54,7 +61,7 @@ StateMachine StateMachineReader::loadSpecification(const std::string& protocolSp
     return statemachine;
 }
 
-StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachineElement)
+StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachineElement, const std::string& protocolSpec)
 {
     StateMachine statemachine;
 
@@ -82,7 +89,7 @@ StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachin
     // read states nodes 
     for (; stateElement != NULL; stateElement = stateElement->NextSiblingElement("state") )
     {
-        State state = parseStateNode(stateElement);
+        State state = parseStateNode(stateElement, protocolSpec);
         LOG_DEBUG("Adding state '%s", state.toString().c_str());
         statemachine.addState(state);
     }
@@ -90,7 +97,7 @@ StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachin
     return statemachine;
 }
 
-State StateMachineReader::parseStateNode(TiXmlElement *stateElement)
+State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::string& protocolSpec)
 {
     State state;
 
@@ -125,8 +132,8 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement)
 
     // Read transitions
     TiXmlHandle handleState = TiXmlHandle(stateElement);
-    TiXmlElement *transitionElement = handleState.FirstChildElement("transition").ToElement();
-    for (; transitionElement != NULL; transitionElement = transitionElement->NextSiblingElement("transition") )
+    TiXmlElement *transitionElement = handleState.FirstChildElement(StateMachineReader::transition).ToElement();
+    for (; transitionElement != NULL; transitionElement = transitionElement->NextSiblingElement(StateMachineReader::transition) )
     {
         Transition t = parseTransitionNode(transitionElement);
         state.addTransition(t);
@@ -141,6 +148,14 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement)
     }
     
     //TODO: implement specification for subprotocols
+    // Read subprotocols
+    TiXmlElement *subProtocolElement = handleState.FirstChildElement(StateMachineReader::subprotocol).ToElement();
+    for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )
+    {
+        StateMachine sm = parseSubProtocol(subProtocolElement, protocolSpec);
+        LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> subprotocol added:\n" << sm.toString();
+    }
+    
     return state;
 }
 
@@ -186,6 +201,26 @@ Transition StateMachineReader::parseTransitionNode(TiXmlElement *transitionEleme
     
     return transition;
 }
+
+StateMachine StateMachineReader::parseSubProtocol(TiXmlElement* subProtocolElement, const std::string& protocolSpec)
+{
+    // Get a valid file path
+    boost::filesystem::path parentProtocolFile(protocolSpec);
+    boost::filesystem::path dir = parentProtocolFile.parent_path();
+    // Append the file
+    const std::string* file = subProtocolElement->Attribute(StateMachineReader::file);
+    dir /= *file;
+    
+    // TODO modify and/or integrate into current SM
+    
+    if (file != NULL)
+    {
+        return loadSpecification(dir.string());
+    } else {
+        throw new std::runtime_error("StateMachineReader::parseSubProtocol subprotocol is missing 'file' attribute");
+    }
+}
+
 
 } //end of namespace acl
 } //end of namespace fipa
