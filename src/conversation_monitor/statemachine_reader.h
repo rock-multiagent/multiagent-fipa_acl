@@ -34,8 +34,7 @@ class StateMachineReader {
         static const std::string performative;
         static const std::string initial;
         static const std::string subprotocol;
-        static const std::string master;
-        static const std::string resident;
+        static const std::string mapping;
         static const std::string file;
 
         /**

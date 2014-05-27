@@ -23,8 +23,7 @@ const std::string StateMachineReader::final = std::string("final");
 const std::string StateMachineReader::performative = std::string("performative");
 const std::string StateMachineReader::initial = std::string("initial");
 const std::string StateMachineReader::subprotocol = std::string("subprotocol");
-const std::string StateMachineReader::master = std::string("master");
-const std::string StateMachineReader::resident = std::string("resident");
+const std::string StateMachineReader::mapping = std::string("mapping");
 const std::string StateMachineReader::file = std::string("file");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
@@ -147,6 +146,7 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
     for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )
     {
         StateMachine sm = parseSubProtocol(subProtocolElement, protocolSpec);
+        state.addEmbeddedStateMachine(sm);
         LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> subprotocol added:\n" << sm.toString();
     }
     
@@ -205,14 +205,16 @@ StateMachine StateMachineReader::parseSubProtocol(TiXmlElement* subProtocolEleme
     const std::string* file = subProtocolElement->Attribute(StateMachineReader::file);
     dir /= *file;
     
-    // TODO modify and/or integrate into current SM
+    StateMachine subStateMachine;
     
     if (file != NULL)
     {
-        return loadSpecification(dir.string());
+        subStateMachine = loadSpecification(dir.string());
     } else {
         throw new std::runtime_error("StateMachineReader::parseSubProtocol subprotocol is missing 'file' attribute");
     }
+    
+    return subStateMachine;
 }
 
 

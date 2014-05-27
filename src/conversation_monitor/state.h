@@ -161,6 +161,12 @@ public:
      * \return list of embedded statemachines
      */
     std::vector<StateMachine> getEmbeddedStatemachines() const;
+    
+    /**
+     * Add an embedded state machine.
+     * TODO more params(master, resident)
+     */
+    void addEmbeddedStateMachine(StateMachine embeddedStateMachine);
 
     /**
      * Convert state to string representation

@@ -150,8 +150,14 @@ std::vector<StateMachine> State::getEmbeddedStatemachines() const
     return mEmbeddedStateMachines;
 }
 
+void State::addEmbeddedStateMachine(StateMachine embeddedStateMachine)
+{
+    mEmbeddedStateMachines.push_back(embeddedStateMachine);
+}
+
 std::string State::toString() const
 {
+    // TODO: consider embedded statemachines
     std::stringstream state;
     state << "state id: '" << mId << "', final: '" << mIsFinal << "'\n";
     std::vector<Transition>::const_iterator it = mTransitions.begin();

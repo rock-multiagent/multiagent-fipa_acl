@@ -14,7 +14,9 @@
 	<state id="4">
 		<transition performative="failure" from="B" to="initiator" target="5"/>
 		<transition performative="inform" from="B" to="initiator" target="6"/>
-		<subprotocol master="B" resident="initiator" file="request"/>
+		<subprotocol file="request>
+                    <mapping from="B" to="initiator"/>
+		</subprotocol>
 	</state>
 	
 	<state id="5" final="yes">
