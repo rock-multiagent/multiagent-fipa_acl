@@ -145,8 +145,19 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
     TiXmlElement *subProtocolElement = handleState.FirstChildElement(StateMachineReader::subprotocol).ToElement();
     for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )
     {
+        EmbeddedStateMachine esm;
         StateMachine sm = parseSubProtocol(subProtocolElement, protocolSpec);
-        state.addEmbeddedStateMachine(sm);
+        esm.stateMachine = sm;
+        // Parse all mappings
+        TiXmlHandle handleSubProtocol = TiXmlHandle(subProtocolElement);
+        TiXmlElement *mappingElement = handleState.FirstChildElement(StateMachineReader::mapping).ToElement();
+        for (; mappingElement != NULL; mappingElement = mappingElement->NextSiblingElement(StateMachineReader::mapping) )
+        {
+            EmbeddedProtocolMapping mapping = parseEmbeddedProtocolMapping(mappingElement);
+            esm.mappings.push_back(mapping);
+        }
+        
+        //state.addEmbeddedStateMachine(sm);
         LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> subprotocol added:\n" << sm.toString();
     }
     
@@ -194,6 +205,28 @@ Transition StateMachineReader::parseTransitionNode(TiXmlElement *transitionEleme
     }
     
     return transition;
+}
+
+EmbeddedProtocolMapping StateMachineReader::parseEmbeddedProtocolMapping(TiXmlElement* mappingElement)
+{
+    EmbeddedProtocolMapping epm;
+    const std::string* from = mappingElement->Attribute(StateMachineReader::from);
+    if (from != NULL)
+    {
+        epm.from = *from;
+    } else {
+        throw new std::runtime_error("StateMachineReader::parseEmbeddedProtocolMapping mapping is missing 'from' attribute");
+    }
+        
+    const std::string* to = mappingElement->Attribute(StateMachineReader::to);
+    if (to != NULL)
+    {
+        epm.to = *to;
+    } else {
+        throw new std::runtime_error("StateMachineReader::parseEmbeddedProtocolMapping mapping is missing 'to' attribute");
+    }
+    
+    return epm;
 }
 
 StateMachine StateMachineReader::parseSubProtocol(TiXmlElement* subProtocolElement, const std::string& protocolSpec)

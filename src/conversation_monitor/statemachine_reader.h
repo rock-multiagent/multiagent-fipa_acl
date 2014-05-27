@@ -23,63 +23,70 @@ namespace acl {
 */
 class StateMachineReader {
         
-    public:
-        // node attribute names used in the spec standard; most general ones such as "state", "transition" are hard-implement
-        static const std::string transition;
-        static const std::string from;
-        static const std::string to;
-        static const std::string target;
-        static const std::string id;
-        static const std::string final;
-        static const std::string performative;
-        static const std::string initial;
-        static const std::string subprotocol;
-        static const std::string mapping;
-        static const std::string file;
+public: // FIXME private!?
+    // node attribute names used in the spec standard; most general ones such as "state", "transition" are hard-implement
+    static const std::string transition;
+    static const std::string from;
+    static const std::string to;
+    static const std::string target;
+    static const std::string id;
+    static const std::string final;
+    static const std::string performative;
+    static const std::string initial;
+    static const std::string subprotocol;
+    static const std::string mapping;
+    static const std::string file;
 
-        /**
-         * Read the xml structure defining a statemachine
-	 * \param statemachineElement the element describing the stateMachine
-         * \param protocolSpec name of the file containing the specification for the
-         * statemachine
-         * \return the parsed state machine
-         */
-        StateMachine parseStateMachineNode(TiXmlElement* statemachineElement, const std::string& protocolSpec);
-        
-        /**
-	  \brief method that parses the <state> element of the spec. file
-	  \param stateElement
-	  \param protocolSpec name of the file containing the specification for the
-           statemachine
-           \return the parsed state
-        */
-        State parseStateNode(TiXmlElement* stateElement, const std::string& protocolSpec);
-        
-        /**
-	  \brief method that parses <transition> element of the spec. file
-	  \param transitionElement
-	  \return transition 
-        */
-        Transition parseTransitionNode(TiXmlElement* transitionElement);
+    /**
+     * Read the xml structure defining a statemachine
+     * \param statemachineElement the element describing the stateMachine
+     * \param protocolSpec name of the file containing the specification for the
+     * statemachine
+     * \return the parsed state machine
+     */
+    StateMachine parseStateMachineNode(TiXmlElement* statemachineElement, const std::string& protocolSpec);
+    
+    /**
+        \brief method that parses the <state> element of the spec. file
+        \param stateElement
+        \param protocolSpec name of the file containing the specification for the
+        statemachine
+        \return the parsed state
+    */
+    State parseStateNode(TiXmlElement* stateElement, const std::string& protocolSpec);
+    
+    /**
+        \brief method that parses <transition> element of the spec. file
+        \param transitionElement
+        \return transition 
+    */
+    Transition parseTransitionNode(TiXmlElement* transitionElement);
 
-        /**
-         * \brief method that parses <subprotocol> element of the spec. file
-         * \param subProtocolElement
-         * \param protocolSpec name of the file containing the specification for the
-         * statemachine
-         * \return the sub-stateMachine
-         */
-        StateMachine parseSubProtocol(TiXmlElement* subProtocolElement, const std::string& protocolSpec);
+    /**
+     * \brief method that parses <subprotocol> element of the spec. file
+     * \param subProtocolElement
+     * \param protocolSpec name of the file containing the specification for the
+     * statemachine
+     * \return the sub-stateMachine
+     */
+    StateMachine parseSubProtocol(TiXmlElement* subProtocolElement, const std::string& protocolSpec);
+    
+    /**
+     * \brief method that parses <mapping> element of the spec. file
+     * \param mappingElement
+     * \return the embedded protocol mapping
+     */
+    EmbeddedProtocolMapping parseEmbeddedProtocolMapping(TiXmlElement* mappingElement);
         
 public:
-        /**
-         * Load the specification and return the corresponding state
-         * machine for it
-	 * \param file name of the file containing the specification for the
-         * statemachine
-	 * \return the statemachine build from spec
-        */
-        StateMachine loadSpecification(const std::string& file);
+    /**
+     * Load the specification and return the corresponding state
+     * machine for it
+     * \param file name of the file containing the specification for the
+     * statemachine
+     * \return the statemachine build from spec
+     */
+    StateMachine loadSpecification(const std::string& file);
     
 };
 

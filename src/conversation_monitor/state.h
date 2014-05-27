@@ -17,6 +17,7 @@
 namespace fipa {
 namespace acl {
 
+struct EmbeddedStateMachine;
 class StateMachine;
 class MessageArchive;
 class Transition;
@@ -70,7 +71,7 @@ private:
     * a state machine cannot exit a state in a valid
     * manner until all the sub-protocols of that state are in a valid final state
     */
-    std::vector<StateMachine> mEmbeddedStateMachines;
+    std::vector<EmbeddedStateMachine> mEmbeddedStateMachines;
 
     static std::vector<StateId> msDefaultStates;
 
@@ -160,13 +161,12 @@ public:
      * Retrieve embedded statemachine 
      * \return list of embedded statemachines
      */
-    std::vector<StateMachine> getEmbeddedStatemachines() const;
+    std::vector<EmbeddedStateMachine> getEmbeddedStatemachines() const;
     
     /**
      * Add an embedded state machine.
-     * TODO more params(master, resident)
      */
-    void addEmbeddedStateMachine(StateMachine embeddedStateMachine);
+    void addEmbeddedStateMachine(fipa::acl::EmbeddedStateMachine embeddedStateMachine);
 
     /**
      * Convert state to string representation

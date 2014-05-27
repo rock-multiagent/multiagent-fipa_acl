@@ -145,12 +145,12 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
 
 }
 
-std::vector<StateMachine> State::getEmbeddedStatemachines() const
+std::vector< EmbeddedStateMachine > State::getEmbeddedStatemachines() const
 { 
     return mEmbeddedStateMachines;
 }
 
-void State::addEmbeddedStateMachine(StateMachine embeddedStateMachine)
+void State::addEmbeddedStateMachine(EmbeddedStateMachine embeddedStateMachine)
 {
     mEmbeddedStateMachines.push_back(embeddedStateMachine);
 }

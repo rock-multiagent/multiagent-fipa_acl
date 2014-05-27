@@ -156,6 +156,28 @@ public:
     std::string toString() const;
 };
 
+/**
+ * \struct EmbeddedProtocolMapping
+ * \brief When embedding protocols, agents participating in one protocol can be mapped to agents participating in the
+ * embedded one.
+ */
+struct EmbeddedProtocolMapping
+{
+    std::string from;
+    std::string to;
+};
+
+/**
+ * \struct EmbeddedStateMachine
+ * \brief An embedded state machine with mappings
+ */
+struct EmbeddedStateMachine
+{
+    StateMachine stateMachine;
+    std::vector<EmbeddedProtocolMapping> mappings;
+    // TODO  std::string toString() const;
+};
+
 } // end of acl
 } // end of fipa
 
