@@ -29,14 +29,13 @@ const std::string StateMachineReader::file = std::string("file");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
 {
-    LOG_DEBUG("loadSpecification: opening file: %s", protocolSpec.c_str());
     {
         FILE* file = fopen(protocolSpec.c_str(), "r");
         if(file)
         {
             fclose(file);
         } else {
-            LOG_ERROR("error loading the spec file: '%s'. File does not exist.", protocolSpec.c_str());
+            LOG_ERROR_S << "error loading the spec file: '" << protocolSpec << "'. File does not exist.";
             throw std::runtime_error("Error loading the specification file: '" + protocolSpec + "' -- file does not exist");
         }
     }
@@ -45,11 +44,11 @@ StateMachine StateMachineReader::loadSpecification(const std::string& protocolSp
     
     if (!file.LoadFile())
     {
-        LOG_ERROR("error loading the spec file: '%s'. Please use setProtocolResourceDir(const std::string&) instead to specify the location of your protocol files", protocolSpec.c_str());
+        LOG_ERROR_S << "error loading the spec file: '" << protocolSpec << "'. Please use setProtocolResourceDir(const std::string&) instead to specify the location of your protocol files";
         throw std::runtime_error("Error loading the specification file: '" + protocolSpec + "' -- tinyxml failed to load the file");
     }
 
-    LOG_DEBUG("loadSpecification: specification file '%s'", protocolSpec.c_str());
+    LOG_DEBUG_S << "loadSpecification: specification file 'protocolSpec'";
     TiXmlElement* statemachineElement = file.RootElement();
 
     StateMachine statemachine = parseStateMachineNode(statemachineElement, protocolSpec);
@@ -68,29 +67,28 @@ StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachin
     const char *initialState;
     
     initialState = statemachineElement->Attribute(StateMachineReader::initial.c_str());
-    LOG_DEBUG("parseStateMachineNode: retrieved value of the \"initial\" state: %s", initialState);
     if (initialState)
     {
         statemachine.setInitialState(std::string(initialState));
     } else {
         throw std::runtime_error("Attribute of initial could not be retrieved");
     }
+    LOG_DEBUG_S << "parseStateMachineNode: retrieved value of the \"initial\" state: " << std::string(initialState);
         
     TiXmlHandle handleSm = TiXmlHandle(statemachineElement);
     TiXmlElement* stateElement = handleSm.FirstChild( "state" ).ToElement();
-    
     if (stateElement)
     {
-        LOG_DEBUG("parseStateMachineNode: found first state element");
+        LOG_DEBUG_S << "parseStateMachineNode: found first state element";
     } else {
-        LOG_WARN("parseStateMachineNode: no state element found");
+        LOG_WARN_S << "parseStateMachineNode: no state element found";
     }
    
     // read states nodes 
     for (; stateElement != NULL; stateElement = stateElement->NextSiblingElement("state") )
     {
         State state = parseStateNode(stateElement, protocolSpec);
-        LOG_DEBUG("Adding state '%s", state.toString().c_str());
+        LOG_DEBUG_S << "Adding state: " << state.toString();
         statemachine.addState(state);
     }
 
@@ -138,13 +136,9 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
         Transition t = parseTransitionNode(transitionElement);
         state.addTransition(t);
 
-        LOG_DEBUG("parseStateNode: state: %s -> transition added: from (Role) %s, to (Role) %s, target state: %s, performative %s",
-                 state.getId().c_str(),
-                 t.getSenderRole().getId().c_str(),
-                 t.getReceiverRole().getId().c_str(),
-                 t.getTargetStateId().c_str(),
-                 PerformativeTxt[t.getPerformative()].c_str()
-                );
+        LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> transition added: from (Role) " << t.getSenderRole().getId()
+                    << ", to (Role) " << t.getReceiverRole().getId() << ", target state: " << t.getTargetStateId() << ", performative "
+                    << PerformativeTxt[t.getPerformative()];
     }
     
     //TODO: implement specification for subprotocols
@@ -186,7 +180,7 @@ Transition StateMachineReader::parseTransitionNode(TiXmlElement *transitionEleme
     {
 	transition.setTargetState(std::string(targetState));
     } else {
-        LOG_ERROR("Could not retrieve attribute for target state: %s", StateMachineReader::target.c_str());
+        LOG_ERROR_S << "Could not retrieve attribute for target state: " << StateMachineReader::target;
         throw std::runtime_error("Could not retrieve attribute for target state");
     }
 
