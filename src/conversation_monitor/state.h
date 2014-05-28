@@ -155,13 +155,13 @@ public:
      * Retrieve transitions associated with this state
      * \return list of transitions
      */
-    std::vector<Transition> getTransitions() const { return mTransitions; }
+    const std::vector<Transition>& getTransitions() const { return mTransitions; }
 
     /**
      * Retrieve embedded statemachine 
      * \return list of embedded statemachines
      */
-    std::vector<EmbeddedStateMachine> getEmbeddedStatemachines() const;
+    const std::vector<EmbeddedStateMachine>& getEmbeddedStatemachines() const;
     
     /**
      * Add an embedded state machine.

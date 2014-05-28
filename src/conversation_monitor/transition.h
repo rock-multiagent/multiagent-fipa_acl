@@ -32,8 +32,8 @@ class Transition
         /** role of the agent expected to be the receiver of a message for this transition */
         Role mReceiverRole;
         
-        /** performative of a message for this transition */
-        ACLMessage::Performative mPerformative;
+        /** performative of a message for this transition, regular expression string */
+        std::string mPerformativeRegExp;
 
         // Source state where this transition starts from
         StateId mSourceStateId;
@@ -47,11 +47,16 @@ class Transition
 	  \brief empty constructor for the transition class; initializes fields
         */
         Transition();
+        
+        /**
+         * Transition constructor using an explicit Performative instead of a regular expression
+         */
+        Transition(const Role& senderRole, const Role& receiverRole, const fipa::acl::ACLMessage::Performative& performative, const fipa::acl::StateId& sourceState, const fipa::acl::StateId& targetState);
 
         /**
          * Transition constructor
          */
-        Transition(const Role& senderRole, const Role& receiverRole, const ACLMessage::Performative& performative, const StateId& sourceState, const StateId& targetState);
+        Transition(const Role& senderRole, const Role& receiverRole, const std::string& performativeRegExp, const StateId& sourceState, const StateId& targetState);
         
         /**
 	  \brief check whether a certain message trigger the execution 
@@ -77,7 +82,13 @@ class Transition
          * \brief setter methods for various fields of the class 
          *
          **/
-        void setPerformative(const ACLMessage::Performative& performative) { mPerformative = performative; }
+        void setPerformativeRegExp(const std::string& performativeRegExp) {  mPerformativeRegExp = performativeRegExp; }
+        
+        /** 
+         * \brief setter methods for various fields of the class 
+         *
+         **/
+        void setPerformative(const fipa::acl::ACLMessage::Performative& performative) {  mPerformativeRegExp = fipa::acl::PerformativeTxt[performative]; }
 
         /**
          * Set the source state of this transition
@@ -109,11 +120,12 @@ class Transition
          */
         Role getReceiverRole() const { return mReceiverRole; }
 
+        
         /**
          * \brief getter methods for various fields of the class
          *
          **/
-        ACLMessage::Performative getPerformative() const { return mPerformative; }
+        std::string getPerformativeRegExp() const { return mPerformativeRegExp; }
 
         /**
          * Get the state id of the source state

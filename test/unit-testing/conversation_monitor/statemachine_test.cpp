@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(transition_test)
 
     BOOST_REQUIRE(t.getSenderRole() == senderRole);
     BOOST_REQUIRE(t.getReceiverRole() == receiverRole);
-    BOOST_REQUIRE(t.getPerformative() == performative);
+    BOOST_REQUIRE(t.getPerformativeRegExp() == PerformativeTxt[performative]);
     BOOST_REQUIRE(t.getSourceStateId() == sourceStateId);
     BOOST_REQUIRE(t.getTargetStateId() == targetStateId);
 
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(transition_test)
 
     BOOST_REQUIRE(t0.getSenderRole() == senderRole);
     BOOST_REQUIRE(t0.getReceiverRole() == receiverRole);
-    BOOST_REQUIRE(t0.getPerformative() == performative);
+    BOOST_REQUIRE(t0.getPerformativeRegExp() == PerformativeTxt[performative]);
     BOOST_REQUIRE(t0.getSourceStateId() == sourceStateId);
     BOOST_REQUIRE(t0.getTargetStateId() == targetStateId);
 
@@ -247,6 +247,7 @@ BOOST_AUTO_TEST_CASE(iterate_through_conversation_monitor_statemachine)
     fipa::acl::StateMachineReader reader;
     std::string configurationPath = getProtocolPath();
     fipa::acl::StateMachine myMachine = reader.loadSpecification(configurationPath + "/brokering");
+    std::cout << myMachine.toString() << std::endl;
 
     std::string root = myMachine.getInitialStateId();
     // adding all other nodes
@@ -257,19 +258,17 @@ BOOST_AUTO_TEST_CASE(iterate_through_conversation_monitor_statemachine)
     {
 
         // debug
-        std::cout << "Transitions vector size: " << it->second.getTransitions().size() << '\n';
-
-        std::vector<fipa::acl::Transition>::const_iterator start = it->second.getTransitions().begin();
-        std::vector<fipa::acl::Transition>::const_iterator stop = it->second.getTransitions().end();
+        std::vector<Transition> transitions = it->second.getTransitions();
+        std::cout << "Transitions vector size: " << transitions.size() << std::endl;
 
         // adding all transitions of state (given by it->second)
-        for(std::vector<fipa::acl::Transition>::const_iterator edge = start; edge != stop; edge++)
+        for(std::vector<fipa::acl::Transition>::const_iterator edge = transitions.begin(); edge != transitions.end(); edge++)
         {
             // debug
             // adding transition
             std::string source =  edge->getSourceStateId();
             std::string dest = edge->getTargetStateId();
-            std::string event = PerformativeTxt[ edge->getPerformative() ];
+            std::string event = edge->getPerformativeRegExp();
             if(source != dest)
             {
                 // got another edge-> acknowledging it

@@ -137,10 +137,9 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
 
         LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> transition added: from (Role) " << t.getSenderRole().getId()
                     << ", to (Role) " << t.getReceiverRole().getId() << ", target state: " << t.getTargetStateId() << ", performative "
-                    << PerformativeTxt[t.getPerformative()];
+                    << t.getPerformativeRegExp();
     }
     
-    //TODO: implement specification for subprotocols
     // Read subprotocols
     TiXmlElement *subProtocolElement = handleState.FirstChildElement(StateMachineReader::subprotocol).ToElement();
     for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )
@@ -199,9 +198,9 @@ Transition StateMachineReader::parseTransitionNode(TiXmlElement *transitionEleme
     performative = transitionElement->Attribute(StateMachineReader::performative.c_str());
     if (performative)
     {
-        transition.setPerformative( ACLMessage::performativeFromString(performative) );
+        transition.setPerformativeRegExp( performative );
     } else {
-        throw new std::runtime_error("Transition performative does not exist");
+        throw new std::runtime_error("StateMachineReader::parseTransitionsNode transition is missing 'performative' attribute");
     }
     
     return transition;

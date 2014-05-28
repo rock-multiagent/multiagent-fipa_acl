@@ -14,16 +14,26 @@ namespace acl {
 Transition::Transition() 
     : mSenderRole()
     , mReceiverRole()
-    , mPerformative()
+    , mPerformativeRegExp()
     , mSourceStateId()
     , mTargetStateId()
 {
 }
 
-Transition::Transition(const Role& senderRole, const Role& receiverRole, const ACLMessage::Performative& performative, const StateId& sourceState, const StateId& targetState)
+Transition::Transition(const Role& senderRole, const Role& receiverRole, const fipa::acl::ACLMessage::Performative& performative, const fipa::acl::StateId& sourceState, const fipa::acl::StateId& targetState)
     : mSenderRole(senderRole)
     , mReceiverRole(receiverRole)
-    , mPerformative(performative)
+    , mPerformativeRegExp(PerformativeTxt[performative])
+    , mSourceStateId(sourceState)
+    , mTargetStateId(targetState)
+{
+}
+
+
+Transition::Transition(const Role& senderRole, const Role& receiverRole, const std::string& performativeRegExp, const StateId& sourceState, const StateId& targetState)
+    : mSenderRole(senderRole)
+    , mReceiverRole(receiverRole)
+    , mPerformativeRegExp(performativeRegExp)
     , mSourceStateId(sourceState)
     , mTargetStateId(targetState)
 {
@@ -53,9 +63,10 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     // not the validator message one
     if (validation::PERFORMATIVE & flags)
     {
-        if( ACLMessage::performativeFromString(msg.getPerformative()) != mPerformative)
+        boost::regex peformativeRegex(mPerformativeRegExp);
+        if(!regex_match(msg.getPerformative(), peformativeRegex))
         {
-            LOG_DEBUG("Performative validation failed: was '%s' but expected: '%s'", msg.getPerformative().c_str(), fipa::acl::PerformativeTxt[mPerformative].c_str()); 
+            LOG_DEBUG("Performative validation failed: was '%s' but expected: '%s'", msg.getPerformative().c_str(), mPerformativeRegExp.c_str()); 
             return false;
         }
     }
@@ -141,7 +152,7 @@ std::string Transition::toString() const
     std::stringstream transition;
     transition << "transition: sender role: " << mSenderRole.getId() << ", "; 
     transition << "receiver role: " << mReceiverRole.getId() << ", ";
-    transition << "performative: " << PerformativeTxt[mPerformative] << ", ";
+    transition << "performative: " << mPerformativeRegExp << ", ";
     transition << "source state: " << mSourceStateId << ", ";
     transition << "target state: " << mTargetStateId;
 
@@ -186,7 +197,7 @@ bool Transition::operator==(const Transition& other) const
     } else if (mReceiverRole != other.mReceiverRole)
     {
         return false;
-    } else if (mPerformative != other.mPerformative)
+    } else if (mPerformativeRegExp != other.mPerformativeRegExp)
     {
         return false;
     }

@@ -5,6 +5,7 @@
 #include "statemachine.h"
 
 #include <boost/assign/list_of.hpp>
+#include <boost/regex.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
@@ -71,11 +72,13 @@ void State::generateDefaultTransitions()
 
     std::vector<Transition> transitions(mTransitions);
 
+    // FIXME This ALWAYS adds ALL default transistions.
     std::vector<Transition>::const_iterator it = transitions.begin();
     for (; it != transitions.end();++it)
     {
         // we don't generate a not-understood transition for not-understood message...
-        if ( it->getPerformative() == ACLMessage::NOT_UNDERSTOOD ) 
+        boost::regex peformativeRegex(it->getPerformativeRegExp());
+        if(regex_match(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD], peformativeRegex))
         {
             continue;
         } else {
@@ -87,7 +90,7 @@ void State::generateDefaultTransitions()
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
 
-        if ( it->getPerformative() == ACLMessage::CANCEL )
+        if(regex_match(PerformativeTxt[ACLMessage::CANCEL], peformativeRegex))
         {
             continue;
         } else {
@@ -99,7 +102,7 @@ void State::generateDefaultTransitions()
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
 
-        if( it->getPerformative() == ACLMessage::FAILURE)
+        if(regex_match(PerformativeTxt[ACLMessage::FAILURE], peformativeRegex))
         {
             continue;
         } else {
@@ -128,7 +131,8 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
         if(!archive.hasMessages())
         {
             // Initiating message, i.e. validation should only apply to performative
-            if (it->getPerformative() == ACLMessage::performativeFromString(msg.getPerformative()) )
+            boost::regex peformativeRegex(it->getPerformativeRegExp());
+            if(regex_match(msg.getPerformative(), peformativeRegex))
             {
                 return *it;
             }
@@ -145,7 +149,7 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
 
 }
 
-std::vector< EmbeddedStateMachine > State::getEmbeddedStatemachines() const
+const std::vector< EmbeddedStateMachine >& State::getEmbeddedStatemachines() const
 { 
     return mEmbeddedStateMachines;
 }
