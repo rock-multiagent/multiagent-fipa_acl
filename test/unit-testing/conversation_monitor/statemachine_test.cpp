@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(statemachine_reader_test)
     std::string configurationPath = getProtocolPath();
 
     StateMachineReader reader;
-    BOOST_CHECK_MESSAGE(1, "NOTE: Assuming a this test resides in a build directory parallel to the folder configuration/");
+    BOOST_CHECK_MESSAGE(1, "NOTE: Assuming this test resides in a build directory parallel to the folder configuration/");
     BOOST_REQUIRE_NO_THROW(reader.loadSpecification(configurationPath + "/inform"));
     BOOST_REQUIRE_NO_THROW(reader.loadSpecification(configurationPath + "/dutchAuction"));
     BOOST_REQUIRE_NO_THROW(reader.loadSpecification(configurationPath + "/subscribe"));
@@ -247,7 +247,6 @@ BOOST_AUTO_TEST_CASE(iterate_through_conversation_monitor_statemachine)
     fipa::acl::StateMachineReader reader;
     std::string configurationPath = getProtocolPath();
     fipa::acl::StateMachine myMachine = reader.loadSpecification(configurationPath + "/brokering");
-    std::cout << myMachine.toString() << std::endl;
 
     std::string root = myMachine.getInitialStateId();
     // adding all other nodes
@@ -280,29 +279,114 @@ BOOST_AUTO_TEST_CASE(iterate_through_conversation_monitor_statemachine)
     }
 }
 
-BOOST_AUTO_TEST_CASE(statemachine_test)
+BOOST_AUTO_TEST_CASE(statemachine_test_inform)
 {
     using namespace fipa::acl;
-
-    std::string configurationPath = getProtocolPath();
 
     StateMachine test;
     BOOST_REQUIRE_THROW(test.inFinalState(), std::runtime_error);
 
-    StateMachineFactory::setProtocolResourceDir(configurationPath);
+    
+    StateMachineFactory::setProtocolResourceDir(getProtocolPath());
+    // Testing inform protocol
+    StateMachine inform = StateMachineFactory::getStateMachine("inform");
+
+    ACLMessage msg(ACLMessage::REQUEST);
+    BOOST_REQUIRE_THROW(inform.consumeMessage(msg), std::runtime_error);
+    BOOST_REQUIRE(!inform.inFailureState());
+
+    inform = StateMachineFactory::getStateMachine("inform");
+    ACLMessage informMsg(ACLMessage::INFORM);
+    BOOST_REQUIRE_NO_THROW(inform.consumeMessage(informMsg));
+    BOOST_REQUIRE(!inform.inFailureState());
+}
+
+BOOST_AUTO_TEST_CASE(statemachine_test_any_performative)
+{
+    using namespace fipa::acl;
+
+    StateMachineFactory::setProtocolResourceDir(getProtocolPath());
+    
+    // Testing any_performative protocol
     {
-        StateMachine inform = StateMachineFactory::getStateMachine("inform");
+        // Trying:
+        // inform, agree, refuse, cancel, not-understood, failure
+        StateMachine sm = StateMachineFactory::getStateMachine("test_any_performative");
+        AgentID self("self");
+        AgentID other("other");
+        sm.setSelf(self);
+        {
+            ACLMessage msg(ACLMessage::INFORM);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE(sm.getCurrentStateId() == "1");
+            BOOST_REQUIRE_NO_THROW(sm.consumeMessage(msg));
+            BOOST_REQUIRE(sm.getCurrentStateId() == "2");
+            BOOST_REQUIRE(!sm.inFinalState());
+            BOOST_REQUIRE(!sm.inFailureState());
+        }
 
-        ACLMessage msg(ACLMessage::REQUEST);
-        BOOST_REQUIRE_THROW(inform.consumeMessage(msg), std::runtime_error);
-        BOOST_REQUIRE(!inform.inFailureState());
+        {
+            ACLMessage msg(ACLMessage::AGREE);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(sm.consumeMessage(msg));
+            BOOST_REQUIRE(sm.getCurrentStateId() == "3"); // State 3 is final
+            BOOST_REQUIRE(sm.inFinalState());
+            BOOST_REQUIRE(!sm.inFailureState());
+        }
 
-        inform = StateMachineFactory::getStateMachine("inform");
-        ACLMessage informMsg(ACLMessage::INFORM);
-        BOOST_REQUIRE_NO_THROW(inform.consumeMessage(informMsg));
-        BOOST_REQUIRE(!inform.inFailureState());
+        {
+            ACLMessage msg(ACLMessage::REFUSE);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(sm.consumeMessage(msg));
+            BOOST_REQUIRE(sm.getCurrentStateId() == "3");
+            BOOST_REQUIRE(sm.inFinalState());
+            BOOST_REQUIRE(!sm.inFailureState());
+        }
+
+        {
+            ACLMessage msg(ACLMessage::CANCEL);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(sm.consumeMessage(msg));
+            BOOST_REQUIRE(sm.getCurrentStateId() == "3");
+            BOOST_REQUIRE(sm.inFinalState());
+            BOOST_REQUIRE(!sm.inFailureState());
+            // Cancel usually results in a failure state, but not if it's part of the protocol
+        }
+        
+        {
+            ACLMessage msg(ACLMessage::NOT_UNDERSTOOD);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(sm.consumeMessage(msg));
+            BOOST_REQUIRE(sm.getCurrentStateId() == "3");
+            BOOST_REQUIRE(sm.inFinalState());
+            BOOST_REQUIRE(!sm.inFailureState());
+        }
+        
+        {
+            ACLMessage msg(ACLMessage::FAILURE);
+            msg.setSender(self);
+            msg.addReceiver(other);
+            BOOST_REQUIRE_NO_THROW(sm.consumeMessage(msg));
+            BOOST_REQUIRE(sm.getCurrentStateId() == "3");
+            BOOST_REQUIRE(sm.inFinalState());
+            BOOST_REQUIRE(!sm.inFailureState());
+            // Failure usually results in a failure state, but not if it's part of the protocol
+        }
     }
+}
 
+BOOST_AUTO_TEST_CASE(statemachine_test_request)
+{
+    using namespace fipa::acl;
+
+    StateMachineFactory::setProtocolResourceDir(getProtocolPath());
+    
+    // Testing request protocol
     {
         // Trying request
         // request ->

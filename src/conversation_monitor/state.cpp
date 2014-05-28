@@ -72,7 +72,8 @@ void State::generateDefaultTransitions()
 
     std::vector<Transition> transitions(mTransitions);
 
-    // FIXME This ALWAYS adds ALL default transistions.
+    // XXX This nearly ALWAYS adds ALL default transistions (just test).
+    // But as they're added at the end, this should do no harm.
     std::vector<Transition>::const_iterator it = transitions.begin();
     for (; it != transitions.end();++it)
     {
