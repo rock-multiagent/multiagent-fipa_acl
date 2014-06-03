@@ -62,15 +62,6 @@ public: // FIXME private!?
         \return transition 
     */
     Transition parseTransitionNode(TiXmlElement* transitionElement);
-
-    /**
-     * \brief method that parses <subprotocol> element of the spec. file
-     * \param subProtocolElement
-     * \param protocolSpec name of the file containing the specification for the
-     * statemachine
-     * \return the sub-stateMachine
-     */
-    StateMachine parseSubProtocol(TiXmlElement* subProtocolElement, const std::string& protocolSpec);
     
     /**
      * \brief method that parses <mapping> element of the spec. file

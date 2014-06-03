@@ -208,14 +208,13 @@ std::string EmbeddedProtocolMapping::toString() const
 std::string EmbeddedStateMachine::toString() const
 {
     std::stringstream str;
-    str << "embedded state machine ";
+    str << "embedded state machine '" << stateMachineFile << "' ";
     str << "(multiple=" << multiple << ")\n";
     std::vector<EmbeddedProtocolMapping>::const_iterator it = mappings.begin();
     for(; it != mappings.end(); ++it)
     {
         str << "\t\t" << it->toString() << "\n";
     }
-    str << "(\n" << stateMachine.toString() << "\n)";
     
     return str.str();
 }

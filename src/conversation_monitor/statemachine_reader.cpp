@@ -146,8 +146,14 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
     for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )
     {
         EmbeddedStateMachine esm;
-        StateMachine sm = parseSubProtocol(subProtocolElement, protocolSpec);
-        esm.stateMachine = sm;
+        
+        const std::string* file = subProtocolElement->Attribute(StateMachineReader::file);
+        if (file != NULL)
+        {
+            esm.stateMachineFile = *file;
+        } else {
+            throw new std::runtime_error("StateMachineReader::parseSubProtocol subprotocol is missing 'file' attribute");
+        }
         
         const std::string* multipleAllowedP;
         multipleAllowedP = subProtocolElement->Attribute(StateMachineReader::multiple);
@@ -252,27 +258,6 @@ EmbeddedProtocolMapping StateMachineReader::parseEmbeddedProtocolMapping(TiXmlEl
     }
     
     return epm;
-}
-
-StateMachine StateMachineReader::parseSubProtocol(TiXmlElement* subProtocolElement, const std::string& protocolSpec)
-{
-    // Get a valid file path
-    boost::filesystem::path parentProtocolFile(protocolSpec);
-    boost::filesystem::path dir = parentProtocolFile.parent_path();
-    // Append the file
-    const std::string* file = subProtocolElement->Attribute(StateMachineReader::file);
-    dir /= *file;
-    
-    StateMachine subStateMachine;
-    
-    if (file != NULL)
-    {
-        subStateMachine = loadSpecification(dir.string());
-    } else {
-        throw new std::runtime_error("StateMachineReader::parseSubProtocol subprotocol is missing 'file' attribute");
-    }
-    
-    return subStateMachine;
 }
 
 

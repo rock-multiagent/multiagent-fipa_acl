@@ -12,20 +12,35 @@
 	</state>
 	
 	<state id="4">
+                <!-- This can either be failure-no-match or failure-proxy -->
 		<transition performative="failure" from="B" to="initiator" target="5"/>
 		<transition performative="inform" from="B" to="initiator" target="6"/>
-		<subprotocol file="request">
-                    <mapping from="B" to="initiator"/>
-		</subprotocol>
 	</state>
 	
 	<state id="5" final="yes">
 	</state>
 	
-	<state id="6" final="yes">
-		<transition performative="inform" from="B" to="initiator" target="6"/>
-		<transition performative="failure" from="B" to="initiator" target="5"/>
+	<state id="6">
+                <!-- This is failure-brokering -->
+                <transition performative="failure" from="B" to="initiator" target="7"/>
+		<transition performative=".*" from="B" to="initiator" target="8"/>
+		
+		<!-- delete file? (any subprotocol is accepted), but include cardinality -->
+		<subprotocol file="request" multiple="yes"> 
+                    <mapping from="B" to="initiator"/>
+                </subprotocol>
 	</state>
 	
+	<state id="7" final="yes">
+        </state>
+        
+        <state id="8" final="yes">
+                <transition performative=".*" from="B" to="initiator" target="8"/>
+                
+                <!-- delete file? (any subprotocol is accepted), but include cardinality -->
+                <subprotocol file="request" multiple="yes"> 
+                    <mapping from="B" to="initiator"/>
+                </subprotocol>
+        </state>
 
 </scxml>

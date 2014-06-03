@@ -177,7 +177,7 @@ struct EmbeddedProtocolMapping
  */
 struct EmbeddedStateMachine
 {
-    StateMachine stateMachine;
+    std::string stateMachineFile;
     // Cardinality: true means more than 1 Subprotocol can be started at that point
     bool multiple;
     std::vector<EmbeddedProtocolMapping> mappings;
