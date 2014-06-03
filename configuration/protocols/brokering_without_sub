@@ -25,13 +25,22 @@
                 <transition performative="failure" from="B" to="initiator" target="7"/>
 		<transition performative=".*" from="B" to="initiator" target="8"/>
 		
+		<!-- delete file? (any subprotocol is accepted), but include cardinality -->
+		<subprotocol file="request" multiple="yes"> 
+                    <mapping from="B" to="initiator"/>
+                </subprotocol>
 	</state>
 	
 	<state id="7" final="yes">
         </state>
         
         <state id="8" final="yes">
-                <transition performative="*" from="B" to="initiator" target="8"/>
+                <transition performative=".*" from="B" to="initiator" target="8"/>
+                
+                <!-- delete file? (any subprotocol is accepted), but include cardinality -->
+                <subprotocol file="request" multiple="yes"> 
+                    <mapping from="B" to="initiator"/>
+                </subprotocol>
         </state>
 
 </scxml>

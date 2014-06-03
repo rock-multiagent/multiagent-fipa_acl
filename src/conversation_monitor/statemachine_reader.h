@@ -36,6 +36,7 @@ public: // FIXME private!?
     static const std::string subprotocol;
     static const std::string mapping;
     static const std::string file;
+    static const std::string multiple;
 
     /**
      * Read the xml structure defining a statemachine
