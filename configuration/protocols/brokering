@@ -38,7 +38,7 @@
                 <transition performative=".*" from="B" to="initiator" target="8"/>
                 
                 <!-- delete file? (any subprotocol is accepted) -->
-                <subprotocol file="request" multiple="yes"> 
+                <subprotocol file="request" multiple="yes" from="B"> 
                     <mapping from="B" to="initiator"/>
                 </subprotocol>
         </state>

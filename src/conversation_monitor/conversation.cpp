@@ -236,13 +236,33 @@ void Conversation::notifyAll(const fipa::acl::ACLMessage& msg, bool newConversat
 
 void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
 {
-    std::string protocol = msg.getProtocol();
-    
-    // TODO Search for an existing SubStateMachine (running) with this protocol.
-    // How to decide a) which SubStateMachine and b) whether it should be a new one
-    // With: Custom ACL-Message field: X-... = ...
+    // Loop through all not-ended sub state machines
+    std::vector<StateMachine>::iterator it0;
+    for(it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
+    {
+        if(it0->inFinalState() || it0->inFailureState())
+        {
+            // StateMachine ended already
+            continue;
+        }
+        // Test if this StateMachine is correct by maintaining a copy of it
+        StateMachine copy = *it0;
+        
+        // Test the update
+        try {
+            it0->consumeMessage(msg);
+            // It worked
+            notifyAll(msg, false);
+            return;
+        } catch(const std::runtime_error& e)
+        {
+            // The state machine was obviously not correct, we play back the copy
+            *it0 = copy;
+        }
+    }
     
     // We must be in a state that allows subProtocols
+    std::string protocol = msg.getProtocol();
     const State& currentState = mStateMachine.getCurrentState();
     const std::vector<EmbeddedStateMachine>& embeddedStateMachines =  currentState.getEmbeddedStatemachines();
     // Search for an embedded state machine with the same protocol
@@ -277,17 +297,31 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
         throw conversation::ProtocolException("Conversation: message with wrong protocol being inserted");
     }
     
-    // TODO construct a new state machine with mapped roles
+    // Construct a new state machine with mapped sender role
     if(!protocol.empty())
     {
         StateMachine subStateMachine = msStateMachineFactory.getStateMachine(protocol);
         subStateMachine.setSelf(msg.getSender());
-        // map string (subID) -> subSM
+        // custom parameter for the message and to identify subStateMachine in the future
+        std::string subSMIdentifier = generateConversationID(currentState.getId());
+        
         mSubStateMachines.push_back(subStateMachine);
+        
+        // update the message state machine
+        try {
+            subStateMachine.consumeMessage(msg);
+        } catch(const std::runtime_error& e)
+        {
+            // Also constructing and using a new one did not work for that message.
+            std::string errorMsg = "Conversation: unexpected message with performative '" + msg.getPerformative() + "' for the protocol '" + msg.getProtocol() + "' ";
+            errorMsg += " current state: '" + mStateMachine.getCurrentStateId() + "'";
+            errorMsg += " -- " + std::string(e.what());
+            throw conversation::ProtocolException(errorMsg);
+        }
     } else {
         LOG_ERROR("Protocol not set");
         throw std::runtime_error("Protocol not set");
-    }    
+    }
     
     notifyAll(msg, false);
 }
