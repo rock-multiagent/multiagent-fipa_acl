@@ -65,7 +65,7 @@ ConversationPtr ConversationMonitor::startConversation(const std::string& topic)
 
 ConversationPtr ConversationMonitor::getConversation(const fipa::acl::ConversationID& conversationId)
 {
-    // get conversation associated with comman of uuid
+    // get conversation associated with command of uuid
     boost::unique_lock<boost::mutex> lock(mMutex);
     std::map<fipa::acl::ConversationID, ConversationPtr>::iterator it = mActiveConversations.find(conversationId);
     if(it != mActiveConversations.end())

@@ -108,6 +108,10 @@ public:
      */
     RoleMapping();
 
+    /**
+     * Returns the mapping
+     */
+    const std::map<Role, AgentIDList>& getMapping() const { return mExpectedAgentMapping; }
 
     /**
      * Add the role 'self'

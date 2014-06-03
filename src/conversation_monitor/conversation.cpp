@@ -169,8 +169,9 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
 
         } else if( mProtocol != msg.getProtocol())
         {
-            LOG_ERROR("Conversation: message with different protocol being inserted: current '%s' - to be inserted '%s'", mProtocol.c_str(), msg.getProtocol().c_str());
-            throw conversation::ProtocolException("Conversation: message with wrong protocol being inserted");
+            // This probably means, it's a subProtocol message
+            updateSubProtocol(msg);
+            return;
         } else if( msg.getProtocol().empty())
         {
             LOG_WARN("Conversation: received message has no protocol being set. Current conversation using '%s'", mProtocol.c_str());
@@ -206,24 +207,89 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
             throw conversation::ProtocolException(errorMsg);
         }
 
-        mMessages.push_back(msg);
-
-        if(mStateMachine.inFailureState())
-        {
-            notify(msg, conversation::FAILURE);
-        } else if(hasEnded()) {
-            notify(msg, conversation::END_OF_CONVERSATION);
-        } else if(newConversation) {
-            notify(msg, conversation::START_OF_CONVERSATION);
-        } else {
-            notify(msg, conversation::INTERMEDIATE_UPDATE);
-        }
+        notifyAll(msg, newConversation);
 
     } catch(...)
     {
         // Notify only to handle internally
         throw;
     }
+}
+
+void Conversation::notifyAll(const fipa::acl::ACLMessage& msg, bool newConversation)
+{
+    mMessages.push_back(msg);
+
+    if(mStateMachine.inFailureState())
+    {
+        notify(msg, conversation::FAILURE);
+    } else if(hasEnded()) {
+        // FIXME The end is being notified, even though there can be additional messages
+        // if the final state has transitions.
+        notify(msg, conversation::END_OF_CONVERSATION);
+    } else if(newConversation) {
+        notify(msg, conversation::START_OF_CONVERSATION);
+    } else {
+        notify(msg, conversation::INTERMEDIATE_UPDATE);
+    }
+}
+
+void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
+{
+    std::string protocol = msg.getProtocol();
+    
+    // TODO Search for an existing SubStateMachine (running) with this protocol.
+    // How to decide a) which SubStateMachine and b) whether it should be a new one
+    // With: Custom ACL-Message field: X-... = ...
+    
+    // We must be in a state that allows subProtocols
+    const State& currentState = mStateMachine.getCurrentState();
+    const std::vector<EmbeddedStateMachine>& embeddedStateMachines =  currentState.getEmbeddedStatemachines();
+    // Search for an embedded state machine with the same protocol
+    const EmbeddedStateMachine* esmP;
+    std::vector<EmbeddedStateMachine>::const_iterator it;
+    for(it = embeddedStateMachines.begin(); it != embeddedStateMachines.end(); it++)
+    {
+        // Protocol and sender must match
+        // TODO Regex matching instead if equality
+        if(it->stateMachineFile == protocol)
+        {           
+            // Check that the sender role is correct
+            // This throws if the mapping does not exist
+            const AgentIDList l = mStateMachine.getRoleMapping().getMapping().at(it->fromRole);
+            AgentIDList::const_iterator lit = std::find(l.begin(), l.end(), msg.getSender());
+            if(lit == l.end())
+            {
+                // Sender does not match
+                continue;
+            }
+            
+            // This is the right ESM
+            esmP = &(*it);
+            break;
+        }
+    }
+    
+    if(!esmP)
+    {
+        // No fitting running or new embedded state machine found
+        LOG_ERROR("Conversation: message with different protocol being inserted: current '%s' - to be inserted '%s'", mProtocol.c_str(), msg.getProtocol().c_str());
+        throw conversation::ProtocolException("Conversation: message with wrong protocol being inserted");
+    }
+    
+    // TODO construct a new state machine with mapped roles
+    if(!protocol.empty())
+    {
+        StateMachine subStateMachine = msStateMachineFactory.getStateMachine(protocol);
+        subStateMachine.setSelf(msg.getSender());
+        // map string (subID) -> subSM
+        mSubStateMachines.push_back(subStateMachine);
+    } else {
+        LOG_ERROR("Protocol not set");
+        throw std::runtime_error("Protocol not set");
+    }    
+    
+    notifyAll(msg, false);
 }
 
 fipa::acl::ACLMessage Conversation::getLastMessage() const
@@ -234,6 +300,7 @@ fipa::acl::ACLMessage Conversation::getLastMessage() const
 
 bool Conversation::hasEnded() const
 {
+    // TODO check if all subProtocols have ended, too.
     if(mStateMachine.inFinalState())
     {
         LOG_DEBUG("Conversation ended");

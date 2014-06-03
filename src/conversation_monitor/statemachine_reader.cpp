@@ -173,9 +173,16 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
             }
             
         } else {
-            char buffer[512];
-            sprintf(buffer, "Attribute could not be retrieved %s", StateMachineReader::multiple.c_str());
-            throw std::runtime_error(std::string(buffer));
+            throw new std::runtime_error("StateMachineReader::parseSubProtocol mapping is missing 'multiple' attribute");
+        }
+        
+        const std::string* from = subProtocolElement->Attribute(StateMachineReader::from);
+        if (from != NULL)
+        {
+            esm.from = *from;
+            esm.fromRole = Role( std::string(from->c_str()));
+        } else {
+            throw new std::runtime_error("StateMachineReader::parseSubProtocol mapping is missing 'from' attribute");
         }
         
         
@@ -245,6 +252,7 @@ EmbeddedProtocolMapping StateMachineReader::parseEmbeddedProtocolMapping(TiXmlEl
     if (from != NULL)
     {
         epm.from = *from;
+        epm.fromRole = Role( std::string(from->c_str()));
     } else {
         throw new std::runtime_error("StateMachineReader::parseEmbeddedProtocolMapping mapping is missing 'from' attribute");
     }
@@ -253,6 +261,7 @@ EmbeddedProtocolMapping StateMachineReader::parseEmbeddedProtocolMapping(TiXmlEl
     if (to != NULL)
     {
         epm.to = *to;
+        epm.toRole = Role( std::string(to->c_str()));
     } else {
         throw new std::runtime_error("StateMachineReader::parseEmbeddedProtocolMapping mapping is missing 'to' attribute");
     }

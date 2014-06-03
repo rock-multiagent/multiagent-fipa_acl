@@ -136,7 +136,10 @@ const State& StateMachine::getCurrentState() const
         throw std::runtime_error("Statemachine has not been properly initialized: current state not set");
     } else {
         std::map<StateId, State>::const_iterator it = mStates.find(mCurrentStateId);
-        assert(it != mStates.end());
+        if(it == mStates.end())
+        {
+            throw std::runtime_error("Statemachine has not been properly initialized: current state not found");
+        }
         return it->second;
     }
 }
@@ -208,8 +211,7 @@ std::string EmbeddedProtocolMapping::toString() const
 std::string EmbeddedStateMachine::toString() const
 {
     std::stringstream str;
-    str << "embedded state machine '" << stateMachineFile << "' ";
-    str << "(multiple=" << multiple << ")\n";
+    str << "embedded state machine protocol:'" << stateMachineFile << "' multiple:'"<< multiple << "' from:'" << from << "'\n";
     std::vector<EmbeddedProtocolMapping>::const_iterator it = mappings.begin();
     for(; it != mappings.end(); ++it)
     {

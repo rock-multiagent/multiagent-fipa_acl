@@ -19,6 +19,41 @@ namespace acl {
 
 class MessageArchive;
 
+/**
+ * \struct EmbeddedProtocolMapping
+ * \brief When embedding protocols, agents participating in one protocol can be mapped to agents participating in the
+ * embedded one.
+ */
+struct EmbeddedProtocolMapping
+{
+    std::string from;
+    Role fromRole;
+    std::string to;
+    Role toRole;
+    /**
+     * Convert to string
+     */
+    std::string toString() const;
+};
+
+/**
+ * \struct EmbeddedStateMachine
+ * \brief An embedded state machine with mappings
+ */
+struct EmbeddedStateMachine
+{
+    std::string from;
+    Role fromRole;
+    std::string stateMachineFile;
+    // Cardinality: true means more than 1 Subprotocol can be started at that point
+    bool multiple;
+    std::vector<EmbeddedProtocolMapping> mappings;
+    /**
+     * Convert to string
+     */
+    std::string toString() const;
+};
+
 class StateMachine
 {
     friend class StateMachineReader; 
@@ -85,12 +120,6 @@ protected:
     void updateRoles();
 
     /**
-     * Get current state
-     * \throws std::runtime_error if statemachine has not been properly initialized
-     */
-    const State& getCurrentState() const;
-
-    /**
      * Update the role mapping
      * \param msg Message
      * \param transition Transition which is associated with the given message
@@ -103,6 +132,17 @@ public:
      * \return states container
      */
     std::map<StateId, State> getStates() const { return mStates; }
+    
+    /**
+     * Get the RoleMapping
+     */
+    const RoleMapping& getRoleMapping() const { return mRoleMapping; }
+    
+    /**
+     * Get current state
+     * \throws std::runtime_error if statemachine has not been properly initialized
+     */
+    const State& getCurrentState() const;
 
     void setCurrentStateId(const StateId& stateId) { mCurrentStateId = stateId; }
 
@@ -152,37 +192,6 @@ public:
 
     /**
      * Convert statemachine to string
-     */
-    std::string toString() const;
-};
-
-/**
- * \struct EmbeddedProtocolMapping
- * \brief When embedding protocols, agents participating in one protocol can be mapped to agents participating in the
- * embedded one.
- */
-struct EmbeddedProtocolMapping
-{
-    std::string from;
-    std::string to;
-    /**
-     * Convert to string
-     */
-    std::string toString() const;
-};
-
-/**
- * \struct EmbeddedStateMachine
- * \brief An embedded state machine with mappings
- */
-struct EmbeddedStateMachine
-{
-    std::string stateMachineFile;
-    // Cardinality: true means more than 1 Subprotocol can be started at that point
-    bool multiple;
-    std::vector<EmbeddedProtocolMapping> mappings;
-    /**
-     * Convert to string
      */
     std::string toString() const;
 };
