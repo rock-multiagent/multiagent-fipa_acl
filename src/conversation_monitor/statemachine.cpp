@@ -129,6 +129,22 @@ void StateMachine::generateDefaultStates()
     }
 }
 
+State& StateMachine::getCurrentStateModifiably()
+{
+    if(mCurrentStateId.empty())
+    {
+        throw std::runtime_error("Statemachine has not been properly initialized: current state not set");
+    } else {
+        std::map<StateId, State>::iterator it = mStates.find(mCurrentStateId);
+        if(it == mStates.end())
+        {
+            throw std::runtime_error("Statemachine has not been properly initialized: current state not found");
+        }
+        return it->second;
+    }
+}
+
+// XXX exact copy of the above but with const_iterator
 const State& StateMachine::getCurrentState() const
 {
     if(mCurrentStateId.empty())
@@ -162,20 +178,34 @@ void StateMachine::updateRoleMapping(const ACLMessage& msg, const Transition& tr
 
 void StateMachine::consumeMessage(const ACLMessage& msg)
 {
-    const State& currentState = getCurrentState();
+    try
+    {
+        const State& currentState = getCurrentState();
+        const Transition& transition = currentState.getTransition(msg, mMessageArchive, mRoleMapping);
+        updateRoleMapping(msg, transition);
+        mMessageArchive.addMessage(msg);
 
-    const Transition& transition = currentState.getTransition(msg, mMessageArchive, mRoleMapping);
-    updateRoleMapping(msg, transition);
-    mMessageArchive.addMessage(msg);
+        // Perform transition
+        mCurrentStateId = transition.getTargetStateId();
+    }
+    catch(const std::exception& e)
+    {
+        // Retry with substatemachineproxied transition
+        State& currentState = getCurrentStateModifiably();
+        const Transition& transition = currentState.getSubstateMachineProxiedTransition(msg, mMessageArchive, mRoleMapping);
+        updateRoleMapping(msg, transition);
+        mMessageArchive.addMessage(msg);
 
-    // Perform transition
-    mCurrentStateId = transition.getTargetStateId();
+        // Perform transition
+        mCurrentStateId = transition.getTargetStateId();
+    }
 }
 
 bool StateMachine::inFinalState() const
 {
     const State& currentState = getCurrentState();
-    return currentState.isFinal();
+    // Use isFinished instead of isFinal
+    return currentState.isFinished();
 }
 
 bool StateMachine::inFailureState() const

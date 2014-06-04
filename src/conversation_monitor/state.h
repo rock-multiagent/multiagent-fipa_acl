@@ -72,6 +72,12 @@ private:
     * manner until all the sub-protocols of that state are in a valid final state
     */
     std::vector<EmbeddedStateMachine> mEmbeddedStateMachines;
+    /**
+    * List of outgoing transitions that belong to this state, proxied by a substatemachine.
+    * These are just maintained here in order to produce no memory leaks, and only constructed
+    * on-the-fly.
+    */
+    std::vector<Transition> mSubstateMachineProxiedTransitions;
 
     static std::vector<StateId> msDefaultStates;
 
@@ -114,10 +120,18 @@ public:
    
     /**
     *  \brief Check whether the received message triggers a transition
-    *  \return target of the transition 
+    *  \return the transition 
     *  \throws runtime_error if the msg is invalid in the current state
     */
     const Transition& getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const;
+    
+    /**
+    *  \brief Check whether the received message triggers a substatemachine proxied transition. This method is not const, as
+    * the generated transitions will be added when they trigger successfully.
+    *  \return the transition 
+    *  \throws runtime_error if the msg is invalid in the current state
+    */
+    const Transition& getSubstateMachineProxiedTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping);
 
     /**
     *  \brief method that generates implicit generic transitions applicable to all states, that may or may not be speciffied in the 
@@ -127,12 +141,14 @@ public:
     */
     void generateDefaultTransitions();
 
+    bool isFinal() const { return mIsFinal; }
+    
     /**
-      \brief method that returns whether the state is a final state or not.
+      \brief method that returns whether the state is a finished state or not.
       In the case of a state with embedded state machines, this is a bit more coplex, see the implementation
-      \return true if state is final, false otherwise
+      \return true if state is finished, false otherwise
     */
-    bool isFinal() const;
+    bool isFinished() const;
 
     /**
      * \brief Test if state belongs to the default state or not

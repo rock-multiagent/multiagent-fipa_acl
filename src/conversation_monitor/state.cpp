@@ -59,21 +59,21 @@ Transition State::addTransition(const Transition& t)
 
 void State::generateDefaultTransitions()
 {
-    // Not adding any transition for final states
+    // Not adding any transition for final states without substatemachines
     if(isFinal())
     {
-        return; 
+        if(mEmbeddedStateMachines.empty())
+        {
+            return;
+        }
     }
-
-    if(mTransitions.empty())
+    else if(mTransitions.empty())
     {
         throw std::runtime_error("Invalid state: non final state without transition defined");
     }
 
     std::vector<Transition> transitions(mTransitions);
 
-    // XXX This nearly ALWAYS adds ALL default transistions (just test).
-    // But as they're added at the end, this should do no harm.
     std::vector<Transition>::const_iterator it = transitions.begin();
     for (; it != transitions.end();++it)
     {
@@ -112,6 +112,30 @@ void State::generateDefaultTransitions()
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
     }
+    
+    // Also add default states for each substatemachine that proxies
+    std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();
+    for (; it0 != mEmbeddedStateMachines.end();++it0)
+    {
+        if(!it0->proxiedTo.empty())
+        {
+            // Add the not understood transition for every matching transition
+            default_transition::NotUnderstood transitionSender0 = default_transition::NotUnderstood(it0->fromRole, it0->proxiedToRole, mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionSender0));
+            default_transition::NotUnderstood transitionReceiver0 = default_transition::NotUnderstood(it0->proxiedToRole, it0->fromRole, mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver0));
+            
+            // Add the cancel transition -- bidirectional regarding receiver/sender role
+            default_transition::ConversationCancelling transitionSender1 = default_transition::ConversationCancelling(it0->fromRole, it0->proxiedToRole, mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionSender1));
+            default_transition::ConversationCancelling transitionReceiver1 = default_transition::ConversationCancelling(it0->proxiedToRole, it0->fromRole, mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver1));
+            
+            // Add default failure transition -- which only applies for self as receiver
+            default_transition::GeneralFailure transitionReceiver2 = default_transition::GeneralFailure(mId);
+            addTransition(*dynamic_cast<Transition*>(&transitionReceiver2));
+        }
+    }
 }
 
 bool State::isDefaultState() const
@@ -122,8 +146,6 @@ bool State::isDefaultState() const
 
 const Transition& State::getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const
 {
-    // TODO: consider embedded statemachines
-
     std::vector<Transition>::const_iterator it = mTransitions.begin();
     for (; it != mTransitions.end(); ++it)
     {
@@ -145,43 +167,43 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
             }
         }
     }
-    
+
+    throw std::runtime_error("Message does not trigger any transition in this state");
+}
+
+const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& msg, const MessageArchive& archive, const RoleMapping& roleMapping)
+{
     if(!archive.hasMessages())
     {
         const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
         // If state has substatemachine(s) && substatemachine(s) proxied_to not empty && actual_protocol != inform && response not already received:
         // Genereate Transition on-the-fly, if posssible
-        std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();
+        std::vector<EmbeddedStateMachine>::iterator it0 = mEmbeddedStateMachines.begin();
         for (; it0 != mEmbeddedStateMachines.end(); ++it0)
         {
             // FIXME there can be other protocols that do not expect any responses
             if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
             {
-                // TODO this produces a memory leak. Save the transition in the vector?
-                // Generate a transition (any performative, not changing the state)
-                Transition* transition = new Transition(it0->fromRole, it0->proxiedToRole, ".*", getId(), getId());
+                // Generate a transition (any performative, not leaving the state)
+                Transition transition (it0->fromRole, it0->proxiedToRole, ".*", getId(), getId());
                 // And see if it triggers
-                if (transition->triggers(msg, initiatingMsg, roleMapping)) 
+                if (transition.triggers(msg, initiatingMsg, roleMapping)) 
                 {
                     // Save that a proxied reply was received
                     it0->receivedProxiedReply = true;
-                    return *transition;
-                }
-                else 
-                {
-                    delete transition;
+                    mSubstateMachineProxiedTransitions.push_back(transition);
+                    return transition;
                 }
             }
         }
     }
 
     throw std::runtime_error("Message does not trigger any transition in this state");
-
 }
 
-bool State::isFinal() const
+bool State::isFinished() const
 {
-    if(!mIsFinal)
+    if(!isFinal())
     {
         return false;
     }

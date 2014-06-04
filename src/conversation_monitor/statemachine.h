@@ -38,14 +38,14 @@ struct EmbeddedStateMachine
     // and it's role.
     Role proxiedToRole;
     
-    // The following two atttributes are mutable, as they are modified after the initial instantiation
-    // via statemachine_reader. This enables all getter methods to still be const.
+    // The following attribute is mutable, as it is modified after the initial instantiation.
+    // The conversation sets this to the actually used protocol. This enables all getter methods to still be const.
     // XXX This is not the cleanest design solution!
     
     // This is set during runtime and refers to the actually used protocol. If name is a regular expression, this can be different.
     mutable std::string actualProtocol;
     // If this is true, a proxied reply has been received and the embedded state machine is finished.
-    mutable bool receivedProxiedReply;
+    bool receivedProxiedReply;
     
     /**
      * Convert to string
@@ -142,6 +142,12 @@ public:
      * \throws std::runtime_error if statemachine has not been properly initialized
      */
     const State& getCurrentState() const;
+    
+    /**
+     * Get current state. Non const!
+     * \throws std::runtime_error if statemachine has not been properly initialized
+     */
+    State& getCurrentStateModifiably();
 
     void setCurrentStateId(const StateId& stateId) { mCurrentStateId = stateId; }
 
