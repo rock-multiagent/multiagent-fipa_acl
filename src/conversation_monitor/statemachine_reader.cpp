@@ -26,6 +26,7 @@ const std::string StateMachineReader::subprotocol = std::string("subprotocol");
 const std::string StateMachineReader::mapping = std::string("mapping");
 const std::string StateMachineReader::name = std::string("name");
 const std::string StateMachineReader::multiple = std::string("multiple");
+const std::string StateMachineReader::proxiedTo = std::string("proxied_to");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
 {
@@ -183,6 +184,12 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
             esm.fromRole = Role( std::string(from->c_str()));
         } else {
             throw new std::runtime_error("StateMachineReader::parseStateNode mapping is missing 'from' attribute");
+        }
+        
+        const std::string* proxiedTo = subProtocolElement->Attribute(StateMachineReader::proxiedTo);
+        if (proxiedTo != NULL)
+        {
+            esm.proxiedTo = *proxiedTo;
         }
         
         state.addEmbeddedStateMachine(esm);

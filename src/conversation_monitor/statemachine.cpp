@@ -203,7 +203,10 @@ std::string StateMachine::toString() const
 std::string EmbeddedStateMachine::toString() const
 {
     std::stringstream str;
-    str << "embedded state machine: protocol:'" << name << "', multiple:'"<< multiple << "', from:'" << from << "'\n";
+    str << "embedded state machine: protocol: '" << name 
+        << "', multiple: '" << multiple 
+        << "', from: '" << from 
+        << "', proxied_to: '" << proxiedTo << "'\n";
     
     return str.str();
 }

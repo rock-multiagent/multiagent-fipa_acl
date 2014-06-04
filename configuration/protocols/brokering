@@ -20,21 +20,19 @@
 	<state id="5" final="yes">
 	</state>
 	
-	<state id="6">
+	<state id="6" final="yes">
                 <!-- This is failure-brokering -->
                 <transition performative="failure" from="B" to="initiator" target="7"/>
-		<transition performative=".*" from="B" to="initiator" target="8"/>
 		
-		<subprotocol name=".*" multiple="yes" from="B"/> 
+		<!-- This means: Any subprotocol (inform/query/...) can be started.
+		     Actually it will be the proxied performative. Multiple subprotocols
+		     can be started, they are all started by 'B'. The responses are 'proxied',
+		     i.e. forwarded back to the initiator.
+		     For propagate subprotocols, proxied_to should be omitted.
+		-->
+		<subprotocol name=".*" multiple="yes" from="B" proxied_to="initiator"/> 
 	</state>
 	
 	<state id="7" final="yes">
         </state>
-        
-        <state id="8" final="yes">
-                <transition performative=".*" from="B" to="initiator" target="8"/>
-                
-                <subprotocol name=".*" multiple="yes" from="B"/>
-        </state>
-
 </scxml>

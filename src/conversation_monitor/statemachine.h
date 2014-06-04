@@ -25,11 +25,16 @@ class MessageArchive;
  */
 struct EmbeddedStateMachine
 {
+    // The initiator of the sub-protocol(s)
     std::string from;
+    //  and it's role.
     Role fromRole;
+    // The name of teh sub-protocol
     std::string name;
     // Cardinality: true means more than 1 Subprotocol can be started at that point
     bool multiple;
+    // To whom responses are forwarded back. Can be empty for propagate instead of proxy.
+    std::string proxiedTo;
     /**
      * Convert to string
      */

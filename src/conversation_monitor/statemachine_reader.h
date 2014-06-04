@@ -37,6 +37,7 @@ public: // FIXME private!?
     static const std::string mapping;
     static const std::string name;
     static const std::string multiple;
+    static const std::string proxiedTo;
 
     /**
      * Read the xml structure defining a statemachine
