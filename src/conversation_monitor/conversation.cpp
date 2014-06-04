@@ -1,6 +1,7 @@
 #include "conversation.h"
 #include <uuid/uuid.h>
 #include <base/Logging.hpp>
+#include <boost/regex.hpp>
 
 namespace fipa {
 namespace acl {
@@ -270,9 +271,9 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
     std::vector<EmbeddedStateMachine>::const_iterator it;
     for(it = embeddedStateMachines.begin(); it != embeddedStateMachines.end(); it++)
     {
-        // Protocol and sender must match
-        // TODO Regex matching instead if equality
-        if(it->name == protocol)
+        // Protocol must match Regex
+        boost::regex peformativeRegex(it->name);
+        if(regex_match(protocol, peformativeRegex))
         {           
             // Check that the sender role is correct
             // This throws if the mapping does not exist

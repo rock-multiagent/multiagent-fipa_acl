@@ -25,7 +25,7 @@
                 <transition performative="failure" from="B" to="initiator" target="7"/>
 		<transition performative=".*" from="B" to="initiator" target="8"/>
 		
-		<subprotocol name="request" multiple="yes" from="B"> 
+		<subprotocol name=".*" multiple="yes" from="B"> 
                     <mapping from="B" to="initiator"/>
                 </subprotocol>
 	</state>
@@ -36,7 +36,7 @@
         <state id="8" final="yes">
                 <transition performative=".*" from="B" to="initiator" target="8"/>
                 
-                <subprotocol name="request" multiple="yes" from="B"> 
+                <subprotocol name=".*" multiple="yes" from="B"> 
                     <mapping from="B" to="initiator"/>
                 </subprotocol>
         </state>
