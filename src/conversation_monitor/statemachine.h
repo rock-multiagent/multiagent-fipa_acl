@@ -44,7 +44,7 @@ struct EmbeddedStateMachine
 {
     std::string from;
     Role fromRole;
-    std::string stateMachineFile;
+    std::string name;
     // Cardinality: true means more than 1 Subprotocol can be started at that point
     bool multiple;
     std::vector<EmbeddedProtocolMapping> mappings;

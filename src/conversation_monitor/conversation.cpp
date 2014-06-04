@@ -272,7 +272,7 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
     {
         // Protocol and sender must match
         // TODO Regex matching instead if equality
-        if(it->stateMachineFile == protocol)
+        if(it->name == protocol)
         {           
             // Check that the sender role is correct
             // This throws if the mapping does not exist
@@ -334,15 +334,25 @@ fipa::acl::ACLMessage Conversation::getLastMessage() const
 
 bool Conversation::hasEnded() const
 {
-    // TODO check if all subProtocols have ended, too.
-    if(mStateMachine.inFinalState())
+    if(!mStateMachine.inFinalState())
     {
-        LOG_DEBUG("Conversation ended");
-        return true;
+        LOG_DEBUG("Conversation did not end");
+        return false;
+        
     }
-
-    LOG_DEBUG("Conversation did not end");
-    return false;
+    // Check all subprotocols
+    std::vector<StateMachine>::const_iterator it0;
+    for(it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
+    {
+        if(!it0->inFinalState() && !it0->inFailureState())
+        {
+            LOG_DEBUG("Conversation did not end (subconversation still running)");
+            return false;
+        }
+    }      
+    
+    LOG_DEBUG("Conversation ended");
+    return true;
 }
 
 bool Conversation::hasMessages() const

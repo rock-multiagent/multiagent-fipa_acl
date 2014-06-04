@@ -35,7 +35,7 @@ public: // FIXME private!?
     static const std::string initial;
     static const std::string subprotocol;
     static const std::string mapping;
-    static const std::string file;
+    static const std::string name;
     static const std::string multiple;
 
     /**
