@@ -262,12 +262,14 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
         }
     }
     
+    
+    const EmbeddedStateMachine* esmP;
     // We must be in a state that allows subProtocols
     std::string protocol = msg.getProtocol();
     const State& currentState = mStateMachine.getCurrentState();
     const std::vector<EmbeddedStateMachine>& embeddedStateMachines =  currentState.getEmbeddedStatemachines();
+    
     // Search for an embedded state machine with the same protocol
-    const EmbeddedStateMachine* esmP;
     std::vector<EmbeddedStateMachine>::const_iterator it;
     for(it = embeddedStateMachines.begin(); it != embeddedStateMachines.end(); it++)
     {
@@ -282,6 +284,12 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
             if(lit == l.end())
             {
                 // Sender does not match
+                continue;
+            }
+            
+            // Check that no subStateMachine is already running if this esm forbids multiple
+            if(!esmP->multiple && !mSubStateMachines.empty())
+            {
                 continue;
             }
             
