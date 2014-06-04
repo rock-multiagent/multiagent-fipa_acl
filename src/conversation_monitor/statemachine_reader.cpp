@@ -24,7 +24,7 @@ const std::string StateMachineReader::performative = std::string("performative")
 const std::string StateMachineReader::initial = std::string("initial");
 const std::string StateMachineReader::subprotocol = std::string("subprotocol");
 const std::string StateMachineReader::mapping = std::string("mapping");
-const std::string StateMachineReader::file = std::string("file");
+const std::string StateMachineReader::name = std::string("name");
 const std::string StateMachineReader::multiple = std::string("multiple");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
@@ -147,12 +147,12 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
     {
         EmbeddedStateMachine esm;
         
-        const std::string* file = subProtocolElement->Attribute(StateMachineReader::file);
-        if (file != NULL)
+        const std::string* name = subProtocolElement->Attribute(StateMachineReader::name);
+        if (name != NULL)
         {
-            esm.stateMachineFile = *file;
+            esm.name = *name;
         } else {
-            throw new std::runtime_error("StateMachineReader::parseSubProtocol subprotocol is missing 'file' attribute");
+            throw new std::runtime_error("StateMachineReader::parseStateNode subprotocol is missing 'name' attribute");
         }
         
         const std::string* multipleAllowedP;
@@ -173,7 +173,7 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
             }
             
         } else {
-            throw new std::runtime_error("StateMachineReader::parseSubProtocol mapping is missing 'multiple' attribute");
+            throw new std::runtime_error("StateMachineReader::parseStateNode mapping is missing 'multiple' attribute");
         }
         
         const std::string* from = subProtocolElement->Attribute(StateMachineReader::from);
@@ -182,7 +182,7 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
             esm.from = *from;
             esm.fromRole = Role( std::string(from->c_str()));
         } else {
-            throw new std::runtime_error("StateMachineReader::parseSubProtocol mapping is missing 'from' attribute");
+            throw new std::runtime_error("StateMachineReader::parseStateNode mapping is missing 'from' attribute");
         }
         
         

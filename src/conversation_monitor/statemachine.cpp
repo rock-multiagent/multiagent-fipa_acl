@@ -211,7 +211,7 @@ std::string EmbeddedProtocolMapping::toString() const
 std::string EmbeddedStateMachine::toString() const
 {
     std::stringstream str;
-    str << "embedded state machine protocol:'" << stateMachineFile << "' multiple:'"<< multiple << "' from:'" << from << "'\n";
+    str << "embedded state machine protocol:'" << name << "' multiple:'"<< multiple << "' from:'" << from << "'\n";
     std::vector<EmbeddedProtocolMapping>::const_iterator it = mappings.begin();
     for(; it != mappings.end(); ++it)
     {
