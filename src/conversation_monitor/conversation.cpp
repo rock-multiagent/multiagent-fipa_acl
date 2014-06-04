@@ -303,8 +303,6 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
     {
         StateMachine subStateMachine = msStateMachineFactory.getStateMachine(protocol);
         subStateMachine.setSelf(msg.getSender());
-        // custom parameter for the message and to identify subStateMachine in the future
-        std::string subSMIdentifier = generateConversationID(currentState.getId());
         
         mSubStateMachines.push_back(subStateMachine);
         
@@ -319,6 +317,9 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
             errorMsg += " -- " + std::string(e.what());
             throw conversation::ProtocolException(errorMsg);
         }
+        
+        // If that was successful, save the actual protocol in the embedded state machine
+        esmP->actualProtocol = protocol;
     } else {
         LOG_ERROR("Protocol not set");
         throw std::runtime_error("Protocol not set");

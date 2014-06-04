@@ -145,15 +145,62 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
             }
         }
     }
+    
+    if(!archive.hasMessages())
+    {
+        const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
+        // If state has substatemachine(s) && substatemachine(s) proxied_to not empty && actual_protocol != inform && response not already received:
+        // Genereate Transition on-the-fly, if posssible
+        std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();
+        for (; it0 != mEmbeddedStateMachines.end(); ++it0)
+        {
+            // FIXME there can be other protocols that do not expect any responses
+            if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
+            {
+                // TODO this produces a memory leak. Save the transition in the vector?
+                // Generate a transition (any performative, not changing the state)
+                Transition* transition = new Transition(it0->fromRole, it0->proxiedToRole, ".*", getId(), getId());
+                // And see if it triggers
+                if (transition->triggers(msg, initiatingMsg, roleMapping)) 
+                {
+                    // Save that a proxied reply was received
+                    it0->receivedProxiedReply = true;
+                    return *transition;
+                }
+                else 
+                {
+                    delete transition;
+                }
+            }
+        }
+    }
 
     throw std::runtime_error("Message does not trigger any transition in this state");
 
 }
 
-const std::vector< EmbeddedStateMachine >& State::getEmbeddedStatemachines() const
-{ 
-    return mEmbeddedStateMachines;
+bool State::isFinal() const
+{
+    if(!mIsFinal)
+    {
+        return false;
+    }
+    
+    // When there are embedded state machines, they all must have forwarded a proxied reply, if this was
+    // necessary in the first place
+    std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();
+    for (; it0 != mEmbeddedStateMachines.end(); ++it0)
+    {
+        // FIXME there can be other protocols that do not expect any responses
+        if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
+        {
+            return false;
+        }
+    }
+    
+    return true;
 }
+
 
 void State::addEmbeddedStateMachine(EmbeddedStateMachine embeddedStateMachine)
 {

@@ -190,6 +190,7 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
         if (proxiedTo != NULL)
         {
             esm.proxiedTo = *proxiedTo;
+            esm.proxiedToRole = Role( std::string(proxiedTo->c_str()));
         }
         
         state.addEmbeddedStateMachine(esm);

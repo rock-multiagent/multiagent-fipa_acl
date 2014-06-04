@@ -128,10 +128,11 @@ public:
     void generateDefaultTransitions();
 
     /**
-      \brief method that returns whether the state is a final state or not
+      \brief method that returns whether the state is a final state or not.
+      In the case of a state with embedded state machines, this is a bit more coplex, see the implementation
       \return true if state is final, false otherwise
     */
-    bool isFinal() const { return mIsFinal; }
+    bool isFinal() const;
 
     /**
      * \brief Test if state belongs to the default state or not
@@ -158,10 +159,10 @@ public:
     const std::vector<Transition>& getTransitions() const { return mTransitions; }
 
     /**
-     * Retrieve embedded statemachine 
+     * Retrieve embedded statemachine.
      * \return list of embedded statemachines
      */
-    const std::vector<EmbeddedStateMachine>& getEmbeddedStatemachines() const;
+    const std::vector<EmbeddedStateMachine>& getEmbeddedStatemachines() const { return mEmbeddedStateMachines; }
     
     /**
      * Add an embedded state machine.
