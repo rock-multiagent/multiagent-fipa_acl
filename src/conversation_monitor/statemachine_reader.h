@@ -62,13 +62,6 @@ public: // FIXME private!?
         \return transition 
     */
     Transition parseTransitionNode(TiXmlElement* transitionElement);
-    
-    /**
-     * \brief method that parses <mapping> element of the spec. file
-     * \param mappingElement
-     * \return the embedded protocol mapping
-     */
-    EmbeddedProtocolMapping parseEmbeddedProtocolMapping(TiXmlElement* mappingElement);
         
 public:
     /**

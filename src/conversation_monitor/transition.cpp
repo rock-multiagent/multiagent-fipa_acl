@@ -150,11 +150,11 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
 std::string Transition::toString() const
 {
     std::stringstream transition;
-    transition << "transition: sender role: " << mSenderRole.getId() << ", "; 
-    transition << "receiver role: " << mReceiverRole.getId() << ", ";
-    transition << "performative: " << mPerformativeRegExp << ", ";
-    transition << "source state: " << mSourceStateId << ", ";
-    transition << "target state: " << mTargetStateId;
+    transition << "transition: sender role: '" << mSenderRole.getId() << "', "; 
+    transition << "receiver role: '" << mReceiverRole.getId() << "', ";
+    transition << "performative: '" << mPerformativeRegExp << "', ";
+    transition << "source state: '" << mSourceStateId << "', ";
+    transition << "target state: '" << mTargetStateId << "'";
 
     return transition.str();
 }

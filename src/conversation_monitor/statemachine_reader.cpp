@@ -185,16 +185,6 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
             throw new std::runtime_error("StateMachineReader::parseStateNode mapping is missing 'from' attribute");
         }
         
-        
-        // Parse all mappings
-        TiXmlHandle handleSubProtocol = TiXmlHandle(subProtocolElement);
-        TiXmlElement *mappingElement = handleSubProtocol.FirstChildElement(StateMachineReader::mapping).ToElement();
-        for (; mappingElement != NULL; mappingElement = mappingElement->NextSiblingElement(StateMachineReader::mapping) )
-        {
-            EmbeddedProtocolMapping mapping = parseEmbeddedProtocolMapping(mappingElement);
-            esm.mappings.push_back(mapping);
-        }
-        
         state.addEmbeddedStateMachine(esm);
         LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> subprotocol added:\n" << esm.toString();
     }
@@ -244,31 +234,6 @@ Transition StateMachineReader::parseTransitionNode(TiXmlElement *transitionEleme
     
     return transition;
 }
-
-EmbeddedProtocolMapping StateMachineReader::parseEmbeddedProtocolMapping(TiXmlElement* mappingElement)
-{
-    EmbeddedProtocolMapping epm;
-    const std::string* from = mappingElement->Attribute(StateMachineReader::from);
-    if (from != NULL)
-    {
-        epm.from = *from;
-        epm.fromRole = Role( std::string(from->c_str()));
-    } else {
-        throw new std::runtime_error("StateMachineReader::parseEmbeddedProtocolMapping mapping is missing 'from' attribute");
-    }
-        
-    const std::string* to = mappingElement->Attribute(StateMachineReader::to);
-    if (to != NULL)
-    {
-        epm.to = *to;
-        epm.toRole = Role( std::string(to->c_str()));
-    } else {
-        throw new std::runtime_error("StateMachineReader::parseEmbeddedProtocolMapping mapping is missing 'to' attribute");
-    }
-    
-    return epm;
-}
-
 
 } //end of namespace acl
 } //end of namespace fipa

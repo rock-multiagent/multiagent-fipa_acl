@@ -199,24 +199,11 @@ std::string StateMachine::toString() const
     return statemachine.str();
 }
 
-// EmbeddedProtocolMapping
-std::string EmbeddedProtocolMapping::toString() const
-{
-    std::stringstream str;
-    str << "mapping from '" << from << "' to '" << to << "'";
-    return str.str();
-}
-
 // EmbeddedStateMachine
 std::string EmbeddedStateMachine::toString() const
 {
     std::stringstream str;
-    str << "embedded state machine protocol:'" << name << "' multiple:'"<< multiple << "' from:'" << from << "'\n";
-    std::vector<EmbeddedProtocolMapping>::const_iterator it = mappings.begin();
-    for(; it != mappings.end(); ++it)
-    {
-        str << "\t\t" << it->toString() << "\n";
-    }
+    str << "embedded state machine: protocol:'" << name << "', multiple:'"<< multiple << "', from:'" << from << "'\n";
     
     return str.str();
 }

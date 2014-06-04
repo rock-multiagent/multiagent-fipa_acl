@@ -20,23 +20,6 @@ namespace acl {
 class MessageArchive;
 
 /**
- * \struct EmbeddedProtocolMapping
- * \brief When embedding protocols, agents participating in one protocol can be mapped to agents participating in the
- * embedded one.
- */
-struct EmbeddedProtocolMapping
-{
-    std::string from;
-    Role fromRole;
-    std::string to;
-    Role toRole;
-    /**
-     * Convert to string
-     */
-    std::string toString() const;
-};
-
-/**
  * \struct EmbeddedStateMachine
  * \brief An embedded state machine with mappings
  */
@@ -47,7 +30,6 @@ struct EmbeddedStateMachine
     std::string name;
     // Cardinality: true means more than 1 Subprotocol can be started at that point
     bool multiple;
-    std::vector<EmbeddedProtocolMapping> mappings;
     /**
      * Convert to string
      */
