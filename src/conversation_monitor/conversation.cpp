@@ -234,9 +234,11 @@ void Conversation::notifyAll(const fipa::acl::ACLMessage& msg, bool newConversat
         notify(msg, conversation::INTERMEDIATE_UPDATE);
     }
 }
-
+// TODO DEBUG
 void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
 {
+    LOG_INFO("Update conversation sub protocol: id '%s'", msg.getConversationID().c_str());
+    
     // Loop through all not-ended sub state machines
     std::vector<StateMachine>::iterator it0;
     for(it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
@@ -251,17 +253,20 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
         
         // Test the update
         try {
+            LOG_INFO("Conversation updateSubProtocol trying an existing sub state machine");
             it0->consumeMessage(msg);
             // It worked
             notifyAll(msg, false);
             return;
         } catch(const std::runtime_error& e)
         {
+            LOG_INFO("Conversation updateSubProtocol Sub state machine incorrect: ", e.what());
             // The state machine was obviously not correct, we play back the copy
             *it0 = copy;
         }
     }
     
+    LOG_INFO("Conversation updateSubProtocol trying to search for a fitting a embedded state machine");
     
     const EmbeddedStateMachine* esmP;
     // We must be in a state that allows subProtocols
@@ -306,16 +311,17 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
         throw conversation::ProtocolException("Conversation: message with wrong protocol being inserted");
     }
     
+    LOG_INFO("Conversation updateSubProtocol found a fiting embedded state machine and will try to create a sub state machine now");
+    
     // Construct a new state machine with mapped sender role
     if(!protocol.empty())
     {
         StateMachine subStateMachine = msStateMachineFactory.getStateMachine(protocol);
         subStateMachine.setSelf(msg.getSender());
         
-        mSubStateMachines.push_back(subStateMachine);
-        
         // update the message state machine
         try {
+            LOG_INFO("Conversation updateSubProtocol sub state machine initialized, trying to consume message");
             subStateMachine.consumeMessage(msg);
         } catch(const std::runtime_error& e)
         {
@@ -327,11 +333,17 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
         }
         
         // If that was successful, save the actual protocol in the embedded state machine
+        LOG_INFO("Conversation updateSubProtocol new sub state machine consumed message");
+        mSubStateMachines.push_back(subStateMachine);
+        LOG_INFO("Conversation updateSubProtocol A");
         esmP->actualProtocol = protocol;
+        LOG_INFO("Conversation updateSubProtocol B");
     } else {
         LOG_ERROR("Protocol not set");
         throw std::runtime_error("Protocol not set");
     }
+    LOG_INFO("Conversation updateSubProtocol C");
+    LOG_INFO("Conversation updateSubProtocol successfully created new sub state machine");
     
     notifyAll(msg, false);
 }

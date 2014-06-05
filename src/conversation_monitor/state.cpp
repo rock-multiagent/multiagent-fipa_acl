@@ -173,7 +173,7 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
 
 const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& msg, const MessageArchive& archive, const RoleMapping& roleMapping)
 {
-    if(!archive.hasMessages())
+    if(archive.hasMessages())
     {
         const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
         // If state has substatemachine(s) && substatemachine(s) proxied_to not empty && actual_protocol != inform && response not already received:
@@ -181,9 +181,11 @@ const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& m
         std::vector<EmbeddedStateMachine>::iterator it0 = mEmbeddedStateMachines.begin();
         for (; it0 != mEmbeddedStateMachines.end(); ++it0)
         {
+            LOG_DEBUG("State getSubstateMachineProxiedTransition checking if a transition needs to be generated");
             // FIXME there can be other protocols that do not expect any responses
             if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
             {
+                LOG_DEBUG("State getSubstateMachineProxiedTransition generating a transition");
                 // Generate a transition (any performative, not leaving the state)
                 Transition transition (it0->fromRole, it0->proxiedToRole, ".*", getId(), getId());
                 // And see if it triggers
@@ -192,7 +194,9 @@ const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& m
                     // Save that a proxied reply was received
                     it0->receivedProxiedReply = true;
                     mSubstateMachineProxiedTransitions.push_back(transition);
-                    return transition;
+                    LOG_DEBUG("State getSubstateMachineProxiedTransition transition triggered");
+                    // We cannot use the local var to return as a reference
+                    return mSubstateMachineProxiedTransitions.back();
                 }
             }
         }

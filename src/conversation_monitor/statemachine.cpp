@@ -178,6 +178,7 @@ void StateMachine::updateRoleMapping(const ACLMessage& msg, const Transition& tr
 
 void StateMachine::consumeMessage(const ACLMessage& msg)
 {
+    LOG_DEBUG("StateMachine consumeMessage");
     try
     {
         const State& currentState = getCurrentState();
@@ -190,6 +191,7 @@ void StateMachine::consumeMessage(const ACLMessage& msg)
     }
     catch(const std::exception& e)
     {
+        LOG_DEBUG("StateMachine consumeMessage trying substatemachine proxied transition");
         // Retry with substatemachineproxied transition
         State& currentState = getCurrentStateModifiably();
         const Transition& transition = currentState.getSubstateMachineProxiedTransition(msg, mMessageArchive, mRoleMapping);
