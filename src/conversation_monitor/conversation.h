@@ -296,6 +296,13 @@ public:
     * \return ContentLanguage
     */
     fipa::acl::ContentLanguage getContentLanguage() const;
+    
+    /**
+     * For protocols requiring a proxy/propagate behaviour, the number of sub conversations to be started
+     * needs to be known in order to monitor the end of the conversation correctly. E.g. a broker would
+     * set this to m, as soon as he knows that m agents will be contacted.
+     */
+    void setNumberOfSubConversations(int amount) { mNumberOfSubConversations = amount; }
 
     /**
     * Update a conversation using an incoming message
@@ -359,6 +366,9 @@ private:
     /** Content language of this conversation */
     fipa::acl::ContentLanguage mContentLanguage;
 
+    /** Number of sub conversations to be started */
+    int mNumberOfSubConversations = 0;
+    
     /**
     * List of commands and associated messages
     * Since one command can produce multiple message, the conversation maps

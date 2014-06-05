@@ -234,6 +234,7 @@ void Conversation::notifyAll(const fipa::acl::ACLMessage& msg, bool newConversat
         notify(msg, conversation::INTERMEDIATE_UPDATE);
     }
 }
+
 // TODO DEBUG
 void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
 {
@@ -292,8 +293,15 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
                 continue;
             }
             
+            // FIXME remove multiple!!!
             // Check that no subStateMachine is already running if this esm forbids multiple
-            if(!it->multiple && !mSubStateMachines.empty())
+            //if(!it->multiple && !mSubStateMachines.empty())
+            //{
+            //    continue;
+            //}
+            
+            // Check that the number of subconversations allows another one
+            if(mSubStateMachines.size() >= mNumberOfSubConversations)
             {
                 continue;
             }
@@ -363,6 +371,14 @@ bool Conversation::hasEnded() const
         return false;
         
     }
+    
+    // Check that enough subprotocols have been started
+    if(mNumberOfSubConversations != mSubStateMachines.size())
+    {
+        LOG_DEBUG("Conversation did not end (subconversation(s) missing)");
+        return false;
+    }
+    
     // Check all subprotocols
     std::vector<StateMachine>::const_iterator it0;
     for(it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
