@@ -9,13 +9,16 @@
 
 #include <boost/test/auto_unit_test.hpp>
 #include <fipa_acl/conversation_monitor/conversation.h>
+#include "utils.h"
 
 BOOST_AUTO_TEST_SUITE(conversation_test_suite)
-
 
 BOOST_AUTO_TEST_CASE(brokering_positive_test)
 {
     using namespace fipa::acl;
+    std::string configurationPath = getProtocolPath();
+    StateMachineFactory::setProtocolResourceDir(configurationPath);
+
     AgentID initiator ("initiator");
     AgentID broker ("broker");
     AgentID serviceProvider0 ("serviceProvider0");

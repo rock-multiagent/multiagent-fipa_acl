@@ -240,8 +240,7 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
     LOG_INFO("Update conversation sub protocol: id '%s'", msg.getConversationID().c_str());
     
     // Loop through all not-ended sub state machines
-    std::vector<StateMachine>::iterator it0;
-    for(it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
+    for(std::vector<StateMachine>::iterator it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
     {
         if(it0->inFinalState() || it0->inFailureState())
         {
@@ -268,7 +267,8 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
     
     LOG_INFO("Conversation updateSubProtocol trying to search for a fitting a embedded state machine");
     
-    const EmbeddedStateMachine* esmP;
+    // TODO rename ptr
+    const EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
     // We must be in a state that allows subProtocols
     std::string protocol = msg.getProtocol();
     const State& currentState = mStateMachine.getCurrentState();
@@ -293,18 +293,18 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
             }
             
             // Check that no subStateMachine is already running if this esm forbids multiple
-            if(!esmP->multiple && !mSubStateMachines.empty())
+            if(!it->multiple && !mSubStateMachines.empty())
             {
                 continue;
             }
             
             // This is the right ESM
-            esmP = &(*it);
+            embeddedStateMachinePtr = &(*it);
             break;
         }
     }
     
-    if(!esmP)
+    if(!embeddedStateMachinePtr)
     {
         // No fitting running or new embedded state machine found
         LOG_ERROR("Conversation: message with different protocol being inserted: current '%s' - to be inserted '%s'", mProtocol.c_str(), msg.getProtocol().c_str());
@@ -336,12 +336,13 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
         LOG_INFO("Conversation updateSubProtocol new sub state machine consumed message");
         mSubStateMachines.push_back(subStateMachine);
         LOG_INFO("Conversation updateSubProtocol A");
-        esmP->actualProtocol = protocol;
+        embeddedStateMachinePtr->actualProtocol = protocol;
         LOG_INFO("Conversation updateSubProtocol B");
     } else {
         LOG_ERROR("Protocol not set");
         throw std::runtime_error("Protocol not set");
     }
+    
     LOG_INFO("Conversation updateSubProtocol C");
     LOG_INFO("Conversation updateSubProtocol successfully created new sub state machine");
     
