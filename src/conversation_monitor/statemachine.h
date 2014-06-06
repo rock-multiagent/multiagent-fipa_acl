@@ -81,6 +81,11 @@ class StateMachine
      * Message archive
      */
     MessageArchive mMessageArchive;
+    
+    /**
+     * Protocol of the state machine
+     */
+    fipa::acl::Protocol mProtocol;
 
     /**
      * Generate the default state for this state machine
@@ -147,7 +152,7 @@ public:
     const State& getCurrentState() const;
     
     /**
-     * Get current state. Non const!
+     * Get current state. Non const! TODO remove?
      * \throws std::runtime_error if statemachine has not been properly initialized
      */
     State& getCurrentStateModifiably();
@@ -165,7 +170,17 @@ public:
      * \return id of the initial state
      */
     StateId getInitialStateId() const { return mInitialStateId; }
+    
+    /**
+     * Set the protocol for this conversation
+     */ 
+    void setProtocol(const fipa::acl::Protocol& protocol) { mProtocol = protocol; }
 
+    /**
+    * Get protocol (which is set by the initiating message)
+    * \return Protocol
+    */
+    fipa::acl::Protocol getProtocol() const { return mProtocol; }
 
     /**
      * Set self agents id -- can only be called once per state machine
@@ -193,7 +208,7 @@ public:
     bool inFailureState() const; 
 
     /**
-     * Check wether the conversation has been successfully cancelled
+     * Check whether the conversation has been successfully cancelled
      * \return true if the conversation was successfully cancelled
      */
     bool cancelled() const;

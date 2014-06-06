@@ -275,7 +275,7 @@ public:
     */
     virtual ~Conversation();
 
-    /**
+    /** TODO remove mProtocol?
      * Set the protocol for this conversation
      */ 
     void setProtocol(const fipa::acl::Protocol& protocol) { mProtocol = protocol; }
@@ -284,7 +284,7 @@ public:
     * Get protocol (which is set by the initiating message)
     * \return Protocol
     */
-    fipa::acl::Protocol getProtocol() const;
+    fipa::acl::Protocol getProtocol() const { return mProtocol; }
 
     /**
      * Set content language

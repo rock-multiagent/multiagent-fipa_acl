@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     try {
         StateMachineReader reader;
         StateMachine statemachine = reader.loadSpecification(protocolfile);
-        printf("Statemachine: \n%s", statemachine.toString().c_str());
+        printf("%s", statemachine.toString().c_str());
     } catch(std::runtime_error& e)
     {
         printf("Runtime error: %s\n", e.what());

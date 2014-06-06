@@ -223,6 +223,7 @@ bool StateMachine::cancelled() const
 std::string StateMachine::toString() const
 {
     std::stringstream statemachine;
+    statemachine << "Statemachine: (" << mProtocol << ")\n";
     std::map<StateId, State>::const_iterator it = mStates.begin();
     for(; it != mStates.end(); ++it)
     {

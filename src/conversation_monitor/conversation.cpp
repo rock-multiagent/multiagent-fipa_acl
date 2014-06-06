@@ -121,11 +121,6 @@ Conversation::~Conversation()
 {
 }
 
-std::string Conversation::getProtocol() const
-{
-    return mProtocol;
-}
-
 std::string Conversation::getContentLanguage() const
 {
     return mContentLanguage;
@@ -233,6 +228,7 @@ void Conversation::notifyAll(const fipa::acl::ACLMessage& msg, bool newConversat
     }
 }
 
+// TODO move this entirely to statemachine/state
 void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
 {
     LOG_INFO("Update conversation sub protocol: id '%s'", msg.getConversationID().c_str());
@@ -268,7 +264,7 @@ void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
     const EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
     // We must be in a state that allows subProtocols
     std::string protocol = msg.getProtocol();
-    const State& currentState = mStateMachine.getCurrentState();
+    State& currentState = mStateMachine.getCurrentStateModifiably();
     const std::vector<EmbeddedStateMachine>& embeddedStateMachines =  currentState.getEmbeddedStatemachines();
     
     // Search for an embedded state machine with the same protocol

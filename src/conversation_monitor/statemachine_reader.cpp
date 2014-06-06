@@ -51,7 +51,11 @@ StateMachine StateMachineReader::loadSpecification(const std::string& protocolSp
     LOG_DEBUG_S << "loadSpecification: specification file 'protocolSpec'";
     TiXmlElement* statemachineElement = file.RootElement();
 
-    StateMachine statemachine = parseStateMachineNode(statemachineElement, protocolSpec);
+    StateMachine statemachine = parseStateMachineNode(statemachineElement);
+    // set protocol
+    boost::filesystem::path path(protocolSpec);
+    statemachine.setProtocol( path.filename().string() );
+    
     statemachine.generateDefaultTransitions();
     statemachine.generateDefaultStates();
     statemachine.updateRoles();
@@ -60,7 +64,7 @@ StateMachine StateMachineReader::loadSpecification(const std::string& protocolSp
     return statemachine;
 }
 
-StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachineElement, const std::string& protocolSpec)
+StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachineElement)
 {
     StateMachine statemachine;
 
@@ -87,7 +91,7 @@ StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachin
     // read states nodes 
     for (; stateElement != NULL; stateElement = stateElement->NextSiblingElement("state") )
     {
-        State state = parseStateNode(stateElement, protocolSpec);
+        State state = parseStateNode(stateElement);
         LOG_DEBUG_S << "Adding state: " << state.toString();
         statemachine.addState(state);
     }
@@ -95,7 +99,7 @@ StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachin
     return statemachine;
 }
 
-State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::string& protocolSpec)
+State StateMachineReader::parseStateNode(TiXmlElement *stateElement)
 {
     State state;
 

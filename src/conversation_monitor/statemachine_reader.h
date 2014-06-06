@@ -45,16 +45,14 @@ public: // FIXME private!?
      * statemachine
      * \return the parsed state machine
      */
-    StateMachine parseStateMachineNode(TiXmlElement* statemachineElement, const std::string& protocolSpec);
+    StateMachine parseStateMachineNode(TiXmlElement* statemachineElement);
     
     /**
         \brief method that parses the <state> element of the spec. file
         \param stateElement
-        \param protocolSpec name of the file containing the specification for the
-        statemachine
         \return the parsed state
     */
-    State parseStateNode(TiXmlElement* stateElement, const std::string& protocolSpec);
+    State parseStateNode(TiXmlElement* stateElement);
     
     /**
         \brief method that parses <transition> element of the spec. file
