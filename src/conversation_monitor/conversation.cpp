@@ -166,7 +166,17 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
         } else if( mProtocol != msg.getProtocol())
         {
             // This probably means, it's a subProtocol message
-            updateSubProtocol(msg);
+            try {
+                mStateMachine.consumeSubStateMachineMessage(msg, msStateMachineFactory.getStateMachine(msg.getProtocol()), mNumberOfSubConversations);
+            } catch(const std::runtime_error& e)
+            {
+                std::string errorMsg = "Conversation: unexpected message with performative '" + msg.getPerformative() + "' for the protocol '" + msg.getProtocol() + "' ";
+                errorMsg += " current state: '" + mStateMachine.getCurrentStateId() + "'";
+                errorMsg += " -- " + std::string(e.what());
+                throw conversation::ProtocolException(errorMsg);
+            }
+            
+            notifyAll(msg, false);
             return;
         } else if( msg.getProtocol().empty())
         {
@@ -228,118 +238,6 @@ void Conversation::notifyAll(const fipa::acl::ACLMessage& msg, bool newConversat
     }
 }
 
-// TODO move this entirely to statemachine/state
-void Conversation::updateSubProtocol(const fipa::acl::ACLMessage& msg)
-{
-    LOG_INFO("Update conversation sub protocol: id '%s'", msg.getConversationID().c_str());
-    
-    // Loop through all not-ended sub state machines
-    for(std::vector<StateMachine>::iterator it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
-    {
-        if(it0->inFinalState() || it0->inFailureState())
-        {
-            // StateMachine ended already
-            continue;
-        }
-        // Test if this StateMachine is correct by maintaining a copy of it
-        StateMachine copy = *it0;
-        
-        // Test the update
-        try {
-            LOG_DEBUG("Conversation updateSubProtocol trying an existing sub state machine");
-            it0->consumeMessage(msg);
-            // It worked
-            notifyAll(msg, false);
-            return;
-        } catch(const std::runtime_error& e)
-        {
-            LOG_DEBUG("Conversation updateSubProtocol Sub state machine incorrect: ", e.what());
-            // The state machine was obviously not correct, we play back the copy
-            *it0 = copy;
-        }
-    }
-    
-    LOG_DEBUG("Conversation updateSubProtocol trying to search for a fitting a embedded state machine");
-    
-    const EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
-    // We must be in a state that allows subProtocols
-    std::string protocol = msg.getProtocol();
-    State& currentState = mStateMachine.getCurrentStateModifiably();
-    const std::vector<EmbeddedStateMachine>& embeddedStateMachines =  currentState.getEmbeddedStatemachines();
-    
-    // Search for an embedded state machine with the same protocol
-    std::vector<EmbeddedStateMachine>::const_iterator it;
-    for(it = embeddedStateMachines.begin(); it != embeddedStateMachines.end(); it++)
-    {
-        // Protocol must match Regex
-        boost::regex peformativeRegex(it->name);
-        if(regex_match(protocol, peformativeRegex))
-        {           
-            // Check that the sender role is correct
-            // This throws if the mapping does not exist
-            const AgentIDList l = mStateMachine.getRoleMapping().getMapping().at(it->fromRole);
-            AgentIDList::const_iterator lit = std::find(l.begin(), l.end(), msg.getSender());
-            if(lit == l.end())
-            {
-                // Sender does not match
-                continue;
-            }
-            
-            // Check that the number of subconversations allows another one
-            if(mSubStateMachines.size() >= mNumberOfSubConversations)
-            {
-                continue;
-            }
-            
-            // This is the right ESM
-            embeddedStateMachinePtr = &(*it);
-            break;
-        }
-    }
-    
-    if(!embeddedStateMachinePtr)
-    {
-        // No fitting running or new embedded state machine found
-        LOG_ERROR("Conversation: message with different protocol being inserted: current '%s' - to be inserted '%s'", mProtocol.c_str(), msg.getProtocol().c_str());
-        throw conversation::ProtocolException("Conversation: message with wrong protocol being inserted");
-    }
-    
-    LOG_DEBUG("Conversation updateSubProtocol found a fiting embedded state machine and will try to create a sub state machine now");
-    
-    // Construct a new state machine with mapped sender role
-    if(!protocol.empty())
-    {
-        StateMachine subStateMachine = msStateMachineFactory.getStateMachine(protocol);
-        subStateMachine.setSelf(msg.getSender());
-        
-        // update the message state machine
-        try {
-            LOG_DEBUG("Conversation updateSubProtocol sub state machine initialized, trying to consume message");
-            subStateMachine.consumeMessage(msg);
-        } catch(const std::runtime_error& e)
-        {
-            // Also constructing and using a new one did not work for that message.
-            std::string errorMsg = "Conversation: unexpected message with performative '" + msg.getPerformative() + "' for the protocol '" + msg.getProtocol() + "' ";
-            errorMsg += " current state: '" + mStateMachine.getCurrentStateId() + "'";
-            errorMsg += " -- " + std::string(e.what());
-            throw conversation::ProtocolException(errorMsg);
-        }
-        
-        // If that was successful, save the actual protocol and number of subconversations in the embedded state machine
-        LOG_DEBUG("Conversation updateSubProtocol new sub state machine consumed message");
-        mSubStateMachines.push_back(subStateMachine);
-        embeddedStateMachinePtr->actualProtocol = protocol;
-        embeddedStateMachinePtr->numberOfSubConversations = mNumberOfSubConversations;
-    } else {
-        LOG_ERROR("Protocol not set");
-        throw std::runtime_error("Protocol not set");
-    }
-    
-    LOG_DEBUG("Conversation updateSubProtocol successfully created new sub state machine");
-    
-    notifyAll(msg, false);
-}
-
 fipa::acl::ACLMessage Conversation::getLastMessage() const
 {
      boost::unique_lock<boost::mutex> lock(mMutex);
@@ -353,26 +251,7 @@ bool Conversation::hasEnded() const
         LOG_DEBUG("Conversation did not end");
         return false;
         
-    }
-    
-    // FIXME this SHOULD NOT be here
-    // Check that enough subprotocols have been started
-    if(mNumberOfSubConversations != mSubStateMachines.size())
-    {
-        LOG_DEBUG("Conversation did not end (subconversation(s) missing)");
-        return false;
-    }
-    
-    // Check all subprotocols
-    std::vector<StateMachine>::const_iterator it0;
-    for(it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
-    {
-        if(!it0->inFinalState() && !it0->inFailureState())
-        {
-            LOG_DEBUG("Conversation did not end (subconversation still running)");
-            return false;
-        }
-    }      
+    }    
     
     LOG_DEBUG("Conversation ended");
     return true;

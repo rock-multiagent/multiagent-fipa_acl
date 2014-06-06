@@ -144,6 +144,112 @@ bool State::isDefaultState() const
     return cit != msDefaultStates.end();
 }
 
+void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl::StateMachine& stateMachine, const fipa::acl::RoleMapping& roleMapping, int numberOfSubConversations)
+{
+    LOG_INFO("State consumeSubStateMachineMessage");
+    
+    // Loop through all not-ended sub state machines
+    for(std::vector<StateMachine>::iterator it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
+    {
+        if(it0->inFinalState() || it0->inFailureState())
+        {
+            // StateMachine ended already
+            continue;
+        }
+        // Test if this StateMachine is correct by maintaining a copy of it
+        StateMachine copy = *it0;
+        
+        // Test the update
+        try {
+            LOG_DEBUG("State consumeSubStateMachineMessage trying an existing sub state machine");
+            it0->consumeMessage(msg);
+            // It worked
+            return;
+        } catch(const std::runtime_error& e)
+        {
+            LOG_DEBUG("State consumeSubStateMachineMessage Sub state machine incorrect: ", e.what());
+            // The state machine was obviously not correct, we play back the copy
+            *it0 = copy;
+        }
+    }
+    
+    LOG_DEBUG("State consumeSubStateMachineMessage trying to search for a fitting a embedded state machine");
+    
+    const EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
+    // We must be in a state that allows subProtocols
+    std::string protocol = msg.getProtocol();
+    
+    // Search for an embedded state machine with the same protocol
+    std::vector<EmbeddedStateMachine>::const_iterator it;
+    for(it = mEmbeddedStateMachines.begin(); it != mEmbeddedStateMachines.end(); it++)
+    {
+        // Protocol must match Regex
+        boost::regex peformativeRegex(it->name);
+        if(regex_match(protocol, peformativeRegex))
+        {           
+            // Check that the sender role is correct
+            // This throws if the mapping does not exist
+            const AgentIDList l = roleMapping.getMapping().at(it->fromRole);
+            AgentIDList::const_iterator lit = std::find(l.begin(), l.end(), msg.getSender());
+            if(lit == l.end())
+            {
+                // Sender does not match
+                continue;
+            }
+            
+            // Check that the number of subconversations allows another one
+            if(mSubStateMachines.size() >= numberOfSubConversations)
+            {
+                continue;
+            }
+            
+            // This is the right ESM
+            embeddedStateMachinePtr = &(*it);
+            break;
+        }
+    }
+    
+    if(!embeddedStateMachinePtr)
+    {
+        // No fitting running or new embedded state machine found
+        LOG_ERROR("State consumeSubStateMachineMessage: No fitting sub state machine found");
+        throw std::runtime_error("State consumeSubStateMachineMessage: No fitting sub state machine found");
+    }
+    
+    LOG_DEBUG("State consumeSubStateMachineMessage found a fiting embedded state machine and will try to create a sub state machine now");
+    
+    // Construct a new state machine with mapped sender role
+    if(!protocol.empty())
+    {
+        // Copy the given state machine
+        StateMachine subStateMachine = stateMachine;
+        subStateMachine.setSelf(msg.getSender());
+        
+        // update the message state machine
+        try {
+            LOG_DEBUG("State consumeSubStateMachineMessage sub state machine initialized, trying to consume message");
+            subStateMachine.consumeMessage(msg);
+        } catch(const std::runtime_error& e)
+        {
+            // Also constructing and using a new one did not work for that message.
+            std::string errorMsg = "Substatemachine creation failed: ";
+            errorMsg += " -- " + std::string(e.what());
+            throw std::runtime_error(errorMsg);
+        }
+        
+        // If that was successful, save the actual protocol and number of subconversations in the embedded state machine
+        LOG_DEBUG("State consumeSubStateMachineMessage new sub state machine consumed message");
+        mSubStateMachines.push_back(subStateMachine);
+        embeddedStateMachinePtr->actualProtocol = protocol;
+        embeddedStateMachinePtr->numberOfSubConversations = numberOfSubConversations;
+    } else {
+        LOG_ERROR("Protocol not set");
+        throw std::runtime_error("Protocol not set");
+    }
+    
+    LOG_DEBUG("State consumeSubStateMachineMessage successfully created new sub state machine");
+}
+
 const Transition& State::getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const
 {
     std::vector<Transition>::const_iterator it = mTransitions.begin();
@@ -212,22 +318,34 @@ bool State::isFinished() const
         return false;
     }
     
-    // This SHOULD be here
-    // Check that enough subprotocols have been started
-    //if(mNumberOfSubConversations != mSubStateMachines.size())
-    //{
-    //    LOG_DEBUG("Conversation did not end (subconversation(s) missing)");
-    //    return false;
-    //}
+    // Check all subprotocols
+    std::vector<StateMachine>::const_iterator it;
+    for(it = mSubStateMachines.begin(); it != mSubStateMachines.end(); it++)
+    {
+        if(!it->inFinalState() && !it->inFailureState())
+        {
+            LOG_DEBUG("State not finished (subconversation still running)");
+            return false;
+        }
+    } 
     
     // When there are embedded state machines, they all must have forwarded a proxied reply, if this was
     // necessary in the first place
     std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();
     for (; it0 != mEmbeddedStateMachines.end(); ++it0)
     {
+        // They must also all have started enough sub state machines
+        // Check that enough subprotocols have been started
+        if(it0->numberOfSubConversations != mSubStateMachines.size())
+        {
+            LOG_DEBUG("State not finished (subconversation still running)");
+            return false;
+        }
+        
         // FIXME there can be other protocols that do not expect any responses
         if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
         {
+            LOG_DEBUG("State not finished (proxied response missing)");
             return false;
         }
     }

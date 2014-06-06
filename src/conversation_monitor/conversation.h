@@ -347,12 +347,6 @@ public:
 private:
     
     /**
-    * Update a conversation using an incoming message
-    * \param msg incoming or outgoing message
-    */
-    void updateSubProtocol(const fipa::acl::ACLMessage& msg);
-    
-    /**
      * Checks if the conversation is erronoues, ended, etc. and notifies accordingly.
      */
     void notifyAll(const fipa::acl::ACLMessage& msg, bool newConversation);
@@ -385,11 +379,6 @@ private:
     * to verify the message flow 
     */
     fipa::acl::StateMachine mStateMachine;
-    
-    /**
-    * The subprotocol statemachines.
-    */
-    std::vector<fipa::acl::StateMachine> mSubStateMachines;
 
     /**
     * The general state machine factory, which allows to instanciate statemachines for

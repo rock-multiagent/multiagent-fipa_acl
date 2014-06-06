@@ -19,43 +19,6 @@ namespace acl {
 
 class MessageArchive;
 
-/**
- * \struct EmbeddedStateMachine
- * \brief An embedded state machine with mappings
- */
-struct EmbeddedStateMachine
-{
-    // The initiator of the sub-protocol(s)
-    std::string from;
-    //  and it's role.
-    Role fromRole;
-    // The name of teh sub-protocol
-    std::string name;
-    // To whom responses are forwarded back. Can be empty for propagate instead of proxy.
-    std::string proxiedTo;
-    // and it's role.
-    Role proxiedToRole;
-    
-    // The following attributes are mutable, as modified after the initial instantiation.
-    // The conversation sets this to the actually used protocol, and the number of planned subconverstions.
-    // This enables all getter methods to still be const.
-    // XXX This is not the cleanest design solution!
-    
-    // This is set during runtime and refers to the actually used protocol. If name is a regular expression, this can be different.
-    mutable std::string actualProtocol;
-    // The planned number of sub conversations
-    // -1 is the default value, which is not valid.
-    mutable int numberOfSubConversations = -1;
-    
-    // If this is true, a proxied reply has been received and the embedded state machine is finished.
-    bool receivedProxiedReply;
-    
-    /**
-     * Convert to string
-     */
-    std::string toString() const;
-};
-
 class StateMachine
 {
     friend class StateMachineReader; 
@@ -152,7 +115,7 @@ public:
     const State& getCurrentState() const;
     
     /**
-     * Get current state. Non const! TODO remove?
+     * Get current state. Non const!
      * \throws std::runtime_error if statemachine has not been properly initialized
      */
     State& getCurrentStateModifiably();
@@ -194,6 +157,15 @@ public:
      * \throws std::runtime_error if message could not be consumed
      */
     void consumeMessage(const ACLMessage& msg);
+    
+    /**
+     * Consume a message meant for sub state machine.
+     * The given stateMachine is only used to be copied, if necessary.
+     * 
+     * \param msg Message which should be consumed
+     * \throws std::runtime_error if message could not be consumed
+     */
+    void consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl::StateMachine& stateMachine, int numberOfSubConversations);
 
     /**
      * Check if the state machine is in a final state, i.e. the conversation has ended
@@ -215,6 +187,49 @@ public:
 
     /**
      * Convert statemachine to string
+     */
+    std::string toString() const;
+};
+
+/**
+ * \struct EmbeddedStateMachine
+ * \brief An embedded state machine with mappings
+ */
+struct EmbeddedStateMachine
+{
+    // The initiator of the sub-protocol(s)
+    std::string from;
+    //  and it's role.
+    Role fromRole;
+    // The name of teh sub-protocol
+    std::string name;
+    // To whom responses are forwarded back. Can be empty for propagate instead of proxy.
+    std::string proxiedTo;
+    // and it's role.
+    Role proxiedToRole;
+    
+    // FIXME immutable
+    // The following attributes are mutable, as modified after the initial instantiation.
+    // The conversation sets this to the actually used protocol, and the number of planned subconverstions.
+    // This enables all getter methods to still be const.
+    // XXX This is not the cleanest design solution!
+    
+    // This is set during runtime and refers to the actually used protocol. If name is a regular expression, this can be different.
+    mutable std::string actualProtocol;
+    // The planned number of sub conversations
+    // -1 is the default value, which is not valid.
+    mutable int numberOfSubConversations = -1;
+    
+    // If this is true, a proxied reply has been received and the embedded state machine is finished.
+    bool receivedProxiedReply;
+    
+    /* This state machine is constructed by statemachine_reader. It then has to be copied for each actually
+     * sub conversation started.
+     */    
+    StateMachine stateMachine;
+    
+    /**
+     * Convert to string
      */
     std::string toString() const;
 };

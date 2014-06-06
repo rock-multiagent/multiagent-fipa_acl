@@ -72,6 +72,12 @@ private:
     * manner until all the sub-protocols of that state are in a valid final state
     */
     std::vector<EmbeddedStateMachine> mEmbeddedStateMachines;
+    
+    /**
+    * The subprotocol statemachines. These are actually running.
+    */
+    std::vector<fipa::acl::StateMachine> mSubStateMachines;
+    
     /**
     * List of outgoing transitions that belong to this state, proxied by a substatemachine.
     * These are just maintained here in order to produce no memory leaks, and only constructed
@@ -124,6 +130,12 @@ public:
     *  \throws runtime_error if the msg is invalid in the current state
     */
     const Transition& getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const;
+    
+    /**
+     * Tries to consume a message meant for a sub state machine.
+     * \throws runtime_error if this does not work
+     */
+    void consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl::StateMachine& stateMachine, const fipa::acl::RoleMapping& roleMapping, int numberOfSubConversations);
     
     /**
     *  \brief Check whether the received message triggers a substatemachine proxied transition. This method is not const, as

@@ -176,9 +176,18 @@ void StateMachine::updateRoleMapping(const ACLMessage& msg, const Transition& tr
     }
 }
 
+void StateMachine::consumeSubStateMachineMessage(const ACLMessage& msg, const StateMachine& stateMachine, int numberOfSubConversations)
+{
+    LOG_DEBUG("StateMachine consumeSubStateMachineMessage");
+    
+    State& currentState = getCurrentStateModifiably();
+    currentState.consumeSubStateMachineMessage(msg, stateMachine, mRoleMapping, numberOfSubConversations);
+}
+
 void StateMachine::consumeMessage(const ACLMessage& msg)
 {
     LOG_DEBUG("StateMachine consumeMessage");
+    
     try
     {
         const State& currentState = getCurrentState();
