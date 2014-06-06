@@ -25,13 +25,12 @@
                 <transition performative="failure" from="B" to="initiator" target="7"/>
 		
 		<!-- This means: Any subprotocol (inform/query/...) can be started.
-		     Actually it will be the proxied performative. Multiple subprotocols
-		     can be started, they are all started by 'B'. The response is 'proxied',
+		     Actually it will be the proxied performative. Subprotocols are all started by 'B'. The response is 'proxied',
 		     i.e. forwarded back to the initiator. That means, that either 0 (in case of inform)
 		     or 1 (otherwise) messages are sent back, not more!
 		     For propagate subprotocols, proxied_to should be omitted.
 		-->
-		<subprotocol name=".*" multiple="yes" from="B" proxied_to="initiator"/> 
+		<subprotocol name=".*" from="B" proxied_to="initiator"/> 
 	</state>
 	
 	<state id="7" final="yes">

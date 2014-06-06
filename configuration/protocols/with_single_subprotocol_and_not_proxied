@@ -7,6 +7,6 @@
 	</state>
 	
 	<state id="2" final="yes">
-		<subprotocol name=".*" multiple="no" from="B"/> 
+		<subprotocol name=".*" from="B"/> 
 	</state>
 </scxml>

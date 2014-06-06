@@ -212,6 +212,14 @@ bool State::isFinished() const
         return false;
     }
     
+    // This SHOULD be here
+    // Check that enough subprotocols have been started
+    //if(mNumberOfSubConversations != mSubStateMachines.size())
+    //{
+    //    LOG_DEBUG("Conversation did not end (subconversation(s) missing)");
+    //    return false;
+    //}
+    
     // When there are embedded state machines, they all must have forwarded a proxied reply, if this was
     // necessary in the first place
     std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();

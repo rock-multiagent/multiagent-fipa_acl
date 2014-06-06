@@ -301,6 +301,8 @@ public:
      * For protocols requiring a proxy/propagate behaviour, the number of sub conversations to be started
      * needs to be known in order to monitor the end of the conversation correctly. E.g. a broker would
      * set this to m, as soon as he knows that m agents will be contacted.
+     * 
+     * This MUST be called BEFORE an actual message of a sub conversation is sent.
      */
     void setNumberOfSubConversations(int amount) { mNumberOfSubConversations = amount; }
 

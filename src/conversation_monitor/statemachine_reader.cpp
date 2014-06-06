@@ -25,7 +25,6 @@ const std::string StateMachineReader::initial = std::string("initial");
 const std::string StateMachineReader::subprotocol = std::string("subprotocol");
 const std::string StateMachineReader::mapping = std::string("mapping");
 const std::string StateMachineReader::name = std::string("name");
-const std::string StateMachineReader::multiple = std::string("multiple");
 const std::string StateMachineReader::proxiedTo = std::string("proxied_to");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
@@ -154,27 +153,6 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement, const std::
             esm.name = *name;
         } else {
             throw new std::runtime_error("StateMachineReader::parseStateNode subprotocol is missing 'name' attribute");
-        }
-        
-        const std::string* multipleAllowedP;
-        multipleAllowedP = subProtocolElement->Attribute(StateMachineReader::multiple);
-        if (multipleAllowedP)
-        {
-            const std::string multipleAllowed(multipleAllowedP->c_str());
-            if (multipleAllowed == "yes" || multipleAllowed == "true" || multipleAllowed == "1")
-            {
-                esm.multiple = true;
-            } else if (multipleAllowed == "no" || multipleAllowed == "false" || multipleAllowed == "0")
-            {
-                esm.multiple = false;
-            } else {
-                char buffer[512];
-                sprintf(buffer, "Invalid value for attribute \"multiple\" of subprotocol node: %s", multipleAllowed.c_str());
-                throw std::runtime_error(std::string(buffer));
-            }
-            
-        } else {
-            throw new std::runtime_error("StateMachineReader::parseStateNode mapping is missing 'multiple' attribute");
         }
         
         const std::string* from = subProtocolElement->Attribute(StateMachineReader::from);
