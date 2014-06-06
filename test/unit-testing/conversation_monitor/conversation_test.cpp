@@ -66,7 +66,25 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     // The conversation should have ended
     BOOST_CHECK_MESSAGE(c1.hasEnded(), "Test 1: conversation did not end.");
     
-    // TODO Test2
+    // Test2: 2x inform
+    Conversation c2 (initiator.getName(), "conv");
+    c2.update(msg1_1);
+    c2.update(msg1_2);
+    c2.update(msg1_3);
+    // Set number of planned sub conversations
+    c2.setNumberOfSubConversations(2);
+    c2.update(msg1_4);
+    BOOST_CHECK_MESSAGE(!c2.hasEnded(), "Test 2: conversation ended too early after msg 4.");
+    // B -> S1 (inform)
+    ACLMessage msg2_5(ACLMessage::INFORM);
+    msg2_5.setConversationID("conv");
+    msg2_5.setSender(broker);
+    msg2_5.addReceiver(serviceProvider1);
+    msg2_5.setProtocol("inform");
+    std::cout << "C2 MSG5" << std::endl;
+    c2.update(msg2_5);
+    // The conversation should have ended
+    BOOST_CHECK_MESSAGE(c2.hasEnded(), "Test 2: conversation did not end.");
     
     // Test3: 1x request
     Conversation c3 (initiator.getName(), "conv");
@@ -193,7 +211,7 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     msg5_4.setProtocol("brokering");
     std::cout << "C5 MSG4" << std::endl;
     c5.update(msg5_4);
-    BOOST_CHECK_MESSAGE(c5.hasEnded(), "Test 5: conversation did not end."); // This fails TODO
+    BOOST_CHECK_MESSAGE(c5.hasEnded(), "Test 5: conversation did not end.");
     
     // Test 6 failure-brokering with 1 subprotocol started
     Conversation c6 (initiator.getName(), "conv");
@@ -376,55 +394,53 @@ BOOST_AUTO_TEST_CASE(with_single_subprotocol_and_not_proxied_test)
     AgentID serviceProvider0 ("serviceProvider0");
     AgentID serviceProvider1 ("serviceProvider1");
     
-    // TODO Test 1 (positive)
-    
-    // Test 2 (negative) subprotocol started twice
-    Conversation c2 (initiator.getName(), "conv");
+    // Test 1 (negative) subprotocol started twice
+    Conversation c1 (initiator.getName(), "conv");
     // I -> P (propagate)
-    ACLMessage msg2_1(ACLMessage::PROPAGATE);
-    msg2_1.setConversationID("conv");
-    msg2_1.setSender(initiator);
-    msg2_1.addReceiver(propagator);
-    msg2_1.setProtocol("with_single_subprotocol_and_not_proxied");
-    std::cout << "C2 MSG1" << std::endl;
-    c2.update(msg2_1);
+    ACLMessage msg1_1(ACLMessage::PROPAGATE);
+    msg1_1.setConversationID("conv");
+    msg1_1.setSender(initiator);
+    msg1_1.addReceiver(propagator);
+    msg1_1.setProtocol("with_single_subprotocol_and_not_proxied");
+    std::cout << "C1 MSG1" << std::endl;
+    c1.update(msg1_1);
     // Set number of planned sub conversations
-    c2.setNumberOfSubConversations(1);
+    c1.setNumberOfSubConversations(1);
     // P -> S (request)
-    ACLMessage msg2_2(ACLMessage::REQUEST);
-    msg2_2.setConversationID("conv");
-    msg2_2.setSender(propagator);
-    msg2_2.addReceiver(serviceProvider0);
-    msg2_2.setProtocol("request");
-    std::cout << "C2 MSG2" << std::endl;
-    c2.update(msg2_2);
+    ACLMessage msg1_2(ACLMessage::REQUEST);
+    msg1_2.setConversationID("conv");
+    msg1_2.setSender(propagator);
+    msg1_2.addReceiver(serviceProvider0);
+    msg1_2.setProtocol("request");
+    std::cout << "C1 MSG2" << std::endl;
+    c1.update(msg1_2);
     // S -> P (agree)
-    ACLMessage msg2_3(ACLMessage::AGREE);
-    msg2_3.setConversationID("conv");
-    msg2_3.setSender(serviceProvider0);
-    msg2_3.addReceiver(propagator);
-    msg2_3.setProtocol("request");
-    std::cout << "C2 MSG3" << std::endl;
-    c2.update(msg2_3);
-    BOOST_CHECK_MESSAGE(!c2.hasEnded(), "Test 2: conversation ended too early after msg 3.");
+    ACLMessage msg1_3(ACLMessage::AGREE);
+    msg1_3.setConversationID("conv");
+    msg1_3.setSender(serviceProvider0);
+    msg1_3.addReceiver(propagator);
+    msg1_3.setProtocol("request");
+    std::cout << "C1 MSG3" << std::endl;
+    c1.update(msg1_3);
+    BOOST_CHECK_MESSAGE(!c1.hasEnded(), "Test 1: conversation ended too early after msg 3.");
     // S -> P (inform)
-    ACLMessage msg2_4(ACLMessage::INFORM);
-    msg2_4.setConversationID("conv");
-    msg2_4.setSender(serviceProvider0);
-    msg2_4.addReceiver(propagator);
-    msg2_4.setProtocol("request");
-    std::cout << "C2 MSG4" << std::endl;
-    c2.update(msg2_4);
-    BOOST_CHECK_MESSAGE(c2.hasEnded(), "Test 2: conversation did not end.");
+    ACLMessage msg1_4(ACLMessage::INFORM);
+    msg1_4.setConversationID("conv");
+    msg1_4.setSender(serviceProvider0);
+    msg1_4.addReceiver(propagator);
+    msg1_4.setProtocol("request");
+    std::cout << "C1 MSG4" << std::endl;
+    c1.update(msg1_4);
+    BOOST_CHECK_MESSAGE(c1.hasEnded(), "Test 1: conversation did not end.");
     // P -> I (inform)
-    ACLMessage msg2_5(ACLMessage::INFORM);
-    msg2_5.setConversationID("conv");
-    msg2_5.setSender(propagator);
-    msg2_5.addReceiver(initiator);
-    msg2_5.setProtocol("with_single_subprotocol_and_not_proxied");
-    std::cout << "C2 MSG5" << std::endl;
+    ACLMessage msg1_5(ACLMessage::INFORM);
+    msg1_5.setConversationID("conv");
+    msg1_5.setSender(propagator);
+    msg1_5.addReceiver(initiator);
+    msg1_5.setProtocol("with_single_subprotocol_and_not_proxied");
+    std::cout << "C1 MSG5" << std::endl;
     // Forwarding a reply is not desired in this protocol, it should throw an exception
-    BOOST_REQUIRE_THROW( c2.update(msg2_5), conversation::ProtocolException );
+    BOOST_REQUIRE_THROW( c1.update(msg1_5), conversation::ProtocolException );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
