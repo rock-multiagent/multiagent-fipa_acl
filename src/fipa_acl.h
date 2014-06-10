@@ -13,8 +13,11 @@
  * No implementation exists for a string representation of the message envelope, since according to
  * http://www.fipa.org/specs/fipa00073/DC00073D.html this standard has been deprecated.
  *
- * Next the standard implementation of message and envelope types, this library provides a statemachine
- * to monitor a message flow based on performatives.
+ * Next to the standard implementation of message and envelope types, this library provides a statemachine
+ * to monitor a message flow based on performatives. The conversation monitor is capable of monitoring
+ * the conversation based on the protocol specified in the messages. There are scxml documents specifying
+ * how these protocols are defined. Protocols may contain subprotocols, which is partially supported. For
+ * constraints and examples see the documentation of fipa::acl::ConversationMonitor
  *
  * \section Examples
  * The following list typical application examples when using this library.
@@ -41,7 +44,7 @@
  message.setOntology("an-ontology");
  \endverbatim
  *
- * \subsection A Generate messages in a specific representation type
+ * \subsection B Generate messages in a specific representation type
  * \verbatim
 
  #include <fipa_acl/fipa_acl.h>
@@ -58,7 +61,7 @@
  MessageParser::parseData(encodedMsgData, decodedMsg, fipa::acl::representation::STRING_REP);
  \endverbatim
  *
- * \subsection A Generation and parsing of an envelope
+ * \subsection C Generation and parsing of an envelope
  * \verbatim
 
  #include <fipa_acl/fipa_acl.h>
@@ -92,7 +95,7 @@
  \endverbatim
  *
  *
- * \section B Available bindings
+ * \section D Available bindings
  *
  * Ruby bindings exist for using fipa acl
  * \verbatim
