@@ -145,6 +145,9 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement)
                     << t.getPerformativeRegExp();
     }
     
+    // TODO allow only 1 subProtocol per state? Throw otherwise.
+    // Also adapt the structs, etc.
+    
     // Read subprotocols
     TiXmlElement *subProtocolElement = handleState.FirstChildElement(StateMachineReader::subprotocol).ToElement();
     for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )

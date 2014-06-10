@@ -275,7 +275,7 @@ public:
     */
     virtual ~Conversation();
 
-    /** TODO remove mProtocol?
+    /**
      * Set the protocol for this conversation
      */ 
     void setProtocol(const fipa::acl::Protocol& protocol) { mProtocol = protocol; }

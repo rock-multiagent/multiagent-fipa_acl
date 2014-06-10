@@ -23,7 +23,7 @@ namespace acl {
 */
 class StateMachineReader {
         
-public: // FIXME private!?
+public:
     // node attribute names used in the spec standard; most general ones such as "state", "transition" are hard-implement
     static const std::string transition;
     static const std::string from;

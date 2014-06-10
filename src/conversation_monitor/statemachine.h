@@ -208,17 +208,17 @@ struct EmbeddedStateMachine
     // and it's role.
     Role proxiedToRole;
     
-    // FIXME immutable
-    // The following attributes are mutable, as modified after the initial instantiation.
+    // The following attributes is mutable, as modified after the initial instantiation.
     // The conversation sets this to the actually used protocol, and the number of planned subconverstions.
     // This enables all getter methods to still be const.
     // XXX This is not the cleanest design solution!
     
     // This is set during runtime and refers to the actually used protocol. If name is a regular expression, this can be different.
     mutable std::string actualProtocol;
+    
     // The planned number of sub conversations
     // -1 is the default value, which is not valid.
-    mutable int numberOfSubConversations = -1;
+    int numberOfSubConversations = -1;
     
     // If this is true, a proxied reply has been received and the embedded state machine is finished.
     bool receivedProxiedReply;

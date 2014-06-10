@@ -175,12 +175,12 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
     
     LOG_DEBUG("State consumeSubStateMachineMessage trying to search for a fitting a embedded state machine");
     
-    const EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
+    EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
     // We must be in a state that allows subProtocols
     std::string protocol = msg.getProtocol();
     
     // Search for an embedded state machine with the same protocol
-    std::vector<EmbeddedStateMachine>::const_iterator it;
+    std::vector<EmbeddedStateMachine>::iterator it;
     for(it = mEmbeddedStateMachines.begin(); it != mEmbeddedStateMachines.end(); it++)
     {
         // Protocol must match Regex
