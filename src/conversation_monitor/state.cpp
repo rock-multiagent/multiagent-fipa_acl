@@ -198,7 +198,7 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
             }
             
             // Check that the number of subconversations allows another one
-            if(mSubStateMachines.size() >= numberOfSubConversations)
+            if(((int) mSubStateMachines.size()) >= numberOfSubConversations)
             {
                 continue;
             }
@@ -336,7 +336,7 @@ bool State::isFinished() const
     {
         // They must also all have started enough sub state machines
         // Check that enough subprotocols have been started
-        if(it0->numberOfSubConversations != mSubStateMachines.size())
+        if(it0->numberOfSubConversations != ((int) mSubStateMachines.size()))
         {
             LOG_DEBUG("State not finished (subconversation still running)");
             return false;
