@@ -363,7 +363,7 @@ private:
     fipa::acl::ContentLanguage mContentLanguage;
 
     /** Number of sub conversations to be started */
-    int mNumberOfSubConversations = 0;
+    int mNumberOfSubConversations;
     
     /**
     * List of commands and associated messages

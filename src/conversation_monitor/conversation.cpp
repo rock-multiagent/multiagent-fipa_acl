@@ -100,6 +100,7 @@ void ConversationObserver::registerObservable(const ConversationObservablePtr& o
 Conversation::Conversation(const std::string& owner, const fipa::acl::ConversationID& conversationId)
    : ConversationObservable(conversationId)
    , mOwner(owner)
+   , mNumberOfSubConversations(0)
 {
     if(mConversationId.empty())
     {
@@ -111,6 +112,7 @@ Conversation::Conversation(const std::string& owner, const fipa::acl::Conversati
 Conversation::Conversation(const std::string& owner, const fipa::acl::ACLMessage& initiator)
    : ConversationObservable()
    , mOwner(owner)
+   , mNumberOfSubConversations(0)
 {
     update(initiator);
     LOG_DEBUG("Conversation created with id: %s\n", initiator.getConversationID().c_str());

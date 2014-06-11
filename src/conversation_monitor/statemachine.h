@@ -218,7 +218,7 @@ struct EmbeddedStateMachine
     
     // The planned number of sub conversations
     // -1 is the default value, which is not valid.
-    int numberOfSubConversations = -1;
+    int numberOfSubConversations;
     
     // If this is true, a proxied reply has been received and the embedded state machine is finished.
     bool receivedProxiedReply;
@@ -227,6 +227,10 @@ struct EmbeddedStateMachine
      * sub conversation started.
      */    
     StateMachine stateMachine;
+
+    EmbeddedStateMachine()
+        : numberOfSubConversations(-1)
+    {}
     
     /**
      * Convert to string
