@@ -26,6 +26,7 @@ const std::string StateMachineReader::subprotocol = std::string("subprotocol");
 const std::string StateMachineReader::mapping = std::string("mapping");
 const std::string StateMachineReader::name = std::string("name");
 const std::string StateMachineReader::proxiedTo = std::string("proxied_to");
+const std::string StateMachineReader::startState = std::string("start_state");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
 {
@@ -95,6 +96,49 @@ StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachin
         LOG_DEBUG_S << "Adding state: " << state.toString();
         statemachine.addState(state);
     }
+    
+    // XXX allow only 1 subProtocol? Throw otherwise.
+    // Read subprotocols
+    TiXmlElement *subProtocolElement = handleSm.FirstChildElement(StateMachineReader::subprotocol).ToElement();
+    for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )
+    {
+        EmbeddedStateMachine esm;
+        
+        const std::string* name = subProtocolElement->Attribute(StateMachineReader::name);
+        if (name != NULL)
+        {
+            esm.name = *name;
+        } else {
+            throw new std::runtime_error("StateMachineReader::parseStateMachineNode subprotocol is missing 'name' attribute");
+        }
+        
+        const std::string* from = subProtocolElement->Attribute(StateMachineReader::from);
+        if (from != NULL)
+        {
+            esm.from = *from;
+            esm.fromRole = Role( std::string(from->c_str()));
+        } else {
+            throw new std::runtime_error("StateMachineReader::parseStateMachineNode subprotocol is missing 'from' attribute");
+        }
+        
+        const std::string* proxiedTo = subProtocolElement->Attribute(StateMachineReader::proxiedTo);
+        if (proxiedTo != NULL)
+        {
+            esm.proxiedTo = *proxiedTo;
+            esm.proxiedToRole = Role( std::string(proxiedTo->c_str()));
+        }
+        
+        const std::string* startState = subProtocolElement->Attribute(StateMachineReader::startState);
+        if (startState != NULL)
+        {
+            esm.startState = *startState;
+        }else {
+            throw new std::runtime_error("StateMachineReader::parseStateMachineNode subprotocol is missing 'start_state' attribute");
+        }
+        
+        statemachine.addEmbeddedStateMachine(esm);
+        LOG_DEBUG_S << "parseStateMachineNode: -> subprotocol added:\n" << esm.toString();
+    }
 
     return statemachine;
 }
@@ -143,43 +187,6 @@ State StateMachineReader::parseStateNode(TiXmlElement *stateElement)
         LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> transition added: from (Role) " << t.getSenderRole().getId()
                     << ", to (Role) " << t.getReceiverRole().getId() << ", target state: " << t.getTargetStateId() << ", performative "
                     << t.getPerformativeRegExp();
-    }
-    
-    // TODO allow only 1 subProtocol per state? Throw otherwise.
-    // Also adapt the structs, etc.
-    
-    // Read subprotocols
-    TiXmlElement *subProtocolElement = handleState.FirstChildElement(StateMachineReader::subprotocol).ToElement();
-    for (; subProtocolElement != NULL; subProtocolElement = subProtocolElement->NextSiblingElement(StateMachineReader::subprotocol) )
-    {
-        EmbeddedStateMachine esm;
-        
-        const std::string* name = subProtocolElement->Attribute(StateMachineReader::name);
-        if (name != NULL)
-        {
-            esm.name = *name;
-        } else {
-            throw new std::runtime_error("StateMachineReader::parseStateNode subprotocol is missing 'name' attribute");
-        }
-        
-        const std::string* from = subProtocolElement->Attribute(StateMachineReader::from);
-        if (from != NULL)
-        {
-            esm.from = *from;
-            esm.fromRole = Role( std::string(from->c_str()));
-        } else {
-            throw new std::runtime_error("StateMachineReader::parseStateNode mapping is missing 'from' attribute");
-        }
-        
-        const std::string* proxiedTo = subProtocolElement->Attribute(StateMachineReader::proxiedTo);
-        if (proxiedTo != NULL)
-        {
-            esm.proxiedTo = *proxiedTo;
-            esm.proxiedToRole = Role( std::string(proxiedTo->c_str()));
-        }
-        
-        state.addEmbeddedStateMachine(esm);
-        LOG_DEBUG_S << "parseStateNode: state: " << state.getId() << " -> subprotocol added:\n" << esm.toString();
     }
     
     return state;
