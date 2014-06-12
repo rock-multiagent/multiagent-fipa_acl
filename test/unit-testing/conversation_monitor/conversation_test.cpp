@@ -297,9 +297,8 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     msg1_4.addReceiver(initiator);
     msg1_4.setProtocol("brokering");
     std::cout << "C1 MSG4" << std::endl;
-    // This should be an accepted message flow, but the conversation will be not ended, which is bad
-    c1.update(msg1_4);
-    BOOST_CHECK_MESSAGE(!c1.hasEnded(), "Expected (admittedly bad) behavior that the conversation won't end has not occured.");
+    // This would be an proxied reply message, which is not allowed if no protocol was started.
+    BOOST_REQUIRE_THROW( c1.update(msg1_4), conversation::ProtocolException );
     
     // Test 2 multiple forwarded replies
     Conversation c2 (initiator.getName(), "conv");
@@ -364,7 +363,7 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     msg3_4.addReceiver(serviceProvider0);
     msg3_4.setProtocol("inform");
     std::cout << "C3 MSG4" << std::endl;
-    c1.update(msg3_4);
+    c3.update(msg3_4);
     c3.update(msg1_3);
     // Forward inform, which is undesired
     ACLMessage msg3_5(ACLMessage::INFORM);

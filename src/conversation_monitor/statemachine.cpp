@@ -312,7 +312,7 @@ const Transition& StateMachine::getSubstateMachineProxiedTransition(const ACLMes
         {
             LOG_DEBUG("StateMachine getSubstateMachineProxiedTransition checking if a transition needs to be generated");
             // FIXME there can be other protocols that do not expect any responses
-            if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
+            if( !mSubStateMachines.empty() && !it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
             {
                 LOG_DEBUG("StateMachine getSubstateMachineProxiedTransition generating a transition");
                 // Generate a transition (any performative, not leaving the state)
