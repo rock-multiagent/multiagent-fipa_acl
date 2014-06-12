@@ -4,9 +4,11 @@
              Actually it will be the proxied performative. Subprotocols are all started by 'B'. The response is 'proxied',
              i.e. forwarded back to the initiator. That means, that either 0 (in case of inform)
              or 1 (otherwise) messages are sent back, not more!
-             For propagate subprotocols, proxied_to should be omitted.
+             For propagate subprotocols, proxied_to and proxy_state should be omitted.
+             
+             All subprotocols are initiated in state 4 and all=one! reply-messages-sub-protocol are sent in state 6.
         -->
-        <subprotocol name=".*" from="B" proxied_to="initiator" start_state="4"/> 
+        <subprotocol name=".*" from="B" proxied_to="initiator" start_state="4" proxy_state="6"/> 
     
 	<state id="1">
 	        <transition performative="proxy" from="initiator" to="B" target="2"/>
@@ -34,6 +36,9 @@
              Other protocols using embedded statemachines must add one transition to final
              states for which they want default transitions (for that sender/receiver pair)
              to be added.
+             
+             In this and only this state, the state machine waits for one(!) reply-message-sub-protocol,
+             before being finished.
         -->
 	<state id="6" final="yes">
                 <!-- This is failure-brokering (sent after failure message in subprotocol received) -->

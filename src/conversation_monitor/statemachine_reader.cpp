@@ -27,6 +27,7 @@ const std::string StateMachineReader::mapping = std::string("mapping");
 const std::string StateMachineReader::name = std::string("name");
 const std::string StateMachineReader::proxiedTo = std::string("proxied_to");
 const std::string StateMachineReader::startState = std::string("start_state");
+const std::string StateMachineReader::proxyState = std::string("proxy_state");
 
 StateMachine StateMachineReader::loadSpecification(const std::string& protocolSpec)
 {
@@ -132,8 +133,14 @@ StateMachine StateMachineReader::parseStateMachineNode(TiXmlElement *statemachin
         if (startState != NULL)
         {
             esm.startState = *startState;
-        }else {
+        } else {
             throw new std::runtime_error("StateMachineReader::parseStateMachineNode subprotocol is missing 'start_state' attribute");
+        }
+        
+        const std::string* proxyState = subProtocolElement->Attribute(StateMachineReader::proxyState);
+        if (proxyState != NULL)
+        {
+            esm.proxyState = *proxyState;
         }
         
         statemachine.addEmbeddedStateMachine(esm);

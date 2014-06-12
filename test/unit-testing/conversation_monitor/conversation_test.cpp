@@ -225,6 +225,7 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     msg6_5.addReceiver(broker);
     msg6_5.setProtocol("request");
     std::cout << "C6 MSG5" << std::endl;
+    c6.update(msg6_5);
     BOOST_CHECK_MESSAGE(!c6.hasEnded(), "Test 6: conversation ended too early after msg 5.");
     c6.update(msg5_4);
     BOOST_CHECK_MESSAGE(c6.hasEnded(), "Test 6: conversation did not end.");

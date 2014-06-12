@@ -241,6 +241,8 @@ struct EmbeddedStateMachine
     Role proxiedToRole;
     // The state from which the sub conversations are initiated.
     StateId startState;
+    // The state in which it is being waited for one(!) reply-message-sub-protocol, before finishing the conversation 
+    StateId proxyState;
     
     // The following attributes is mutable, as modified after the initial instantiation.
     // The conversation sets this to the actually used protocol, and the number of planned subconverstions.

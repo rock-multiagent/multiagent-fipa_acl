@@ -364,15 +364,22 @@ bool StateMachine::inFinalState() const
     for (; it0 != mEmbeddedStateMachines.end(); ++it0)
     {
         // They must also all have started enough sub state machines
-        // Check that enough subprotocols have been started
-        if(it0->numberOfSubConversations != ((int) mSubStateMachines.size()))
+        // Check that enough subprotocols have been started.
+        // If we're in its starting_state, -1 signalizes the value has not been set already.
+        // Otherwise this means, that there are no conversations to be started.
+        if(it0->numberOfSubConversations != ((int) mSubStateMachines.size()) &&
+            (getCurrentStateId() == it0->startState || it0->numberOfSubConversations != -1))
         {
-            LOG_DEBUG("Statemachine not finished (subconversation still running)");
+            LOG_DEBUG_S << "Statemachine not finished (not enough subconversation started): " << mSubStateMachines.size()
+                        << " of " << it0->numberOfSubConversations;
             return false;
-        }
+        }       
         
         // FIXME there can be other protocols that do not expect any responses
-        if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
+        // We expect a reply-message-sub-protocol, if there are started sub state machine, which should proxy and the actual
+        // protocol is not "inform". Also, we must be in the proxyState.
+        if(mSubStateMachines.size() != 0 && !it0->proxiedTo.empty() && it0->actualProtocol != "inform"
+            && !it0->receivedProxiedReply && getCurrentStateId() == it0->proxyState )
         {
             LOG_DEBUG("Statemachine not finished (proxied response missing)");
             return false;
@@ -417,6 +424,7 @@ std::string EmbeddedStateMachine::toString() const
     str << "embedded state machine: protocol: '" << name
         << "', from: '" << from 
         << "', startState: '" << startState 
+        << "', proxyState: '" << proxyState 
         << "', proxied_to: '" << proxiedTo << "'\n";
     
     return str.str();
