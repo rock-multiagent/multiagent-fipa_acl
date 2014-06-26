@@ -4,7 +4,7 @@
 #include <vector>
 #include <list>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 #include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/conversation_monitor/transition.h>
