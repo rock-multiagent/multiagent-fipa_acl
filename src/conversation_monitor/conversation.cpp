@@ -248,15 +248,25 @@ fipa::acl::ACLMessage Conversation::getLastMessage() const
 
 bool Conversation::hasEnded() const
 {
-    if(!mStateMachine.inFinalState())
+    try
     {
-        LOG_DEBUG("Conversation did not end");
+        if(!mStateMachine.inFinalState())
+        {
+            LOG_DEBUG("Conversation did not end");
+            return false;
+            
+        }
+        LOG_DEBUG("Conversation ended");
+        return true;
+    }
+    catch(const std::runtime_error& e)
+    {
+        // This very probably means the state machine has not been initialized properly,
+        // as there was no message yet to know the protocol. Therefore, technically
+        // the conversation did not end!
+        LOG_WARN_S << "Runtime error when testing if conversation ended. Therefore not ended. Message: " << e.what();
         return false;
-        
-    }    
-    
-    LOG_DEBUG("Conversation ended");
-    return true;
+    }
 }
 
 bool Conversation::hasMessages() const
