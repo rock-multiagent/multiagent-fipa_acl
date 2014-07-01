@@ -3,7 +3,7 @@
 
 #include <map>
 #include <vector>
-#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <fipa_acl/conversation_monitor/conversation.h>
 #include <fipa_acl/message_generator/acl_message.h>
