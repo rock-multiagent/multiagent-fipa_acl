@@ -92,6 +92,7 @@ ConversationPtr ConversationMonitor::getOrCreateConversation(const fipa::acl::Co
 
 void ConversationMonitor::cleanup()
 {
+    LOG_DEBUG_S << "Cleaning up conversation monitor.";
     boost::unique_lock<boost::mutex> lock(mMutex);
 
     std::map<fipa::acl::ConversationID, ConversationPtr>::iterator it = mActiveConversations.begin();
@@ -102,17 +103,21 @@ void ConversationMonitor::cleanup()
     // any existing observers
     for(; it != mActiveConversations.end(); ++it)
     {
+        LOG_DEBUG_S << "Cleaning up conversation monitor: Processing conversation " << it->first;
         ConversationPtr conversation = it->second;
         assert(it->second);
         if(conversation->hasEnded())
         {
+            LOG_DEBUG_S << "Detaching observers from ended conversation " << it->first;
             conversation->detachObservers();
             endedConversations.push_back(it->first);
         }
     }
     
+    LOG_DEBUG_S << "Erasing ended conversations from active conversations.";
     for( eit = endedConversations.begin(); eit != endedConversations.end(); ++eit)
     {
+        LOG_DEBUG_S << "Erasing ended conversation " << *eit << " from active conversations.";
         mActiveConversations.erase(*eit);
     }
 }

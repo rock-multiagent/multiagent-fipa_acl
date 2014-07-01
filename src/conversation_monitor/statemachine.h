@@ -49,25 +49,6 @@ class StateMachine
      * Protocol of the state machine
      */
     fipa::acl::Protocol mProtocol;
-    
-    /** 
-    * Embedded statemachines implement the subprotocol concept from the fipa specification as a state machine.
-    * A state machine cannot exit in a valid
-    * manner until all the sub-protocols are in a valid final state.
-    */
-    std::vector<EmbeddedStateMachine> mEmbeddedStateMachines;
-    
-    /**
-    * The subprotocol statemachines. These are actually running.
-    */
-    std::vector<fipa::acl::StateMachine> mSubStateMachines;
-    
-    /**
-    * List of outgoing transitions that belong to this state, proxied by a substatemachine.
-    * These are just maintained here in order to produce no memory leaks, and only constructed
-    * on-the-fly.
-    */
-    std::vector<Transition> mSubstateMachineProxiedTransitions;
 
     /**
      * Generate the default state for this state machine
@@ -132,6 +113,12 @@ public:
      * \throws std::runtime_error if statemachine has not been properly initialized
      */
     const State& getCurrentState() const;
+    
+    /**
+     * Get current state. Non const!
+     * \throws std::runtime_error if statemachine has not been properly initialized
+     */
+    State& getCurrentStateModifiably();
 
     void setCurrentStateId(const StateId& stateId) { mCurrentStateId = stateId; }
 
@@ -162,17 +149,6 @@ public:
      * Set self agents id -- can only be called once per state machine
      */
     void setSelf(const AgentID& self);
-    
-    /**
-     * Retrieve embedded statemachine.
-     * \return list of embedded statemachines
-     */
-    const std::vector<EmbeddedStateMachine>& getEmbeddedStatemachines() const { return mEmbeddedStateMachines; }
-    
-    /**
-     * Add an embedded state machine.
-     */
-    void addEmbeddedStateMachine(fipa::acl::EmbeddedStateMachine embeddedStateMachine);
 
     /**
      * Consume a message
@@ -190,14 +166,6 @@ public:
      * \throws std::runtime_error if message could not be consumed
      */
     void consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl::StateMachine& stateMachine, int numberOfSubConversations);
-    
-    /**
-    *  \brief Check whether the received message triggers a substatemachine proxied transition. This method is not const, as
-    * the generated transitions will be added when they trigger successfully.
-    *  \return the transition 
-    *  \throws runtime_error if the msg is invalid in the current state
-    */
-    const Transition& getSubstateMachineProxiedTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping);
 
     /**
      * Check if the state machine is in a final state, i.e. the conversation has ended
@@ -239,10 +207,6 @@ struct EmbeddedStateMachine
     std::string proxiedTo;
     // and it's role.
     Role proxiedToRole;
-    // The state from which the sub conversations are initiated.
-    StateId startState;
-    // The state in which it is being waited for one(!) reply-message-sub-protocol, before finishing the conversation 
-    StateId proxyState;
     
     // The following attributes is mutable, as modified after the initial instantiation.
     // The conversation sets this to the actually used protocol, and the number of planned subconverstions.
@@ -258,6 +222,11 @@ struct EmbeddedStateMachine
     
     // If this is true, a proxied reply has been received and the embedded state machine is finished.
     bool receivedProxiedReply;
+    
+    /* This state machine is constructed by statemachine_reader. It then has to be copied for each actually
+     * sub conversation started.
+     */    
+    StateMachine stateMachine;
 
     EmbeddedStateMachine()
         : numberOfSubConversations(-1)

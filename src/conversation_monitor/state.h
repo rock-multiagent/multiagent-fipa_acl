@@ -65,6 +65,26 @@ private:
     */
     std::vector<Transition> mTransitions;
 
+    /** 
+    * Embedded statemachines implement the subprotocol concept from the fipa speciffication as a state machine.
+    * Each embedded state machine belongs to the state from which the subprotocol starts;
+    * a state machine cannot exit a state in a valid
+    * manner until all the sub-protocols of that state are in a valid final state
+    */
+    std::vector<EmbeddedStateMachine> mEmbeddedStateMachines;
+    
+    /**
+    * The subprotocol statemachines. These are actually running.
+    */
+    std::vector<fipa::acl::StateMachine> mSubStateMachines;
+    
+    /**
+    * List of outgoing transitions that belong to this state, proxied by a substatemachine.
+    * These are just maintained here in order to produce no memory leaks, and only constructed
+    * on-the-fly.
+    */
+    std::vector<Transition> mSubstateMachineProxiedTransitions;
+
     static std::vector<StateId> msDefaultStates;
 
 protected:
@@ -110,6 +130,20 @@ public:
     *  \throws runtime_error if the msg is invalid in the current state
     */
     const Transition& getTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping) const;
+    
+    /**
+     * Tries to consume a message meant for a sub state machine.
+     * \throws runtime_error if this does not work
+     */
+    void consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl::StateMachine& stateMachine, const fipa::acl::RoleMapping& roleMapping, int numberOfSubConversations);
+    
+    /**
+    *  \brief Check whether the received message triggers a substatemachine proxied transition. This method is not const, as
+    * the generated transitions will be added when they trigger successfully.
+    *  \return the transition 
+    *  \throws runtime_error if the msg is invalid in the current state
+    */
+    const Transition& getSubstateMachineProxiedTransition(const ACLMessage &msg, const MessageArchive& archive, const RoleMapping& roleMapping);
 
     /**
     *  \brief method that generates implicit generic transitions applicable to all states, that may or may not be speciffied in the 
@@ -119,11 +153,14 @@ public:
     */
     void generateDefaultTransitions();
 
-    /**
-      \brief method that returns whether the state is final.
-      \return true if state is final, false otherwise
-    */
     bool isFinal() const { return mIsFinal; }
+    
+    /**
+      \brief method that returns whether the state is a finished state or not.
+      In the case of a state with embedded state machines, this is a bit more coplex, see the implementation
+      \return true if state is finished, false otherwise
+    */
+    bool isFinished() const;
 
     /**
      * \brief Test if state belongs to the default state or not
@@ -148,6 +185,17 @@ public:
      * \return list of transitions
      */
     const std::vector<Transition>& getTransitions() const { return mTransitions; }
+
+    /**
+     * Retrieve embedded statemachine.
+     * \return list of embedded statemachines
+     */
+    const std::vector<EmbeddedStateMachine>& getEmbeddedStatemachines() const { return mEmbeddedStateMachines; }
+    
+    /**
+     * Add an embedded state machine.
+     */
+    void addEmbeddedStateMachine(fipa::acl::EmbeddedStateMachine embeddedStateMachine);
 
     /**
      * Convert state to string representation

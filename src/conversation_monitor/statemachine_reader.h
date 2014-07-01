@@ -37,8 +37,6 @@ public:
     static const std::string mapping;
     static const std::string name;
     static const std::string proxiedTo;
-    static const std::string startState;
-    static const std::string proxyState;
 
     /**
      * Read the xml structure defining a statemachine

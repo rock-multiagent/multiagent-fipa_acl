@@ -8,8 +8,8 @@
 /*! \mainpage FIPA ACL Library
  * This class provides a representation of a message conforming to the FIPA specifications hosted at http://www.fipa.org
  *
- * This library implements the fipa acl message in three different encodings: bitefficient, XML and string encoding.
- * In addition it provides the implementation of the bitefficient and XML message envelope.
+ * This library implements the fipa acl message in two different encodings: bitefficient and string encoding.
+ * In addition it provides the implementation of the bitefficient message envelope.
  * No implementation exists for a string representation of the message envelope, since according to
  * http://www.fipa.org/specs/fipa00073/DC00073D.html this standard has been deprecated.
  *

@@ -1,11 +1,12 @@
 <scxml version="1.0" initial="1">
-    <!-- This is for testing subprotocols not proxying -->
-    <subprotocol name=".*" from="B" start_state="2"/> 
+    <!-- This is for testing subprotocols with multiple=false and no proxied_to -->
+    
 
 	<state id="1">
 	        <transition performative="propagate" from="initiator" to="B" target="2"/>
 	</state>
 	
 	<state id="2" final="yes">
+		<subprotocol name=".*" from="B"/> 
 	</state>
 </scxml>

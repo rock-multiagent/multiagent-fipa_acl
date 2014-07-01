@@ -44,9 +44,17 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     msg1_2.setProtocol("brokering");
     std::cout << "C1 MSG2" << std::endl;
     c1.update(msg1_2);
+    // B -> I (inform)
+    ACLMessage msg1_3(ACLMessage::INFORM);
+    msg1_3.setConversationID("conv");
+    msg1_3.setSender(broker);
+    msg1_3.addReceiver(initiator);
+    msg1_3.setProtocol("brokering");
+    std::cout << "C1 MSG3" << std::endl;
+    c1.update(msg1_3);
     // Set number of planned sub conversations
     c1.setNumberOfSubConversations(1);
-    // MSG3 deleted!
+    BOOST_CHECK_MESSAGE(!c1.hasEnded(), "Test 1: conversation ended too early after msg 3.");
     // B -> S (inform)
     ACLMessage msg1_4(ACLMessage::INFORM);
     msg1_4.setConversationID("conv");
@@ -55,15 +63,6 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     msg1_4.setProtocol("inform");
     std::cout << "C1 MSG4" << std::endl;
     c1.update(msg1_4);
-    BOOST_CHECK_MESSAGE(!c1.hasEnded(), "Test 1: conversation ended too early after msg 4.");
-    // B -> I (inform)
-    ACLMessage msg1_4a(ACLMessage::INFORM);
-    msg1_4a.setConversationID("conv");
-    msg1_4a.setSender(broker);
-    msg1_4a.addReceiver(initiator);
-    msg1_4a.setProtocol("brokering");
-    std::cout << "C1 MSG4a" << std::endl;
-    c1.update(msg1_4a);
     // The conversation should have ended
     BOOST_CHECK_MESSAGE(c1.hasEnded(), "Test 1: conversation did not end.");
     
@@ -71,6 +70,7 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     Conversation c2 (initiator.getName(), "conv");
     c2.update(msg1_1);
     c2.update(msg1_2);
+    c2.update(msg1_3);
     // Set number of planned sub conversations
     c2.setNumberOfSubConversations(2);
     c2.update(msg1_4);
@@ -83,7 +83,6 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     msg2_5.setProtocol("inform");
     std::cout << "C2 MSG5" << std::endl;
     c2.update(msg2_5);
-    c2.update(msg1_4a);
     // The conversation should have ended
     BOOST_CHECK_MESSAGE(c2.hasEnded(), "Test 2: conversation did not end.");
     
@@ -91,6 +90,7 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     Conversation c3 (initiator.getName(), "conv");
     c3.update(msg1_1);
     c3.update(msg1_2);
+    c3.update(msg1_3);
     // Set number of planned sub conversations
     c3.setNumberOfSubConversations(1);
     // B -> S (request)
@@ -110,7 +110,6 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     msg3_5.setProtocol("request");
     std::cout << "C3 MSG5" << std::endl;
     c3.update(msg3_5);
-    c3.update(msg1_4a);
     BOOST_CHECK_MESSAGE(!c3.hasEnded(), "Test 3: conversation ended too early after msg 5.");
     // S -> B (inform)
     ACLMessage msg3_6(ACLMessage::INFORM);
@@ -135,6 +134,7 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     Conversation c4 (initiator.getName(), "conv");
     c4.update(msg1_1);
     c4.update(msg1_2);
+    c4.update(msg1_3);
     // Set number of planned sub conversations
     c4.setNumberOfSubConversations(3);
     c4.update(msg3_4);
@@ -174,7 +174,6 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     msg4_10.setProtocol("request");
     std::cout << "C4 MSG10" << std::endl;
     c4.update(msg4_10);
-    c4.update(msg1_4a);
     // And end both
     // S1 -> B (inform)
     ACLMessage msg4_11(ACLMessage::INFORM);
@@ -197,10 +196,13 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     c4.update(msg3_7);
     BOOST_CHECK_MESSAGE(c4.hasEnded(), "Test 4: conversation did not end.");
     
-    // Test 5 failure-no-match
+    // Test 5 failure-brokering with no subprotocols started yet
     Conversation c5 (initiator.getName(), "conv");
     c5.update(msg1_1);
     c5.update(msg1_2);
+    c5.update(msg1_3);
+    // Set number of planned sub conversations
+    c5.setNumberOfSubConversations(1);
     // B -> I (failure)
     ACLMessage msg5_4(ACLMessage::FAILURE);
     msg5_4.setConversationID("conv");
@@ -211,15 +213,16 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     c5.update(msg5_4);
     BOOST_CHECK_MESSAGE(c5.hasEnded(), "Test 5: conversation did not end.");
     
-    // Test 6 failure-proxy
+    // Test 6 failure-brokering with 1 subprotocol started
     Conversation c6 (initiator.getName(), "conv");
     c6.update(msg1_1);
     c6.update(msg1_2);
+    c6.update(msg1_3);
     // Set number of planned sub conversations
     c6.setNumberOfSubConversations(1);
     c6.update(msg3_4);
-    // S -> B (refuse)
-    ACLMessage msg6_5(ACLMessage::REFUSE);
+    // S -> B (failure)
+    ACLMessage msg6_5(ACLMessage::FAILURE);
     msg6_5.setConversationID("conv");
     msg6_5.setSender(serviceProvider0);
     msg6_5.addReceiver(broker);
@@ -227,29 +230,9 @@ BOOST_AUTO_TEST_CASE(brokering_positive_test)
     std::cout << "C6 MSG5" << std::endl;
     c6.update(msg6_5);
     BOOST_CHECK_MESSAGE(!c6.hasEnded(), "Test 6: conversation ended too early after msg 5.");
+    std::cout << "C6 MSG6" << std::endl;
     c6.update(msg5_4);
     BOOST_CHECK_MESSAGE(c6.hasEnded(), "Test 6: conversation did not end.");
-    
-    // Test 7 failure-brokering
-    Conversation c7 (initiator.getName(), "conv");
-    c7.update(msg1_1);
-    c7.update(msg1_2);
-    // Set number of planned sub conversations
-    c7.setNumberOfSubConversations(1);
-    c7.update(msg3_4);
-    c7.update(msg3_5);
-    c7.update(msg1_4a);
-    // S -> B (failure)
-    ACLMessage msg7_6(ACLMessage::FAILURE);
-    msg7_6.setConversationID("conv");
-    msg7_6.setSender(serviceProvider0);
-    msg7_6.addReceiver(broker);
-    msg7_6.setProtocol("request");
-    std::cout << "C7 MSG6" << std::endl;
-    c7.update(msg7_6);
-    BOOST_CHECK_MESSAGE(!c7.hasEnded(), "Test 7: conversation ended too early after msg 5.");
-    c7.update(msg5_4);
-    BOOST_CHECK_MESSAGE(c7.hasEnded(), "Test 7: conversation did not end.");
 }
 
 BOOST_AUTO_TEST_CASE(brokering_negative_test)
@@ -279,9 +262,6 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     msg1_2.setProtocol("brokering");
     std::cout << "C1 MSG2" << std::endl;
     c1.update(msg1_2);
-    // Set number of planned sub conversations
-    c1.setNumberOfSubConversations(1);
-    // Now a subprotocol should be started, but it is not
     // B -> I (inform)
     ACLMessage msg1_3(ACLMessage::INFORM);
     msg1_3.setConversationID("conv");
@@ -290,6 +270,9 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     msg1_3.setProtocol("brokering");
     std::cout << "C1 MSG3" << std::endl;
     c1.update(msg1_3);
+    // Set number of planned sub conversations
+    c1.setNumberOfSubConversations(1);
+    // Now a subprotocol should be started, but it is not
     // B -> I (inform)
     ACLMessage msg1_4(ACLMessage::INFORM);
     msg1_4.setConversationID("conv");
@@ -297,13 +280,15 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     msg1_4.addReceiver(initiator);
     msg1_4.setProtocol("brokering");
     std::cout << "C1 MSG4" << std::endl;
-    // This would be an proxied reply message, which is not allowed if no protocol was started.
-    BOOST_REQUIRE_THROW( c1.update(msg1_4), conversation::ProtocolException );
+    // This should be an accepted message flow, but the conversation will be not ended, which is bad
+    c1.update(msg1_4);
+    BOOST_CHECK_MESSAGE(!c1.hasEnded(), "Expected (admittedly bad) behavior that the conversation won't end has not occured.");
     
     // Test 2 multiple forwarded replies
     Conversation c2 (initiator.getName(), "conv");
     c2.update(msg1_1);
     c2.update(msg1_2);
+    c2.update(msg1_3);
     // Set number of planned sub conversations
     c2.setNumberOfSubConversations(1);
     // B -> S (request)
@@ -322,7 +307,6 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     msg2_5.setProtocol("request");
     std::cout << "C2 MSG5" << std::endl;
     c2.update(msg2_5);
-    c2.update(msg1_3);
     // Forward agree
     // B -> I (agree)
     ACLMessage msg2_6(ACLMessage::AGREE);
@@ -354,6 +338,7 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     Conversation c3 (initiator.getName(), "conv");
     c3.update(msg1_1);
     c3.update(msg1_2);
+    c3.update(msg1_3);
     // Set number of planned sub conversations
     c3.setNumberOfSubConversations(1);
     // B -> S (inform)
@@ -363,8 +348,7 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     msg3_4.addReceiver(serviceProvider0);
     msg3_4.setProtocol("inform");
     std::cout << "C3 MSG4" << std::endl;
-    c3.update(msg3_4);
-    c3.update(msg1_3);
+    c1.update(msg3_4);
     // Forward inform, which is undesired
     ACLMessage msg3_5(ACLMessage::INFORM);
     msg3_5.setConversationID("conv");
@@ -378,11 +362,11 @@ BOOST_AUTO_TEST_CASE(brokering_negative_test)
     Conversation c4 (initiator.getName(), "conv");
     c4.update(msg1_1);
     c4.update(msg1_2);
+    c4.update(msg1_3);
     // Set number of planned sub conversations
     c4.setNumberOfSubConversations(1);
     c4.update(msg2_4);
     c4.update(msg2_5);
-    c4.update(msg1_3);
     // msg 6 omitted!
     c4.update(msg2_7);
     // Forward inform to the wrong person
