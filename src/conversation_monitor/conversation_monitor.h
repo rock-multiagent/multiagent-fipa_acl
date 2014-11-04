@@ -33,7 +33,7 @@ ACLMessage myMsg(ACLMessage::INFORM);
 myMsg.setProtocol("inform");
 // ...
 convPtr->update(myMsg);
-if(myMsg.hasEnded())
+if(convPtr->hasEnded())
 {
     // ...
 }
@@ -48,15 +48,15 @@ convPtr->setNumberOfSubConversations(n);
 
 If one wishes to be notified of changes to a conversation, one can use the following after obtaining a ConversationPtr:
 \verbatim
-ConversationObserver observer();
-convPtr->addObserver(ConversationObserverPtr(observer));
+ConversationObserverPtr observer(new ConversationObserver());
+convPtr->addObserver(observer);
 // Method A:
-conversation::Event event = observer.waitForNextEvent();
+conversation::Event event = observer->waitForNextEvent();
 // ...
 
 // Method B:
 conversation::Event event;
-if(observer.hasEvents() && observer.getNextEvent(event))
+if(observer->hasEvents() && observer->getNextEvent(event))
 {
     // ...
 }
