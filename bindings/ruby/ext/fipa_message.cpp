@@ -192,7 +192,7 @@ Object wrap_fromByteString(Object self, String byteString)
 	MessageParser parser;
 	if(!parser.parseData(data, *msg))
 	{
-		throw Exception(rb_eRuntimeError, "FIPA::ACLMessage: data could not be parsed");
+		throw std::runtime_error("FIPA::ACLMessage: data could not be parsed");
 	}
 
 	return msg;
@@ -298,7 +298,7 @@ Object wrap_envelope_fromByteString(Object self, String byteString)
 	EnvelopeParser parser;
 	if(!parser.parseData(data, *envelope, representation::BITEFFICIENT))
 	{
-		throw Exception(rb_eRuntimeError, "FIPA::ACLEnvelope: data could not be parsed");
+		throw std::runtime_error("FIPA::ACLEnvelope: data could not be parsed");
 	}
 
 	return envelope;
