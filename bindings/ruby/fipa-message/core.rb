@@ -47,7 +47,12 @@ module Utils
                 raise "Cannot serialize class type: #{data.class.name}"
             end
 
-            content = data.to_a
+            if(data.is_a?(String))
+                content = data
+            else
+                content = data.to_a
+            end
+
             # Prepare the binary string
             if pack
                 content = content.pack("C*")
