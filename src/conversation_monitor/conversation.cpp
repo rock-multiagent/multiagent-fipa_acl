@@ -192,18 +192,6 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
             throw std::runtime_error("Conversation: conversation with multiple content language are not supported");
         }
 
-#ifdef NDEBUG
-        std::string receiver;
-        fipa::acl::AgentIDList receivers = msg.getAllReceivers();
-        if(!receivers.empty())
-        {
-            receiver = receivers[0].getName();
-        }
-
-
-        LOG_INFO("StateMachine consume message '%s' for owner '%s' with performative '%s' sender '%s' receiver '%s' ", msg.getConversationID().c_str(), mStateMachine.getOwner().getName().c_str(), msg.getPerformative().c_str(), msg.getSender().getName().c_str(),
-                receiver.c_str());
-#endif
         // update the message state machine
         try {
             mStateMachine.consumeMessage(msg);
