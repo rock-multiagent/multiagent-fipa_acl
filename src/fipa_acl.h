@@ -2,6 +2,8 @@
 #define FIPA_ACL_H
 #include <fipa_acl/bitefficient_message.h>
 #include <fipa_acl/message_generator/acl_envelope.h>
+#include <fipa_acl/message_generator/envelope_generator.h>
+#include <fipa_acl/message_parser/envelope_parser.h>
 #include <fipa_acl/message_generator/serialized_letter.h>
 #include <fipa_acl/conversation_monitor/conversation_monitor.h>
 
