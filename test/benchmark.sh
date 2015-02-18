@@ -1,7 +1,7 @@
 #!/bin/sh
 TIMESTAMP=`date +%Y%m%d_%H:%M:%S`
 OUTPUT=results-$TIMESTAMP.txt
-BENCHMARK=../build/bin/fipa_acl-benchmark
+BENCHMARK=../build/src/fipa_acl-benchmark
 touch $OUTPUT
 
 `${BENCHMARK} 0 >> ${OUTPUT}`
