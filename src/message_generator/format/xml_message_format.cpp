@@ -62,7 +62,9 @@ std::vector<TiXmlElement*> XMLMessageFormat::getParameters(const ACLMessage& acl
     if(!aclMsg.getContentPtr()->empty())
     {
         TiXmlElement* contentElem = new TiXmlElement(MessageFieldTxt[CONTENT]);
-        contentElem->LinkEndChild(new TiXmlText(*aclMsg.getContentPtr()));
+        TiXmlText* text = new TiXmlText(aclMsg.getContent());
+        text->SetCDATA(true);
+        contentElem->LinkEndChild(text);
         vec.push_back(contentElem);
     }
     
