@@ -13,8 +13,6 @@
   <depend package="ruby" />
   <depend package="uuid" />
   <depend package="external/tinyxml" />
-  <versioncontrol type="git" url="" />
-  <export>
-    <cpp cflags="" lflags="" />
-  </export>
+  <versioncontrol type="git" url="https://github.com/rock-multiagent/multiagent-fipa_acl" />
+  <tags>stable</tags>
 </package>
