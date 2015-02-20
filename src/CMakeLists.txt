@@ -115,11 +115,14 @@ rock_executable(fipa_acl-conv_monitor-reader
         DEPS ${PROJECT_NAME}
         )
 
-# do not install - only for local testing
-rock_executable(fipa_acl-benchmark
-        SOURCES benchmark.cpp
-        DEPS ${PROJECT_NAME}
-        NOINSTALL)
+pkg_check_modules(NUMERIC QUIET numeric)
+if(${NUMERIC_FOUND})
+    rock_executable(fipa_acl-benchmark
+            SOURCES benchmark.cpp
+            DEPS ${PROJECT_NAME}
+            DEPS_PKGCONFIG numeric
+            )
+else()
+    message(WARNING "Not building 'fipa_acl-benchmark'. Missing dependency: 'numeric'")
+endif()
 
-    #install(DIRECTORY ${PROJECT_SOURCE_DIR}/configuration/protocols DESTINATION configuration/${PROJECT_NAME})
-    #

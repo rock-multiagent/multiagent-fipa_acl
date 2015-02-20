@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <math.h>
 #include <sys/time.h>
+#include <numeric/Stats.hpp>
 
 /* Subtract the `struct timeval' values X and Y,
    storing the result in RESULT.
@@ -37,12 +38,17 @@ int timeval_subtract (struct timeval* result, struct timeval* x,struct timeval* 
 
 int main(int argc, char** argv)
 {
-    if(argc != 3)
+    if(argc < 3)
     {
         printf("usage: %s <content-size-in-byte> <epochs>\n", argv[0]);
         printf("output will be: <encoding> <content-size in byte> <encoded-msg-size in bytes > <overhead-percent> <encoding-time in ms/msg> <decoding-time in ms/msg> <epochs>\n");
         exit(0);
     }
+
+    // 1 MB ~ 10 ms > 200 runs
+    // 0 MB ~ 0 ms > 200000
+    uint32_t BUFFER_MAX = atoi(argv[1]);
+    int32_t epochs = atoi(argv[2]);
 
     using namespace fipa::acl;
     ACLMessage msg("inform");
@@ -78,88 +84,78 @@ int main(int argc, char** argv)
 
 
 
-    uint32_t BUFFER_MAX = atoi(argv[1]);
     char* buffer = (char*) calloc(1,BUFFER_MAX+1);
     if(!buffer)
     {
         fprintf(stderr, "Allocation of memory for test message failed\n");
         exit(0);
     }
-    memset(buffer, 1, BUFFER_MAX);
+    srand(::time(NULL));
+    for(size_t i = 0; i < BUFFER_MAX; ++i)
+    {
+        buffer[i] = (char) 48 + rand() % 40;
+    }
+
+   // memset(buffer, 1, BUFFER_MAX);
     buffer[BUFFER_MAX] = '\0';
-    msg.setContent(buffer);
+    std::string content(buffer, BUFFER_MAX);
+    msg.setContent(content);
 
     uint32_t payloadsize = info.size() + BUFFER_MAX + 8 + 1; // s. comment above for performative and replyBy
     printf("# PAYLOAD SIZE: %d\n", payloadsize);
+    printf("# CONTENT SIZE: %lu\n", content.size());
+    printf("# MSG CONTENT SIZE: %lu\n", msg.getContent().size());
 
-    // 1 MB ~ 10 ms > 200 runs
-    // 0 MB ~ 0 ms > 200000
-    int32_t epochs = atoi(argv[2]);
 
     MessageParser inputParser;
 
     std::string encodedMsg;
-
-    double encodingMsPerMsg;
-    double encodedMsgSize;
-    double decodingMsPerMsg;
-
-    double encodingMsPerEnv;
-    double encodedEnvSize;
-    double decodingMsPerEnv;
-
-
     printf("#<encoding> <content-size in byte> <encoded-msg-size in bytes > <overhead-percent> <encoding-time in ms/msg> <decoding-time in ms/msg> <epochs>\n");
     for(int i = static_cast<int>(representation::BITEFFICIENT); i < static_cast<int>(representation::END_MARKER); ++i)
     {
+        base::Stats<double> msgEncodingStats;
+        base::Stats<double> msgDecodingStats;
+
+        base::Stats<double> envEncodingStats;
+        base::Stats<double> envDecodingStats;
+
         representation::Type representationType = static_cast<representation::Type>(i);
         {
             struct timeval start, stop, diff;
-            gettimeofday(&start, 0);
             for(int i = 0; i < epochs; ++i)
             {
+               gettimeofday(&start, 0);
                encodedMsg = MessageGenerator::create(msg, representationType);
+               gettimeofday(&stop, 0);
+               timeval_subtract(&diff, &stop, &start);
+               double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
+               msgEncodingStats.update(totaltime);
             }
-            gettimeofday(&stop, 0);
-
-            timeval_subtract(&diff, &stop, &start);
-
-            double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
-            //double totaltime = difftime(stop, start);
-            double timePerMsgInMs = totaltime/(1.0*epochs);
-
-            //printf("Encoding time total: %.5f per msg: %.5f ms\n", totaltime, timePerMsgInMs);
-            encodingMsPerMsg = timePerMsgInMs;
         }
-
         {
             ACLMessage msg;
-            encodedMsgSize = encodedMsg.size();
             struct timeval start, stop, diff;
-            gettimeofday(&start, 0);
             for(int i = 0; i < epochs; ++i)
             {
+               gettimeofday(&start, 0);
                if(!inputParser.parseData(encodedMsg, msg, representationType))
                {
                    printf("Could not parse: using %s\n", representation::TypeTxt[representationType].c_str());
                }
+               gettimeofday(&stop, 0);
+               timeval_subtract(&diff, &stop, &start);
+                double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
+                msgDecodingStats.update(totaltime);
             }
-            gettimeofday(&stop, 0);
-            timeval_subtract(&diff, &stop, &start);
-
-            double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
-            double timePerMsgInMs = totaltime/(1.0*epochs);
-
-            //printf("Decoding time total: %.5f per msg: %.5f ms\n", totaltime, timePerMsgInMs);
-            decodingMsPerMsg = timePerMsgInMs;
         }
 
-        double overheadInPercent = (encodedMsgSize - payloadsize)/(1.0*encodedMsgSize);
+        double overheadInPercent = (encodedMsg.size() - payloadsize)*1.0/(1.0*encodedMsg.size());
 
-        printf("message  %d %d %10.6f %10.6f %10.6f %d %s\n", BUFFER_MAX, (int) encodedMsg.size(), overheadInPercent, encodingMsPerMsg, decodingMsPerMsg, epochs, representation::TypeTxt[representationType].c_str());
+        printf("message  %d %d %10.6f %10.6f %10.6f %10.6f %10.6f %d %s\n", BUFFER_MAX, (int) encodedMsg.size(), overheadInPercent, msgEncodingStats.mean(), msgEncodingStats.stdev(), msgDecodingStats.mean(), msgDecodingStats.stdev(), epochs, representation::TypeTxt[representationType].c_str());
 
         // envelope
         //printf("#<encoding> <content-size in byte> <encoded-env-size in bytes > <overhead-percent> <encoding-time in ms/msg> <decoding-time in ms/msg> <epochs>\n");
+        std::string encodedEnvelope;
         for(int e = static_cast<int>(representation::BITEFFICIENT); e < static_cast<int>(representation::END_MARKER); ++e)
         {
             if( e == static_cast<int>(representation::STRING_REP))
@@ -167,46 +163,43 @@ int main(int argc, char** argv)
                 continue;
             }
 
-            std::string encodedEnvelope;
             representation::Type envRepresentationType = static_cast<representation::Type>(e);
-            {
-                ACLEnvelope env(msg, representationType);
 
-                struct timeval start, stop, diff;
-                gettimeofday(&start, 0);
-                for(int i = 0; i < epochs; ++i)
+            for(int i = 0; i < epochs; ++i)
+            {
                 {
+                    ACLEnvelope env(msg, representationType);
+                    struct timeval start, stop, diff;
+                    gettimeofday(&start, 0);
                     encodedEnvelope = EnvelopeGenerator::create(env, envRepresentationType);
-                }
-                gettimeofday(&stop, 0);
-                timeval_subtract(&diff, &stop, &start);
 
-                double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
-                double timePerMsgInMs = totaltime/(1.0*epochs);
-                encodingMsPerEnv = timePerMsgInMs;
-            }
-            {
-                ACLEnvelope env;
-                struct timeval start, stop, diff;
-                gettimeofday(&start, 0);
-                for(int i = 0; i < epochs; ++i)
+                    gettimeofday(&stop, 0);
+                    timeval_subtract(&diff, &stop, &start);
+
+                    double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
+                    envEncodingStats.update(totaltime);
+                }
+
+                ACLEnvelope decodedEnvelope;
                 {
-                    if(!EnvelopeParser::parseData(encodedEnvelope, env, envRepresentationType))
+                    struct timeval start, stop, diff;
+                    gettimeofday(&start, 0);
+                    if(!EnvelopeParser::parseData(encodedEnvelope, decodedEnvelope, envRepresentationType))
                     {
                         printf("Decoding envelope failed using: %s\n", representation::TypeTxt[envRepresentationType].c_str());
                         break;
                     }
-                }
-                gettimeofday(&stop, 0);
-                timeval_subtract(&diff, &stop, &start);
+                    gettimeofday(&stop, 0);
+                    timeval_subtract(&diff, &stop, &start);
 
-                double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
-                double timePerMsgInMs = totaltime/(1.0*epochs);
-                decodingMsPerEnv = timePerMsgInMs;
+                    double totaltime = diff.tv_sec*1000 + diff.tv_usec/1000.0;
+                    envDecodingStats.update(totaltime);
+                }
             }
 
             overheadInPercent = (encodedEnvelope.size() - encodedMsg.size())/(1.0*encodedEnvelope.size());
-            printf("envelope %d %d %10.6f %10.6f %10.6f %d %s %s\n",  BUFFER_MAX, (int) encodedEnvelope.size(), overheadInPercent, encodingMsPerEnv, decodingMsPerEnv, epochs, representation::TypeTxt[envRepresentationType].c_str(), representation::TypeTxt[representationType].c_str());
+            printf("envelope %d %d %10.6f %10.6f %10.6f %10.6f %10.6f %d %s %s\n",  BUFFER_MAX, (int) encodedEnvelope.size(), overheadInPercent, envEncodingStats.mean(), envEncodingStats.stdev(), envDecodingStats.mean(), envDecodingStats.stdev(), epochs, representation::TypeTxt[envRepresentationType].c_str(), representation::TypeTxt[representationType].c_str());
+
         }
         printf(" ---\n");
     }
