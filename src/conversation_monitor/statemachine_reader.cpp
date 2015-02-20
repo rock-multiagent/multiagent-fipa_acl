@@ -54,7 +54,7 @@ StateMachine StateMachineReader::loadSpecification(const std::string& protocolSp
     StateMachine statemachine = parseStateMachineNode(statemachineElement);
     // set protocol
     boost::filesystem::path path(protocolSpec);
-    statemachine.setProtocol( path.filename().string() );
+    statemachine.setProtocol( path.filename().string());
     
     statemachine.generateDefaultTransitions();
     statemachine.generateDefaultStates();
