@@ -1,6 +1,7 @@
 #include "xml_envelope_parser.h"
 #include "xml_parser.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include <base/Logging.hpp>
 #include <stdexcept>
 
@@ -11,9 +12,29 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
 {
     TiXmlDocument doc;
     LOG_INFO_S << "XMLEnvelopeParser: starting to parse: " << storage;
+
+    std::string envelopeXML;
+    std::string payloadData;
+
+    // check whether we can split the document into envelope and content
+    std::string envelopeEndMarker = "</envelope>";
+    size_t pos = storage.find(envelopeEndMarker);
+    if(pos == std::string::npos)
+    {
+        LOG_WARN_S << "XMLEnvelopeParser: this is not an XML envelope. Could not find </envelope>";
+        return false;
+    } else {
+        envelopeXML = storage.substr(0, pos + envelopeEndMarker.size());
+
+        size_t payloadPosition = pos + envelopeEndMarker.size();
+        if(payloadPosition < storage.length());
+        {
+            envelope.setPayload(storage.substr(payloadPosition));
+        }
+    }
     
     // Load the string into XML doc
-    const char* parseResult = doc.Parse(storage.c_str());
+    const char* parseResult = doc.Parse(envelopeXML.c_str());
     // A non-null parseResult usually indicates an error, but we seem to get that every time.
     if(parseResult != NULL)
     {
@@ -71,17 +92,6 @@ bool XMLEnvelopeParser::parseData(const std::string& storage, ACLEnvelope& envel
             LOG_WARN_S << "Parsing error extra envelope: " << e.what();
             return false;
         }
-    }
-    // Parse the payload.
-    // Get the latest values for payload-length
-    PayloadLength len =  envelope.flattened().getPayloadLength();
-    if(len > storage.length())
-    {
-        LOG_WARN_S << "Parsing error: payload length (" << len << ") bigger than storage length (" << storage.length() << "). Payload must still be set.";
-    }
-    else
-    {
-        envelope.setPayload(storage.substr(storage.length() - len));
     }
     
     return true;
