@@ -47,9 +47,9 @@ struct WordWithoutKeyword : qi::grammar<Iterator, std::string()>
     {
         using encoding::char_;
 
-        word_rule = (char_ - wordExceptionsStart )                     [ label::_val += label::_1 ]
-                     >> *(!keyword >> (char_ - wordExceptionsGeneral)  [ label::_val += label::_1 ])
-        ;
+        word_rule = (char_ - wordExceptionsStart )                      [ label::_val += label::_1 ]
+                     >> *(!keyword >> (char_ - wordExceptionsGeneral)   [ label::_val += label::_1 ]
+	);
 
         wordExceptionsStart %= wordExceptionsGeneral
                         | char_('#')
@@ -123,8 +123,8 @@ struct Number : qi::grammar<Iterator, std::string() >
             >> +digit                   [ label::_val += label::_1 ]
         ;
 
-        sign = char_('+')
-            | char_('-');
+        sign = encoding::string("+")
+            | encoding::string("-");
 
         digit = char_('0','9');
 
@@ -151,8 +151,8 @@ struct Number : qi::grammar<Iterator, std::string() >
             >> +digit                   [ label::_val += label::_1 ]
         ;
 
-        exponent = char_('e')
-            | char_('E');
+        exponent = encoding::string("e")
+            | encoding::string("E");
 
         FIPA_DEBUG_RULE(integer_number);
         FIPA_DEBUG_RULE(float_number);
@@ -162,7 +162,7 @@ struct Number : qi::grammar<Iterator, std::string() >
     qi::rule<Iterator, std::string()> float_number;
 
     qi::rule<Iterator, std::string()> sign;
-    qi::rule<Iterator, std::string()> digit;
+    qi::rule<Iterator, char()> digit;
     qi::rule<Iterator, std::string()> float_mantissa;
     qi::rule<Iterator, std::string()> float_exponent;
     qi::rule<Iterator, std::string()> exponent;
@@ -181,7 +181,7 @@ struct DateTimeToken : qi::grammar<Iterator, std::string() >
             >> year                [ label::_val += label::_1 ]
             >> month               [ label::_val += label::_1 ]
             >> day                 [ label::_val += label::_1 ]
-            >> char_("T")          [ label::_val += label::_1 ]
+            >> char_('T')          [ label::_val += label::_1 ]
             >> hour                [ label::_val += label::_1 ]
             >> minute              [ label::_val += label::_1 ]
             >> second              [ label::_val += label::_1 ]
@@ -189,8 +189,8 @@ struct DateTimeToken : qi::grammar<Iterator, std::string() >
             >> - typeDesignator    [ label::_val += label::_1 ]
         ;
 
-        sign = char_('+')
-            | char_('-');
+        sign = encoding::string("+")
+            | encoding::string("-");
 
         typeDesignator = char_('a','z')
             | char_('A','Z');
@@ -226,9 +226,9 @@ struct DateTimeToken : qi::grammar<Iterator, std::string() >
     qi::rule<Iterator, std::string()> minute;
     qi::rule<Iterator, std::string()> second;
 
-    qi::rule<Iterator, std::string()> digit;
+    qi::rule<Iterator, char()> digit;
     qi::rule<Iterator, std::string()> sign;
-    qi::rule<Iterator, std::string()> typeDesignator;
+    qi::rule<Iterator, char()> typeDesignator;
 
     qi::rule<Iterator, std::string()> millisecond;
     qi::rule<Iterator, std::string()> date_time;
@@ -264,9 +264,9 @@ struct Expression : qi::grammar<Iterator, std::string(), Skipper>
 	namespace label = qi::labels;
 
         expression = expression_base    [ label::_val = label::_1 ]
-            | ( char_("(")
+            | ( char_('(')
                 >> *expression          [ label::_val = concatStringsWithSeparator(label::_val,label::_1," ") ]
-                >> char_(")")
+                >> char_(')')
             )
         ;
 
