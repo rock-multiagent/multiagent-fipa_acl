@@ -172,6 +172,19 @@ public:
     bool operator==(const AgentID& other) const;
 
     /**
+     * \brief Allow testing on inequality of agents based on the agents' names
+     * only
+     * \return true if the agents' names are different, false otherwise
+     */
+    bool operator!=(const AgentID& other) const { return !(*this == other); }
+
+    /**
+     * \brief Allow comparing two agents, based on the agent name only
+     * \return True if first agent's name < other agent's name
+     */
+    bool operator<(const AgentID& other) const { return this->getName() < other.getName(); }
+
+    /**
       \brief alternative function for equality operator; the depth can be specified through the depth param 
     */
     static bool compareEqual(const AgentID& a, const AgentID& b, int depth);
