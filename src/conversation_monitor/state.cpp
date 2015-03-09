@@ -161,19 +161,19 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
         
         // Test the update
         try {
-            LOG_DEBUG("State consumeSubStateMachineMessage trying an existing sub state machine");
+            LOG_DEBUG("Trying an existing sub state machine");
             it0->consumeMessage(msg);
             // It worked
             return;
         } catch(const std::runtime_error& e)
         {
-            LOG_DEBUG("State consumeSubStateMachineMessage Sub state machine incorrect: ", e.what());
+            LOG_DEBUG("Sub state machine incorrect: ", e.what());
             // The state machine was obviously not correct, we play back the copy
             *it0 = copy;
         }
     }
     
-    LOG_DEBUG("State consumeSubStateMachineMessage trying to search for a fitting a embedded state machine");
+    LOG_DEBUG("Trying to search for a fitting a embedded state machine");
     
     EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
     // We must be in a state that allows subProtocols
@@ -216,7 +216,7 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
         throw std::runtime_error("State consumeSubStateMachineMessage: No fitting sub state machine found");
     }
     
-    LOG_DEBUG("State consumeSubStateMachineMessage found a fiting embedded state machine and will try to create a sub state machine now");
+    LOG_DEBUG("Found a fitting embedded state machine and will try to create a sub state machine now");
     
     // Construct a new state machine with mapped sender role
     if(!protocol.empty())
@@ -227,7 +227,7 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
         
         // update the message state machine
         try {
-            LOG_DEBUG("State consumeSubStateMachineMessage sub state machine initialized, trying to consume message");
+            LOG_DEBUG("Substate machine initialized, trying to consume message");
             subStateMachine.consumeMessage(msg);
         } catch(const std::runtime_error& e)
         {
@@ -238,7 +238,7 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
         }
         
         // If that was successful, save the actual protocol and number of subconversations in the embedded state machine
-        LOG_DEBUG("State consumeSubStateMachineMessage new sub state machine consumed message");
+        LOG_DEBUG("New sub state machine consumed message");
         mSubStateMachines.push_back(subStateMachine);
         embeddedStateMachinePtr->actualProtocol = protocol;
         embeddedStateMachinePtr->numberOfSubConversations = numberOfSubConversations;
@@ -287,11 +287,11 @@ const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& m
         std::vector<EmbeddedStateMachine>::iterator it0 = mEmbeddedStateMachines.begin();
         for (; it0 != mEmbeddedStateMachines.end(); ++it0)
         {
-            LOG_DEBUG("State getSubstateMachineProxiedTransition checking if a transition needs to be generated");
+            LOG_DEBUG("Checking if a transition needs to be generated");
             // FIXME there can be other protocols that do not expect any responses
             if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
             {
-                LOG_DEBUG("State getSubstateMachineProxiedTransition generating a transition");
+                LOG_DEBUG("Generating a transition");
                 // Generate a transition (any performative, not leaving the state)
                 Transition transition (it0->fromRole, it0->proxiedToRole, ".*", getId(), getId());
                 // And see if it triggers
@@ -300,7 +300,7 @@ const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& m
                     // Save that a proxied reply was received
                     it0->receivedProxiedReply = true;
                     mSubstateMachineProxiedTransitions.push_back(transition);
-                    LOG_DEBUG("State getSubstateMachineProxiedTransition transition triggered");
+                    LOG_DEBUG("Transition triggered");
                     // We cannot use the local var to return as a reference
                     return mSubstateMachineProxiedTransitions.back();
                 }
@@ -308,7 +308,7 @@ const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& m
         }
     }
 
-    throw std::runtime_error("Message does not trigger any transition in this state");
+    throw std::runtime_error("Message does not trigger any (incl. proxied) transitions in this state");
 }
 
 bool State::isFinished() const
