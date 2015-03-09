@@ -173,8 +173,9 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
             } catch(const std::runtime_error& e)
             {
                 std::string errorMsg = "Conversation: unexpected message with performative '" + msg.getPerformative() + "' for the protocol '" + msg.getProtocol() + "' ";
-                errorMsg += " current state: '" + mStateMachine.getCurrentStateId() + "'";
-                errorMsg += " -- " + std::string(e.what());
+                errorMsg += " current state: '" + mStateMachine.getCurrentStateId() + "',";
+                errorMsg += " role mapping -- " + mStateMachine.getRoleMapping().toString();
+                errorMsg += " -- " + std::string(e.what()) + "\n";
                 throw conversation::ProtocolException(errorMsg);
             }
             
@@ -199,8 +200,9 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
         } catch(const std::runtime_error& e)
         {
             std::string errorMsg = "Conversation: unexpected message with performative '" + msg.getPerformative() + "' for the protocol '" + msg.getProtocol() + "' ";
-            errorMsg += " current state: '" + mStateMachine.getCurrentStateId() + "'";
-            errorMsg += " -- " + std::string(e.what());
+            errorMsg += " current state: '" + mStateMachine.getCurrentStateId() + "',";
+            errorMsg += " role mapping -- " + mStateMachine.getRoleMapping().toString();
+            errorMsg += " -- " + std::string(e.what()) + "\n";
             throw conversation::ProtocolException(errorMsg);
         }
 
