@@ -63,8 +63,8 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     // not the validator message one
     if (validation::PERFORMATIVE & flags)
     {
-        boost::regex peformativeRegex(mPerformativeRegExp);
-        if(!regex_match(msg.getPerformative(), peformativeRegex))
+        boost::regex performativeRegex(mPerformativeRegExp);
+        if(!regex_match(msg.getPerformative(), performativeRegex))
         {
             LOG_DEBUG("Performative validation failed: was '%s' but expected: '%s'", msg.getPerformative().c_str(), mPerformativeRegExp.c_str()); 
             return false;
@@ -171,7 +171,6 @@ bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& rol
 
     // Test whether the actual receivers are expected -- according to the current role to agent mapping
     AgentIDList::const_iterator ait = actualReceivers.begin(); 
-
     for(; ait != actualReceivers.end(); ++ait)
     {
         if(!roleMapping.isExpected(mReceiverRole, *ait))
