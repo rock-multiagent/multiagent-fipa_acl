@@ -313,6 +313,11 @@ public:
     void update(const fipa::acl::ACLMessage& msg);
 
     /**
+     * Get all messages in order of this conversation
+     */
+    std::vector<fipa::acl::ACLMessage> getMessages() const { return mMessages; }
+
+    /**
     * Get the last message of a conversation
     * \return Last message of the conversation
     */
@@ -376,9 +381,7 @@ private:
     int mNumberOfSubConversations;
     
     /**
-    * List of commands and associated messages
-    * Since one command can produce multiple message, the conversation maps
-    * a command to a list of messages
+    * List of associated messages
     */
     std::vector<fipa::acl::ACLMessage> mMessages;
 
