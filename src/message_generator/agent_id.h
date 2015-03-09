@@ -192,13 +192,20 @@ public:
 };
 
 template< typename C, typename E>
+std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const AgentID& agent)
+{
+    out << "AgentID<" << agent.getName() << ">";
+    return out;
+}
+
+template< typename C, typename E>
 std::basic_ostream<C, E>& operator<<(std::basic_ostream<C,E>& out, const AgentIDList& agents)
 {
     AgentIDList::const_iterator cit = agents.begin();
     out << "[";
     for(; cit != agents.end(); ++cit)
     {
-        out << "AgentID<" << cit->getName() << ">";
+        out << *cit;
     }
     out << "]";
     return out;
