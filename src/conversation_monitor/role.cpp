@@ -127,20 +127,20 @@ bool RoleMapping::isExpected(const Role& role, const AgentID& agent) const
         return true;
     }
 
-    std::map<Role, AgentIDList>::const_iterator it = mExpectedAgentMapping.find(role);
-    if(it == mExpectedAgentMapping.end())
-    {
-        std::string msg = "Unexpected role '" + role.toString() + "'.";
-        LOG_ERROR("%s", msg.c_str());
-        throw std::runtime_error(msg);
-    }
+    const AgentIDList& expectedAgents = getExpectedAgents(role);
 
     bool expected = false;
-    const AgentIDList& expectedAgents = it->second;
+    // Indication of an unassigned role -- this should be valid
+    if(expectedAgents.empty())
+    {
+        return true;
+    }
+
+    // Agent has to match against one in the list
     AgentIDList::const_iterator eit = expectedAgents.begin(); 
     for(; eit != expectedAgents.end(); ++eit)
     {
-        boost::regex regex(eit->getName());
+        boost::regex regex(eit->getName() + "$");
         if(regex_match(agent.getName(), regex))
         {
             expected = true;
