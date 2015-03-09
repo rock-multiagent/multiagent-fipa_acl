@@ -183,13 +183,14 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
         } else if( msg.getProtocol().empty())
         {
             LOG_WARN("Conversation: received message has no protocol being set. Current conversation using '%s'", mProtocol.c_str());
-        } else if( msg.getLanguage().empty())
+        }
+
+        if( msg.getLanguage().empty())
         {
-            LOG_WARN("Conversation: received message has not language being set. Current conversation using '%s'", mContentLanguage.c_str());
+            LOG_INFO("Conversation: received message has not language being set. Current conversation using '%s'", mContentLanguage.c_str());
         } else if(mContentLanguage != msg.getLanguage())
         {
-            LOG_ERROR("Conversation: message with different content language being inserted: current '%s' - to be inserted '%s'", mContentLanguage.c_str(), msg.getLanguage().c_str());
-            throw std::runtime_error("Conversation: conversation with multiple content language are not supported");
+            LOG_INFO("Conversation: message with different content language being inserted: current '%s' - to be inserted '%s'", mContentLanguage.c_str(), msg.getLanguage().c_str());
         }
 
         // update the message state machine
