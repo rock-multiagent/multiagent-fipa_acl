@@ -344,6 +344,16 @@ public:
      */
     static fipa::acl::ConversationID generateConversationID(const std::string& topic = "");
 
+    /**
+     * Convert message list to string
+     */
+    static std::string toString(const std::vector<fipa::acl::ACLMessage>& messages);
+
+    /**
+     * Convert conversation to string
+     */
+    std::string toString() const;
+
 private:
     
     /**

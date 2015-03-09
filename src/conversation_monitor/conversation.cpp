@@ -279,6 +279,38 @@ fipa::acl::ConversationID Conversation::generateConversationID(const std::string
     return std::string(conversationId) + "--" + topic + "--" + base::Time::now().toString();
 }
 
+std::string Conversation::toString(const std::vector<fipa::acl::ACLMessage>& messages)
+{
+    std::stringstream ss;
+    std::vector<fipa::acl::ACLMessage>::const_iterator cit = messages.begin();
+    for(; cit != messages.end(); ++cit)
+    {
+        ss << cit->toString() << std::endl;
+    }
+    return ss.str();
+}
+
+std::string Conversation::toString() const
+{
+    std::stringstream ss;
+    ss << "Conversation: " << std::endl;
+    if(!mMessages.empty())
+    {
+        ss << "    id: " << mMessages.front().getConversationID();
+    }
+    ss << std::endl;
+    ss << "    owner:              " << mOwner << std::endl;
+    ss << "    protocol:           " << mProtocol << std::endl;
+    ss << "    language:           " << mContentLanguage << std::endl;
+    ss << "    # subconversations: " << mNumberOfSubConversations << std::endl;
+    ss << "    # messages          " << mMessages.size() << std::endl;
+    ss << "BEGIN " << std::endl;
+    ss << toString(mMessages) << std::endl;
+    ss << "END" << std::endl;
+
+    return ss.str();
+}
+
 ConversationObservable::ConversationObservable()
     : mStatus(conversation::UNINITIALIZED)
 {}
