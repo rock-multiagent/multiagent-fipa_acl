@@ -151,10 +151,21 @@ public:
     void resetExpectedAgents();
 
     /**
+     * Get the list of expected agents for a given role
+     * \throw std::runtime_error if the role does not exist
+     */
+    const AgentIDList& getExpectedAgents(const Role& role) const;
+
+    /**
      * Check whether the given agent belongs to the list of expected receivers
      * \throws If role is completely unknown to this role mapping
      */
     bool isExpected(const Role& role, const AgentID& agent) const;
+
+    /**
+     * Stringify role mapping
+     */
+    std::string toString() const;
 };
 
 } // end namespace acl

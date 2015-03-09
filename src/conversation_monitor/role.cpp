@@ -150,5 +150,30 @@ bool RoleMapping::isExpected(const Role& role, const AgentID& agent) const
     return expected;
 }
 
+const AgentIDList& RoleMapping::getExpectedAgents(const Role& role) const
+{
+    std::map<Role, AgentIDList>::const_iterator it = mExpectedAgentMapping.find(role);
+    if(it == mExpectedAgentMapping.end())
+    {
+        std::string msg = "Unexpected role '" + role.toString() + "'.";
+        LOG_ERROR("%s", msg.c_str());
+        throw std::runtime_error(msg);
+    }
+    return it->second;
+}
+
+std::string RoleMapping::toString() const
+{
+    std::stringstream ss;
+    std::map<Role, AgentIDList>::const_iterator cit = mExpectedAgentMapping.begin();
+    for(; cit != mExpectedAgentMapping.end(); ++cit)
+    {
+        ss << "'" << cit->first.toString() << "': ";
+        AgentIDList list = cit->second;
+        ss << list;
+    }
+    return ss.str();
+}
+
 } 
 } // end namespace fipa::acl
