@@ -5,6 +5,7 @@
   </description>
   <author>Thomas Roehr/thomas.roehr@dfki.de</author>
   <author>Mircea Cretu Stancu/mircea.ctza@yahoo.com</author>
+  <maintainer>Thomas Roehr/thomas.roehr@dfki.de</maintainer>
   <license>LPGL v3 or higher</license>
   <url>http://www.fipa.org</url>
   <depend package="base/types" />
