@@ -119,6 +119,17 @@ Conversation::Conversation(const std::string& owner, const fipa::acl::ACLMessage
     assert(!mConversationId.empty());
 }
 
+Conversation::Conversation(const Conversation& other)
+    : ConversationObservable(other)
+    , mOwner(other.mOwner)
+    , mProtocol(other.mProtocol)
+    , mContentLanguage(other.mContentLanguage)
+    , mNumberOfSubConversations(other.mNumberOfSubConversations)
+    , mMessages(other.mMessages)
+    , mStateMachine(other.mStateMachine)
+{
+}
+
 Conversation::~Conversation()
 {
 }
@@ -315,6 +326,12 @@ std::string Conversation::toString() const
 
 ConversationObservable::ConversationObservable()
     : mStatus(conversation::UNINITIALIZED)
+{}
+
+ConversationObservable::ConversationObservable(const ConversationObservable& other)
+    : mStatus(other.mStatus)
+    , mObservers(other.mObservers)
+    , mConversationId(other.mConversationId)
 {}
 
 ConversationObservable::ConversationObservable(const fipa::acl::ConversationID& conversationId)
