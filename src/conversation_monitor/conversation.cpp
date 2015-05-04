@@ -329,9 +329,9 @@ ConversationObservable::ConversationObservable()
 {}
 
 ConversationObservable::ConversationObservable(const ConversationObservable& other)
-    : mStatus(other.mStatus)
+    : mConversationId(other.mConversationId)
+    , mStatus(other.mStatus)
     , mObservers(other.mObservers)
-    , mConversationId(other.mConversationId)
 {}
 
 ConversationObservable::ConversationObservable(const fipa::acl::ConversationID& conversationId)
