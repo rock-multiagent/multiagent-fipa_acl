@@ -164,6 +164,8 @@ public:
      */
     ConversationObservable(); 
 
+    ConversationObservable(const ConversationObservable& other);
+
     /**
      * Construct conversation observable with a given id
      */
@@ -269,6 +271,8 @@ public:
     * includes a call to update
     */
     Conversation(const std::string& owner, const fipa::acl::ACLMessage& initiator);
+
+    Conversation(const Conversation& other);
 
     /**
     * Conversation destructor cleans also all related commands in the command controller
