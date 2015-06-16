@@ -269,8 +269,15 @@ public:
 
     /**
      * Set content 
+     * \param content Content as string (can be binary content as well)
      */
     void setContent(const std::string& content) { mContent = content; }
+
+    /**
+     * Set content using a byte vector
+     * \param content binary content
+     */
+    void setBinaryContent(const std::vector<uint8_t>& content) { mContent.assign(content.begin(), content.end()); }
    
     /**
      * Check whether the content has to be treated as binary or not. This is done by simply checking on the 
