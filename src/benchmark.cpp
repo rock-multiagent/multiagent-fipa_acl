@@ -113,11 +113,11 @@ int main(int argc, char** argv)
     printf("#<encoding> <content-size in byte> <encoded-msg-size in bytes > <overhead-percent> <encoding-time in ms/msg> <decoding-time in ms/msg> <epochs>\n");
     for(int i = static_cast<int>(representation::BITEFFICIENT); i < static_cast<int>(representation::END_MARKER); ++i)
     {
-        base::Stats<double> msgEncodingStats;
-        base::Stats<double> msgDecodingStats;
+        numeric::Stats<double> msgEncodingStats;
+        numeric::Stats<double> msgDecodingStats;
 
-        base::Stats<double> envEncodingStats;
-        base::Stats<double> envDecodingStats;
+        numeric::Stats<double> envEncodingStats;
+        numeric::Stats<double> envDecodingStats;
 
         representation::Type representationType = static_cast<representation::Type>(i);
         {
