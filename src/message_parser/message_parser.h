@@ -12,6 +12,7 @@ namespace acl {
 class MessageParserImplementation
 {
     public:
+        virtual ~MessageParserImplementation() {}
         virtual bool parseData(const std::string& storage, ACLMessage& msg) { throw std::runtime_error("Parser not implemented"); }
 };
 

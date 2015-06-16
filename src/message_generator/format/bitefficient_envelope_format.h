@@ -36,6 +36,9 @@ private:
     std::string getReceivedObject(const ACLBaseEnvelope& envelope) const;
 
 public:
+
+    virtual ~BitefficientEnvelopeFormat() {}
+
     /**
      * Applies the format to the envelope
      * \return the formatted envelope object

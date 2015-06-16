@@ -51,6 +51,8 @@ public:
      */
     MessageFormat();
 
+    virtual ~MessageFormat() {}
+
     /**
      * Set if use code table should be used
      */

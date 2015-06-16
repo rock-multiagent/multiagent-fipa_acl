@@ -13,6 +13,8 @@ namespace acl {
 class EnvelopeParserImplementation
 {
     public:
+        virtual ~EnvelopeParserImplementation() {}
+
         virtual bool parseData(const std::string& storage, ACLEnvelope& envelope) { throw std::runtime_error("Parser not implemented"); }
 };
 

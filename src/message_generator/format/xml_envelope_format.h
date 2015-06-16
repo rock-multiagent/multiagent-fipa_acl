@@ -24,6 +24,9 @@ private:
      */
     std::vector< TiXmlElement* > getParameters(const ACLBaseEnvelope& envelope) const;
 public:
+
+    virtual ~XMLEnvelopeFormat() {}
+
     /**
      * Applies the format to the envelope
      * \return the formatted envelope object

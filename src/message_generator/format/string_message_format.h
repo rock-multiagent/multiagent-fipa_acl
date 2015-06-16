@@ -8,6 +8,7 @@ namespace acl {
 class StringMessageFormat : public MessageFormat
 {
 public:
+    virtual ~StringMessageFormat() {}
     /**
      * Applies the string format to the message
      * \return the formatted message

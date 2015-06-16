@@ -9,6 +9,8 @@ namespace acl {
 class BitefficientMessageFormat : public MessageFormat
 {
 public:
+    virtual ~BitefficientMessageFormat() {}
+
     /**
      * Applies the format to the message
      * \return the formatted message object

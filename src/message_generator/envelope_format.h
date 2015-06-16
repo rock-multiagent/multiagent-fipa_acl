@@ -10,6 +10,8 @@ namespace acl {
 class EnvelopeFormat
 {
 public:
+    virtual ~EnvelopeFormat() {}
+
     virtual std::string apply(const ACLEnvelope& envelope) const = 0;
 
 };
