@@ -22,7 +22,7 @@ class StateMachineFactory
         // Marked when the function prepareProtocolFromResourceDir has already been called
         // Used for lazy initialization in getStateMachine
         static bool msPreparedResourceDir;
-        
+
         static std::map<std::string, StateMachine> msStateMachines;
 
         /**
@@ -30,12 +30,7 @@ class StateMachineFactory
         */
         static void prepareProtocolsFromResourceDirs();
 
-        /**
-        * Instanciates all available machines a resource directory
-        */
-        static void prepareProtocolsFromResourceDir(const std::string& directory);
-
-public: 
+public:
         /**
         * Set the resource dir where to search for the protocol definitions
         * (implies a clearing of all previous entries)
@@ -51,10 +46,14 @@ public:
 
         /**
          * Create a statemachine for a given protocol
-         * \throws runtime_error if statem machine 
+         * \throws runtime_error if statem machine
          */
         static StateMachine getStateMachine(const std::string& protocol);
-
+        
+        /**
+        * Instanciates all available machines a resource directory
+        */
+        static void prepareProtocolsFromResourceDir(const std::string& directory);
 };
 
 } // end namespace acl
