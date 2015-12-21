@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/get.hpp>

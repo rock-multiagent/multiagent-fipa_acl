@@ -50,14 +50,16 @@ namespace fipa {
 
     struct mergeBaseEnvelopeImpl
     {
+	typedef fipa::acl::ACLBaseEnvelope result_type;
+
         template <typename T0, typename T1>
         struct result
         {
-	    typedef fipa::acl::ACLBaseEnvelope type;
+	    typedef result_type type;
         };
 
 	    template <typename T0, typename T1>
-	    fipa::acl::ACLBaseEnvelope operator()(T0 base, T1 extra) const
+	    result_type operator()(T0 base, T1 extra) const
 	    {
 	        return base.merge(extra);
 	    }

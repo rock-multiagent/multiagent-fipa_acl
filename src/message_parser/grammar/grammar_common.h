@@ -5,8 +5,8 @@
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_repeat.hpp>
 
+#ifndef BOOST_SPIRIT_USE_PHOENIX_V3
 #include <boost/spirit/home/support/context.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -14,6 +14,12 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#else
+#include <boost/phoenix/phoenix.hpp>
+#include <boost/phoenix/fusion/at.hpp>
+#include <boost/fusion/adapted/std_pair.hpp>
+#endif
+
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <arpa/inet.h>
@@ -117,14 +123,16 @@ namespace fipa {
 	// lazy evaluation is required	
         struct extractFromCodetableImpl
 	{
+		typedef std::string result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef std::string type;
+			typedef result_type type;
 		};
 
 		template <typename T>
-		std::string operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 			if(typeid(T) == typeid(unsigned short))
 			{
@@ -145,14 +153,16 @@ namespace fipa {
 	/** Concatenation of two string as 'lazy' implementation for boost spirit*/
 	struct buildStringImpl
 	{
+		typedef std::string result_type;
+
 		template <typename T, typename U, typename V>
 		struct result
 		{
-			typedef std::string type;
+			typedef result_type type;
 		};
 
 		template <typename T, typename U, typename V>
-		std::string operator()(T arg0, U arg1, V arg2) const
+		result_type operator()(T arg0, U arg1, V arg2) const
 		{
 			arg0 += arg1;
 			arg0 += arg2;
@@ -166,14 +176,16 @@ namespace fipa {
 	/** Concatenation of two strings as 'lazy' implementation for boost spirit using a dedicated separation character*/
 	struct concatStringsWithSeparatorImpl
 	{
+		typedef std::string result_type;
+
 		template <typename T, typename U, typename V>
 		struct result
 		{
-			typedef std::string type;
+			typedef result_type type;
 		};
 
 		template <typename T, typename U, typename V>
-		std::string operator()(T arg0, U arg1, V arg2) const
+		result_type operator()(T arg0, U arg1, V arg2) const
 		{
                     if(arg0.empty())
                     {
@@ -190,14 +202,16 @@ namespace fipa {
 	/** Debug output */
 	struct printImpl
 	{
+	        typedef void result_type;
+
 		template <typename T, typename U>
 		struct result
 		{
-			typedef void type;
+			typedef result_type type;
 		};
 
 		template <typename T, typename U>
-		void operator()(T arg0, U arg1) const
+		result_type operator()(T arg0, U arg1) const
 		{
 			printf("%s %s\n", arg0, arg1.c_str());
 		}
@@ -208,14 +222,16 @@ namespace fipa {
 
         struct digitPaddingBytesImpl
         {
+             typedef uint32_t result_type;
+
              template <typename T>
              struct result
              {
-                 typedef uint32_t type;
+                 typedef result_type type;
              };
              
              template <typename T>
-             uint32_t operator()(T digit /* std::string */) const
+             result_type operator()(T digit /* std::string */) const
              {
                    char lastbyte = digit[0];
                    // odd number of characters
@@ -237,14 +253,16 @@ namespace fipa {
 	/** Convert byte to number according to the FIPA definition */
 	struct convertToNumberTokenImpl
 	{
+		typedef std::string result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef std::string type;
+			typedef result_type type;
 		};
 		
 		template <typename T> 
-		std::string operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 
 			// Each bytes contains two numbers: 
@@ -297,19 +315,21 @@ namespace fipa {
 	*/
 	struct convertDigitsToHexImpl
 	{
+		typedef std::string result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef std::string type;
+			typedef result_type type;
 		};
 
 		template <typename T> 
-		std::string operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 			return "";
 		}
 		
-		std::string operator()(std::string arg) const
+		result_type operator()(std::string arg) const
 		{
 			unsigned int hexNumber = atoi(arg.c_str());
 			
@@ -324,15 +344,17 @@ namespace fipa {
 
 	struct convertToNativeShortImpl
 	{
+		typedef uint16_t result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef uint16_t type;
+			typedef result_type type;
 		};
 
 		// for std::vector<char>
 		template <typename T>
-		uint16_t operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 			return ntohs(arg);
 		}
@@ -342,15 +364,17 @@ namespace fipa {
 
 	struct convertToNativeLongImpl
 	{
+		typedef uint32_t result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef uint32_t type;
+			typedef result_type type;
 		};
 
 		// for std::vector<char>
 		template <typename T>
-		uint32_t operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 			return ntohl(arg); 
 		}
@@ -362,20 +386,22 @@ namespace fipa {
 	/** Convert types to strings */
 	struct convertToStringImpl
 	{
+		typedef std::string result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef std::string type;
+			typedef result_type type;
 		};
 
 		// for std::vector<char>
 		template <typename T>
-		std::string operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 			return std::string(arg.begin(), arg.end());
 		}
 
-		std::string operator()(fipa::acl::ByteSequence arg) const
+		result_type operator()(fipa::acl::ByteSequence arg) const
 		{
 			// TODO: (optional) perform some encoding stuff here
 			// using arg.encoding
@@ -390,14 +416,16 @@ namespace fipa {
 	/** Convert types to vector of characters */
 	struct convertToCharVectorImpl
 	{
+		typedef std::vector<unsigned char> result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef std::vector<unsigned char> type;
+			typedef result_type type;
 		};
 
 		template<typename T>
-		std::vector<unsigned char> operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 			int length = arg.size();
 			std::vector<unsigned char> tmp;
@@ -416,10 +444,12 @@ namespace fipa {
 
     struct createAgentIDImpl
     {
+        typedef fipa::acl::AgentID result_type;
+
         template <typename T>
         struct result
         {
-            typedef fipa::acl::AgentID type;
+            typedef result_type type;
         };
 
         template<typename T>
@@ -434,10 +464,11 @@ namespace fipa {
 
     struct convertStringToNumberImpl
     {
+        typedef boost::uint32_t result_type;
         template <typename T>
         struct result
         {
-            typedef boost::uint32_t type;
+            typedef result_type type;
         };
 
         template<typename T>
@@ -463,21 +494,17 @@ namespace fipa {
 	/** Convert String to Time */
 	struct convertToTimeImpl
 	{
+		typedef fipa::acl::Time result_type;
+
 		template <typename T, typename U>
 		struct result
 		{
-			typedef fipa::acl::Time type;
+			typedef result_type type;
 		};
 
-		template <typename T, typename U>
-		fipa::acl::Time operator()(T arg0, U arg1) const
+		result_type operator()(const std::string& arg, const std::string& msecs) const
 		{
-			return  fipa::acl::Time();
-		}
-
-		fipa::acl::Time operator()(std::string arg, std::string msecs) const
-		{
-			fipa::acl::Time	convertedTime;
+			fipa::acl::Time convertedTime;
 #ifdef BOOST_SPIRIT_DEBUG
 			printf("convertToTimeImpl: %s:%s\n", arg.c_str(), msecs.c_str());
 #endif
@@ -485,7 +512,7 @@ namespace fipa {
 			strptime(arg.c_str(),"%Y-%m-%dT%H:%M:%S",&convertedTime);
 			convertedTime.tm_msec = atoi(msecs.c_str());
 			
-			return fipa::acl::Time(convertedTime);
+			return convertedTime;
 		}
 	};
 
@@ -494,24 +521,26 @@ namespace fipa {
 	/** Convert Time to base::Time */
 	struct convertToBaseTimeImpl
 	{
+		typedef base::Time result_type;
+
 		template <typename T>
 		struct result
 		{
-			typedef base::Time type;
+			typedef result_type type;
 		};
 
 		template <typename T>
-		base::Time operator()(T arg) const
+		result_type operator()(T arg) const
 		{
 			return arg.toTime();
 		}
 
-		base::Time operator()(fipa::acl::DateTime arg) const
+		result_type operator()(fipa::acl::DateTime arg) const
 		{
 			return arg.toTime();
 		}
 
-                base::Time operator()(std::string arg) const
+                result_type operator()(std::string arg) const
                 {
                     std::string time = arg;
                     if ( arg.data()[0] == '-' || arg.data()[0] == '+')
