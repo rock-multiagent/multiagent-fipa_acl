@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 namespace fipa {
 namespace acl {

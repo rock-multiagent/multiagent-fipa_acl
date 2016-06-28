@@ -8,7 +8,7 @@
 #include "acl_message.h"
 #include <iostream>
 #include <algorithm>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 namespace fipa {
 namespace acl {

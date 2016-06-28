@@ -1,6 +1,6 @@
 #include "statemachine_factory.h"
 #include <boost/filesystem/operations.hpp>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 #include "statemachine_reader.h"
 #include "transition.h"
 

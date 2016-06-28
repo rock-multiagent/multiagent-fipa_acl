@@ -4,7 +4,7 @@
 #include <sstream>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 #include <fipa_acl/message_parser/message_parser.h>
 #include <fipa_acl/message_generator/message_generator.h>

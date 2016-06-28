@@ -1,7 +1,7 @@
 #include "envelope_generator.h"
 #include <stdexcept>
 #include <boost/assign/list_of.hpp>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 #include "format/bitefficient_envelope_format.h"
 #include "format/xml_envelope_format.h"

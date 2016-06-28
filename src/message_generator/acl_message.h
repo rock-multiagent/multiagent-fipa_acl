@@ -13,7 +13,7 @@
 #include <string>
 #include <fipa_acl/message_generator/agent_id.h>
 #include <fipa_acl/message_generator/userdef_param.h>
-#include <base/time.h>
+#include <base/Time.hpp>
 
 /**
 * \brief Foundation of Physical Intelligent Agents

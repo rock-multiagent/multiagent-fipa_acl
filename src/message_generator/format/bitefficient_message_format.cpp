@@ -12,7 +12,7 @@
 
 #include<boost/algorithm/string/erase.hpp>
 
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 #include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/message_generator/message_format.h>

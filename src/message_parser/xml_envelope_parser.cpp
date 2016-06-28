@@ -2,7 +2,7 @@
 #include "xml_parser.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 #include <stdexcept>
 
 namespace fipa {

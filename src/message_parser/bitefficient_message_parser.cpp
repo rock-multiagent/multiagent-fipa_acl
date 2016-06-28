@@ -9,7 +9,7 @@
 #include <boost/variant/get.hpp>
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/variant/variant.hpp>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 #include "bitefficient_message_parser.h"
 #include "grammar/grammar_bitefficient.h"

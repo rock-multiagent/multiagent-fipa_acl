@@ -2,7 +2,7 @@
 #define FIPA_ACL_XML_FORMAT_H
 
 #include <string>
-#include <base/time.h>
+#include <base/Time.hpp>
 #include <fipa_acl/message_generator/acl_envelope.h>
 #include <fipa_acl/message_generator/acl_message.h>
 #include <fipa_acl/message_generator/types.h>

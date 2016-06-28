@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <boost/regex.hpp>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 namespace fipa {
 namespace acl {

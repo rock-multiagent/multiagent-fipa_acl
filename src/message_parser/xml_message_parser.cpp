@@ -1,7 +1,7 @@
 #include "xml_message_parser.h"
 #include "xml_parser.h"
 #include <fipa_acl/message_generator/message_format.h>
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 
 #include <boost/foreach.hpp>
 

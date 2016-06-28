@@ -1,7 +1,7 @@
 #include "string_message_parser.h"
 
 #include "grammar/grammar_string_message.h"
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 
 namespace fipa {
 namespace acl {

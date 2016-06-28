@@ -1,7 +1,7 @@
 #include "bitefficient_format.h"
 #include <boost/algorithm/string.hpp>
 #include <sstream>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 namespace fipa {
 namespace acl {

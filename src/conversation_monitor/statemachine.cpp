@@ -21,7 +21,7 @@ note for future: the "in reply to" policy needs to be defined somehow (not neces
 #include <algorithm>
 #include <set>
 #include <stdexcept>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 namespace fipa {
 namespace acl {

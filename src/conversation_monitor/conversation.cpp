@@ -1,6 +1,6 @@
 #include "conversation.h"
 #include <uuid/uuid.h>
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 #include <boost/regex.hpp>
 
 namespace fipa {

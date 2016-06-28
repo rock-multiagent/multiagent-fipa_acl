@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cstring>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 #include <tinyxml.h>
 #include <boost/filesystem/path.hpp>

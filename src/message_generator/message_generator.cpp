@@ -1,7 +1,7 @@
 #include "message_generator.h"
 #include <stdexcept>
 #include <boost/assign/list_of.hpp>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 #include "format/bitefficient_message_format.h"
 #include "format/string_message_format.h"
