@@ -1,9 +1,24 @@
 require 'fipa-message'
-require 'test/unit'
+require 'minitest/autorun'
 
 include FIPA
 
-class FipaMessageTest < Test::Unit::TestCase
+class FipaMessageTest < Minitest::Test
+
+    attr_accessor :msg
+
+    def setup
+        @msg = FIPA::ACLMessage.new
+
+        msg.setPerformative(:request)
+        msg.setProtocol("test-protocol")
+        msg.setLanguage("test-language")
+        msg.setContent( "test-content" )
+        msg.addReceiver(FIPA::AgentId.new("test-to"))
+        msg.setSender(FIPA::AgentId.new("test-from"))
+        msg.addReplyTo(FIPA::AgentId.new("test-reply-to"))
+        msg.setConversationID("test-conversation-id")
+    end
 
 	def test_UserdefinedParameter
 		name = "user-def-param"
@@ -47,21 +62,17 @@ class FipaMessageTest < Test::Unit::TestCase
 		aidAddresses = aid.getAddresses
 		aidAddresses = aidAddresses.reverse
 		count = 0
-		aidAddresses.each do |address|
-			#puts "#{address}"
-			assert_equal("address-#{count}",address)
-			count += 1
+		addresses.each do |address|
+                        assert(aidAddresses.include?(address), "Address: #{address} included")
 		end
 		
 		count = 0
 		aidResolvers = aid.getResolvers
 		aidResolvers = aidResolvers.reverse
 
-		aidResolvers.each do |resolver|
-			#puts "#{resolver.getName}"
-			assert_equal("resolver-#{count}",resolver.getName)
-			count += 1
-		end
+		resolvers.each do |resolver|
+                        assert(aidResolvers.include?(resolver), "aidResolver should contain: #{resolver.getName} was found")
+                end
 	end
 
 	def test_FipaMessage
@@ -84,7 +95,57 @@ class FipaMessageTest < Test::Unit::TestCase
 			count += 1
 		end
 
-	end
+                msg.clearReceivers
+                assert(msg.getReceivers.empty?, "Receivers should be empty after calling clearReceivers")
+                require 'time'
+                e_replyByTime = Time.parse("2017-01-01")
+                msg.setReplyBy  e_replyByTime
+                assert(msg.getReplyBy == e_replyByTime, "ReplyBy #{e_replyByTime} expected: got #{msg.getReplyBy}")
+
+    end
+
+    def test_ACLEnvelope
+        msg
+        env = FIPA::ACLEnvelope.new
+        representation = FIPARepresentation::BITEFFICIENT
+        env.insert(msg, representation)
+
+        assert(env.getBaseEnvelope.getDate, "Default envelope has current date: was #{env.getBaseEnvelope.getDate}")
+
+        time = Time.parse("2017-01-01")
+        envelope = ACLBaseEnvelope.new
+        envelope.setDate time
+        assert(envelope.getDate == time, "Envelope has given date was #{envelope.getDate}")
+
+        env.addExtraEnvelope envelope
+        assert(env.flattened.getDate == time, "Flattened envelope has given date, was: #{env.flattened.getDate}")
+
+        mta0 = AgentId.new("mta0")
+        mta1 = AgentId.new("mta1")
+        env.stamp mta1
+
+        assert(!env.hasStamp?(mta0), "Envelope has no stamp from mta0")
+        assert(env.hasStamp?(mta1), "Envelope has stamp from mta1")
+    end
+
+    def test_ACLBaseEnvelope
+        env = ACLBaseEnvelope.new
+        e_receivers = []
+        2.times do |idx|
+            e_receivers << AgentId.new("receiver-#{idx}")
+        end
+        env.setTo e_receivers
+
+        e_sender = AgentId.new("sender")
+        env.setFrom e_sender
+
+        receivers = env.getTo
+        assert(receivers == e_receivers, "All receivers: #{receivers}")
+        assert(!receivers.include?(e_sender), "All receivers are not sender")
+
+        sender = env.getFrom
+        assert(sender == e_sender, "Senders: #{sender}")
+    end
 
 	def test_InterfaceCalls
  		msg = ACLMessage.new
@@ -101,6 +162,5 @@ class FipaMessageTest < Test::Unit::TestCase
 		content = msg.to_byte_array
 		p content
 	end
-
 end
 

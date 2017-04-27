@@ -12,11 +12,10 @@
 #include <fipa_acl/message_parser/envelope_parser.h>
 
 using namespace Rice;
-using namespace fipa::acl;
 
 typedef std::vector< std::string > StringVector;
-typedef std::vector< AgentID > AgentIDVector;
-typedef std::vector< UserdefParam > ParameterVector;
+typedef std::vector< fipa::acl::AgentID > AgentIDVector;
+typedef std::vector< fipa::acl::UserdefParam > ParameterVector;
 typedef std::vector< uint8_t > ByteVector;
 
 Data_Type<StringVector> stringVector;
@@ -24,17 +23,26 @@ Data_Type<AgentIDVector> aidVector;
 Data_Type<ParameterVector> parameterVector;
 Data_Type<ByteVector> byteVector;
 
-Data_Type<ACLEnvelope> rb_cFipaEnvelope;
-Data_Type<ACLBaseEnvelope> rb_cFipaBaseEnvelope;
-Data_Type<ACLMessage> rb_cFipaMessage;
-Data_Type<AgentID> rb_cAgentID;
-Data_Type<UserdefParam> rb_cUserDefinedParameters;
-Data_Type<ConversationMonitor> rb_cConversationMonitor;
-Data_Type<Conversation> rb_cConversation;
+Data_Type<fipa::acl::ACLEnvelope> rb_cFipaEnvelope;
+Data_Type<fipa::acl::ACLBaseEnvelope> rb_cFipaBaseEnvelope;
+Data_Type<fipa::acl::ACLMessage> rb_cFipaMessage;
+Data_Type<fipa::acl::AgentID> rb_cAgentID;
+Data_Type<fipa::acl::UserdefParam> rb_cUserDefinedParameters;
+Data_Type<fipa::acl::ConversationMonitor> rb_cConversationMonitor;
+Data_Type<fipa::acl::Conversation> rb_cConversation;
 
-Enum<representation::Type> rb_eRepresentationType;
+Enum<fipa::acl::representation::Type> rb_eRepresentationType;
 
 static Module rb_mFIPA;
+
+template<>
+Object to_ruby< base::Time >(const base::Time& date)
+{
+    // the self
+    double seconds = date.toSeconds();
+    rb_require("time");
+    return rb_funcall(rb_cTime, rb_intern("at"), 1, DBL2NUM(seconds) );
+}
 
 template<>
 StringVector from_ruby< StringVector >(Object obj)
@@ -56,17 +64,31 @@ Object to_ruby<StringVector>(const StringVector& v)
 	return strings;
 }
 
+template<>
+fipa::acl::AgentID from_ruby<fipa::acl::AgentID>(Object obj)
+{
+    Data_Object<fipa::acl::AgentID> agentId(obj, rb_cAgentID);
+    return *agentId;
+}
 
 template<>
 AgentIDVector from_ruby< AgentIDVector >(Object obj)
 {
-	Data_Object<AgentIDVector> ids(obj, aidVector);
-	return *ids;
+    Array r_agentList(obj);
+    AgentIDVector agentList;
+    Array::iterator aIt = r_agentList.begin();
+    for(; aIt != r_agentList.end(); ++aIt)
+    {
+	//Data_Object<AgentIDVector> ids(obj, aidVector);
+        agentList.push_back( from_ruby<fipa::acl::AgentID>(*aIt) );
+    }
+    return agentList;
 }
 
 template<>
 Object to_ruby< AgentIDVector >(const AgentIDVector& v)
 {
+	using namespace fipa::acl;
 	Array ids;
 	AgentIDVector::const_iterator it;
 	for( it = v.begin(); it != v.end(); it++)
@@ -91,7 +113,7 @@ Object to_ruby< ParameterVector >(const ParameterVector& v)
 	ParameterVector::const_iterator it;
 	for( it = v.begin(); it != v.end(); it++)
 	{
-		params.push(Data_Object<UserdefParam>(new UserdefParam(*it) ));
+		params.push(Data_Object<fipa::acl::UserdefParam>(new fipa::acl::UserdefParam(*it) ));
 	}
 
 	return params;
@@ -101,7 +123,7 @@ template<>
 Object to_ruby< ByteVector >(const std::vector<uint8_t>& obj)
 {
 	Array bytes;
-        
+
 	int size = obj.size();
 	for( int i = 0; i < size; i++)
 	{
@@ -116,69 +138,72 @@ ByteVector from_ruby< ByteVector >(Object obj)
 {
 	Data_Object< ByteVector> bytes(obj, byteVector);
 	return *bytes;
-	return *bytes;	
+	return *bytes;
 }
 
 template<>
-Object to_ruby< ConversationPtr >(const ConversationPtr& p)
+Object to_ruby< fipa::acl::ConversationPtr >(const fipa::acl::ConversationPtr& p)
 {
-    Data_Object<Conversation> conversation(new Conversation(*p.get()), rb_cConversation);
+    Data_Object<fipa::acl::Conversation> conversation(new fipa::acl::Conversation(*p.get()), rb_cConversation);
     return conversation;
 }
 
 // Convert std::vector<string> to ruby Array
 Array wrap_getAddresses(Object aid)
 {
-   // the self
-   Data_Object<AgentID> id(aid, rb_cAgentID);
+    using namespace fipa::acl;
+    // the self
+    Data_Object<AgentID> id(aid, rb_cAgentID);
 
-   //Array list of agents
-   Array agents;
-   std::vector<std::string> addresses = id->getAddresses();
-   agents = to_ruby<StringVector>(addresses);
-   
-   return agents;
+    //Array list of agents
+    Array agents;
+    std::vector<std::string> addresses = id->getAddresses();
+    agents = to_ruby<StringVector>(addresses);
+
+    return agents;
 }
 
 // Convert std::vector<string> to ruby Array
 Array wrap_getResolvers(Object aid)
 {
-   // the self
-   Data_Object<AgentID> id(aid, rb_cAgentID);
-   Array resolvers;
-   AgentIDVector aids = id->getResolvers();
-   resolvers = to_ruby<AgentIDVector>(aids);
-	
-   return resolvers;
+    using namespace fipa::acl;
+    // the self
+    Data_Object<AgentID> id(aid, rb_cAgentID);
+    Array resolvers;
+    AgentIDVector aids = id->getResolvers();
+    resolvers = to_ruby<AgentIDVector>(aids);
+
+    return resolvers;
 }
 
 Array wrap_getUserDefinedParameters(Object aid)
 {
-   // the self
-   Data_Object<AgentID> id(aid, rb_cAgentID);
-   Array paramArray;
-   ParameterVector params = id->getUserdefParams();
-   paramArray = to_ruby<ParameterVector>(params);
-	
-   return paramArray;
+    using namespace fipa::acl;
+    // the self
+    Data_Object<AgentID> id(aid, rb_cAgentID);
+    Array paramArray;
+    ParameterVector params = id->getUserdefParams();
+    paramArray = to_ruby<ParameterVector>(params);
+
+    return paramArray;
 }
 
 
-Array wrap_toByteVector(Object message)
+Array wrap_ACLMessage_toByteVector(Object message)
 {
+    using namespace fipa::acl;
+    Data_Object<ACLMessage> msg(message, rb_cFipaMessage);
 
-   Data_Object<ACLMessage> msg(message, rb_cFipaMessage);
+    std::string bitefficientMsg = MessageGenerator::create(*msg, representation::BITEFFICIENT);
+    int size = bitefficientMsg.size();
 
-   std::string bitefficientMsg = MessageGenerator::create(*msg, representation::BITEFFICIENT);
-   int size = bitefficientMsg.size();
+    std::vector<uint8_t> bytes;
+    for(int i = 0; i < size; i++)
+    {
+        bytes.push_back(bitefficientMsg[i]);
+    }
 
-   std::vector<uint8_t> bytes;
-   for(int i = 0; i < size; i++)
-   {
-       bytes.push_back(bitefficientMsg[i]);
-   } 
-
-   return to_ruby<ByteVector>(bytes); 
+    return to_ruby<ByteVector>(bytes);
 }
 
 
@@ -187,11 +212,12 @@ Array wrap_toByteVector(Object message)
 * The array of bytes will be parsed in the message object
 * throw an exception if the parsing step fails
 */
-Object wrap_fromByteString(Object self, String byteString)
+Object wrap_ACLMessage_fromByteString(Object self, String byteString)
 {
-	Data_Object<ACLMessage> msg(self, rb_cFipaMessage);	
+	using namespace fipa::acl;
+	Data_Object<ACLMessage> msg(self, rb_cFipaMessage);
 
-	std::string data; 
+	std::string data;
 	int size = byteString.length();
 
 	for(int i=0; i < size; i++)
@@ -208,8 +234,9 @@ Object wrap_fromByteString(Object self, String byteString)
 	return msg;
 }
 
-Object wrap_setPerformative(Object self, Symbol performative)
+Object wrap_ACLMessage_setPerformative(Object self, Symbol performative)
 {
+	using namespace fipa::acl;
 	Data_Object<ACLMessage> msg(self, rb_cFipaMessage);
 
 	// Replace underscore with dash to convert symbols to performative label
@@ -224,13 +251,14 @@ Object wrap_setPerformative(Object self, Symbol performative)
 	    performativeString.replace(pos,1,"-");
 	}
 
-	msg->setPerformative(performativeString); 
+	msg->setPerformative(performativeString);
 
 	return self;
 }
 
-Symbol wrap_getPerformative(Object self)
+Symbol wrap_ACLMessage_getPerformative(Object self)
 {
+	using namespace fipa::acl;
 	Data_Object<ACLMessage> msg(self, rb_cFipaMessage);
 	std::string performative = msg->getPerformative();
 
@@ -247,11 +275,19 @@ Symbol wrap_getPerformative(Object self)
 	return Symbol(performative);
 }
 
+void wrap_ACLMessage_setReplyBy(Object self, Object rubytime)
+{
+    Data_Object<fipa::acl::ACLMessage> msg(self, rb_cFipaMessage);
+
+    double floattime = NUM2DBL( rb_funcall(rubytime, rb_intern("to_f"), 0) );
+    msg->setReplyBy( base::Time::fromSeconds(floattime) );
+}
 /**
  * ACLEnvelope methods
  */
-Array wrap_envelope_getTo(Object self)
+Array wrap_ACLEnvelope_getTo(Object self)
 {
+    using namespace fipa::acl;
     Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
     ACLBaseEnvelope baseEnvelope = envelope->flattened();
     AgentIDList agents = baseEnvelope.getTo();
@@ -259,32 +295,33 @@ Array wrap_envelope_getTo(Object self)
     return to_ruby<AgentIDList>(agents);
 }
 
-Object wrap_envelope_getFrom(Object self)
+Object wrap_ACLEnvelope_getFrom(Object self)
 {
+    using namespace fipa::acl;
     Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
     ACLBaseEnvelope baseEnvelope = envelope->flattened();
     AgentID agent = baseEnvelope.getFrom();
-    
+
     Data_Object<AgentID> rubyAgent(new AgentID(agent), rb_cAgentID);
     return rubyAgent;
 }
 
-Array wrap_envelope_toByteVector(Object self)
+Array wrap_ACLEnvelope_toByteVector(Object self)
 {
+    using namespace fipa::acl;
+    Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
 
-   Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+    std::string bitefficientEnvelope = EnvelopeGenerator::create(*envelope, representation::BITEFFICIENT);
 
-   std::string bitefficientEnvelope = EnvelopeGenerator::create(*envelope, representation::BITEFFICIENT);
+    int size = bitefficientEnvelope.size();
 
-   int size = bitefficientEnvelope.size();
+    std::vector<uint8_t> bytes;
+    for(int i = 0; i < size; i++)
+    {
+        bytes.push_back(bitefficientEnvelope[i]);
+    }
 
-   std::vector<uint8_t> bytes;
-   for(int i = 0; i < size; i++)
-   {
-       bytes.push_back(bitefficientEnvelope[i]);
-   } 
-
-   return to_ruby<ByteVector>(bytes); 
+    return to_ruby<ByteVector>(bytes);
 }
 
 
@@ -293,11 +330,12 @@ Array wrap_envelope_toByteVector(Object self)
 * The array of bytes will be parsed in the envelope object
 * throw an exception if the parsing step fails
 */
-Object wrap_envelope_fromByteString(Object self, String byteString)
+Object wrap_ACLEnvelope_fromByteString(Object self, String byteString)
 {
-	Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);	
+	using namespace fipa::acl;
+	Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
 
-	std::string data; 
+	std::string data;
 	int size = byteString.length();
 
 	for(int i=0; i < size; i++)
@@ -315,52 +353,30 @@ Object wrap_envelope_fromByteString(Object self, String byteString)
 }
 
 
-Object wrap_conversation_getConversationId(Object self)
+Object wrap_ConversationMonitor_getConversationId(Object self)
 {
+    using namespace fipa::acl;
     Data_Object<Conversation> conversation(self, rb_cConversation);
     fipa::acl::ConversationID id = conversation->getConversationId();
     return String(id);
 }
 
-
-/*
-template<typename T>
-class Vector
+void wrap_ACLBaseEnvelope_setDate(Object self, Object rubytime)
 {
-	typedef std::vector<T> TVector; 
-	TVector tVectorInstance;
+    Data_Object<fipa::acl::ACLBaseEnvelope> baseEnvelope(self, rb_cFipaBaseEnvelope);
 
-	Array toArray(Object o)
-	{
-		Data_Object<T> typedVector(o, tVectorInstance);
-		Array array;
-		//array = to_ruby<T>( *typedVector );
-		return array;
-	}
-	
-	template<>
-	Array to_ruby<TVector>(const TVector& v)
-	{
-		Array array;
-		
-		std::vector<T>::const_iterator it;
-		for( it = v.begin(); it != v.end(); it++)
-		{
-			array.push(Data_Object<T>(new T(*it) ));
-		}
-	
-		return array;
-	}
+    double floattime = NUM2DBL( rb_funcall(rubytime, rb_intern("to_f"), 0) );
+    baseEnvelope->setDate( base::Time::fromSeconds(floattime) );
+}
 
-	TVector from_ruby(Object obj)
-	{
-		Data_Object<TVector> tVector(obj, tVectorInstance);
-		return *tVector;
-	}
-	
-
-};
-*/
+Object wrap_ACLBaseEnvelope_setTo(Object self, Array array)
+{
+    using namespace fipa::acl;
+    Data_Object<ACLBaseEnvelope> envelope(self, rb_cFipaBaseEnvelope);
+    AgentIDList agentIdList = from_ruby<AgentIDList>(array);
+    envelope->setTo(agentIdList);
+    return envelope;
+}
 
 /**
 * Initialise method in order to
@@ -368,6 +384,7 @@ class Vector
 extern "C"
 void Init_fipamessage_ruby()
 {
+    using namespace fipa::acl;
 
     // Define module FIPA
     rb_mFIPA = define_module("FIPA");
@@ -378,7 +395,8 @@ void Init_fipamessage_ruby()
         .define_method("getName", &UserdefParam::getName)
         .define_method("setName", &UserdefParam::setName, (Arg("name")) )
         .define_method("getValue", &UserdefParam::getValue, (Arg("name") ) )
-        .define_method("setValue", &UserdefParam::setValue, Arg("value") );
+        .define_method("setValue", &UserdefParam::setValue, Arg("value") )
+        .define_method("==", &UserdefParam::operator==, (Arg("param")));
 
     rb_cAgentID = define_class_under<AgentID>(rb_mFIPA,"AgentId")
         .define_constructor(Constructor<AgentID, const std::string&>() )
@@ -389,7 +407,8 @@ void Init_fipamessage_ruby()
         .define_method("getResolvers", &wrap_getResolvers)
         .define_method("deleteResolver", &AgentID::deleteResolver, (Arg("agentid") ))
         .define_method("addUserDefinedParameter", &AgentID::addUserdefParam, (Arg("param")))
-        .define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters);
+        .define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters)
+        .define_method("==", &AgentID::operator==, (Arg("agentid")));
 
     rb_eRepresentationType = define_enum<representation::Type>("FIPARepresentation")
         .define_value("UNKNOWN",representation::BITEFFICIENT)
@@ -401,13 +420,26 @@ void Init_fipamessage_ruby()
     rb_cFipaBaseEnvelope = define_class_under<ACLBaseEnvelope>(rb_mFIPA, "ACLBaseEnvelope")
         .define_constructor(Constructor<ACLBaseEnvelope>())
         .define_method("getTo", &ACLBaseEnvelope::getTo)
+        .define_method("clearAllTo", &ACLBaseEnvelope::clearAllTo)
         .define_method("getFrom", &ACLBaseEnvelope::getFrom)
         .define_method("getComments", &ACLBaseEnvelope::getComments)
         .define_method("getACLRepresentation", &ACLBaseEnvelope::getACLRepresentation)
         .define_method("getPayloadLength", &ACLBaseEnvelope::getPayloadLength)
-        .define_method("getDate",&ACLBaseEnvelope::getDate)
+        .define_method("getPayloadEncoding", &ACLBaseEnvelope::getPayloadEncoding)
+        .define_method("getDate", &ACLBaseEnvelope::getDate)
         .define_method("getIntendedReceivers", &ACLBaseEnvelope::getIntendedReceivers)
+        .define_method("clearAllIntendedReceivers", &ACLBaseEnvelope::clearAllIntendedReceivers)
+        .define_method("hasReceivedObject", &ACLBaseEnvelope::hasReceivedObject)
         .define_method("getTransportBehaviour", &ACLBaseEnvelope::getTransportBehaviour)
+        .define_method("setTo", &wrap_ACLBaseEnvelope_setTo, (Arg("agentids")) )
+        .define_method("setFrom", &ACLBaseEnvelope::setFrom, (Arg("agentid")) )
+        //.define_method("setComments", &ACLBaseEnvelope::getComments)
+        //.define_method("setACLRepresentation", &ACLBaseEnvelope::setACLRepresentation, (Arg("representation")))
+        //.define_method("setPayloadLength", &ACLBaseEnvelope::setPayloadLength, (Arg("payload-length")))
+        //.define_method("setPayloadEncoding", &ACLBaseEnvelope::setPayloadEncoding, (Arg("encoding")))
+        .define_method("setDate", &wrap_ACLBaseEnvelope_setDate, (Arg("time")))
+        //.define_method("setIntendedReceivers", &ACLBaseEnvelope::setIntendedReceivers)
+        //.define_method("getTransportBehaviour", &ACLBaseEnvelope::getTransportBehaviour)
         ;
 
 
@@ -420,17 +452,20 @@ void Init_fipamessage_ruby()
         .define_method("getBaseEnvelope", &ACLEnvelope::getBaseEnvelope)
         .define_method("getExtraEnvelopes", &ACLEnvelope::getExtraEnvelopes)
         .define_method("getACLMessage", &ACLEnvelope::getACLMessage)
-        .define_method("getTo", &wrap_envelope_getTo)
-        .define_method("getFrom", &wrap_envelope_getFrom)
+        .define_method("getTo", &wrap_ACLEnvelope_getTo)
+        .define_method("getFrom", &wrap_ACLEnvelope_getFrom)
         .define_method("flattened", &ACLEnvelope::flattened)
-        .define_method("to_byte_array", &wrap_envelope_toByteVector)
-        .define_method("from_byte_string", &wrap_envelope_fromByteString)
+        .define_method("to_byte_array", &wrap_ACLEnvelope_toByteVector)
+        .define_method("from_byte_string", &wrap_ACLEnvelope_fromByteString)
+        .define_method("addExtraEnvelope", &ACLEnvelope::addExtraEnvelope, (Arg("envelope")))
+        .define_method("stamp", &ACLEnvelope::stamp, (Arg("agent_id")))
+        .define_method("hasStamp?", &ACLEnvelope::hasStamp, (Arg("agent_id")))
         ;
 
     rb_cFipaMessage = define_class_under<ACLMessage>(rb_mFIPA, "ACLMessage")
         .define_constructor(Constructor<ACLMessage>())
-        .define_method("setPerformative", &wrap_setPerformative)
-        .define_method("getPerformative", &wrap_getPerformative)
+        .define_method("setPerformative", &wrap_ACLMessage_setPerformative)
+        .define_method("getPerformative", &wrap_ACLMessage_getPerformative)
         .define_method("addReceiver", &ACLMessage::addReceiver, Arg("receiver"))
         .define_method("clearReceivers", &ACLMessage::clearReceivers)
         .define_method("getReceivers", &ACLMessage::getAllReceivers)
@@ -451,12 +486,13 @@ void Init_fipamessage_ruby()
         .define_method("getInReplyTo", &ACLMessage::getInReplyTo)
         .define_method("setReplyWith", &ACLMessage::setReplyWith, Arg("reply_with"))
         .define_method("getReplyWith", &ACLMessage::getReplyWith)
+        .define_method("getReplyBy", &ACLMessage::getReplyBy)
         .define_method("setConversationID", &ACLMessage::setConversationID, Arg("conversation_id"))
         .define_method("getConversationID", &ACLMessage::getConversationID)
-        .define_method("to_byte_array", &wrap_toByteVector)
-        .define_method("from_byte_string", &wrap_fromByteString)
+        .define_method("to_byte_array", &wrap_ACLMessage_toByteVector)
+        .define_method("from_byte_string", &wrap_ACLMessage_fromByteString)
         .define_method("to_s", &ACLMessage::toString)
-        //.define_method("setReplyBy",
+        .define_method("setReplyBy",&wrap_ACLMessage_setReplyBy, Arg("time"))
         //.define_method("addUserDefinedParameter", &ACLMessage::addUserdefParam)
         //.define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters)
         ;
@@ -474,6 +510,7 @@ void Init_fipamessage_ruby()
 
     rb_cConversation = define_class_under<Conversation>(rb_mFIPA, "Conversation")
         .define_method("getProtocol", &Conversation::getProtocol)
-        .define_method("getConversationID", &wrap_conversation_getConversationId)
+        .define_method("getConversationID", &wrap_ConversationMonitor_getConversationId)
         ;
+
 }
