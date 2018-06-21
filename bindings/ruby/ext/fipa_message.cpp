@@ -23,6 +23,7 @@ Data_Type<AgentIDVector> aidVector;
 Data_Type<ParameterVector> parameterVector;
 Data_Type<ByteVector> byteVector;
 
+Data_Type<fipa::acl::ReceivedObject> rb_cReceivedObject;
 Data_Type<fipa::acl::ACLEnvelope> rb_cFipaEnvelope;
 Data_Type<fipa::acl::ACLBaseEnvelope> rb_cFipaBaseEnvelope;
 Data_Type<fipa::acl::ACLMessage> rb_cFipaMessage;
@@ -100,6 +101,33 @@ Object to_ruby< AgentIDVector >(const AgentIDVector& v)
 }
 
 template<>
+fipa::acl::ACLBaseEnvelopeList from_ruby < fipa::acl::ACLBaseEnvelopeList >(Object obj)
+{
+    using namespace fipa::acl;
+    Array r_baseEnvelopeList(obj);
+    ACLBaseEnvelopeList envelopeList;
+    Array::iterator eIt = r_baseEnvelopeList.begin();
+    for(; eIt != r_baseEnvelopeList.end(); ++eIt)
+    {
+        envelopeList.push_back( from_ruby<fipa::acl::ACLBaseEnvelope>(*eIt) );
+    }
+    return envelopeList;
+}
+
+template<>
+Object to_ruby< fipa::acl::ACLBaseEnvelopeList >(const fipa::acl::ACLBaseEnvelopeList& e)
+{
+    using namespace fipa::acl;
+    Array envelopes;
+    ACLBaseEnvelopeList::const_iterator it;
+    for( it = e.begin(); it != e.end(); ++it)
+    {
+        envelopes.push(Data_Object<ACLBaseEnvelope>(new ACLBaseEnvelope(*it)) );
+    }
+    return envelopes;
+}
+
+template<>
 ParameterVector from_ruby< ParameterVector >(Object obj)
 {
 	Data_Object<ParameterVector> params(obj, parameterVector);
@@ -137,7 +165,6 @@ template<>
 ByteVector from_ruby< ByteVector >(Object obj)
 {
 	Data_Object< ByteVector> bytes(obj, byteVector);
-	return *bytes;
 	return *bytes;
 }
 
@@ -295,6 +322,14 @@ Array wrap_ACLEnvelope_getTo(Object self)
     return to_ruby<AgentIDList>(agents);
 }
 
+Array wrap_ACLEnvelope_getExtraEnvelopes(Object self)
+{
+    using namespace fipa::acl;
+    Data_Object<ACLEnvelope> envelope(self, rb_cFipaEnvelope);
+    ACLBaseEnvelopeList baseEnvelopes = envelope->getExtraEnvelopes();
+    return to_ruby<ACLBaseEnvelopeList>(baseEnvelopes);
+}
+
 Object wrap_ACLEnvelope_getFrom(Object self)
 {
     using namespace fipa::acl;
@@ -417,6 +452,15 @@ void Init_fipamessage_ruby()
         .define_value("XML", representation::XML)
         ;
 
+    rb_cReceivedObject = define_class_under<ReceivedObject>(rb_mFIPA,
+            "ReceivedObject")
+        .define_constructor(Constructor<ReceivedObject>())
+        .define_method("getBy",&ReceivedObject::getBy)
+        .define_method("getFrom",&ReceivedObject::getFrom)
+        .define_method("getDate",&ReceivedObject::getDate)
+        .define_method("getId",&ReceivedObject::getId)
+        .define_method("getVia",&ReceivedObject::getVia);
+
     rb_cFipaBaseEnvelope = define_class_under<ACLBaseEnvelope>(rb_mFIPA, "ACLBaseEnvelope")
         .define_constructor(Constructor<ACLBaseEnvelope>())
         .define_method("getTo", &ACLBaseEnvelope::getTo)
@@ -429,6 +473,7 @@ void Init_fipamessage_ruby()
         .define_method("getDate", &ACLBaseEnvelope::getDate)
         .define_method("getIntendedReceivers", &ACLBaseEnvelope::getIntendedReceivers)
         .define_method("clearAllIntendedReceivers", &ACLBaseEnvelope::clearAllIntendedReceivers)
+        .define_method("getReceivedObject", &ACLBaseEnvelope::getReceivedObject)
         .define_method("hasReceivedObject", &ACLBaseEnvelope::hasReceivedObject)
         .define_method("getTransportBehaviour", &ACLBaseEnvelope::getTransportBehaviour)
         .define_method("setTo", &wrap_ACLBaseEnvelope_setTo, (Arg("agentids")) )
@@ -450,7 +495,7 @@ void Init_fipamessage_ruby()
         .define_method("insert", &ACLEnvelope::insert, (Arg("message"), Arg("representation")))
         .define_method("getDeliveryPath", &ACLEnvelope::getDeliveryPath)
         .define_method("getBaseEnvelope", &ACLEnvelope::getBaseEnvelope)
-        .define_method("getExtraEnvelopes", &ACLEnvelope::getExtraEnvelopes)
+        .define_method("getExtraEnvelopes", &wrap_ACLEnvelope_getExtraEnvelopes)
         .define_method("getACLMessage", &ACLEnvelope::getACLMessage)
         .define_method("getTo", &wrap_ACLEnvelope_getTo)
         .define_method("getFrom", &wrap_ACLEnvelope_getFrom)
