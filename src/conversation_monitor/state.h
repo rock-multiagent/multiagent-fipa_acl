@@ -202,6 +202,11 @@ public:
      */
     std::string toString() const;
 
+    /**
+     * Convert state to XML representation
+     */
+    std::string toXML() const;
+
 };
 
 class FinalState : public State

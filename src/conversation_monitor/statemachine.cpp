@@ -246,9 +246,33 @@ std::string EmbeddedStateMachine::toString() const
 {
     std::stringstream str;
     str << "embedded state machine: protocol: '" << name
-        << "', from: '" << from 
+        << "', from: '" << from
         << "', proxied_to: '" << proxiedTo << "'\n";
-    
+
+    return str.str();
+}
+
+std::string StateMachine::toXML() const
+{
+    std::stringstream ss;
+    ss << "<scxml version=\"1.0\" initial=\"1\">" << std::endl;
+    std::map<StateId, State>::const_iterator it = mStates.begin();
+    for(; it != mStates.end(); ++it)
+    {
+        ss << it->second.toXML();
+    }
+    ss << "</scxml>" << std::endl;
+
+    return ss.str();
+}
+
+std::string EmbeddedStateMachine::toXML() const
+{
+    std::stringstream str;
+    str << "<subprotocol name=\"" << name << "\" "
+        << "from=\"" << from << "\" "
+        << "proxied_to=\"" << proxiedTo << "\"";
+
     return str.str();
 }
 

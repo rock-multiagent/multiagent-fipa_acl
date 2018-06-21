@@ -143,6 +143,11 @@ class Transition
         std::string toString() const;
 
         /**
+         * Convert transition to XML
+         */
+        std::string toXML() const;
+
+        /**
          * Equals operator
          */
         bool operator==(const Transition& t) const;

@@ -189,6 +189,8 @@ public:
      * Convert statemachine to string
      */
     std::string toString() const;
+
+    std::string toXML() const;
 };
 
 /**
@@ -236,6 +238,11 @@ struct EmbeddedStateMachine
      * Convert to string
      */
     std::string toString() const;
+
+    /**
+     * Convert to XML
+     */
+    std::string toXML() const;
 };
 
 } // end of acl

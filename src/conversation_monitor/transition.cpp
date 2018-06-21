@@ -159,6 +159,19 @@ std::string Transition::toString() const
     return transition.str();
 }
 
+std::string Transition::toXML() const
+{
+    std::stringstream transition;
+    transition << "<transition ";
+    transition << "performative=\"" << mPerformativeRegExp << "\" ";
+    transition << "from=\"" << mSenderRole.getId() << "\" ";
+    transition << "to=\"" << mReceiverRole.getId() << "\" ";
+    transition << "target=\"" << mTargetStateId << "\" ";
+    transition << "/>";
+
+    return transition.str();
+}
+
 bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& roleMapping) const
 {
     AgentIDList actualReceivers = msg.getAllReceivers();

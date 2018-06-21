@@ -376,6 +376,29 @@ std::string State::toString() const
     return state.str();
 }
 
+std::string State::toXML() const
+{
+    std::stringstream ss;;
+    ss << "<state id=\"" << mId << "\"";
+    if(mIsFinal)
+    {
+        ss << " final=\"yes\" /";
+    }
+    ss << ">" << std::endl;
+
+    for(std::vector<Transition>::const_iterator it = mTransitions.begin(); it != mTransitions.end(); ++it)
+    {
+        ss << "\t" << it->toXML() << "\n";
+    }
+
+    for(std::vector<EmbeddedStateMachine>::const_iterator it = mEmbeddedStateMachines.begin(); it != mEmbeddedStateMachines.end(); ++it)
+    {
+        ss << "\t" << it->toXML() << "\n";
+    }
+
+    return ss.str();
+}
+
 FinalState::FinalState(const StateId& id)
     : State(id)
 {
