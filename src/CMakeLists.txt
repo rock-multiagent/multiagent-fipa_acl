@@ -27,6 +27,7 @@ set(SOURCES
     message_generator/format/xml_message_format.cpp
     message_generator/message_format.cpp
     message_generator/message_generator.cpp
+    message_generator/received_object.cpp
     message_generator/userdef_param.cpp
     message_generator/serialized_letter.cpp
     conversation_monitor/conversation.cpp

@@ -83,6 +83,12 @@ public:
      */
     void setName(const std::string& name);
 
+    /**
+     * Stringify object
+     * \return string presentation
+     */
+    std::string toString() const;
+
 };
 
 typedef std::vector<UserdefParam> UserdefinedParameterList;

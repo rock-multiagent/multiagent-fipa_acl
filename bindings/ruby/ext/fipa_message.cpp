@@ -431,7 +431,8 @@ void Init_fipamessage_ruby()
         .define_method("setName", &UserdefParam::setName, (Arg("name")) )
         .define_method("getValue", &UserdefParam::getValue, (Arg("name") ) )
         .define_method("setValue", &UserdefParam::setValue, Arg("value") )
-        .define_method("==", &UserdefParam::operator==, (Arg("param")));
+        .define_method("==", &UserdefParam::operator==, (Arg("param")))
+        .define_method("to_s", &UserdefParam::toString);
 
     rb_cAgentID = define_class_under<AgentID>(rb_mFIPA,"AgentId")
         .define_constructor(Constructor<AgentID, const std::string&>() )
@@ -443,7 +444,8 @@ void Init_fipamessage_ruby()
         .define_method("deleteResolver", &AgentID::deleteResolver, (Arg("agentid") ))
         .define_method("addUserDefinedParameter", &AgentID::addUserdefParam, (Arg("param")))
         .define_method("getUserDefinedParameters", &wrap_getUserDefinedParameters)
-        .define_method("==", &AgentID::operator==, (Arg("agentid")));
+        .define_method("==", &AgentID::operator==, (Arg("agentid")))
+        .define_method("to_s",&AgentID::toString);
 
     rb_eRepresentationType = define_enum<representation::Type>("FIPARepresentation")
         .define_value("UNKNOWN",representation::BITEFFICIENT)
@@ -459,7 +461,8 @@ void Init_fipamessage_ruby()
         .define_method("getFrom",&ReceivedObject::getFrom)
         .define_method("getDate",&ReceivedObject::getDate)
         .define_method("getId",&ReceivedObject::getId)
-        .define_method("getVia",&ReceivedObject::getVia);
+        .define_method("getVia",&ReceivedObject::getVia)
+        .define_method("to_s",&ReceivedObject::toString);
 
     rb_cFipaBaseEnvelope = define_class_under<ACLBaseEnvelope>(rb_mFIPA, "ACLBaseEnvelope")
         .define_constructor(Constructor<ACLBaseEnvelope>())

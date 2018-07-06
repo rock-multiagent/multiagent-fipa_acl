@@ -7,6 +7,7 @@
 #include "agent_id.h"
 #include "acl_message.h"
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 #include <base-logging/Logging.hpp>
 
@@ -209,6 +210,32 @@ bool AgentID::compareEqual(const AgentID& a, const AgentID& b, int depth)
 bool AgentID::empty() const
 {
     return mName.empty();
+}
+
+std::string AgentID::toString(size_t indent) const
+{
+    std::string hspace(indent,' ');
+    std::stringstream ss;
+    ss << hspace << "AgentID: " << mName << std::endl;
+    ss << hspace << "    addresses:" << std::endl;
+    std::vector<std::string>::const_iterator ait = mAddresses.begin();
+    for(; ait != mAddresses.end(); ++ait)
+    {
+        ss << hspace << *ait << std::endl;
+    }
+    ss << hspace << "    resolvers:" << std::endl;
+    AgentIDList::const_iterator rit = mResolvers.begin();
+    for(; rit != mResolvers.end(); ++rit)
+    {
+        ss << rit->toString(indent + 4) << std::endl;
+    }
+    ss << hspace << "    parameters:" << std::endl;
+    std::vector<UserdefParam>::const_iterator pit = mParameters.begin();
+    for(; pit != mParameters.end(); ++pit)
+    {
+        ss << hspace << pit->toString() << std::endl;
+    }
+    return ss.str();
 }
 
 UndefinedAgentID::UndefinedAgentID()

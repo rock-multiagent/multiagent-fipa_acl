@@ -7,11 +7,11 @@
 #ifndef FIPA_ACL_AGENTID_H
 #define FIPA_ACL_AGENTID_H
 
-#include <fipa_acl/message_generator/userdef_param.h>
 #include <string>
 #include <vector>
 #include <iosfwd>
 #include <utility>
+#include "userdef_param.h"
 
 namespace fipa {
 
@@ -189,6 +189,12 @@ public:
     */
     static bool compareEqual(const AgentID& a, const AgentID& b, int depth);
 
+    /**
+     * Stringify object
+     * \return string representation of agent id
+     */
+    std::string toString(size_t indent = 0) const;
+
 };
 
 template< typename C, typename E>
@@ -220,9 +226,6 @@ public:
     UndefinedAgentID();
 };
 
-
 }//end of acl namespace
-
 }// end of fipa namespace
-
 #endif

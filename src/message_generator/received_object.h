@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <base/Time.hpp>
-#include <fipa_acl/message_generator/userdef_param.h>
+#include "userdef_param.h"
 
 namespace fipa {
 namespace acl {
@@ -105,6 +105,11 @@ public:
      * Set via
      */
     void setVia(const Via& via) { mVia = via; }
+
+    /**
+     * Create to string methods
+     */
+    std::string toString(size_t indent = 0) const;
 
     /**
      * Get userdefined parameters
