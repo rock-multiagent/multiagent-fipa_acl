@@ -9,6 +9,7 @@ add_definitions(-DNUMERIC_DEPRECATE=1)
 add_definitions(-g0)
 add_definitions(-DTIXML_USE_STL=1)
 add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
+add_definitions(-DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION)
 
 find_package(Boost 1.44.0 REQUIRED filesystem unit_test_framework regex thread system)
 include_directories(${Boost_INCLUDE_DIRS})
