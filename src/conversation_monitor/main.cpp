@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fipa_acl/conversation_monitor.h>
 #include <getopt.h>
+#include <cstdlib>
 
 using namespace fipa::acl;
 
