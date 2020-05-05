@@ -1,7 +1,6 @@
 #include "conversation.h"
 #include <uuid/uuid.h>
 #include <base-logging/Logging.hpp>
-#include <boost/regex.hpp>
 
 namespace fipa {
 namespace acl {
@@ -189,7 +188,7 @@ void Conversation::update(const fipa::acl::ACLMessage& msg)
                 errorMsg += " -- " + std::string(e.what()) + "\n";
                 throw conversation::ProtocolException(errorMsg);
             }
-            
+
             notifyAll(msg, false);
             return;
         } else if( msg.getProtocol().empty())
@@ -256,7 +255,7 @@ bool Conversation::hasEnded() const
         {
             LOG_DEBUG("Conversation did not end");
             return false;
-            
+
         }
         LOG_DEBUG("Conversation ended");
         return true;

@@ -5,13 +5,13 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <boost/regex.hpp>
+#include <regex>
 #include <base-logging/Logging.hpp>
 
 namespace fipa {
 namespace acl {
-    
-Transition::Transition() 
+
+Transition::Transition()
     : mSenderRole()
     , mReceiverRole()
     , mPerformativeRegExp()
@@ -63,20 +63,20 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     // not the validator message one
     if (validation::PERFORMATIVE & flags)
     {
-        boost::regex performativeRegex(mPerformativeRegExp);
+        std::regex performativeRegex(mPerformativeRegExp);
         if(!regex_match(msg.getPerformative(), performativeRegex))
         {
-            LOG_DEBUG("Performative validation failed: was '%s' but expected: '%s'", msg.getPerformative().c_str(), mPerformativeRegExp.c_str()); 
+            LOG_DEBUG("Performative validation failed: was '%s' but expected: '%s'", msg.getPerformative().c_str(), mPerformativeRegExp.c_str());
             return false;
         }
     }
 
     if( validation::SENDER & flags)
     {
-        AgentID senderAgent = msg.getSender(); 
+        AgentID senderAgent = msg.getSender();
         if(!roleMapping.isExpected(mSenderRole, senderAgent))
         {
-                LOG_DEBUG("Sender validation failed: '%s' unexpected for role '%s'", senderAgent.getName().c_str(), mSenderRole.getId().c_str()); 
+                LOG_DEBUG("Sender validation failed: '%s' unexpected for role '%s'", senderAgent.getName().c_str(), mSenderRole.getId().c_str());
                 return false;
         }
     }
@@ -85,7 +85,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     {
         if(!validateReceivers(msg, roleMapping))
         {
-            LOG_DEBUG("Receivers validation failed"); 
+            LOG_DEBUG("Receivers validation failed");
             return false;
         }
     }
@@ -93,16 +93,16 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     if(validation::CONVERSATION_ID & flags)
     {
         if (msg.getConversationID() != validatorMsg.getConversationID())
-        { 
-            LOG_DEBUG("ConversationID validation failed: was '%s' but expected: '%s'", msg.getConversationID().c_str(), validatorMsg.getConversationID().c_str()); 
-            return false; 
+        {
+            LOG_DEBUG("ConversationID validation failed: was '%s' but expected: '%s'", msg.getConversationID().c_str(), validatorMsg.getConversationID().c_str());
+            return false;
         }
     }
 
     if(validation::PROTOCOL & flags)
     {
         if (msg.getProtocol() != validatorMsg.getProtocol())
-        { 
+        {
             LOG_DEBUG("Protocol validation failed: was '%s' but expected: '%s'", msg.getProtocol().c_str(), validatorMsg.getProtocol().c_str());
             return false;
         }
@@ -111,9 +111,9 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
     if(validation::ENCODING & flags)
     {
         if (msg.getEncoding() != validatorMsg.getEncoding())
-        { 
-            LOG_DEBUG("Encoding validation failed: was '%s' but expected: '%s'", msg.getEncoding().c_str(), validatorMsg.getEncoding().c_str()); 
-            return false; 
+        {
+            LOG_DEBUG("Encoding validation failed: was '%s' but expected: '%s'", msg.getEncoding().c_str(), validatorMsg.getEncoding().c_str());
+            return false;
         }
     }
 
@@ -150,7 +150,7 @@ bool Transition::validateMessage(const ACLMessage& msg, const ACLMessage& valida
 std::string Transition::toString() const
 {
     std::stringstream transition;
-    transition << "transition: sender role: '" << mSenderRole.getId() << "', "; 
+    transition << "transition: sender role: '" << mSenderRole.getId() << "', ";
     transition << "receiver role: '" << mReceiverRole.getId() << "', ";
     transition << "performative: '" << mPerformativeRegExp << "', ";
     transition << "source state: '" << mSourceStateId << "', ";
@@ -183,7 +183,7 @@ bool Transition::validateReceivers(const ACLMessage& msg, const RoleMapping& rol
     }
 
     // Test whether the actual receivers are expected -- according to the current role to agent mapping
-    AgentIDList::const_iterator ait = actualReceivers.begin(); 
+    AgentIDList::const_iterator ait = actualReceivers.begin();
     for(; ait != actualReceivers.end(); ++ait)
     {
         if(!roleMapping.isExpected(mReceiverRole, *ait))

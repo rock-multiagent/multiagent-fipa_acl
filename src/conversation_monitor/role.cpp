@@ -1,7 +1,7 @@
 #include "role.h"
 #include <stdexcept>
 #include <cassert>
-#include <boost/regex.hpp>
+#include <regex>
 #include <base-logging/Logging.hpp>
 
 namespace fipa {
@@ -63,7 +63,7 @@ AgentID RoleMapping::getSelf() const
     {
         return it->second.front();
     } else {
-        // AgentID has never been set -- should never happen 
+        // AgentID has never been set -- should never happen
         assert(false);
     }
 
@@ -89,8 +89,8 @@ void RoleMapping::addExpectedAgent(const Role& role, const AgentID& agent)
         LOG_ERROR("%s", msg.c_str());
         throw std::runtime_error(msg);
     }
-   
-    AgentIDList& expectedAgents = it->second; 
+
+    AgentIDList& expectedAgents = it->second;
     AgentIDList::iterator eit = std::find(expectedAgents.begin(), expectedAgents.end(), agent);
     if(eit == expectedAgents.end())
     {
@@ -121,7 +121,7 @@ bool RoleMapping::isExpected(const Role& role, const AgentID& agent) const
 {
     // Check first if role regex matches agent name
     // afterwards try to resolve roles
-    boost::regex roleRegex(role.getId());
+    std::regex roleRegex(role.getId());
     if(regex_match(agent.getName(), roleRegex))
     {
         return true;
@@ -137,10 +137,10 @@ bool RoleMapping::isExpected(const Role& role, const AgentID& agent) const
     }
 
     // Agent has to match against one in the list
-    AgentIDList::const_iterator eit = expectedAgents.begin(); 
+    AgentIDList::const_iterator eit = expectedAgents.begin();
     for(; eit != expectedAgents.end(); ++eit)
     {
-        boost::regex regex(eit->getName() + "$");
+        std::regex regex(eit->getName() + "$");
         if(regex_match(agent.getName(), regex))
         {
             expected = true;
@@ -175,5 +175,5 @@ std::string RoleMapping::toString() const
     return ss.str();
 }
 
-} 
+}
 } // end namespace fipa::acl

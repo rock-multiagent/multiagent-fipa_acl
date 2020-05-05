@@ -5,7 +5,7 @@
 #include "statemachine.h"
 
 #include <boost/assign/list_of.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
@@ -30,13 +30,13 @@ std::vector<StateId> State::msDefaultStates = boost::assign::list_of
     (State::GENERAL_FAILURE_STATE)
     ;
 
-State::State() 
+State::State()
     : mId(State::UNDEFINED_ID)
     , mIsFinal(false)
 {
 }
 
-State::State(const StateId& uid) 
+State::State(const StateId& uid)
     : mId(uid)
     , mIsFinal(false)
 {
@@ -78,7 +78,7 @@ void State::generateDefaultTransitions()
     for (; it != transitions.end();++it)
     {
         // we don't generate a not-understood transition for not-understood message...
-        boost::regex peformativeRegex(it->getPerformativeRegExp());
+        std::regex peformativeRegex(it->getPerformativeRegExp());
         if(regex_match(PerformativeTxt[ACLMessage::NOT_UNDERSTOOD], peformativeRegex))
         {
             continue;
@@ -112,7 +112,7 @@ void State::generateDefaultTransitions()
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver));
         }
     }
-    
+
     // Also add default states for each substatemachine that proxies
     std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();
     for (; it0 != mEmbeddedStateMachines.end();++it0)
@@ -124,13 +124,13 @@ void State::generateDefaultTransitions()
             addTransition(*dynamic_cast<Transition*>(&transitionSender0));
             default_transition::NotUnderstood transitionReceiver0 = default_transition::NotUnderstood(it0->proxiedToRole, it0->fromRole, mId);
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver0));
-            
+
             // Add the cancel transition -- bidirectional regarding receiver/sender role
             default_transition::ConversationCancelling transitionSender1 = default_transition::ConversationCancelling(it0->fromRole, it0->proxiedToRole, mId);
             addTransition(*dynamic_cast<Transition*>(&transitionSender1));
             default_transition::ConversationCancelling transitionReceiver1 = default_transition::ConversationCancelling(it0->proxiedToRole, it0->fromRole, mId);
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver1));
-            
+
             // Add default failure transition -- which only applies for self as receiver
             default_transition::GeneralFailure transitionReceiver2 = default_transition::GeneralFailure(mId);
             addTransition(*dynamic_cast<Transition*>(&transitionReceiver2));
@@ -147,7 +147,7 @@ bool State::isDefaultState() const
 void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl::StateMachine& stateMachine, const fipa::acl::RoleMapping& roleMapping, int numberOfSubConversations)
 {
     LOG_INFO("State consumeSubStateMachineMessage");
-    
+
     // Loop through all not-ended sub state machines
     for(std::vector<StateMachine>::iterator it0 = mSubStateMachines.begin(); it0 != mSubStateMachines.end(); it0++)
     {
@@ -158,7 +158,7 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
         }
         // Test if this StateMachine is correct by maintaining a copy of it
         StateMachine copy = *it0;
-        
+
         // Test the update
         try {
             LOG_DEBUG("Trying an existing sub state machine");
@@ -172,21 +172,21 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
             *it0 = copy;
         }
     }
-    
+
     LOG_DEBUG("Trying to search for a fitting a embedded state machine");
-    
+
     EmbeddedStateMachine* embeddedStateMachinePtr = NULL;
     // We must be in a state that allows subProtocols
     std::string protocol = msg.getProtocol();
-    
+
     // Search for an embedded state machine with the same protocol
     std::vector<EmbeddedStateMachine>::iterator it;
     for(it = mEmbeddedStateMachines.begin(); it != mEmbeddedStateMachines.end(); it++)
     {
         // Protocol must match Regex
-        boost::regex peformativeRegex(it->name);
+        std::regex peformativeRegex(it->name);
         if(regex_match(protocol, peformativeRegex))
-        {           
+        {
             // Check that the sender role is correct
             // This throws if the mapping does not exist
             const AgentIDList l = roleMapping.getMapping().at(it->fromRole);
@@ -196,35 +196,35 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
                 // Sender does not match
                 continue;
             }
-            
+
             // Check that the number of subconversations allows another one
             if(mSubStateMachines.size() >= numberOfSubConversations)
             {
                 continue;
             }
-            
+
             // This is the right ESM
             embeddedStateMachinePtr = &(*it);
             break;
         }
     }
-    
+
     if(!embeddedStateMachinePtr)
     {
         // No fitting running or new embedded state machine found
         LOG_ERROR("State consumeSubStateMachineMessage: No fitting sub state machine found");
         throw std::runtime_error("State consumeSubStateMachineMessage: No fitting sub state machine found");
     }
-    
+
     LOG_DEBUG("Found a fitting embedded state machine and will try to create a sub state machine now");
-    
+
     // Construct a new state machine with mapped sender role
     if(!protocol.empty())
     {
         // Copy the given state machine
         StateMachine subStateMachine = stateMachine;
         subStateMachine.setSelf(msg.getSender());
-        
+
         // update the message state machine
         try {
             LOG_DEBUG("Substate machine initialized, trying to consume message");
@@ -236,7 +236,7 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
             errorMsg += " -- " + std::string(e.what());
             throw std::runtime_error(errorMsg);
         }
-        
+
         // If that was successful, save the actual protocol and number of subconversations in the embedded state machine
         LOG_DEBUG("New sub state machine consumed message");
         mSubStateMachines.push_back(subStateMachine);
@@ -246,7 +246,7 @@ void State::consumeSubStateMachineMessage(const ACLMessage& msg, const fipa::acl
         LOG_ERROR("Protocol not set");
         throw std::runtime_error("Protocol not set");
     }
-    
+
     LOG_DEBUG("State consumeSubStateMachineMessage successfully created new sub state machine");
 }
 
@@ -260,14 +260,14 @@ const Transition& State::getTransition(const ACLMessage &msg, const MessageArchi
         if(!archive.hasMessages())
         {
             // Initiating message, i.e. validation should only apply to performative
-            boost::regex peformativeRegex(it->getPerformativeRegExp());
+            std::regex peformativeRegex(it->getPerformativeRegExp());
             if(regex_match(msg.getPerformative(), peformativeRegex))
             {
                 return *it;
             }
         } else {
             const ACLMessage& initiatingMsg = archive.getInitiatingMessage();
-            if (it->triggers(msg, initiatingMsg, roleMapping)) 
+            if (it->triggers(msg, initiatingMsg, roleMapping))
             {
                 return *it;
             }
@@ -295,7 +295,7 @@ const Transition& State::getSubstateMachineProxiedTransition(const ACLMessage& m
                 // Generate a transition (any performative, not leaving the state)
                 Transition transition (it0->fromRole, it0->proxiedToRole, ".*", getId(), getId());
                 // And see if it triggers
-                if (transition.triggers(msg, initiatingMsg, roleMapping)) 
+                if (transition.triggers(msg, initiatingMsg, roleMapping))
                 {
                     // Save that a proxied reply was received
                     it0->receivedProxiedReply = true;
@@ -317,7 +317,7 @@ bool State::isFinished() const
     {
         return false;
     }
-    
+
     // Check all subprotocols
     std::vector<StateMachine>::const_iterator it;
     for(it = mSubStateMachines.begin(); it != mSubStateMachines.end(); it++)
@@ -327,8 +327,8 @@ bool State::isFinished() const
             LOG_DEBUG("State not finished (subconversation still running)");
             return false;
         }
-    } 
-    
+    }
+
     // When there are embedded state machines, they all must have forwarded a proxied reply, if this was
     // necessary in the first place
     std::vector<EmbeddedStateMachine>::const_iterator it0 = mEmbeddedStateMachines.begin();
@@ -341,7 +341,7 @@ bool State::isFinished() const
             LOG_DEBUG("State not finished (subconversation still running)");
             return false;
         }
-        
+
         // FIXME there can be other protocols that do not expect any responses
         if(!it0->proxiedTo.empty() && it0->actualProtocol != "inform" && !it0->receivedProxiedReply )
         {
@@ -349,7 +349,7 @@ bool State::isFinished() const
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -367,12 +367,12 @@ std::string State::toString() const
     {
         state << "\t" << it->toString() << "\n";
     }
-    
+
     for(std::vector<EmbeddedStateMachine>::const_iterator it = mEmbeddedStateMachines.begin(); it != mEmbeddedStateMachines.end(); ++it)
     {
         state << "\t" << it->toString() << "\n";
     }
-    
+
     return state.str();
 }
 
@@ -405,13 +405,13 @@ FinalState::FinalState(const StateId& id)
     setFinal(true);
 }
 
-UndefinedState::UndefinedState() 
+UndefinedState::UndefinedState()
     : State(State::UNDEFINED_ID)
 {}
 
 namespace default_state {
 
-ConversationCancelling::ConversationCancelling() 
+ConversationCancelling::ConversationCancelling()
     : State(State::CONVERSATION_CANCELLING)
 {
     // Add the cancel transitions -> success or failure
